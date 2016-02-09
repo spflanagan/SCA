@@ -1,0 +1,22 @@
+﻿Build started 11/30/2015 3:59:15 PM.
+     1>Project "E:\ubuntushare\SCA\gwsca_haplotypes\gwsca_haplotypes.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt gwsca_haplotypes.cpp
+         gwsca_haplotypes.cpp
+     1>e:\ubuntushare\sca\gwsca_haplotypes\gwsca_haplotypes.cpp(250): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\gwsca_haplotypes\gwsca_haplotypes.cpp(259): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\gwsca_haplotypes\gwsca_haplotypes.cpp(330): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\gwsca_haplotypes\gwsca_haplotypes.cpp(391): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\gwsca_haplotypes\gwsca_haplotypes.cpp(395): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\gwsca_haplotypes\gwsca_haplotypes.cpp(418): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\gwsca_haplotypes\gwsca_haplotypes.cpp(470): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\gwsca_haplotypes\gwsca_haplotypes.cpp(115): warning C4101: 'iii' : unreferenced local variable
+     1>e:\ubuntushare\sca\gwsca_haplotypes\gwsca_haplotypes.cpp(115): warning C4101: 'pop_index' : unreferenced local variable
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\ubuntushare\SCA\gwsca_haplotypes\Debug\gwsca_haplotypes.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\ubuntushare\SCA\gwsca_haplotypes\Debug\gwsca_haplotypes.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\ubuntushare\SCA\gwsca_haplotypes\Debug\gwsca_haplotypes.lib" /MACHINE:X86 Debug\gwsca_haplotypes.obj
+         gwsca_haplotypes.vcxproj -> E:\ubuntushare\SCA\gwsca_haplotypes\Debug\gwsca_haplotypes.exe
+     1>Done Building Project "E:\ubuntushare\SCA\gwsca_haplotypes\gwsca_haplotypes.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:09.08

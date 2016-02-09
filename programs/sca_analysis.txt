@@ -1,0 +1,278 @@
+Selection Components Analysis Log File
+This is being started on 27 January 2016 so it's a bit late, and I've already filled my lab notebook with >50 pages
+Outline of the approach:
+1. Run Stacks, prune dataset, calculate Fsts among groups, compare those Fst distributions to null distributions from simulation models.
+Programs utilized:
+->ref_map.pl (Stacks)
+->populations (Stacks)
+->process_alleles_files
+->convert_matches | infer_maternal_contribution | gwsca_haplotypes
+->R to compare to model (from sca_simulation)
+->mom_female_fst
+2. Run GATK pipeline, prune dataset, and follow Monnahan et al. approach to analyze selection components analysis.
+->scripts/pre_gatk.sh
+->scripts/run_gatk.sh
+->filter_vcf (but this didn't work right)
+
+For #1: Problem is that Fsts are elevated relative to model by quite a bit. 
+Solution 1: Maybe using haplotypes was not the best approach. So, let's look at biallelic SNPs
+Programs utilized:
+->ref_map.pl (Stacks)
+->populations (Stacks)
+->scripts/convert_snps.R (R) | infer_maternal_contribution/infer_mat_vcf/infer_mat_vcf | gwsca_biallelic
+->R to compare to model (from sca_simulation)
+
+Solution 2: Maybe there really are elevated Fsts due to increased relatedness. Need to calculate pairwise relatedness and estimate parentage
+->haplotypes_to_cervus | CERVUS
+->some program I've still yet to write.
+
+For #2: I ran into the problem that my filter_vcf file somehow messed up the format of the vcf so it was no longer readable.
+Also, I hadn't included all of my samples.
+Solution 1: Maybe GATK pipeline was messing things up? So I tried to convert my bowtie alignments and the stacks output
+^This was not the problem.
+Programs I used:
+->scripts/run_bowite_for_gatk.sh
+->scripts/sam_to_bam.sh
+->scripts/sort_bam.sh
+->scripts/test_bwtgatk.sh
+->convert_vcf_for_sca
+->subset_plink_file
+
+Solution 2: Re-run GATK to start from scratch and then use vcftools to filter_vcf
+(vcftools)
+
+
+#############################################LAB BOOK######################################################
+#####Monday, 8 February 2016
+Well, I accidentally permanently deleted parse_structure_output. Just FYI. I'll have to rewrite it at some point.
+
+So to run CERVUS a bunch of times, I need to test to see if loci are in hardy-weinberg first. 
+I'm going to start with the full genotypes file, and start playing around with that. 
+This is going OK, although I need to account for non-alphabetical order of genotype calls..or sort it first? maybe that will work...
+
+gwsca_biallelic crashed again--after OFF026, I'm pretty sure it's just running out of memory.
+
+#####Sunday, 7 February 2016
+The structure run had finished, so I zipped all of the output files (from structure/Results/ directory) and uploaded them to Structure Harvester. Downloaded the structure harvester output.
+in the scovelli_popgen/saltwater/programs is a program called parse_structure_output. Ran that in Linux for all of my results files.
+It appears that K=2 is the best. It has the highes L'(K) and the highest Delta(K) values
+Using R I plotted the structure output.
+
+Also, gwsca_biallelic is not finding non-biallelic alleles with the updated new.snps.txt files. I'm going to re-start it in "Release" mode because then it should run faster. And I'll see if it runs out of memory more quickly. In release mode it is finding a few loci with more than two alleles, but not very many. Probably Ns or something. 
+
+Meanwhile, started in on the relatedness code. I'm writing it on my home computer for now. I need to ask Adam about a few things re: calculating relatedness.
+ 
+
+#####Saturday, 6 February 2016
+I'm debugging gwsca_biallelic. It looks like the 'new.snps.txt' files aren't actually reduced? And maybe something's wrong with the way they're output.
+So when I merge snps and matches the dataframe becomes huge, but then I make it smaller using keep.snp and pruning for stack depth<-becomes larger because there are duplicate entries for "LocusID".
+Two things:
+	1. I'm going to remove any from snps that have a type = "U"...that suggests that the likelihood ratio was too low to call het/hom so it's not worth including.
+	2. If Type="O" I need to recode the genotypes (I haven't been doing that)<-this is critical for calculating allele frequencies.
+Maybe this will help? Really there shouldn't be ANY loci that aren't biallelic.
+I don't know if it will help with the memory issues, but I worry about trying to break it up and messing up the calculations. I could probably calculate allele frequencies (or at least count the number of alleles) and not have to save everything to file...
+
+#####Friday, 5 February 2016
+gwsca_biallelic crashed--it either ran out of memory or deleted too many alleles. It's difficult to say.
+So I'm going to try pruning the sumstats file to just biallelic loci. Well, actually, they're all biallelic...so there must be something buggy about my program. I'm re-starting it in debug mode. 
+
+
+#####Thursday, 4 February 2016
+I re-started gwsca_biallelic with the pre-pruned files.
+
+GATK: finished running! Now I'm doing the Monnahan pipeline but it's a bit confusing. 
+I'm renaming the scripts so that they're in order and my fixes/updates are in them. Done!
+Ran het_v_depth successfully, and then also the first file (bigVCF_v1.py). But the next files require a file that's in a format I don't know and I don't really feel like trying to figure it out from the code (because it's really not obvious) so I emailed John Kelly. I asked him several questions, including what to do with the females.
+John Kelly pointed out that I have an excess of heterozygotes (lots near 0.6). Could this explain elevated Fsts? I don't have a good answer...Why might there be elevated heterozygosity?
+
+KINGROUP is not working correctly? Maybe? Or it's just buggy in general? I can't tell.
+I should look up when it was last cited.
+Adam recommends calculating relatedness myself, and just looking at the point estimates.
+Also he thinks we should do a parentage/relatedness paper.
+
+ALSO! I should do a structure analysis to see if females are different than others.
+populations -b 1 -P ./results/stacks -M ./results/stacks/sca.null.map.txt -W ./results/stacks/shared_loci.txt -t 3 --plink
+Then to prune:
+../Nerophis_ophidion/results/plink --file ./results/stacks/batch_1.plink --r2 --ld-window-r2 0.2 --hardy --geno 0.05 --maf 0.05 --max-maf 0.95 --noweb --allow-no-sex --write-snplist --out ./results/stacks/pruned
+[this removes those with LD > 0.2, not in HWE, minimum allele freq between 0.05 and 0.95, and present in <95% of individuals. Leaves 3041 loci]
+../Nerophis_ophidion/results/plink --file ./results/stacks/batch_1.plink --extract ./results/stacks/pruned.snplist --noweb --allow-no-sex --recode --recode-structure --out ./results/stacks/pruned
+Running STRUCTURE on 3041 pruned loci in 443 individuals
+	missing value = 0 (unless specified with --output-missing-genotype)
+	one row per individual
+	row 1 = locus name
+	row 2 = map distance?
+	column 1 = individual id
+	column 2 = sampling location
+Now it's running with 10,000 burn-in, 10000 MCMC, admixture, and correlated frequencies; 
+batch job with K=1 through K=4 with 10 iterations.
+
+
+
+
+
+#####Wednesday, 3 February 2016
+Although KINGROUP accepts CERVUS format files, it doesn't if you want to run it with 1000 loci. So I wrote a C++ program to re-format CERVUS files in KINSHIP format (cervus_to_kinship). It seems to have worked! It replaces "0" with "/".
+
+I ran CERVUS with the 99% present loci (394) but it only assigned 10% of offspring, and the critical delta was 0?? I wonder if ~400 loci is too many. 
+
+**Not all of these loci are polymorphic!! If they're "consensus" then they're not polymorphic...**
+
+In KINGROUP v2 I'm running Pairwise Relatedness, Maximum Likelihood method from Goodknight & Queller (1999), calculating allele frequencies, displaying p-values and half matrix, and sorting descending by ID (it's very slow to respond).
+
+Re-ran CERVUS with 1744 polymorphic loci found in 98% of individuals, which resulted in a 19% assignment rate (30 offspring assigned). And all those not assigned were excluded (Delta = 0, LOC < 0).
+
+For gwsca_biallelic, it occurred to me that I could prune the input files before the C++ program in R so that I only have the reference SNPs..this prunes the input file from 4,848,705 to 230,650 SNPs.
+
+#####Tuesday, 2 February 2016
+VirtualBox crashed while GATK HaplotypeCaller was running OFF113...so I created rerun_haplotypecaller.sh and re-ran it.
+Organized the significant and moderately-significant maternity results in a table to print and put in lab notebook to discuss with Adam.
+OK, so I need to run CERVUS with another set of loci to see if I can reproduce the same results. Then I need to start ramping up the number of loci included in the analysis until CERVUS breaks. So I'm using R to subset each of the subsetted files and also write one to file that has loci present in 98% of the individuals. 
+
+Also, downloaded KINGROUP v.2, which is a java program to analyze pairwise relatedness. It accepts up to 1000 loci in CERVUS format, so I can use my subsetting in R to create a useful file.
+	[1] "genotypes14  had no loci present in 98% of individuals"
+	[1] "genotypes19  had no loci present in 98% of individuals"
+	[1] "genotypes27  had no loci present in 98% of individuals"
+	[1] "genotypes28  had no loci present in 98% of individuals"
+	[1] "genotypes29  had no loci present in 98% of individuals"
+	[1] "genotypes30  had no loci present in 98% of individuals"
+	[1] "genotypes31  had no loci present in 98% of individuals"
+	[1] "genotypes32  had no loci present in 98% of individuals"
+	[1] "genotypes35  had no loci present in 98% of individuals"
+	[1] "genotypes37  had no loci present in 98% of individuals"
+	[1] "genotypes43  had no loci present in 98% of individuals"
+	[1] "genotypes44  had no loci present in 98% of individuals"
+	[1] "genotypes45  had no loci present in 98% of individuals"
+	[1] "genotypes47  had no loci present in 98% of individuals"
+	[1] "genotypes54  had no loci present in 98% of individuals"
+	[1] "genotypes56  had no loci present in 98% of individuals"
+	[1] "genotypes57  had no loci present in 98% of individuals"
+	[1] "genotypes58  had no loci present in 98% of individuals"
+	[1] "genotypes59  had no loci present in 98% of individuals"
+	[1] "genotypes6  had no loci present in 98% of individuals"
+	[1] "genotypes60  had no loci present in 98% of individuals"
+	[1] "genotypes61  had no loci present in 98% of individuals"
+	[1] "genotypes62  had no loci present in 98% of individuals"
+	[1] "genotypes7  had no loci present in 98% of individuals"
+	[1] "genotypes8  had no loci present in 98% of individuals"
+
+	
+...meanwhile biallelic SCA is still chugging along....
+
+
+#####Monday, 1 February 2016
+Figuring out CERVUS simulations:
+"you should not simulate the number of offspring in your actual analysis"
+"The average number of candidate parents per offspring should be estimated"<-so this should be one?
+"Prop. sampled...you should not set this parameter to one unless you are certain that you have sampled all observed candidate parents and there is no possibility that there are candidate parents which have eluded observation."
+"Prop. loci typed...allows for missing data and should be an average value...simulation should select the calculated value by default."
+"Prop. loci mistyped...by default the proportion of loci mistyped is also used as the error rate in the likelihood calculations (both by the simulation and in actual parentage analysis)...default value is 0.01."
+"Minimum typed loci. By default this parameter is set to half the total number of loci."
+set 10000 offspring, 1000 candidate mothers, .25 prop sampled, typed .75 and mistyped .02 and minimum typed = 1500
+
+It keeps giving me a floating point error...
+
+I'm going to sub-sample 100-200 loci all of which are present in at least 75% of individuals.
+Using R, I found 143 loci in genotypes0.txt that are present in 98% of individuals. 
+
+Ran CERVUS but noticed that the output said that most known fathers weren't typed...because the offspring file specified offspring as their own father. Manually fixing that file.
+
+Cervus results:
+
+	Mother given known father:
+
+	Level       Confidence (%)  Critical Delta  Assignments        Assignment Rate  
+												Observed Expected  Observed Expected
+	Strict               95.00            5.88       20 (     14)      13%    (  9%)
+	Relaxed              90.00            4.50       25 (     15)      16%    ( 10%)
+	Unassigned                                      130 (    140)      84%    ( 90%)
+	Total                                           155 (    155)     100%    (100%)
+
+
+	**** Number of individuals tested ****
+
+	Offspring (total):                                           160
+	  Tested (typed at 72 or more loci):                         159
+		Known father typed at 72 or more loci:                   155
+		Known father typed at fewer than 72 loci:                  4
+	  Not tested (typed at fewer than 72 loci):                    1
+
+	Candidate mothers (total):                                    87
+	  Tested (typed at 72 or more loci):                          87
+	  Not tested (typed at fewer than 72 loci):                    0
+	  Average number of candidate mothers per offspring:          87
+	  Average proportion of sampled candidate mothers:             1.0000
+
+
+	**** Files ****
+
+	Input
+	  Offspring file:                 offspring.txt
+	  Candidate mother file:          candidate_parents.txt
+	  Genotype file:                  genotypes0.pruned.txt
+	  Allele frequency file:          genotypes0.pruned_allelefreqs.alf
+	  Simulation data file:           genotypes0.pruned_simulation.sim
+
+	Output
+	  Parentage summary file:         genotypes0.pruned_maternity.txt
+	  Parentage data file:            genotypes0.pruned_maternity.csv
+
+...now what??
+
+
+#####Sunday, 31 January 2016
+I wrote a program to parse the genotypes.txt file into multiple smaller files, each with 3000 loci. 
+This seemed to work, although I noticed some of the alleles are coded as "consensus"...but since all individuals are compared to the same "consensus" sequence then this is just as good as having the haplotype sequence. We'll see what happens.
+To run CERVUS, I need to run the allele frequency thing first. So I'm doing that with genotypes0.txt
+Then ran maternity analysis simulation with 10000 offspring, 1000 mothers, sampled .25, typed 0.25 loci and mistyped 0.05, with minimum typed loci = 3000. Confidence using delta and relaxed Confidence level = 90% and strict = 95%.
+Finally, I ran the maternity analysis...but 0% assigned! Is this right or is there something about the simulatio that I did wrong??
+
+Saturday, 30 January 2016
+CERVUS can't handle all of my loci. So I need to split the file...maybe rewrite the haplotypes_to_cervus to output a certain number of loci per file and just run a bunch of different files? 
+
+#####Friday, 29 January 2016
+So today haplotypes_to_cervus finished running, but problem: CERVUS didn't accept the input! 
+It turns out I misunderstood their instructions. I need three files:
+	1. File with just offspring INFO (Off ID, Known Parent ID, etc.)
+	2. File with just candidate parent INFO (just a list of parent ids)
+	3. File with ALL genotypes
+So I modified haplotypes_to_cervus and am re-running it.
+
+GATK is still running.
+So is gwsca_biallelic. It's finding loci that are not biallelic and removing them. Hopefully it's not *all* of the loci. Also, this is freaking slow. I don't know if there is but there should seriously be a better way to go about doing this. Or something faster, IDK. Maybe there's a different way to index vectors (or arrays) than I've been using.
+
+
+#####Thursday, 28 January 2016
+When I arrived this morning, ./convert_matches had finished running to generate new sample_*_haplotypes.txt files.
+GATK had finished running.
+gwsca_biallelic was still running through the first individual's file! And then it ran out of memory and crashed.
+
+So now I'm running haplotypes_to_cervus with the new haplotype files...
+	and thinking about a way to fix the gwsca_biallelic issue. Maybe I need a different format, or I need a list 
+	of SNPs, or maybe I should create a whitelist of loci.
+	
+OK, gwsca_biallelic:
+Can I have a reference and then not store individual info?
+Another problem: MOMs have different "SNPID"s than population individuals: 
+	MOMs use CatID.Pos, whereas the others have CatID.Col, where column is the position in the RAD locus not the	
+	reference basepair.
+
+	I can fix that with batch_1.sumstats.tsv, plus that may help prune some loci since the loci have to have 
+	minor allele frequency >= 0.05.
+	
+**Note: haplotypes_to_cervus needed me to re-enter the name for sample_NPM1128_haplotypes.txt and sample_PRM087
+**Also, the ./results/parentage directory didn't exist so I had to re-run haplotypes_to_cervus.
+
+So I don't think I'll be able to append to files the way I did with infer_maternal_contribution, although I guess
+	it could be possible. Instead I'm creating the reference up-front and then disregarding any loci that aren't
+	in the reference. So far it's successfully read in the reference (sans allele info), so that's good. 
+	Ran into a few other small issues debugging but those were mostly me being sloppy. We'll see what else pops up.
+	It's finding a lot of loci not in the reference...
+	
+NOW GATK!
+So I was able to run vcftools and filter by allele frequency (between 0.05 and 0.95) and depth (between 1 and 100)
+	and restrict it to biallelic loci. This resulted in only 1662 loci! f***
+Anyway, when I ran het_v_depth.py it didn't produce any depths. It looks like this might be because of a modification
+	I made to the python code. When I changed that, I got an error. So now I have to figure that out.
+That is due to the fact that the GATK output sometimes has 5 fields and sometimes it has 7. Sometimes it includes PGT and PID
+	I didn't run HaplotypeCaller with -doNotRunPhysicalPhasing. FML.
+	Re-running HaplotypeCaller and GenotypeGVCFs using ./scripts/run_haplotypecaller.sh
