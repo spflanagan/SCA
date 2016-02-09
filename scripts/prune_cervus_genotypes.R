@@ -80,36 +80,37 @@ for(i in 1:length(genotypes.files)){
 
 #large file
 genotypes<-read.delim("genotypes.txt")
+#genotypes<-read.delim("genotypes99_10loci.txt")
 
-genotypes<-read.delim("genotypes99_10loci.txt")
 #prune to remove non-polymorphic loci
 consensus.num<-apply(genotypes,2,function(x){ length(which(x=="consensus")) })
 all.poly<-consensus.num[consensus.num==0]
 poly<-genotypes[,colnames(genotypes) %in% names(all.poly)]
+
 #remove any found in less than 90% of individuals
 gen90<-prune.loci(poly,0.1)
+
 #remove those loci not in hardy weinberg equilibrium
 hwe<-data.frame()
 for(x in seq(2,ncol(gen90),2)){
 	hwe<-rbind(hwe,hwe.test(gen90[,c(x,(x+1))]))
 }
 keep.loci<-hwe[as.numeric(as.character(hwe$chi.result))>0.05,]
+keep.names<-c("ID",unlist(lapply(as.list(keep.loci$locus.name),function(x){
+	names<-c(paste(x,"A",sep=""),paste(x,"B",sep=""))
+	return(names) })))
+gen.keep<-gen90[,colnames(gen90) %in% keep.names]
 
-
-###remove consensus
-consensus.num<-apply(all.pruned,2,function(x){ length(which(x=="consensus")) })
-all.poly<-consensus.num[consensus.num==0]
-poly<-all.pruned[,colnames(all.pruned) %in% names(all.poly)]
-
-pruned99<-prune.loci(all.pruned, 0.01)
+#prune for higher coverage
+pruned99<-prune.loci(gen.keep, 0.01)
 poly99<-prune.loci(poly, 0.01)
+
+#write to file
 write.table(poly99,"genotypes_in99.txt", col.names=T,
 	row.names=F, sep='\t', quote=F)
 
+#convert to relatedness format
 relatedness<-poly[,!(colnames(poly) %in% colnames(poly99))] #removes ID
 relatedness<-cbind(poly99, relatedness[,1:(2000-(ncol(poly99)-1))])
 write.table(relatedness,"relatedness1000.txt", col.names=T,
 	row.names=F, sep='\t', quote=F)
-
-write.table(poly,"genotypes.poly.txt", col.names=T,
-	row.names=F, sep='\t', quote=F) #all polymorphic loci

@@ -57,17 +57,25 @@ sarah@sarah-vb:~/sf_ubuntushare/SCA/results/biallelic$ grep '#CHROM' ../stacks/b
 manually removed all PRM and OFF, keeping only FEM and NPM
 sarah@sarah-vb:~/sf_ubuntushare/SCA/results/biallelic$ vcftools --vcf ../stacks/batch_1.vcf --keep extract_from_vcf.txt --out fem --recode-INFO-all --recode
 *Had to remove ##Includes inferred maternal alleles header *
-vcf-sort biallelic_maternal.vcf > maternal.vcf
-
-bgzip fem.recode.vcf
-bgzip biallelic_maternal.vcf
-tabix -p vcf fem.recode.vcf.gz
-tabix -p vcf biallelic_maternal.vcf.gz
-vcf-merge fem.vcf.gz biallelic_maternal.vcf.gz
-
 vcf-merge is not working!!! I don't know why.
 In the fem.vcf file, the header with FORMAT info said AD field should have 1 number but it has 2. I just changed that to say that it should have "." numbers.
 Now checking them with vcf-validator.
+
+vcf-sort biallelic_maternal.vcf > maternal.vcf
+bgzip maternal.vcf
+tabix -p vcf maternal.vcf.gz
+vcf-sort fem.recode.vcf > fem.vcf
+bgzip fem.vcf
+tabix -p vcf fem.vcf.gz
+vcf-merge fem.vcf.gz maternal.vcf.gz > merged.vcf
+STILL NOT WORKING!
+Probably because some individuals were duplicated, so I'm just doing this in R
+Found some loci that have the same scaffold and position but a different REF, so I'm just removing those from the dataset because that's too confusing for me. Re-wrote a vcf (biallelic.vcf) with 312755 loci and 565 genotypes (including inferred mothers).
+
+Using Notepad++ I created a ind.info.vcf.txt file with the individual information.
+
+Now I just have to re-write the program...
+
 
 
 **could I do this with the assigned maternity rather than the inferred allele?
