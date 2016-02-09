@@ -43,6 +43,36 @@ Solution 2: Re-run GATK to start from scratch and then use vcftools to filter_vc
 
 
 #############################################LAB BOOK######################################################
+#####Tuesday, 9 February 2016
+Working on pruning for hardy weinberg equilibrium...I think I figured it out. I'm calculated the Chi-Squared test statistic myself and then using 1-pchisq(x,df) to calculate the p-value based on df=num alleles -1.
+Now I need to choose those with p>0.05 and then take those loci from the main dataframe.
+
+Thinking about the biallelic gwsca, I could read in the first ~20000 columns, save those and save the index of the last column, and do the calculations, empty the vectors, and read in those columns to tmp and then do the next 20000...I think this could work...except I have to go through each individual I guess? That could make it more complicated. But I think it's still do-able...
+PROBLEM! The individuals don't have the locus IDs that they're missing! This would be easier in vcf format...
+I have vcf format from the infer_maternal_contribution!
+I think the solution is going to be to re-do gwsca_biallelic using vcf input
+Got all the vcf ind names with 
+	sarah@sarah-vb:~/sf_ubuntushare/SCA/results/biallelic$ grep '#CHROM' biallelic_maternal.vcf > ind.info.bi.vcf.txt
+sarah@sarah-vb:~/sf_ubuntushare/SCA/results/biallelic$ grep '#CHROM' ../stacks/batch_1.vcf > all_seqd.vcf.txt
+manually removed all PRM and OFF, keeping only FEM and NPM
+sarah@sarah-vb:~/sf_ubuntushare/SCA/results/biallelic$ vcftools --vcf ../stacks/batch_1.vcf --keep extract_from_vcf.txt --out fem --recode-INFO-all --recode
+*Had to remove ##Includes inferred maternal alleles header *
+vcf-sort biallelic_maternal.vcf > maternal.vcf
+
+bgzip fem.recode.vcf
+bgzip biallelic_maternal.vcf
+tabix -p vcf fem.recode.vcf.gz
+tabix -p vcf biallelic_maternal.vcf.gz
+vcf-merge fem.vcf.gz biallelic_maternal.vcf.gz
+
+vcf-merge is not working!!! I don't know why.
+In the fem.vcf file, the header with FORMAT info said AD field should have 1 number but it has 2. I just changed that to say that it should have "." numbers.
+Now checking them with vcf-validator.
+
+
+**could I do this with the assigned maternity rather than the inferred allele?
+
+
 #####Monday, 8 February 2016
 Well, I accidentally permanently deleted parse_structure_output. Just FYI. I'll have to rewrite it at some point.
 
