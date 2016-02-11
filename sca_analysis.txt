@@ -43,6 +43,22 @@ Solution 2: Re-run GATK to start from scratch and then use vcftools to filter_vc
 
 
 #############################################LAB BOOK######################################################
+#####Thursday, 11 February 2016
+I think I figured out the indexing problm, though it's a little broken at the moment. 
+Fixed it! Now it's done and it runs much more quickly! A few minutes tops! Woo hoo!!
+So the biallelic pipeline is no longer convert_snps.R | infer_mat_vcf | gwsca_biallelic, it's now
+stacks/batch_1 | infer_mat_vcf | vcftools --extract-INFO-all GT | merge_vcfs.R | gwsca_biallelic_vcf
+I have to fix a few bugs...first the alleles weren't being designated correctly, then the Fst values are off.
+Some of the allele2s are NULL...I don't think I check for that scenario when calculating Fsts.
+It's mostly fixed but for some reason the NONPREG group is having frequencies > 1...it's saying there are 45 instances of allele 1!! But the ind info file is correct and there are only 8 non pregnant males and only 8 individuals marked as NONPREG...so something in the code. It looks like I hadn't cleared the freq counters...did that, we'll see if it's fixed.
+
+#####Wednesday, 10 February 2016
+For some reason R does not like me asking if sum(allelefreqs)=="1". So I just removed that sanity check and will assume that the expected allele frequencies always sum to 1. 
+This resulted in 11202 loci. Then I'm pruning to 97% coverage, which yields 3119 loci.
+Now I just need to sample! Done. Now just need to run through CERVUS...perfect thing to do while watching TV ;)
+
+Meanwhile, worked on the gwsca_biallelic code. I can do one locus at a time in the vcf format so I don't have to store much of anything. I just need to assign indices for the popstats? or something. I am not sure how this is going to work yet... I should also do a biallelic sanity check. I need to figure out a way to index the individuals in the pop stats one.
+
 #####Tuesday, 9 February 2016
 Working on pruning for hardy weinberg equilibrium...I think I figured it out. I'm calculated the Chi-Squared test statistic myself and then using 1-pchisq(x,df) to calculate the p-value based on df=num alleles -1.
 Now I need to choose those with p>0.05 and then take those loci from the main dataframe.

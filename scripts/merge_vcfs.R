@@ -14,5 +14,6 @@ vcf$index<-apply(vcf,1,function(x){ idx<-paste(x[1],".",x[2],sep="") })
 addedon<-vcf[duplicated(vcf$index),"index"]
 vcf<-vcf[!(vcf$index %in% addedon),]
 
-write.table(vcf,"biallelic.vcf",col.names=T,row.names=T,quote=F,sep='\t')
+write.table(vcf[,1:(ncol(vcf)-1)],"biallelic.vcf",col.names=T,row.names=F,
+	quote=F,sep='\t')
 
