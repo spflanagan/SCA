@@ -6,53 +6,11 @@ setwd("E:/ubuntushare/SCA/results/biallelic")
 gw.fst<-read.delim("gwsca_fsts.txt")
 gw.sum<-read.delim("gwsca_summary.txt")
 
+gw.fst<-gw.fst[,c("Chrom","Pos","ADULT.JUVIE","MAL.FEM","PREGGER.OFF",
+	"MOM.FEM")]
+gw.fst$Locus<-paste(gw.fst$Chrom,gw.fst$Pos,sep=".")
+gw.sum$Locus<-paste(gw.sum$Chrom,gw.sum$Pos,sep=".")
 
-gw.all.loc<-split(gw.alleles, gw.alleles$Locus)
-gw.all.sum<-lapply(gw.all.loc, function(x) colSums(x[,3:11]))
-gw.loc.count<-data.frame(matrix(unlist(gw.all.sum), nrow=length(gw.all.sum), byrow=T),stringsAsFactors=FALSE)
-colnames(gw.loc.count)<-names(gw.all.sum[[1]])
-rownames(gw.loc.count)<-names(gw.all.loc)
-
-#prune based on major allele frequency
-#now keep those with major allele frequency > 95% in each pop
-calc.max.af<-function(x,y){
-	if(max(x[,y])>0)
-		m<-max(x[,y]/sum(x[,y]))
-	else
-		m<-0
-	return(m)
-}
-
-adult.af<-unlist(lapply(gw.all.loc,calc.max.af,y=3))
-names(adult.af)<-names(gw.all.loc)
-fem.af<-unlist(lapply(gw.all.loc,calc.max.af,y=4))
-names(fem.af)<-names(gw.all.loc)
-pop.af<-unlist(lapply(gw.all.loc,calc.max.af,y=5))
-names(pop.af)<-names(gw.all.loc)
-mal.af<-unlist(lapply(gw.all.loc,calc.max.af,y=6))
-names(mal.af)<-names(gw.all.loc)
-non.af<-unlist(lapply(gw.all.loc,calc.max.af,y=7))
-names(non.af)<-names(gw.all.loc)
-juv.af<-unlist(lapply(gw.all.loc,calc.max.af,y=8))
-names(juv.af)<-names(gw.all.loc)
-prg.af<-unlist(lapply(gw.all.loc,calc.max.af,y=10))
-names(prg.af)<-names(gw.all.loc)
-mom.af<-unlist(lapply(gw.all.loc,calc.max.af,y=11))
-names(mom.af)<-names(gw.all.loc)
-
-adt.af.trim<-adult.af[adult.af<=0.95 & adult.af >= 0.05]
-juv.af.trim<-juv.af[juv.af<=0.95 & juv.af >= 0.05]
-fem.af.trim<-fem.af[fem.af<=0.95 & fem.af>=0.05]
-mal.af.trim<-mal.af[mal.af<=0.95 & mal.af>=0.5]
-mom.af.trim<-mom.af[mom.af<=0.95 & mom.af>=0.05]
-pop.af.trim<-pop.af[pop.af<=0.95 & pop.af>=0.5]
-prg.af.trim<-mal.af[mal.af<=0.95 & mal.af>=0.05]
-non.af.trim<-non.af[non.af<=0.95 & non.af>=0.05]
-#the comparisons
-aj.maf<-names(adt.af.trim[names(adt.af.trim) %in% names(juv.af.trim)])
-fm.maf<-names(fem.af.trim[names(fem.af.trim) %in% names(mal.af.trim)])
-mo.maf<-names(mom.af.trim[names(mom.af.trim) %in% names(pop.af.trim)])
-np.maf<-names(prg.af[names(prg.af.trim) %in% names(non.af.trim)])
 
 ##NOW prune based on representation in the groups
 adt.grp.trim<-rownames(gw.loc.count[gw.loc.count$ADULTCount>440,])

@@ -52,6 +52,9 @@ I have to fix a few bugs...first the alleles weren't being designated correctly,
 Some of the allele2s are NULL...I don't think I check for that scenario when calculating Fsts.
 It's mostly fixed but for some reason the NONPREG group is having frequencies > 1...it's saying there are 45 instances of allele 1!! But the ind info file is correct and there are only 8 non pregnant males and only 8 individuals marked as NONPREG...so something in the code. It looks like I hadn't cleared the freq counters...did that, we'll see if it's fixed.
 
+Re-zeroing the frequency counts seems to have fixed it. Though some of the max Fst values were a little high (0.8).
+I didn't output the allele frequencies so I'm not sure I can prune based on major allele freq.
+
 #####Wednesday, 10 February 2016
 For some reason R does not like me asking if sum(allelefreqs)=="1". So I just removed that sanity check and will assume that the expected allele frequencies always sum to 1. 
 This resulted in 11202 loci. Then I'm pruning to 97% coverage, which yields 3119 loci.
