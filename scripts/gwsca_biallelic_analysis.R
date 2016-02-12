@@ -13,67 +13,84 @@ gw.sum$Locus<-paste(gw.sum$Chrom,gw.sum$Pos,sep=".")
 
 
 ##NOW prune based on representation in the groups
-adt.grp.trim<-rownames(gw.loc.count[gw.loc.count$ADULTCount>440,])
-juv.grp.trim<-rownames(gw.loc.count[gw.loc.count$JUVIECount>160,])
-fem.grp.trim<-rownames(gw.loc.count[gw.loc.count$FEMCount>130,])
-mal.grp.trim<-rownames(gw.loc.count[gw.loc.count$MALCount>196,])
-mom.grp.trim<-rownames(gw.loc.count[gw.loc.count$MOMCount>10,])
-pop.grp.trim<-rownames(gw.loc.count[gw.loc.count$POPCount>87,])
-prg.grp.trim<-rownames(gw.loc.count[gw.loc.count$PREGGERCount>188,])
-non.grp.trim<-rownames(gw.loc.count[gw.loc.count$NONPREGCount>8,])
+sum.list<-split(gw.sum, gw.sum$Pop)
+adt.n<-sum.list$ADULT[sum.list$ADULT$N > 440 & !is.na(sum.list$ADULT$Hs),]
+juv.n<-sum.list$JUVIE[sum.list$JUVIE$N>160& !is.na(sum.list$JUVIE$Hs),]
+fem.n<-sum.list$FEM[sum.list$FEM$N>130& !is.na(sum.list$FEM$Hs),]
+mal.n<-sum.list$MAL[sum.list$MAL$N>196& !is.na(sum.list$MAL$Hs),]
+mom.n<-sum.list$MOM[sum.list$MOM$N>100& !is.na(sum.list$MOM$Hs),]
+pop.n<-sum.list$POP[sum.list$POP$N>87& !is.na(sum.list$POP$Hs),]
+prg.n<-sum.list$PREGGER[sum.list$PREGGER$N>188& !is.na(sum.list$PREGGER$Hs),]
+non.n<-sum.list$NONPREG[sum.list$NONPREG$N>8& !is.na(sum.list$NONPREG$Hs),]
 
-#the comparisons
-aj.loci<-rownames(gw.loc.count[gw.loc.count$ADULTCount>440 & 
-	gw.loc.count$JUVIECount>160,])
-fm.loci<-rownames(gw.loc.count[gw.loc.count$FEMCount>130 & 
-	gw.loc.count$MALCount>196,])
-mo.loci<-rownames(gw.loc.count[gw.loc.count$POPCount>87 & 
-	gw.loc.count$MOMCount>10,])
-np.loci<-rownames(gw.loc.count[gw.loc.count$PREGGERCount>188 & 
-	gw.loc.count$NONPREGCount>8,])
 
-#apply both filters
-adt.prune<-adt.af.trim[names(adt.af.trim) %in% adt.grp.trim]
-juv.prune<-juv.af.trim[names(juv.af.trim) %in% juv.grp.trim]
-fem.prune<-fem.af.trim[names(fem.af.trim) %in% fem.grp.trim]
-mal.prune<-mal.af.trim[names(mal.af.trim) %in% mal.grp.trim]
-mom.prune<-mom.af.trim[names(mom.af.trim) %in% mom.grp.trim]
-pop.prune<-pop.af.trim[names(pop.af.trim) %in% pop.grp.trim]
-prg.prune<-prg.af.trim[names(prg.af.trim) %in% prg.grp.trim]
-non.prune<-non.af.trim[names(non.af.trim) %in% non.grp.trim]
 #comparisons
-aj.prune<-aj.loci[aj.loci %in% aj.maf]
-fm.prune<-fm.loci[fm.loci %in% fm.maf]
-mo.prune<-mo.loci[mo.loci %in% mo.maf]
-np.prune<-np.loci[np.loci %in% np.maf]
+aj.prune<-gw.fst[gw.fst$Locus %in% adt.n$Locus&gw.fst$Locus %in% juv.n$Locus, ]
+aj.prune<-aj.prune[aj.prune$ADULT.JUVIE>0,]
+fm.prune<-gw.fst[gw.fst$Locus %in% mal.n$Locus&gw.fst$Locus %in% fem.n$Locus, ]
+fm.prune<-fm.prune[fm.prune$MAL.FEM>0,]
+mo.prune<-gw.fst[gw.fst$Locus %in% fem.n$Locus&gw.fst$Locus %in% mom.n$Locus, ]
+mo.prune<-mo.prune[mo.prune$MOM.FEM>0,]
 
-all.pruned<-gw.alleles[gw.alleles$Locus %in% aj.prune &
-	gw.alleles$Locus %in% fm.prune &
-	gw.alleles$Locus %in% mo.prune,]
-
-gw.plot<-data.frame(Locus=gw.fst$Locus,Adult.Juvie=gw.fst$ADULT.JUVIE, 
-	Fem.Mal=gw.fst$FEM.MAL, Fem.Mom=gw.fst$POP.MOM, 
-	Nonpreg.Pregger=gw.fst$NONPREG.PREGGER)
-gw.loc.info<-data.frame(Locus=gw.cat[,3],Chrom=gw.cat[,4],BP=gw.cat[,5])
-gw.plot<-merge(gw.plot, gw.loc.info, by.x="Locus",by.y="Locus")
-
-aj.plot<-gw.plot[gw.plot$Locus %in% aj.prune,]
 write.table(aj.plot, "aj.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
-fm.plot<-gw.plot[gw.plot$Locus %in% fm.prune,]
 write.table(fm.plot, "fm.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
-mo.plot<-gw.plot[gw.plot$Locus %in% mo.prune,]
 write.table(gw.plot, "mo.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
-np.plot<-gw.plot[gw.plot$Locus %in% np.prune,]
 
 
+gw.plot<-gw.fst[gw.fst$Locus %in% aj.prune$Locus |
+	gw.fst$Locus %in% fm.prune$Locus |
+	gw.fst$Locus %in% mo.prune$Locus,]
 
-aj.ci<-c(mean(aj.plot$Adult.Juvie)+2.57583*sd(aj.plot$Adult.Juvie),
-	mean(aj.plot$Adult.Juvie)-2.57583*sd(aj.plot$Adult.Juvie))
-fm.ci<-c(mean(fm.plot$Fem.Mal)+2.57583*sd(fm.plot$Fem.Mal),
-	mean(fm.plot$Fem.Mal)-(2.57583*sd(fm.plot$Fem.Mal)))
-mo.ci<-c(mean(mo.plot$Fem.Mom)+(2.57583*sd(mo.plot$Fem.Mom)),
-	mean(mo.plot$Fem.Mom)-(2.57583*sd(mo.plot$Fem.Mom)))
-np.ci<-c(mean(np.plot$Nonpreg.Pregger)+(2.57583*sd(np.plot$Nonpreg.Pregger)),
-	mean(np.plot$Nonpreg.Pregger)-(2.57583*sd(np.plot$Nonpreg.Pregger)))
+aj.ci<-c(mean(aj.prune$ADULT.JUVIE)+2.57583*sd(aj.prune$ADULT.JUVIE),
+	mean(aj.prune$ADULT.JUVIE)-2.57583*sd(aj.prune$ADULT.JUVIE))
+fm.ci<-c(mean(fm.prune$MAL.FEM)+2.57583*sd(fm.prune$MAL.FEM),
+	mean(fm.prune$MAL.FEM)-(2.57583*sd(fm.prune$MAL.FEM)))
+mo.ci<-c(mean(mo.prune$MOM.FEM)+(2.57583*sd(mo.prune$MOM.FEM)),
+	mean(mo.prune$MOM.FEM)-(2.57583*sd(mo.prune$MOM.FEM)))
 
+model.aj<-read.delim("../sca_simulation_output/knowndist.ss0.2allelesao.txt")
+model.aj<-model.aj[model.aj$Fst>0,]
+aj.null<-c(mean(model.aj$Fst)+2.57583*sd(model.aj$Fst),
+	mean(model.aj$Fst)-2.57583*sd(model.aj$Fst))
 
+model.mo<-read.delim("../sca_simulation_output/knowndist.ss0.2allelesgp.txt")
+model.mo<-model.mo[model.mo$Fst>0,]
+fm.null<-c(mean(model.mo$Fst)+2.57583*sd(model.mo$Fst),
+	mean(model.mo$Fst)-(2.57583*sd(model.mo$Fst)))
+
+model.mf<-read.delim("../sca_simulation_output/knowndist.ss0.2allelesmf.txt")
+model.mf<-model.mf[model.mf$Fst>0,]
+mo.null<-c(mean(model.mf$Fst)+(2.57583*sd(model.mf$Fst)),
+	mean(model.mf$Fst)-(2.57583*sd(model.mf$Fst)))
+
+#plot
+png("fst.biallelic.png",height=300,width=300,units="mm",res=300)
+par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
+plot.fsts(aj.prune, ci.dat=aj.ci,fst.name="ADULT.JUVIE", chrom.name="Chrom"
+	, axis.size=0.75, bp.name="Pos")
+legend("top","Adult-Juvenile", cex=0.75,bty="n")
+plot.fsts(fm.prune, ci.dat=fm.ci,fst.name="MAL.FEM", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos")
+legend("top","Male-Female", cex=0.75,bty="n")
+plot.fsts(mo.prune, ci.dat=mo.ci,fst.name="MOM.FEM", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos")
+legend("top","Mothers-Females", cex=0.75,bty="n")
+mtext("Genomic Location", 1, outer=T, cex=1)
+mtext("Fst", 2, outer=T, cex=1)
+dev.off()
+
+#plot with the model CIs
+png("fst.biallelic.model.png",height=300,width=300,units="mm",res=300)
+par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
+plot.fsts(aj.prune, ci.dat=aj.null,fst.name="ADULT.JUVIE", chrom.name="Chrom"
+	, axis.size=0.75, bp.name="Pos")
+legend("top","Adult-Juvenile", cex=0.75,bty="n")
+plot.fsts(fm.prune, ci.dat=fm.null,fst.name="MAL.FEM", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos")
+legend("top","Male-Female", cex=0.75,bty="n")
+plot.fsts(mo.prune, ci.dat=mo.null,fst.name="MOM.FEM", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos")
+legend("top","Mothers-Females", cex=0.75,bty="n")
+mtext("Genomic Location", 1, outer=T, cex=1)
+mtext("Fst", 2, outer=T, cex=1)
+dev.off()

@@ -55,6 +55,8 @@ It's mostly fixed but for some reason the NONPREG group is having frequencies > 
 Re-zeroing the frequency counts seems to have fixed it. Though some of the max Fst values were a little high (0.8).
 I didn't output the allele frequencies so I'm not sure I can prune based on major allele freq.
 
+OK, so I got rid of any NAs and any with Fst < 0 and kept those above certain N cutoffs.
+
 #####Wednesday, 10 February 2016
 For some reason R does not like me asking if sum(allelefreqs)=="1". So I just removed that sanity check and will assume that the expected allele frequencies always sum to 1. 
 This resulted in 11202 loci. Then I'm pruning to 97% coverage, which yields 3119 loci.
