@@ -1,0 +1,25 @@
+﻿Build started 8/4/2015 3:50:50 PM.
+     1>Project "C:\Users\Sarah\Documents\Visual Studio 2013\Projects\generate_test_dataset\generate_test_dataset\generate_test_dataset.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt generate_dataset.cpp
+         generate_dataset.cpp
+     1>c:\users\sarah\documents\visual studio 2013\projects\generate_test_dataset\generate_test_dataset\rand_num_distributions.h(113): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+     1>c:\users\sarah\documents\visual studio 2013\projects\generate_test_dataset\generate_test_dataset\classes.h(78): warning C4101: 'ii' : unreferenced local variable
+     1>c:\users\sarah\documents\visual studio 2013\projects\generate_test_dataset\generate_test_dataset\classes.h(186): warning C4101: 'iii' : unreferenced local variable
+     1>c:\users\sarah\documents\visual studio 2013\projects\generate_test_dataset\generate_test_dataset\classes.h(229): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\sarah\documents\visual studio 2013\projects\generate_test_dataset\generate_test_dataset\classes.h(246): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\sarah\documents\visual studio 2013\projects\generate_test_dataset\generate_test_dataset\classes.h(260): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\sarah\documents\visual studio 2013\projects\generate_test_dataset\generate_test_dataset\classes.h(268): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\sarah\documents\visual studio 2013\projects\generate_test_dataset\generate_test_dataset\classes.h(198): warning C4101: 'last' : unreferenced local variable
+     1>c:\users\sarah\documents\visual studio 2013\projects\generate_test_dataset\generate_test_dataset\classes.h(481): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+     1>c:\users\sarah\documents\visual studio 2013\projects\generate_test_dataset\generate_test_dataset\classes.h(484): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+     1>c:\users\sarah\documents\visual studio 2013\projects\generate_test_dataset\generate_test_dataset\classes.h(485): warning C4018: '>' : signed/unsigned mismatch
+     1>c:\users\sarah\documents\visual studio 2013\projects\generate_test_dataset\generate_test_dataset\generate_dataset.cpp(19): warning C4101: 'v' : unreferenced local variable
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Sarah\Documents\Visual Studio 2013\Projects\generate_test_dataset\Debug\generate_test_dataset.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Sarah\Documents\Visual Studio 2013\Projects\generate_test_dataset\Debug\generate_test_dataset.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Sarah\Documents\Visual Studio 2013\Projects\generate_test_dataset\Debug\generate_test_dataset.lib" /MACHINE:X86 Debug\generate_dataset.obj
+         generate_test_dataset.vcxproj -> C:\Users\Sarah\Documents\Visual Studio 2013\Projects\generate_test_dataset\Debug\generate_test_dataset.exe
+     1>Done Building Project "C:\Users\Sarah\Documents\Visual Studio 2013\Projects\generate_test_dataset\generate_test_dataset\generate_test_dataset.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:01.93
