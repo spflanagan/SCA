@@ -199,7 +199,7 @@ public:
 		num_qtl = 2;
 		num_alleles = 2;
 		prior_qtl = false;
-		afs_file_name = "allelefreqs.txt";
+		afs_file_name = "E://ubuntushare//SCA//results//biallelic//empirical_allelefreqs.txt";
 
 		adult_samplesize = 440;
 		offspring_samplesize = 160;

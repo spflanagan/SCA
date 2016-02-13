@@ -11,17 +11,26 @@ gw.fst<-gw.fst[,c("Chrom","Pos","ADULT.JUVIE","MAL.FEM","PREGGER.OFF",
 gw.fst$Locus<-paste(gw.fst$Chrom,gw.fst$Pos,sep=".")
 gw.sum$Locus<-paste(gw.sum$Chrom,gw.sum$Pos,sep=".")
 
-
-##NOW prune based on representation in the groups
+##prune based on representation in the groups
 sum.list<-split(gw.sum, gw.sum$Pop)
 adt.n<-sum.list$ADULT[sum.list$ADULT$N > 440 & !is.na(sum.list$ADULT$Hs),]
-juv.n<-sum.list$JUVIE[sum.list$JUVIE$N>160& !is.na(sum.list$JUVIE$Hs),]
+juv.n<-sum.list$JUVIE[sum.list$JUVIE$N>200& !is.na(sum.list$JUVIE$Hs),]
 fem.n<-sum.list$FEM[sum.list$FEM$N>130& !is.na(sum.list$FEM$Hs),]
-mal.n<-sum.list$MAL[sum.list$MAL$N>196& !is.na(sum.list$MAL$Hs),]
+mal.n<-sum.list$MAL[sum.list$MAL$N>200& !is.na(sum.list$MAL$Hs),]
 mom.n<-sum.list$MOM[sum.list$MOM$N>100& !is.na(sum.list$MOM$Hs),]
 pop.n<-sum.list$POP[sum.list$POP$N>87& !is.na(sum.list$POP$Hs),]
-prg.n<-sum.list$PREGGER[sum.list$PREGGER$N>188& !is.na(sum.list$PREGGER$Hs),]
-non.n<-sum.list$NONPREG[sum.list$NONPREG$N>8& !is.na(sum.list$NONPREG$Hs),]
+prg.n<-sum.list$PREGGER[sum.list$PREGGER$N>200& !is.na(sum.list$PREGGER$Hs),]
+non.n<-sum.list$NONPREG[sum.list$NONPREG$N>14& !is.na(sum.list$NONPREG$Hs),]
+
+#Now prune based on allele frequencies
+adt.n<-adt.n[adt.n$Allele1Freq > 0.05 & adt.n$Allele1Freq < 0.95,]
+juv.n<-juv.n[juv.n$Allele1Freq > 0.05 & juv.n$Allele1Freq < 0.95,]
+fem.n<-fem.n[fem.n$Allele1Freq > 0.05 & fem.n$Allele1Freq < 0.95,]
+mal.n<-mal.n[mal.n$Allele1Freq > 0.05 & mal.n$Allele1Freq < 0.95,]
+mom.n<-mom.n[mom.n$Allele1Freq > 0.05 & mom.n$Allele1Freq < 0.95,]
+pop.n<-pop.n[pop.n$Allele1Freq > 0.05 & pop.n$Allele1Freq < 0.95,]
+prg.n<-prg.n[prg.n$Allele1Freq > 0.05 & prg.n$Allele1Freq < 0.95,]
+non.n<-non.n[non.n$Allele1Freq > 0.05 & non.n$Allele1Freq < 0.95,]
 
 
 #comparisons
@@ -48,20 +57,19 @@ fm.ci<-c(mean(fm.prune$MAL.FEM)+2.57583*sd(fm.prune$MAL.FEM),
 mo.ci<-c(mean(mo.prune$MOM.FEM)+(2.57583*sd(mo.prune$MOM.FEM)),
 	mean(mo.prune$MOM.FEM)-(2.57583*sd(mo.prune$MOM.FEM)))
 
-model.aj<-read.delim("../sca_simulation_output/knowndist.ss0.2allelesao.txt")
-model.aj<-model.aj[model.aj$Fst>0,]
-aj.null<-c(mean(model.aj$Fst)+2.57583*sd(model.aj$Fst),
-	mean(model.aj$Fst)-2.57583*sd(model.aj$Fst))
+#get model data
+model<-read.delim("../sca_simulation_output/knowndist.ss0.2alleles.fst_out.txt")
+model.aj<-model[model$AOFst>0 & model$MaleAF < 0.95 & model$MaleAF > 0.05,]
+aj.null<-c(mean(model.aj$AOFst)+2.57583*sd(model.aj$AOFst),
+	mean(model.aj$AOFst)-2.57583*sd(model.aj$AOFst))
 
-model.mo<-read.delim("../sca_simulation_output/knowndist.ss0.2allelesgp.txt")
-model.mo<-model.mo[model.mo$Fst>0,]
-fm.null<-c(mean(model.mo$Fst)+2.57583*sd(model.mo$Fst),
-	mean(model.mo$Fst)-(2.57583*sd(model.mo$Fst)))
+model.mo<-model[model$MDFst>0 & model$MaleAF < 0.95 & model$MaleAF > 0.05,]
+fm.null<-c(mean(model.mo$MDFst)+2.57583*sd(model.mo$MDFst),
+	mean(model.mo$MDFst)-(2.57583*sd(model.mo$MDFst)))
 
-model.mf<-read.delim("../sca_simulation_output/knowndist.ss0.2allelesmf.txt")
-model.mf<-model.mf[model.mf$Fst>0,]
-mo.null<-c(mean(model.mf$Fst)+(2.57583*sd(model.mf$Fst)),
-	mean(model.mf$Fst)-(2.57583*sd(model.mf$Fst)))
+model.mf<-model[model$MFFst>0 & model$MaleAF < 0.95 & model$MaleAF > 0.05,]
+mo.null<-c(mean(model.mf$MFFst)+(2.57583*sd(model.mf$MFFst)),
+	mean(model.mf$MFFst)-(2.57583*sd(model.mf$MFFst)))
 
 #plot
 png("fst.biallelic.png",height=300,width=300,units="mm",res=300)

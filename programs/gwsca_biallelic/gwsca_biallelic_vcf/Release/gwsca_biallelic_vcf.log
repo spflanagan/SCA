@@ -1,9 +1,10 @@
-﻿Build started 2/11/2016 1:37:19 PM.
+﻿Build started 2/12/2016 9:19:31 AM.
      1>Project "E:\ubuntushare\SCA\programs\gwsca_biallelic\gwsca_biallelic_vcf\gwsca_biallelic_vcf.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt gwsca_biallelic_vcf.cpp
          gwsca_biallelic_vcf.cpp
-     1>gwsca_biallelic_vcf.cpp(241): warning C4018: '<' : signed/unsigned mismatch
+     1>gwsca_biallelic_vcf.cpp(242): warning C4018: '<' : signed/unsigned mismatch
+     1>gwsca_biallelic_vcf.cpp(348): warning C4018: '<' : signed/unsigned mismatch
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\ubuntushare\SCA\programs\gwsca_biallelic\gwsca_biallelic_vcf\Release\gwsca_biallelic_vcf.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\ubuntushare\SCA\programs\gwsca_biallelic\gwsca_biallelic_vcf\Release\gwsca_biallelic_vcf.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\ubuntushare\SCA\programs\gwsca_biallelic\gwsca_biallelic_vcf\Release\gwsca_biallelic_vcf.lib" /MACHINE:X86 /SAFESEH Release\gwsca_biallelic_vcf.obj
          Generating code
@@ -13,4 +14,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.20
+Time Elapsed 00:00:02.07

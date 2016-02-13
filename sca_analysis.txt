@@ -43,6 +43,10 @@ Solution 2: Re-run GATK to start from scratch and then use vcftools to filter_vc
 
 
 #############################################LAB BOOK######################################################
+#####Friday, 12 February 2016
+In the simulation model I had calculated Fst as 1-(hs1+hs2)/(2*ht) whereas in my calculations I'd done ht-avg(hs)/ht...which I believe is mathematically identical but I changed it just to be safe.
+I also output the allele frequencies and re-ran gwsca_biallelic_vcf. Next I'm going to extract the allele frequency spectrum from the biallelic data and run the model with that AFS, just to be sure that I'm using the best possible model.
+
 #####Thursday, 11 February 2016
 I think I figured out the indexing problm, though it's a little broken at the moment. 
 Fixed it! Now it's done and it runs much more quickly! A few minutes tops! Woo hoo!!

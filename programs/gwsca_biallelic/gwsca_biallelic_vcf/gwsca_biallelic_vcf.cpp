@@ -264,7 +264,7 @@ int main()
 	}
 
 	summary_out.open(summary_out_name);
-	summary_out << "Pop\tChrom\tPos\tN\tHs\tHo\tAllele1\tAllele2";
+	summary_out << "Pop\tChrom\tPos\tN\tHs\tHo\tAllele1Freq\tAllele2Freq";
 
 	vcf.open(vcf_name);
 	FileTest(vcf, vcf_name);
@@ -362,7 +362,7 @@ int main()
 							pop_stats[t].freq2 = pop_stats[t].freq2 / pop_stats[t].two_n;
 							pop_stats[t].hs = 1 - ((pop_stats[t].freq1 * pop_stats[t].freq1) + (pop_stats[t].freq2*pop_stats[t].freq2));
 							summary_out << '\n' << pop_stats[t].group_name << '\t' << chrom << '\t' << pos << '\t' << pop_stats[t].two_n << '\t' << pop_stats[t].hs << '\t'
-								<< pop_stats[t].ho << '\t' << pop_stats[t].allele1 << '\t' << pop_stats[t].allele2;
+								<< pop_stats[t].ho << '\t' << pop_stats[t].freq1 << '\t' << pop_stats[t].freq2;
 						}
 						else
 							summary_out << '\n' << pop_stats[t].group_name << '\t' << chrom << '\t' << pos << '\t' << pop_stats[t].two_n <<'\t' <<  '\t' << '\t' << pop_stats[t].allele1 << '\t' << pop_stats[t].allele2;
@@ -417,9 +417,9 @@ int main()
 						{
 							double hs = (pop_stats[t].hs + pop_stats[tt].hs) / 2;
 							if (ht[index] > 0)
-								fsts[index] = (ht[index] - hs) / ht[index];
+								fsts[index] = 1 - (pop_stats[t].hs + pop_stats[tt].hs) / (2*ht[index]);
 							else
-								fsts[index] = -1;
+								fsts[index] = -1.0;
 							if (fsts[index]>1)
 								cout << "fst is greater than 1\n";
 							fst_out << '\t' << fsts[index];
