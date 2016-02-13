@@ -111,6 +111,7 @@ public:
 		for (j = 0; j < alleles.size(); j++)
 			freq[j] = freq[j] / count;
 	}
+
 };
 
 class individual
@@ -128,6 +129,44 @@ public:
 	}
 };
 
+vector<double>& calc_af_without_i(int ind_index, vector<individual>& pop, vector<locus_info>& ref, int locus)
+{
+	int j, jj;
+	vector<double> freq_no_i;
+	for (j = 0; j < ref[locus].alleles.size(); j++)
+		freq_no_i.push_back(0);
+	for (j = 0; j < pop.size(); j++)
+	{
+		if (j != ind_index)
+		{
+			for (jj = 0; jj < ref[locus].alleles.size(); jj++)
+			{
+				if (pop[j].allele1[locus] == ref[locus].alleles[jj])
+					freq_no_i[jj]++;
+				if (pop[j].allele2[locus] == ref[locus].alleles[jj])
+					freq_no_i[jj]++;
+			}
+		}
+	}
+	for (j = 0; j < ref[locus].alleles.size(); j++)
+		freq_no_i[jj] / (pop.size() - 1);
+	return freq_no_i;
+}
+
+class relatedness_scores
+{
+public:
+	string focal_ID;
+	vector<string> comparison_IDs;
+	vector<double> r;
+
+	relatedness_scores()
+	{
+		focal_ID = string();
+		comparison_IDs = vector < string > ();
+		r = vector<double>();
+	}
+};
 int main()
 {
 	int i, ii, iii, iv, count, locus_count;
@@ -138,6 +177,7 @@ int main()
 	ofstream allelefreqs, relatedness;
 	vector<locus_info> reference;
 	vector<individual> population;
+	vector<relatedness_scores> r_values;
 
 	kinship_name = "../../results/relatedness/genotypes99_10loci.txt";
 	kinship_format = false; //if true it's kinship format, if false it's CERVUS format
@@ -222,6 +262,21 @@ int main()
 	for (i = 0; i < reference.size(); i++)
 		reference[i].caclualte_allele_freqs();
 
+	//set up r_values
+	for (i = 0; i < population.size(); i++)
+	{
+		r_values.push_back(relatedness_scores());
+		r_values[i].focal_ID = population[i].ID;
+		for (ii = 0; ii < population.size(); ii++)
+		{
+			if (i != ii)
+			{
+				r_values[i].r.push_back(0);
+				r_values[i].comparison_IDs.push_back(population[ii].ID);
+			}
+		}
+	}
+
 	//now compare each individual at each locus
 	for (i = 0; i < population.size(); i++)
 	{
@@ -229,13 +284,21 @@ int main()
 		{
 			if (i != ii)
 			{
+				double num, den;
+				num = den = 0;
 				for (iii = 0; iii < reference.size(); iii++)
 				{
-					
-					if (population[i].allele1[iii] == population[ii].allele1[iii])
+					//calculate relatedness
+					vector<double> mean_freqs;
+					mean_freqs = calc_af_without_i(i, population, reference, iii);
+					for (iv = 0; iv < reference[iii].alleles.size(); iv++)
 					{
-						//calculate relatedness and likelihood estimators
+						if (reference[iii].alleles[iv] == population[i].allele1[iii])
+						{
+							num = num;
+						}
 					}
+
 
 				}
 			}
