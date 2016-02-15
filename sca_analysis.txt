@@ -43,6 +43,20 @@ Solution 2: Re-run GATK to start from scratch and then use vcftools to filter_vc
 
 
 #############################################LAB BOOK######################################################
+#####Sunday, 14 February 2016
+I calculated the selection differentials for various morphometric tratis using relative mating success, number of offspring, and number of non-reduced offspring based on the parentage analysis from gen1600_8
+
+                        SVL SnoutLength SnoutDepth    TailLength      BandNum MeanBandArea
+Mating Success    0.1282916   0.1634555  0.1188022 -0.0003594433  0.006399823   0.02001239
+Total Num Embryos 0.2685957   0.2396699  0.2319460 -0.0104568167 -0.052075048   0.16136224
+Surviving Embryos 0.2858035   0.2461369  0.2421699 -0.0132749882 -0.038329322   0.16094581
+
+
+#####Saturday, 13 February 2016
+I worked on the relatedness code. I switched to using Lynch & Ritland (1999) formulas, but it's not giving me reasonable output.
+I'm not sure what to do about that...maybe there's a program to use to calculate relatedness?
+Maybe I shouldn't do the weighting??
+
 #####Friday, 12 February 2016
 In the simulation model I had calculated Fst as 1-(hs1+hs2)/(2*ht) whereas in my calculations I'd done ht-avg(hs)/ht...which I believe is mathematically identical but I changed it just to be safe.
 I also output the allele frequencies and re-ran gwsca_biallelic_vcf. Next I'm going to extract the allele frequency spectrum from the biallelic data and run the model with that AFS, just to be sure that I'm using the best possible model.

@@ -59,6 +59,12 @@ istream& universal_getline(istream& is, string& t)
 
 }
 
+class relatedness_locus
+{
+public:
+	double rxyl, wl;
+};
+
 class locus_info
 {
 public:
@@ -96,12 +102,17 @@ public:
 		if (found1 == false)
 		{
 			alleles.push_back(al1);
-			freq.push_back(0);
+			freq.push_back(1);
 		}
 		if (found2 == false)
 		{
-			alleles.push_back(al2);
-			freq.push_back(0);
+			if (al1 != al2)
+			{
+				alleles.push_back(al2);
+				freq.push_back(1);
+			}
+			else
+				freq.back()++;//you know it was the last one because if al2 wasn't found neither was al1.
 		}
 	}
 
@@ -109,9 +120,50 @@ public:
 	{
 		int j;
 		for (j = 0; j < alleles.size(); j++)
-			freq[j] = freq[j] / count;
+			freq[j] = freq[j] / (count*2);
 	}
 
+	relatedness_locus calc_relatedness(string al_a, string al_b, string al_c, string al_d)
+	{
+		int iv, Sab, Sbc, Sbd, Sac, Sad;
+		double pa, pb;
+		relatedness_locus r;
+		pa = pb = 0;
+		for (iv = 0; iv < alleles.size(); iv++)
+		{
+			if (alleles[iv] == al_a)
+			{
+				pa = freq[iv];
+			}
+			if (alleles[iv] == al_b)
+			{
+				pb = freq[iv];
+			}
+		}
+		if (al_a == al_b)
+			Sab = 1;
+		else
+			Sab = 0;
+		if (al_a == al_c)
+			Sac = 1;
+		else
+			Sac = 0;
+		if (al_a == al_d)
+			Sad = 1;
+		else
+			Sad = 0;
+		if (al_b == al_c)
+			Sbc = 1;
+		else
+			Sbc = 0;
+		if (al_b == al_d)
+			Sbd = 1;
+		else
+			Sbd = 0;
+		r.rxyl= ((pa*(Sbc + Sbd)) + (pb*(Sac + Sad)) - (4 * pa*pb)) / ((1 + Sab)*(pa + pb) - (4 * pa*pb));
+		r.wl = ((1 + Sab)*(pa + pb) - (4 * pa*pb)) / (2 * pa*pb);
+		return r;
+	}
 };
 
 class individual
@@ -128,30 +180,6 @@ public:
 		allele2 = vector<string>();
 	}
 };
-
-vector<double>& calc_af_without_i(int ind_index, vector<individual>& pop, vector<locus_info>& ref, int locus)
-{
-	int j, jj;
-	vector<double> freq_no_i;
-	for (j = 0; j < ref[locus].alleles.size(); j++)
-		freq_no_i.push_back(0);
-	for (j = 0; j < pop.size(); j++)
-	{
-		if (j != ind_index)
-		{
-			for (jj = 0; jj < ref[locus].alleles.size(); jj++)
-			{
-				if (pop[j].allele1[locus] == ref[locus].alleles[jj])
-					freq_no_i[jj]++;
-				if (pop[j].allele2[locus] == ref[locus].alleles[jj])
-					freq_no_i[jj]++;
-			}
-		}
-	}
-	for (j = 0; j < ref[locus].alleles.size(); j++)
-		freq_no_i[jj] / (pop.size() - 1);
-	return freq_no_i;
-}
 
 class relatedness_scores
 {
@@ -179,6 +207,7 @@ int main()
 	vector<individual> population;
 	vector<relatedness_scores> r_values;
 
+	relatedness_name = "../../results/relatedness/10loci_r_out.txt";
 	kinship_name = "../../results/relatedness/genotypes99_10loci.txt";
 	kinship_format = false; //if true it's kinship format, if false it's CERVUS format
 	
@@ -278,32 +307,34 @@ int main()
 	}
 
 	//now compare each individual at each locus
+	relatedness.open(relatedness_name);
+	relatedness << "Ind1\tInd2\trxy\tW\tr";
+	int index;
 	for (i = 0; i < population.size(); i++)
 	{
+		index = 0;
 		for (ii = 0; ii < population.size(); ii++)
 		{
 			if (i != ii)
 			{
-				double num, den;
-				num = den = 0;
+				double W, r;
+				W = r = 0;
 				for (iii = 0; iii < reference.size(); iii++)
 				{
-					//calculate relatedness
-					vector<double> mean_freqs;
-					mean_freqs = calc_af_without_i(i, population, reference, iii);
-					for (iv = 0; iv < reference[iii].alleles.size(); iv++)
-					{
-						if (reference[iii].alleles[iv] == population[i].allele1[iii])
-						{
-							num = num;
-						}
-					}
-
-
+					//calculate relatedness where population[i] is the proband
+					relatedness_locus rxy, ryx;
+					rxy = reference[iii].calc_relatedness(population[i].allele1[iii], population[i].allele2[iii], population[ii].allele1[iii], population[ii].allele2[iii]);
+					ryx = reference[iii].calc_relatedness(population[ii].allele1[iii], population[ii].allele2[iii], population[i].allele1[iii], population[i].allele2[iii]);
+					r = r + (((rxy.rxyl*rxy.wl) + (ryx.rxyl*ryx.wl)) / 2);
+					W = W + ((rxy.wl + ryx.wl) / 2);
 				}
+				r_values[i].r[index] = r / W;
+				relatedness << '\n' << population[i].ID << '\t' << population[ii].ID << '\t' << r << '\t' << W << '\t' << r_values[i].r[index];
+				index++;
 			}
 		}
 	}
+	relatedness.close();
 	cout << "\nDone! Input Integer to Quit.\n";
 	cin >> i;
 	return 0;
