@@ -43,6 +43,32 @@ Solution 2: Re-run GATK to start from scratch and then use vcftools to filter_vc
 
 
 #############################################LAB BOOK######################################################
+#####Monday, 15 February 2016
+I finished running all of the CERVUS combinations yesterday (up to 1600 loci), so now I need to analyze those data.
+I'm extracting delta, num assignments, and percentage of assignments for each one. 
+I think it would also be useful to see how many times females are assigned and if each time they're assigned to the same offspring...still figuring out how to get that info.
+So I think I've got decent summaries. Though I'm not sure I'm really graphically representing info in the best way possible. But I'll show it to Adam.
+I'm going to show Adam:
+	-gwsca_biallelic plot
+	-Structure plot
+	-CERVUS summary info
+	-Batemanator output and selection differentials
+And ask what to do. (sort of)
+
+OK, so after talking with Adam:
+1. Batemanator results and selection differentials help for  proof-of-principle thing.
+2. Re-make histograms for 100,200,1600 loci or something--number of assignments and MS
+3. Relatedness should be summed over all loci
+4. Calculate band-sharing as well (this generates the distribution of values for male-offspring pairs)
+5. Add simulation of offspring allele dropout to the gwsca biallelic simulation
+6. Calculate proportion of loci in which fathers and offspring are compatible.
+
+I re-made the CERVUS histograms (saved as parentage/CERVUS_incremental_snps/CervusMaternitySummary.png).
+I'm re-running the calculate_relatedness with 1600 loci.
+Calculating band-sharing and the proportion of incompatible father-offspring genotypes using band_sharing program.
+I'm getting really high band-sharing numbers (~0.95), which I guess suggests most loci are homozygous for the same allele in fathers and offspring. 
+I'm trying this on the biallelic.vcf file to see what it looks like for biallelic snps.
+
 #####Sunday, 14 February 2016
 I calculated the selection differentials for various morphometric tratis using relative mating success, number of offspring, and number of non-reduced offspring based on the parentage analysis from gen1600_8
 
