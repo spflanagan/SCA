@@ -43,6 +43,15 @@ Solution 2: Re-run GATK to start from scratch and then use vcftools to filter_vc
 
 
 #############################################LAB BOOK######################################################
+#####Wednesday, 17 February 2016
+The number of bands shared just seems improbable. It's incredibly frustrating.
+
+#####Tuesday, 16 February 2016
+Band sharing resulted in sharing = 1 and 0 incompatible loci for the biallelic dataset. That just doesn't seem right.
+And relatedness isn't working right either. Why is this so difficult???
+OK, so the relatedness program issue was because of loci with only one allele...which was shared so the denominator of rxy was 0. I think that's fixed, now we'll see what the values look like.
+That's fixed, but now I'm getting unusual values. With 1600 loci, the majority of the values are less than 0, and most father-offspring pairs have negative relatedness values.
+
 #####Monday, 15 February 2016
 I finished running all of the CERVUS combinations yesterday (up to 1600 loci), so now I need to analyze those data.
 I'm extracting delta, num assignments, and percentage of assignments for each one. 
@@ -68,6 +77,8 @@ I'm re-running the calculate_relatedness with 1600 loci.
 Calculating band-sharing and the proportion of incompatible father-offspring genotypes using band_sharing program.
 I'm getting really high band-sharing numbers (~0.95), which I guess suggests most loci are homozygous for the same allele in fathers and offspring. 
 I'm trying this on the biallelic.vcf file to see what it looks like for biallelic snps.
+
+Something is really not working with the relatedness calculations. It's spitting out a bunch of -1.#IND r-values. I'm not sure when or why it's happening...at first I thought it was because I was including missing loci, but that's not it.
 
 #####Sunday, 14 February 2016
 I calculated the selection differentials for various morphometric tratis using relative mating success, number of offspring, and number of non-reduced offspring based on the parentage analysis from gen1600_8

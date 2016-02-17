@@ -207,7 +207,7 @@ int main()
 	vector<individual> population;
 	vector<relatedness_scores> r_values;
 
-	relatedness_name = "../../results/relatedness/10loci_r_out.txt";
+	relatedness_name = "../../results/relatedness/genotypes99_10loci.rout.txt";
 	kinship_name = "../../results/relatedness/genotypes99_10loci.txt";
 	kinship_format = false; //if true it's kinship format, if false it's CERVUS format
 	
@@ -322,13 +322,20 @@ int main()
 				for (iii = 0; iii < reference.size(); iii++)
 				{
 					//calculate relatedness where population[i] is the proband
-					relatedness_locus rxy, ryx;
-					rxy = reference[iii].calc_relatedness(population[i].allele1[iii], population[i].allele2[iii], population[ii].allele1[iii], population[ii].allele2[iii]);
-					ryx = reference[iii].calc_relatedness(population[ii].allele1[iii], population[ii].allele2[iii], population[i].allele1[iii], population[i].allele2[iii]);
-					r = r + (((rxy.rxyl*rxy.wl) + (ryx.rxyl*ryx.wl)) / 2);
-					W = W + ((rxy.wl + ryx.wl) / 2);
+					if (population[i].allele1[iii] != "0" && population[ii].allele1[iii] != "0" && reference[iii].alleles.size() > 1)
+					{
+						relatedness_locus rxy, ryx;
+						rxy = reference[iii].calc_relatedness(population[i].allele1[iii], population[i].allele2[iii], population[ii].allele1[iii], population[ii].allele2[iii]);
+						ryx = reference[iii].calc_relatedness(population[ii].allele1[iii], population[ii].allele2[iii], population[i].allele1[iii], population[i].allele2[iii]);
+						r = r + (((rxy.rxyl*rxy.wl) + (ryx.rxyl*ryx.wl)) / 2);
+						W = W + ((rxy.wl + ryx.wl) / 2);
+						//cout << "\n" << reference[iii].ID << '\t' << r;
+					}
 				}
-				r_values[i].r[index] = r / W;
+				if (W > 0)
+					r_values[i].r[index] = r / W;
+				else
+					r_values[i].r[index] = r;
 				relatedness << '\n' << population[i].ID << '\t' << population[ii].ID << '\t' << r << '\t' << W << '\t' << r_values[i].r[index];
 				index++;
 			}

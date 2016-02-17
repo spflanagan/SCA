@@ -50,7 +50,7 @@ for(i in 2:length(structure)){
 dev.off()
 
 #just plot one example of each set.
-png("sca.structure.png",height=50,width=10,units="in",res=300)
+png("sca.structure.png",height=10,width=10,units="in",res=300)
 par(mfrow=c(3,length(pop.list)),mar=c(1,0,1,0),oma=c(1,0,1,0),cex=0.5)
 plot.structure(structure[[11]],
 		sub('(\\d+)_\\d+','\\1',names(structure[11])),
