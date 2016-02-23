@@ -167,7 +167,7 @@ public:
 	double gaussian_preference_mean;
 	double significance_level, sigma;
 	double mean_mal_trait, mean_fem_trait;
-	double recombination_rate, avg_pairwise_d, avg_ld;
+	double recombination_rate, avg_pairwise_d, avg_ld, error_rate;
 	int peak_window, num_ld;
 	int mutation_rate, mutational_variance;
 	int environmental_variance, environmental_sd, allelic_sd;
@@ -207,6 +207,7 @@ public:
 		female_samplesize = 196;//males in pipefish
 		dad_samplesize = 160;//moms in pipefish
 
+		error_rate = 0.03;
 		recombination_rate = 0.2;
 		environmental_variance = 0;
 		environmental_sd = sqrt(environmental_variance);
@@ -1080,9 +1081,11 @@ public:
 		}
 	}
 	
-	void infer_genotype(int adult_index, int off_index, int dad_index)
+	void infer_genotype(int adult_index, int off_index, int dad_index, bool allelic_dropout)
 	{
 		int j, jj, jjj;
+		double rand_num;
+		
 		for (j = 0; j < num_chrom; j++)
 		{
 			for (jj = 0; jj < num_markers; jj++)
@@ -1097,16 +1100,30 @@ public:
 				if (adults[adult_index].maternal[j].loci[jj] == offspring[off_index].maternal[j].loci[jj])
 					mom_allele.push_back(offspring[off_index].maternal[j].loci[jj]);
 
-				if (mom_allele.size() > 1)
+				if (!allelic_dropout)
+					rand_num = 1.0;
+				else
+					rand_num = genrand();
+				if (rand_num < error_rate)
 				{
-					vector<int>::iterator it;
-					it = unique(mom_allele.begin(), mom_allele.end());
-					mom_allele.resize(distance(mom_allele.begin(), it));
+					if (genrand() < 0.5)
+						inferred_dads[dad_index][j].loci[jj] = adults[adult_index].paternal[j].loci[jj];
+					else
+						inferred_dads[dad_index][j].loci[jj] = adults[adult_index].maternal[j].loci[jj];
 				}
-
-				if (mom_allele.size() == 1)//otherwise it's not an informative locus
+				else
 				{
-					inferred_dads[dad_index][j].loci[jj] = mom_allele[0];
+					if (mom_allele.size() > 1)
+					{
+						vector<int>::iterator it;
+						it = unique(mom_allele.begin(), mom_allele.end());
+						mom_allele.resize(distance(mom_allele.begin(), it));
+					}
+
+					if (mom_allele.size() == 1)//otherwise it's not an informative locus
+					{
+						inferred_dads[dad_index][j].loci[jj] = mom_allele[0];
+					}
 				}
 			}
 			for (jj = 0; jj < num_qtl; jj++)
@@ -1138,7 +1155,7 @@ public:
 		}
 	}
 
-	void sample_pop()
+	void sample_pop(bool allelic_dropout)
 	{
 		int j, jj, jjj, off_counter, fem_counter, mal_counter;
 		vector<bool> taken;
@@ -1184,7 +1201,7 @@ public:
 								rand2 = randnum(adults[sampled_females[fem_counter]].offspring_index.size());
 								sampled_off.push_back(adults[sampled_females[fem_counter]].offspring_index[rand2]);
 								//infer dad's genotype
-								infer_genotype(sampled_adults[j], sampled_off[off_counter], off_counter);
+								infer_genotype(sampled_adults[j], sampled_off[off_counter], off_counter, allelic_dropout);
 								sampled_dads.push_back(off_counter);
 							}
 						}
@@ -1219,7 +1236,7 @@ public:
 										rand2 = randnum(adults[sampled_females[fem_counter]].offspring_index.size());
 										sampled_off.push_back(adults[sampled_females[fem_counter]].offspring_index[rand2]);
 										//infer dad's genotype
-										infer_genotype(sampled_adults[j], sampled_off[off_counter], off_counter);
+										infer_genotype(sampled_adults[j], sampled_off[off_counter], off_counter, allelic_dropout);
 									}
 								}
 								off_counter++;

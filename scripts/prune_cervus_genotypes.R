@@ -67,7 +67,7 @@ poly<-genotypes[,colnames(genotypes) %in% names(all.poly)]
 
 #remove any found in less than 90% of individuals
 gen90<-prune.loci(poly,0.1)
-
+#write.table(gen90,"PolymorphicIn90PercInds.txt", quote=F,sep="\t",row.names=F)
 #remove those loci not in hardy weinberg equilibrium
 hwe<-data.frame()
 for(x in seq(2,ncol(gen90),2)){
@@ -81,6 +81,7 @@ gen.keep<-gen90[,colnames(gen90) %in% keep.names]
 
 #prune for higher coverage
 pruned<-prune.loci(gen.keep, 0.03)
+#write.table(pruned,"PolymorphicIn97PercIndsHWE.txt", quote=F,sep="\t",row.names=F)
 
 #sample
 nloci<-c(50,100,200,400,800,1600)
@@ -115,7 +116,7 @@ for(i in 1:10){ #do ten replicates of each set
 #	}
 #}
 
-
+#write.table(gen90[,1],"CERVUS_indivduals.txt",row.names=F,sep='\t',quote=F,col.names=F)
 #poly99<-prune.loci(poly, 0.01)
 
 #write to file

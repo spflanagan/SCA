@@ -20,9 +20,10 @@ using namespace std;
 int main()
 {
 	int num_reps = 1;
-	string base_name = "E://ubuntushare//SCA//results//sca_simulation_output//knowndist.ss0.2alleles";
+	string base_name = "E://ubuntushare//SCA//results//sca_simulation_output//knowndist.ss0.2alleles.error03";
 	bool known_qtl = false;
 	bool empirical_afs = true;
+	bool add_allelic_dropout = true;
 	int end, generations, reps, i, ii, iii, ld_count;
 	population pop;
 	ld_info returned_data;
@@ -115,7 +116,7 @@ int main()
 			pop.standardize_genotypes();
 			pop.mating(0);
 			pop.mutation();
-			pop.sample_pop();
+			pop.sample_pop(add_allelic_dropout);
 			ofstream sampled_inds;
 			sampled_inds.open("sampled.inds.txt");
 			sampled_inds << "Adults";

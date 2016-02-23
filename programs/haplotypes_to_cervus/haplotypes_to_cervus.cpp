@@ -101,8 +101,8 @@ int main()
 	dad_kid_name = "../../results/haplotypes/dad.kid.pairs.txt";
 
 	gen_name = "../../results/parentage/genotypes.txt";
-	par_name = "../../results/parentage/candidate_parents.txt";
-	off_name = "../../results/parentage/offspring.txt";
+	par_name = "../../results/parentage/candidate_parents.rerun.txt";
+	off_name = "../../results/parentage/offspring.rerun.txt";
 
 	locus_file.open(locus_file_name);
 	FileTest(locus_file, locus_file_name);
