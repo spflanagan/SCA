@@ -6,18 +6,145 @@ setwd("E:/ubuntushare/SCA/results/biallelic")
 gw.fst<-read.delim("gwsca_fsts.txt")
 gw.sum<-read.delim("gwsca_summary.txt")
 
-gw.fst<-gw.fst[,c("Chrom","Pos","ADULT.JUVIE","MAL.FEM","PREGGER.OFF",
-	"MOM.FEM")]
+#pstI only
+gw.psti.fst<-read.delim("gwsca_fsts_psti.txt")
+gw.psti.sum<-read.delim("gwsca_summary_psti.txt")
+gw.psti.fst$Locus<-paste(gw.psti.fst$Chrom,gw.psti.fst$Pos,sep=".")
+gw.psti.sum$Locus<-paste(gw.psti.sum$Chrom,gw.psti.sum$Pos,sep=".")
+gw.psti.sum<-gw.psti.sum[!is.na(gw.psti.sum$AA),]
+gw.psti.sum$AAexp<-gw.psti.sum$Allele1Freq*gw.psti.sum$Allele1Freq
+gw.psti.sum$aaexp<-gw.psti.sum$Allele2Freq*gw.psti.sum$Allele2Freq
+gw.psti.sum$Aaexp<-1-gw.psti.sum$aaexp-gw.psti.sum$AAexp
+gw.psti.sum$chi<-(((gw.psti.sum$AA-gw.psti.sum$AAexp)^2)/gw.psti.sum$AAexp)+
+	(((gw.psti.sum$Aa-gw.psti.sum$Aaexp)^2)/gw.psti.sum$Aaexp)+
+	(((gw.psti.sum$aa-gw.psti.sum$aaexp)^2)/gw.psti.sum$aaexp)
+gw.psti.sum$chi.result<-1-pchisq(gw.psti.sum$chi,1) #biallelic, df=1
+sum.sum<-tapply(gw.psti.sum$N,gw.psti.sum$Locus,sum)
+sum.sum<-sum.sum[as.numeric(sum.sum) > 87]#total N is 58*2<-this is 75%
+psum.prune<-gw.psti.sum[gw.psti.sum$Locus %in% names(sum.sum),]
+psum.list<-split(psum.prune, psum.prune$Pop)
+pfem.n<-psum.list$FEM[psum.list$FEM$N > 30,]
+pmal.n<-psum.list$PRM[psum.list$PRM$N>28,]
+#Now prune based on allele frequencies
+pfem.n<-pfem.n[pfem.n$Allele1Freq > 0.05 & pfem.n$Allele1Freq < 0.95,]
+pmal.n<-pmal.n[pmal.n$Allele1Freq > 0.05 & pmal.n$Allele1Freq < 0.95,]
+#comparisons
+pfm.prune<-gw.psti.fst[gw.psti.fst$Locus %in% pmal.n$Locus &
+	gw.psti.fst$Locus %in% pfem.n$Locus, ]
+pfm.prune<-pfm.prune[pfm.prune$FEM.PRM>0,]
+
+
+#all ddRAD inds
+dgw.fst<-read.delim("gwsca_fsts_ddRAD.txt")
+dgw.sum<-read.delim("gwsca_summary_ddRAD.txt")
+dgw.fst$Locus<-paste(dgw.fst$Chrom,dgw.fst$Pos,sep=".")
+dgw.sum$Locus<-paste(dgw.sum$Chrom,dgw.sum$Pos,sep=".")
+dgw.sum<-dgw.sum[!is.na(dgw.sum$AA),]
+dgw.sum$AAexp<-dgw.sum$Allele1Freq*dgw.sum$Allele1Freq
+dgw.sum$aaexp<-dgw.sum$Allele2Freq*dgw.sum$Allele2Freq
+dgw.sum$Aaexp<-1-dgw.sum$aaexp-dgw.sum$AAexp
+dgw.sum$chi<-(((dgw.sum$AA-dgw.sum$AAexp)^2)/dgw.sum$AAexp)+
+	(((dgw.sum$Aa-dgw.sum$Aaexp)^2)/dgw.sum$Aaexp)+
+	(((dgw.sum$aa-dgw.sum$aaexp)^2)/dgw.sum$aaexp)
+dgw.sum$chi.result<-1-pchisq(dgw.sum$chi,1) #biallelic, df=1
+sum.sum<-tapply(dgw.sum$N,dgw.sum$Locus,sum)
+sum.sum<-sum.sum[as.numeric(sum.sum) > 87]#total N is 58*2<-this is 75%
+dsum.prune<-dgw.sum[dgw.sum$Locus %in% names(sum.sum),]
+dsum.list<-split(dsum.prune, dsum.prune$Pop)
+dfem.n<-dsum.list$FEM[dsum.list$FEM$N > 30,]
+dmal.n<-dsum.list$PRM[dsum.list$PRM$N>28,]
+#Now prune based on allele frequencies
+dfem.n<-dfem.n[dfem.n$Allele1Freq > 0.05 & dfem.n$Allele1Freq < 0.95,]
+dmal.n<-dmal.n[dmal.n$Allele1Freq > 0.05 & dmal.n$Allele1Freq < 0.95,]
+#comparisons
+dfm.prune<-dgw.fst[dgw.fst$Locus %in% dmal.n$Locus &
+	dgw.fst$Locus %in% dfem.n$Locus, ]
+dfm.prune<-dfm.prune[dfm.prune$FEM.PRM>0,]
+
+#ddRAD subset
+dsgw.fst<-read.delim("gwsca_fsts_ddRADsub.txt")
+dsgw.sum<-read.delim("gwsca_summary_ddRADsub.txt")
+dsgw.fst$Locus<-paste(dsgw.fst$Chrom,dsgw.fst$Pos,sep=".")
+dsgw.sum$Locus<-paste(dsgw.sum$Chrom,dsgw.sum$Pos,sep=".")
+dsgw.sum<-dsgw.sum[!is.na(dsgw.sum$AA),]
+dsgw.sum$AAexp<-dsgw.sum$Allele1Freq*dsgw.sum$Allele1Freq
+dsgw.sum$aaexp<-dsgw.sum$Allele2Freq*dsgw.sum$Allele2Freq
+dsgw.sum$Aaexp<-1-dsgw.sum$aaexp-dsgw.sum$AAexp
+dsgw.sum$chi<-(((dsgw.sum$AA-dsgw.sum$AAexp)^2)/dsgw.sum$AAexp)+
+	(((dsgw.sum$Aa-dsgw.sum$Aaexp)^2)/dsgw.sum$Aaexp)+
+	(((dsgw.sum$aa-dsgw.sum$aaexp)^2)/dsgw.sum$aaexp)
+dsgw.sum$chi.result<-1-pchisq(dsgw.sum$chi,1) #biallelic, df=1
+sum.sum<-tapply(dsgw.sum$N,dsgw.sum$Locus,sum)
+sum.sum<-sum.sum[as.numeric(sum.sum) > 87]#total N is 58*2<-this is 75%
+dssum.prune<-dsgw.sum[dsgw.sum$Locus %in% names(sum.sum),]
+dssum.list<-split(dssum.prune, dssum.prune$Pop)
+dsfem.n<-dssum.list$FEM[dssum.list$FEM$N > 30,]
+dsmal.n<-dssum.list$PRM[dssum.list$PRM$N>28,]
+#Now prune based on allele frequencies
+dsfem.n<-dsfem.n[dsfem.n$Allele1Freq > 0.05 & dsfem.n$Allele1Freq < 0.95,]
+dsmal.n<-dsmal.n[dsmal.n$Allele1Freq > 0.05 & dsmal.n$Allele1Freq < 0.95,]
+#comparisons
+dsfm.prune<-dsgw.fst[dsgw.fst$Locus %in% dsmal.n$Locus &
+	dsgw.fst$Locus %in% dsfem.n$Locus, ]
+dsfm.prune<-dsfm.prune[dsfm.prune$FEM.PRM>0,]
+
+png("ddRADvoRAD.png",height=7,width=21,units="in",res=300)
+par(mfrow=c(1,3),mar=c(2,2,2,2),oma=c(2,2,2,2))
+plot(pfm.prune$FEM.PRM,ylab="",xlab="",axes=F,ylim=c(0,0.6))
+axis(1,pos=0)
+axis(2,pos=0,las=2,ylim=c(0,0.6))
+mtext("original RAD",3,outer=F)
+abline(h=0.025,col="grey")
+abline(h=0.05,col="grey")
+plot(dfm.prune$FEM.PRM,ylab="",xlab="",axes=F,ylim=c(0,0.6))
+axis(1,pos=0)
+axis(2,pos=0,las=2,ylim=c(0,0.6))
+mtext("ddRAD",3,outer=F)
+abline(h=0.025,col="grey")
+abline(h=0.05,col="grey")
+plot(dsfm.prune$FEM.PRM,ylab="",xlab="",axes=F,ylim=c(0,0.6))
+axis(1,pos=0)
+axis(2,pos=0,las=2,ylim=c(0,0.6))
+abline(h=0.025,col="grey")
+abline(h=0.05,col="grey")
+mtext("ddRAD Subset",3,outer=F)
+mtext("Index",1,outer=T,line=2)
+mtext("Fst",2,outer=T,line=2)
+dev.off()
+
+
+#gw.fst<-gw.fst[,c("Chrom","Pos","ADULT.JUVIE","MAL.FEM","PREGGER.OFF",
+#	"MOM.FEM")]
 gw.fst$Locus<-paste(gw.fst$Chrom,gw.fst$Pos,sep=".")
 gw.sum$Locus<-paste(gw.sum$Chrom,gw.sum$Pos,sep=".")
 
+#remove any that are not polymorphic
+gw.sum<-gw.sum[!is.na(gw.sum$AA),]
+#test for HWE
+gw.sum$AAexp<-gw.sum$Allele1Freq*gw.sum$Allele1Freq
+gw.sum$aaexp<-gw.sum$Allele2Freq*gw.sum$Allele2Freq
+gw.sum$Aaexp<-1-gw.sum$aaexp-gw.sum$AAexp
+
+gw.sum$chi<-(((gw.sum$AA-gw.sum$AAexp)^2)/gw.sum$AAexp)+
+	(((gw.sum$Aa-gw.sum$Aaexp)^2)/gw.sum$Aaexp)+
+	(((gw.sum$aa-gw.sum$aaexp)^2)/gw.sum$aaexp)
+gw.sum$chi.result<-1-pchisq(gw.sum$chi,1) #biallelic, df=1
+gw.hwe<-gw.sum[gw.sum$chi.result > 0.05,]
+
+#prune to keep only those found in most pops
+sum.prune<-gw.hwe[gw.hwe$Pop=="ADULT" | gw.hwe$Pop=="JUVIE" | 
+	gw.hwe$Pop == "POP",]
+sum.sum<-tapply(sum.prune$N,sum.prune$Locus,sum)
+sum.sum<-sum.sum[as.numeric(sum.sum) > 846]#total N is 564*2<-this is ~75%
+sum.prune<-gw.hwe[gw.hwe$Locus %in% names(sum.sum),]
+
 ##prune based on representation in the groups
-sum.list<-split(gw.sum, gw.sum$Pop)
-adt.n<-sum.list$ADULT[sum.list$ADULT$N > 440 & !is.na(sum.list$ADULT$Hs),]
-juv.n<-sum.list$JUVIE[sum.list$JUVIE$N>200& !is.na(sum.list$JUVIE$Hs),]
-fem.n<-sum.list$FEM[sum.list$FEM$N>130& !is.na(sum.list$FEM$Hs),]#130
-mal.n<-sum.list$MAL[sum.list$MAL$N>200& !is.na(sum.list$MAL$Hs),]
-mom.n<-sum.list$MOM[sum.list$MOM$N>100& !is.na(sum.list$MOM$Hs),]
+sum.list<-split(sum.prune, sum.prune$Pop)
+adt.n<-sum.list$ADULT[sum.list$ADULT$N > 255 & !is.na(sum.list$ADULT$Hs),]
+juv.n<-sum.list$JUVIE[sum.list$JUVIE$N > 157 & !is.na(sum.list$JUVIE$Hs),]
+fem.n<-sum.list$FEM[sum.list$FEM$N > 87& !is.na(sum.list$FEM$Hs),]#130
+mal.n<-sum.list$MAL[sum.list$MAL$N>168& !is.na(sum.list$MAL$Hs),]
+mom.n<-sum.list$MOM[sum.list$MOM$N>152& !is.na(sum.list$MOM$Hs),]
 pop.n<-sum.list$POP[sum.list$POP$N>87& !is.na(sum.list$POP$Hs),]
 prg.n<-sum.list$PREGGER[sum.list$PREGGER$N>200& !is.na(sum.list$PREGGER$Hs),]
 non.n<-sum.list$NONPREG[sum.list$NONPREG$N>14& !is.na(sum.list$NONPREG$Hs),]
@@ -89,7 +216,7 @@ mtext("Fst", 2, outer=T, cex=1)
 dev.off()
 
 #plot with the model CIs
-png("fst.biallelic.model.png",height=300,width=300,units="mm",res=300)
+png("fst.biallelic.pruned.model.png",height=300,width=300,units="mm",res=300)
 par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
 plot.fsts(aj.prune, ci.dat=aj.null,fst.name="ADULT.JUVIE", chrom.name="Chrom"
 	, axis.size=0.75, bp.name="Pos")
@@ -109,10 +236,25 @@ dev.off()
 weirdos<-weirdos[,c("Locus","Chrom","Pos","MAL.FEM")]
 weirdsum<-gw.sum[gw.sum$Locus %in% weirdos$Locus,]
 weirdsum<-weirdsum[weirdsum$Pop == "MAL" | weirdsum$Pop == "FEM",]
-
+weirdos$hobs<-1-weirdos$Ho
 regsum<-gw.sum[gw.sum$Locus %in% fm.prune$Locus,] 
 regsum<-regsum[regsum$Pop=="MAL" | regsum$Pop == "FEM",]
 regsum<-regsum[!(regsum$Locus %in% weirdsum$Locus),]
+regsum$hobs<-1-regsum$Ho
+
+png("HsvHo.png",height=7,width=7,units="in",res=300)
+par(mfrow=c(2,2), oma=c(2,2,2,2),mar=c(2,2,2,2))
+plot(regsum[regsum$Pop=="FEM",c("hobs","Hs")])
+mtext("Regular, Females",3,outer=F)
+plot(regsum[regsum$Pop=="MAL",c("hobs","Hs")])
+mtext("Regular, Males",3,outer=F)
+plot(weirdos[weirdos$Pop=="FEM",c("hobs","Hs")])
+mtext("Weird, Females",3,outer=F)
+plot(weirdos[weirdos$Pop=="MAL",c("hobs","Hs")])
+mtext("Weird, Males",3,outer=F)
+mtext("Observed Heterozygosity",1,outer=T)
+mtext("Expected Heterozygosity (Hs)",2,outer=T)
+dev.off()
 
 png("HsInWeirdMalFemLoci.png",height=7,width=7,units="in",res=300)
 par(mfrow=c(2,2), oma=c(2,2,2,2),mar=c(2,2,2,2))
@@ -144,7 +286,18 @@ mtext("N",1,outer=T)
 mtext("Weird Loci",3,outer=T)
 dev.off()
 
- 
+ par(mfrow=c(2,2), oma=c(2,2,2,2),mar=c(2,2,2,2))
+plot(regsum[regsum$Pop=="MAL",c("N","Hs")],ylab="",xlab="",pch=15)
+legend("bottomleft",bty="n","Hs Males",text.col="red")
+plot(regsum[regsum$Pop=="MAL",c("N","Ho")],ylab="",xlab="",pch=15,col="blue")
+legend("bottomleft",bty="n","Ho, Males",text.col="red")
+plot(regsum[regsum$Pop=="FEM",c("N","Hs")],ylab="",xlab="",pch=19)
+legend("bottomright",bty='n',"Hs, Females",text.col="red")
+plot(regsum[regsum$Pop=="FEM",c("N","Ho")],ylab="",xlab="",pch=19,col="blue")
+legend("bottomleft",bty='n',"Ho, Females",text.col="red")
+mtext("Heterozygosity",2,outer=T)
+mtext("N",1,outer=T)
+mtext("Weird Loci",3,outer=T)
 
 
 fem.n<-sum.list$FEM[!is.na(sum.list$FEM$Hs),]
@@ -160,3 +313,65 @@ rem.fem<-gw.fst[gw.fst$Locus %in% removedfem$Locus & gw.fst$MAL.FEM > 0.025
 	& gw.fst$MAL.FEM < 0.05,c("Locus","Chrom","Pos","MAL.FEM")]
 rem.fem<-merge(rem.fem, removedfem,by="Locus")
 
+rem.mal<-gw.sum[gw.sum$Locus %in% rem.fem$Locus & gw.sum$Pop=="MAL",]
+
+mal.n<-sum.list$MAL[sum.list$MAL$N>160& !is.na(sum.list$MAL$Hs),]
+ plot(gw.fst[gw.fst$Locus %in% mal.n$Locus & gw.fst$MAL.FEM > 0,"MAL.FEM"])
+
+png("CoverageOfLocusGroups.png",height=7,width=14,units="in",res=300)
+par(mfrow=c(2,4), oma=c(2,2,2,2),mar=c(2,2,2,2))
+hist(regsum[regsum$Pop=="MAL","N"], breaks=50, main="",ylab="",xlab="")
+mtext("Regular (kept) Loci, Males",3,outer=F)
+hist(weirdsum[weirdsum$Pop=="MAL","N"], breaks=50, main="",ylab="",xlab="")
+mtext("Weird Loci, Males",3,outer=F)
+hist(gw.sum[gw.sum$Locus %in% removedfem$Locus & gw.sum$Pop=="MAL","N"], breaks=50, main="",ylab="",xlab="")
+mtext("All Pruned-Out Loci, Males",3,outer=F)
+hist(rem.mal$N, breaks=50, main="",ylab="",xlab="")
+mtext("Pruned-Out Loci in Fst Gap, Males",3,outer=F)
+hist(regsum[regsum$Pop=="FEM","N"], breaks=50, main="",ylab="",xlab="")
+mtext("Regular (kept) Loci, Females",3,outer=F)
+hist(weirdsum[weirdsum$Pop=="FEM","N"], breaks=50, main="",ylab="",xlab="")
+mtext("Weird Loci, Females",3,outer=F)
+hist(removedfem$N, breaks=50, main="",ylab="",xlab="")
+mtext("All Pruned-Out Loci, Females",3,outer=F)
+hist(rem.fem$N, breaks=50, main="",ylab="",xlab="")
+mtext("Pruned-Out Loci in Fst Gap, Females",3,outer=F)
+mtext("N",1,outer=T)
+mtext("Frequency",2,outer=T)
+dev.off()
+
+gw.uber<-merge(gw.sum,gw.fst,by="Locus") 
+png("NvFst.png",height=7,width=7,units="in",res=300)
+par(mfrow=c(1,2))
+plot(gw.uber[gw.uber$Pop=="MAL" & gw.uber$MAL.FEM > 0,c("N","MAL.FEM")],ylab="Fst")
+mtext("Males",3,outer=F)
+plot(gw.uber[gw.uber$Pop=="FEM" & gw.uber$MAL.FEM > 0,c("N","MAL.FEM")],ylab="Fst")
+mtext("Females",3,outer=F)
+dev.off()
+
+
+
+tags<-read.table("../stacks/batch_1.catalog.tags.tsv",sep='\t')
+colnames(tags)<-c("SqlID","SampleID","LocusID","Chr","BP","Strand","SeqType",
+	"StackComponent","SeqID","Sequence","Deleveraged","Blacklist",
+	"Lumberjackstack","loglike")
+snps<-read.table("../stacks/batch_1.catalog.snps.tsv",sep='\t')
+colnames(snps)<-c("SqlID","SampleID","LocusID","Col","Type","LikelihoodRatio",
+	"Rank1","Rank2","Rank3","Rank4")
+sumstats<-read.table("../stacks/batch_1.sumstats.tsv",sep='\t')
+colnames(sumstats)<-c("BatchID","LocusID","Chr","BP","Col","PopID","P","Q",
+	"NumInd","FreqP","ObsHet","ObsHom","ExpHet","ExpHom","Pi","SmoothPi",
+	"SmoothPiP","Fis","SmoothFis","SmoothFisP","Private")
+sumstats$Locus<-paste(sumstats$Chr,".",sumstats$BP,sep="")
+tagsnps<-merge(tags,snps,"LocusID")
+tagsnps$BPCol<-tagsnps$BP+tagsnps$Col+1
+tagsnps$Locus<-paste(tagsnps$Chr,".",tagsnps$BPCol,sep="")
+tagsnps<-merge(tagsnps,sumstats,"Locus")
+weird.tags<-tagsnps[tagsnps$Locus %in% weirdos$Locus,]
+weird.tags<-weird.tags[,c("LocusID","Chr.x","BP.x","Chr.y","BP.y",
+	"Sequence","loglike","LikelihoodRatio","Col.y","PopID","Rank1",
+	"Rank2","P","Q","NumInd","FreqP","ObsHet","ObsHom","ExpHet",
+	"ExpHom","Pi","Fis","Private","Locus")]
+weird.tags.out<-merge(weirdos,tagsnps,"Locus")
+write.table(weird.tags.out,"WeirdFstsInfo.txt",sep='\t',quote=F,row.names=F)
+#...what now???

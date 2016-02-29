@@ -1,4 +1,4 @@
-﻿Build started 2/23/2016 2:03:28 PM.
+﻿Build started 2/26/2016 9:09:31 AM.
      1>Project "E:\ubuntushare\SCA\programs\calculate_relatedness\calculate_relatedness.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt calculate_relatedness.cpp
@@ -6,20 +6,13 @@
      1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(89): warning C4018: '<' : signed/unsigned mismatch
      1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(122): warning C4018: '<' : signed/unsigned mismatch
      1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(132): warning C4018: '<' : signed/unsigned mismatch
-     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(260): warning C4018: '<' : signed/unsigned mismatch
-     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(303): warning C4018: '<' : signed/unsigned mismatch
-     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(308): warning C4018: '<' : signed/unsigned mismatch
-     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(312): warning C4018: '<' : signed/unsigned mismatch
-     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(323): warning C4018: '<' : signed/unsigned mismatch
-     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(326): warning C4018: '<' : signed/unsigned mismatch
-     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(332): warning C4018: '<' : signed/unsigned mismatch
-     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(354): warning C4018: '<' : signed/unsigned mismatch
-     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(370): warning C4018: '<' : signed/unsigned mismatch
-     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(375): warning C4018: '<' : signed/unsigned mismatch
-     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(379): warning C4018: '<' : signed/unsigned mismatch
-     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(390): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(278): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(288): warning C4554: '&' : check operator precedence for possible error; use parentheses to clarify precedence
+     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(317): warning C4554: '&' : check operator precedence for possible error; use parentheses to clarify precedence
+     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(341): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(361): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(364): warning C4018: '<' : signed/unsigned mismatch
      1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(393): warning C4018: '<' : signed/unsigned mismatch
-     1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(399): warning C4018: '<' : signed/unsigned mismatch
      1>e:\ubuntushare\sca\programs\calculate_relatedness\calculate_relatedness.cpp(201): warning C4101: 'iv' : unreferenced local variable
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\ubuntushare\SCA\programs\calculate_relatedness\Debug\calculate_relatedness.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\ubuntushare\SCA\programs\calculate_relatedness\Debug\calculate_relatedness.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\ubuntushare\SCA\programs\calculate_relatedness\Debug\calculate_relatedness.lib" /MACHINE:X86 Debug\calculate_relatedness.obj
@@ -28,4 +21,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.91
+Time Elapsed 00:00:01.27

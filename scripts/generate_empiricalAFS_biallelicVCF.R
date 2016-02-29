@@ -9,6 +9,7 @@ gw.sum<-read.delim("gwsca_summary.txt")
 sum.seq<-gw.sum[gw.sum$Pop == "ADULT" | gw.sum$Pop == "OFF",]
 sum.seq<-sum.seq[!is.na(sum.seq$Hs),]
 sum.seq$Count1<-sum.seq$Allele1Freq*sum.seq$N*2
+sum.seq$Locus<-paste(sum.seq$Chrom,".",sum.seq$Pos,sep="")
 overall.freq<-tapply(sum.seq$Count1,sum.seq$Locus,sum) 
 overall.n<-tapply(sum.seq$N,sum.seq$Locus,sum) 
 overall<-data.frame(Locus=names(overall.freq),Count1=overall.freq, 

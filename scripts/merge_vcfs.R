@@ -3,7 +3,7 @@
 #Purpose: Merge FORMAT files exported from vcf.
 
 setwd("E:/ubuntushare/SCA/results/biallelic")
-vcf1<-read.delim("out.GT.FORMAT")
+vcf1<-read.delim("biallelic_maternal.GT.FORMAT")
 dups<-grep("align.1",colnames(vcf1))
 vcf1<-vcf1[,-dups]
 vcf2<-read.delim("fem.GT.FORMAT")
@@ -14,6 +14,6 @@ vcf$index<-apply(vcf,1,function(x){ idx<-paste(x[1],".",x[2],sep="") })
 addedon<-vcf[duplicated(vcf$index),"index"]
 vcf<-vcf[!(vcf$index %in% addedon),]
 
-write.table(vcf[,1:(ncol(vcf)-1)],"biallelic.vcf",col.names=T,row.names=F,
+write.table(vcf[,1:(ncol(vcf)-1)],"biallelic.gt.vcf",col.names=T,row.names=F,
 	quote=F,sep='\t')
 

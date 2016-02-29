@@ -117,7 +117,7 @@ class locus_statistics
 public:
 	string group_name;
 	double freq1,freq2;
-	double hs, ho;
+	double hs, ho, AA,Aa,aa;
 	int major_allele_index;
 	int two_n, num_inds;
 	string allele1, allele2;
@@ -126,7 +126,7 @@ public:
 	{
 		freq1 = freq2 = double();//it's biallelic
 		hs = double();
-		ho = double();
+		ho = AA = Aa = aa = double();
 		group_name = string();
 		two_n = int();
 		major_allele_index = int();
@@ -149,7 +149,7 @@ int main()
 	vector<locus_statistics> pop_stats;
 
 	ind_info_name = "E://ubuntushare//SCA//results//biallelic//ind.info.vcf.txt";
-	vcf_name = "E://ubuntushare//SCA//results//biallelic//biallelic.vcf";
+	vcf_name = "E://ubuntushare//SCA//results//biallelic//biallelic.gt.vcf";
 	summary_out_name = "E://ubuntushare//SCA//results//biallelic//gwsca_summary.txt";
 	fst_out_name = "E://ubuntushare//SCA//results//biallelic//gwsca_fsts.txt";
 	
@@ -245,6 +245,8 @@ int main()
 		pop_stats[i].allele1 = "0";
 		pop_stats[i].allele2 = "1";
 		pop_stats[i].two_n = 0;
+		pop_stats[i].ho = pop_stats[i].hs = 0;
+		pop_stats[i].AA = pop_stats[i].Aa = pop_stats[i].aa = 0;
 	}
 	cout << "\nEstablished " << pop_stats.size() << " groups:";
 	for (t = 0; t < pop_stats.size(); t++)
@@ -264,7 +266,7 @@ int main()
 	}
 
 	summary_out.open(summary_out_name);
-	summary_out << "Pop\tChrom\tPos\tN\tHs\tHo\tAllele1Freq\tAllele2Freq";
+	summary_out << "Pop\tChrom\tPos\tN\tHs\tHo\tAllele1Freq\tAllele2Freq\tAA\tAa\taa";
 
 	vcf.open(vcf_name);
 	FileTest(vcf, vcf_name);
@@ -340,6 +342,14 @@ int main()
 
 							if (allele1 == allele2 && allele1 != ".")
 								pop_stats[inds[indices[count]].pop_indices[ttt]].ho++;
+							if (allele1 == "0" && allele2 == "0")
+								pop_stats[inds[indices[count]].pop_indices[ttt]].AA++;
+							if (allele1 == "0" && allele2 == "1")
+								pop_stats[inds[indices[count]].pop_indices[ttt]].Aa++;
+							if (allele1 == "1" && allele2 == "0")
+								pop_stats[inds[indices[count]].pop_indices[ttt]].Aa++;
+							if (allele1 == "1" && allele2 == "1")
+								pop_stats[inds[indices[count]].pop_indices[ttt]].aa++;
 						}//end popstats
 					}//end if
 					count++;
@@ -355,20 +365,25 @@ int main()
 					{
 						if (pop_stats[t].freq1 != 0 && pop_stats[t].freq2 != 0)
 						{
-							pop_stats[t].ho = pop_stats[t].ho / (pop_stats[t].two_n / 2);
+							pop_stats[t].ho = 1 - (pop_stats[t].ho / (pop_stats[t].two_n / 2));
+							pop_stats[t].AA = pop_stats[t].AA / (pop_stats[t].two_n / 2);
+							pop_stats[t].Aa = pop_stats[t].Aa / (pop_stats[t].two_n / 2);
+							pop_stats[t].aa = pop_stats[t].aa / (pop_stats[t].two_n / 2);
 							if (pop_stats[t].freq1 / pop_stats[t].two_n > 1)
 								cout << "pause for large freq.\t";
 							pop_stats[t].freq1 = pop_stats[t].freq1 / pop_stats[t].two_n;
 							pop_stats[t].freq2 = pop_stats[t].freq2 / pop_stats[t].two_n;
 							pop_stats[t].hs = 1 - ((pop_stats[t].freq1 * pop_stats[t].freq1) + (pop_stats[t].freq2*pop_stats[t].freq2));
 							summary_out << '\n' << pop_stats[t].group_name << '\t' << chrom << '\t' << pos << '\t' << pop_stats[t].two_n << '\t' << pop_stats[t].hs << '\t'
-								<< pop_stats[t].ho << '\t' << pop_stats[t].freq1 << '\t' << pop_stats[t].freq2;
+								<< pop_stats[t].ho << '\t' << pop_stats[t].freq1 << '\t' << pop_stats[t].freq2 << '\t' << pop_stats[t].AA << '\t' << pop_stats[t].Aa << '\t' << pop_stats[t].aa;
 						}
 						else
-							summary_out << '\n' << pop_stats[t].group_name << '\t' << chrom << '\t' << pos << '\t' << pop_stats[t].two_n <<'\t' <<  '\t' << '\t' << pop_stats[t].allele1 << '\t' << pop_stats[t].allele2;
+							summary_out << '\n' << pop_stats[t].group_name << '\t' << chrom << '\t' << pos << '\t' << pop_stats[t].two_n << '\t' << '\t' << '\t' << pop_stats[t].allele1 << '\t' << pop_stats[t].allele2
+							<< '\t' << '\t' << '\t';
 					}
 					else
-						summary_out << '\n' << pop_stats[t].group_name << '\t' << chrom << '\t' << pos << '\t' << pop_stats[t].two_n << '\t' << '\t' << '\t' << pop_stats[t].allele1 << '\t' << pop_stats[t].allele2;
+						summary_out << '\n' << pop_stats[t].group_name << '\t' << chrom << '\t' << pos << '\t' << pop_stats[t].two_n << '\t' << '\t' << '\t' << pop_stats[t].allele1 << '\t' << pop_stats[t].allele2
+						<< '\t' << '\t' << '\t';
 				}
 
 				vector<double> fsts;
@@ -432,6 +447,7 @@ int main()
 				{
 					pop_stats[t].freq1 = pop_stats[t].freq2 = 0;
 					pop_stats[t].ho = pop_stats[t].hs = 0;
+					pop_stats[t].AA = pop_stats[t].Aa = pop_stats[t].aa = 0;
 					pop_stats[t].two_n = 0;
 				}
 				

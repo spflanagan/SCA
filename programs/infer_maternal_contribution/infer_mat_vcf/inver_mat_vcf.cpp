@@ -123,9 +123,9 @@ int main()
 	vector<locus_data> locus_info;
 	bool first = true;
 
-	path = "E://ubuntushare//SCA//fathers_offspring//infer_maternal_contribution//infer_mat_vcf//";
-	dad_kid_name = "E://ubuntushare//SCA//dad.kid.pairs.txt";
-	vcf_name = "E://ubuntushare//SCA//batch_1.vcf";
+	path = "../../../results/biallelic/";
+	dad_kid_name = "../../../results/stacks/dad.kid.pairs.fullnames.txt";
+	vcf_name = "../../../results/stacks/batch_1.pruned.vcf";
 	summary_name = path + "biallelic_maternal.vcf";
 
 	
@@ -151,7 +151,7 @@ int main()
 	vcf.open(vcf_name);
 	FileTest(vcf, vcf_name);
 	summary.open(summary_name);
-	summary << "##Includes Inferred Maternal Alleles";
+	//summary << "##Includes Inferred Maternal Alleles";
 	locus_index = line_count = snp_count = 0;
 	while (universal_getline(vcf, line))
 	{

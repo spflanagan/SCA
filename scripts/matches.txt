@@ -1,443 +1,443 @@
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM001_align.matches.tsv -o ../results/haplotypes/sample_FEM001_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM002_align.matches.tsv -o ../results/haplotypes/sample_FEM002_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM004_align.matches.tsv -o ../results/haplotypes/sample_FEM004_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM005_align.matches.tsv -o ../results/haplotypes/sample_FEM005_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM006_align.matches.tsv -o ../results/haplotypes/sample_FEM006_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM007_align.matches.tsv -o ../results/haplotypes/sample_FEM007_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM008_align.matches.tsv -o ../results/haplotypes/sample_FEM008_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM009_align.matches.tsv -o ../results/haplotypes/sample_FEM009_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM010_align.matches.tsv -o ../results/haplotypes/sample_FEM010_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM011_align.matches.tsv -o ../results/haplotypes/sample_FEM011_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM012_align.matches.tsv -o ../results/haplotypes/sample_FEM012_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM013_align.matches.tsv -o ../results/haplotypes/sample_FEM013_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM014_align.matches.tsv -o ../results/haplotypes/sample_FEM014_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM015_align.matches.tsv -o ../results/haplotypes/sample_FEM015_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM016_align.matches.tsv -o ../results/haplotypes/sample_FEM016_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM017_align.matches.tsv -o ../results/haplotypes/sample_FEM017_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM018_align.matches.tsv -o ../results/haplotypes/sample_FEM018_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM019_align.matches.tsv -o ../results/haplotypes/sample_FEM019_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM020_align.matches.tsv -o ../results/haplotypes/sample_FEM020_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM021_align.matches.tsv -o ../results/haplotypes/sample_FEM021_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM022_align.matches.tsv -o ../results/haplotypes/sample_FEM022_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM023_align.matches.tsv -o ../results/haplotypes/sample_FEM023_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM024_align.matches.tsv -o ../results/haplotypes/sample_FEM024_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM025_align.matches.tsv -o ../results/haplotypes/sample_FEM025_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM026_align.matches.tsv -o ../results/haplotypes/sample_FEM026_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM027_align.matches.tsv -o ../results/haplotypes/sample_FEM027_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM028_align.matches.tsv -o ../results/haplotypes/sample_FEM028_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM029_align.matches.tsv -o ../results/haplotypes/sample_FEM029_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM030_align.matches.tsv -o ../results/haplotypes/sample_FEM030_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM031_align.matches.tsv -o ../results/haplotypes/sample_FEM031_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM032_align.matches.tsv -o ../results/haplotypes/sample_FEM032_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM033_align.matches.tsv -o ../results/haplotypes/sample_FEM033_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM034_align.matches.tsv -o ../results/haplotypes/sample_FEM034_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM035_align.matches.tsv -o ../results/haplotypes/sample_FEM035_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM036_align.matches.tsv -o ../results/haplotypes/sample_FEM036_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM037_align.matches.tsv -o ../results/haplotypes/sample_FEM037_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM038_align.matches.tsv -o ../results/haplotypes/sample_FEM038_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM039_align.matches.tsv -o ../results/haplotypes/sample_FEM039_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM040_align.matches.tsv -o ../results/haplotypes/sample_FEM040_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM041_align.matches.tsv -o ../results/haplotypes/sample_FEM041_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM042_align.matches.tsv -o ../results/haplotypes/sample_FEM042_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM043_align.matches.tsv -o ../results/haplotypes/sample_FEM043_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM044_align.matches.tsv -o ../results/haplotypes/sample_FEM044_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM045_align.matches.tsv -o ../results/haplotypes/sample_FEM045_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM046_align.matches.tsv -o ../results/haplotypes/sample_FEM046_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM047_align.matches.tsv -o ../results/haplotypes/sample_FEM047_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM048_align.matches.tsv -o ../results/haplotypes/sample_FEM048_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM049_align.matches.tsv -o ../results/haplotypes/sample_FEM049_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM050_align.matches.tsv -o ../results/haplotypes/sample_FEM050_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM051_align.matches.tsv -o ../results/haplotypes/sample_FEM051_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM052_align.matches.tsv -o ../results/haplotypes/sample_FEM052_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM053_align.matches.tsv -o ../results/haplotypes/sample_FEM053_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM054-1_align.matches.tsv -o ../results/haplotypes/sample_FEM054-1_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM054_align.matches.tsv -o ../results/haplotypes/sample_FEM054_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM055_align.matches.tsv -o ../results/haplotypes/sample_FEM055_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM056_align.matches.tsv -o ../results/haplotypes/sample_FEM056_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM057_align.matches.tsv -o ../results/haplotypes/sample_FEM057_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM058_align.matches.tsv -o ../results/haplotypes/sample_FEM058_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM059_align.matches.tsv -o ../results/haplotypes/sample_FEM059_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM060_align.matches.tsv -o ../results/haplotypes/sample_FEM060_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM061_align.matches.tsv -o ../results/haplotypes/sample_FEM061_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM062_align.matches.tsv -o ../results/haplotypes/sample_FEM062_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM063_align.matches.tsv -o ../results/haplotypes/sample_FEM063_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM064_align.matches.tsv -o ../results/haplotypes/sample_FEM064_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM065_align.matches.tsv -o ../results/haplotypes/sample_FEM065_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM066_align.matches.tsv -o ../results/haplotypes/sample_FEM066_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM067_align.matches.tsv -o ../results/haplotypes/sample_FEM067_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM068_align.matches.tsv -o ../results/haplotypes/sample_FEM068_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM069_align.matches.tsv -o ../results/haplotypes/sample_FEM069_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM070_align.matches.tsv -o ../results/haplotypes/sample_FEM070_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM071_align.matches.tsv -o ../results/haplotypes/sample_FEM071_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM072_align.matches.tsv -o ../results/haplotypes/sample_FEM072_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM073_align.matches.tsv -o ../results/haplotypes/sample_FEM073_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM074_align.matches.tsv -o ../results/haplotypes/sample_FEM074_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM075_align.matches.tsv -o ../results/haplotypes/sample_FEM075_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM076_align.matches.tsv -o ../results/haplotypes/sample_FEM076_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM077_align.matches.tsv -o ../results/haplotypes/sample_FEM077_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM078_align.matches.tsv -o ../results/haplotypes/sample_FEM078_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM079_align.matches.tsv -o ../results/haplotypes/sample_FEM079_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM080_align.matches.tsv -o ../results/haplotypes/sample_FEM080_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM081_align.matches.tsv -o ../results/haplotypes/sample_FEM081_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM082_align.matches.tsv -o ../results/haplotypes/sample_FEM082_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM083_align.matches.tsv -o ../results/haplotypes/sample_FEM083_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM084_align.matches.tsv -o ../results/haplotypes/sample_FEM084_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM085_align.matches.tsv -o ../results/haplotypes/sample_FEM085_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM086_align.matches.tsv -o ../results/haplotypes/sample_FEM086_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM087_align.matches.tsv -o ../results/haplotypes/sample_FEM087_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_NPM005_align.matches.tsv -o ../results/haplotypes/sample_NPM005_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_NPM006_align.matches.tsv -o ../results/haplotypes/sample_NPM006_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_NPM007_align.matches.tsv -o ../results/haplotypes/sample_NPM007_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_NPM008_align.matches.tsv -o ../results/haplotypes/sample_NPM008_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_NPM010_align.matches.tsv -o ../results/haplotypes/sample_NPM010_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_NPM011_align.matches.tsv -o ../results/haplotypes/sample_NPM011_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_NPM012_align.matches.tsv -o ../results/haplotypes/sample_NPM012_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_NPM1128_align.matches.tsv -o ../results/haplotypes/sample_NPM1128_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF001_align.matches.tsv -o ../results/haplotypes/sample_OFF001_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF004_align.matches.tsv -o ../results/haplotypes/sample_OFF004_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF005_align.matches.tsv -o ../results/haplotypes/sample_OFF005_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF006_align.matches.tsv -o ../results/haplotypes/sample_OFF006_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF007_align.matches.tsv -o ../results/haplotypes/sample_OFF007_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF008_align.matches.tsv -o ../results/haplotypes/sample_OFF008_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF009_align.matches.tsv -o ../results/haplotypes/sample_OFF009_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF010_align.matches.tsv -o ../results/haplotypes/sample_OFF010_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF011_align.matches.tsv -o ../results/haplotypes/sample_OFF011_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF012_align.matches.tsv -o ../results/haplotypes/sample_OFF012_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF013_align.matches.tsv -o ../results/haplotypes/sample_OFF013_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF014_align.matches.tsv -o ../results/haplotypes/sample_OFF014_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF015_align.matches.tsv -o ../results/haplotypes/sample_OFF015_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF016-1_align.matches.tsv -o ../results/haplotypes/sample_OFF016-1_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF016_align.matches.tsv -o ../results/haplotypes/sample_OFF016_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF017_align.matches.tsv -o ../results/haplotypes/sample_OFF017_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF018_align.matches.tsv -o ../results/haplotypes/sample_OFF018_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF020_align.matches.tsv -o ../results/haplotypes/sample_OFF020_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF022_align.matches.tsv -o ../results/haplotypes/sample_OFF022_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF024_align.matches.tsv -o ../results/haplotypes/sample_OFF024_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF025_align.matches.tsv -o ../results/haplotypes/sample_OFF025_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF026_align.matches.tsv -o ../results/haplotypes/sample_OFF026_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF027-1_align.matches.tsv -o ../results/haplotypes/sample_OFF027-1_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF027_align.matches.tsv -o ../results/haplotypes/sample_OFF027_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF028_align.matches.tsv -o ../results/haplotypes/sample_OFF028_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF029_align.matches.tsv -o ../results/haplotypes/sample_OFF029_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF030_align.matches.tsv -o ../results/haplotypes/sample_OFF030_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF031_align.matches.tsv -o ../results/haplotypes/sample_OFF031_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF032-1_align.matches.tsv -o ../results/haplotypes/sample_OFF032-1_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF032_align.matches.tsv -o ../results/haplotypes/sample_OFF032_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF033_align.matches.tsv -o ../results/haplotypes/sample_OFF033_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF034_align.matches.tsv -o ../results/haplotypes/sample_OFF034_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF035_align.matches.tsv -o ../results/haplotypes/sample_OFF035_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF036_align.matches.tsv -o ../results/haplotypes/sample_OFF036_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF037_align.matches.tsv -o ../results/haplotypes/sample_OFF037_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF038_align.matches.tsv -o ../results/haplotypes/sample_OFF038_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF039_align.matches.tsv -o ../results/haplotypes/sample_OFF039_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF041_align.matches.tsv -o ../results/haplotypes/sample_OFF041_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF042_align.matches.tsv -o ../results/haplotypes/sample_OFF042_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF043_align.matches.tsv -o ../results/haplotypes/sample_OFF043_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF044_align.matches.tsv -o ../results/haplotypes/sample_OFF044_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF045_align.matches.tsv -o ../results/haplotypes/sample_OFF045_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF046_align.matches.tsv -o ../results/haplotypes/sample_OFF046_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF047_align.matches.tsv -o ../results/haplotypes/sample_OFF047_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF049_align.matches.tsv -o ../results/haplotypes/sample_OFF049_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF050_align.matches.tsv -o ../results/haplotypes/sample_OFF050_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF051_align.matches.tsv -o ../results/haplotypes/sample_OFF051_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF052_align.matches.tsv -o ../results/haplotypes/sample_OFF052_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF053_align.matches.tsv -o ../results/haplotypes/sample_OFF053_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF054_align.matches.tsv -o ../results/haplotypes/sample_OFF054_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF055_align.matches.tsv -o ../results/haplotypes/sample_OFF055_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF056_align.matches.tsv -o ../results/haplotypes/sample_OFF056_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF057_align.matches.tsv -o ../results/haplotypes/sample_OFF057_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF058_align.matches.tsv -o ../results/haplotypes/sample_OFF058_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF059_align.matches.tsv -o ../results/haplotypes/sample_OFF059_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF060_align.matches.tsv -o ../results/haplotypes/sample_OFF060_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF061_align.matches.tsv -o ../results/haplotypes/sample_OFF061_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF064_align.matches.tsv -o ../results/haplotypes/sample_OFF064_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF066_align.matches.tsv -o ../results/haplotypes/sample_OFF066_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF067_align.matches.tsv -o ../results/haplotypes/sample_OFF067_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF068_align.matches.tsv -o ../results/haplotypes/sample_OFF068_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF070_align.matches.tsv -o ../results/haplotypes/sample_OFF070_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF071_align.matches.tsv -o ../results/haplotypes/sample_OFF071_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF072_align.matches.tsv -o ../results/haplotypes/sample_OFF072_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF073_align.matches.tsv -o ../results/haplotypes/sample_OFF073_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF074_align.matches.tsv -o ../results/haplotypes/sample_OFF074_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF075_align.matches.tsv -o ../results/haplotypes/sample_OFF075_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF076_align.matches.tsv -o ../results/haplotypes/sample_OFF076_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF077_align.matches.tsv -o ../results/haplotypes/sample_OFF077_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF078_align.matches.tsv -o ../results/haplotypes/sample_OFF078_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF079_align.matches.tsv -o ../results/haplotypes/sample_OFF079_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF080_align.matches.tsv -o ../results/haplotypes/sample_OFF080_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF081_align.matches.tsv -o ../results/haplotypes/sample_OFF081_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF083_align.matches.tsv -o ../results/haplotypes/sample_OFF083_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF084_align.matches.tsv -o ../results/haplotypes/sample_OFF084_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF085_align.matches.tsv -o ../results/haplotypes/sample_OFF085_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF08623_align.matches.tsv -o ../results/haplotypes/sample_OFF8623_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF086_align.matches.tsv -o ../results/haplotypes/sample_OFF086_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF088_align.matches.tsv -o ../results/haplotypes/sample_OFF088_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF089_align.matches.tsv -o ../results/haplotypes/sample_OFF089_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF090_align.matches.tsv -o ../results/haplotypes/sample_OFF090_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF091_align.matches.tsv -o ../results/haplotypes/sample_OFF091_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF092_align.matches.tsv -o ../results/haplotypes/sample_OFF092_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF093_align.matches.tsv -o ../results/haplotypes/sample_OFF093_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF094_align.matches.tsv -o ../results/haplotypes/sample_OFF094_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF095_align.matches.tsv -o ../results/haplotypes/sample_OFF095_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF096_align.matches.tsv -o ../results/haplotypes/sample_OFF096_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF097_align.matches.tsv -o ../results/haplotypes/sample_OFF097_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF100_align.matches.tsv -o ../results/haplotypes/sample_OFF100_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF101_align.matches.tsv -o ../results/haplotypes/sample_OFF101_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF102_align.matches.tsv -o ../results/haplotypes/sample_OFF102_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF103_align.matches.tsv -o ../results/haplotypes/sample_OFF103_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF105_align.matches.tsv -o ../results/haplotypes/sample_OFF105_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF106_align.matches.tsv -o ../results/haplotypes/sample_OFF106_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF110_align.matches.tsv -o ../results/haplotypes/sample_OFF110_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF111_align.matches.tsv -o ../results/haplotypes/sample_OFF111_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF112_align.matches.tsv -o ../results/haplotypes/sample_OFF112_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF113_align.matches.tsv -o ../results/haplotypes/sample_OFF113_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF114_align.matches.tsv -o ../results/haplotypes/sample_OFF114_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF115_align.matches.tsv -o ../results/haplotypes/sample_OFF115_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF117_align.matches.tsv -o ../results/haplotypes/sample_OFF117_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF118_align.matches.tsv -o ../results/haplotypes/sample_OFF118_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF119_align.matches.tsv -o ../results/haplotypes/sample_OFF119_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF120_align.matches.tsv -o ../results/haplotypes/sample_OFF120_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF121_align.matches.tsv -o ../results/haplotypes/sample_OFF121_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF122_align.matches.tsv -o ../results/haplotypes/sample_OFF122_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF123_align.matches.tsv -o ../results/haplotypes/sample_OFF123_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF124_align.matches.tsv -o ../results/haplotypes/sample_OFF124_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF125_align.matches.tsv -o ../results/haplotypes/sample_OFF125_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF126_align.matches.tsv -o ../results/haplotypes/sample_OFF126_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF127_align.matches.tsv -o ../results/haplotypes/sample_OFF127_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF134_align.matches.tsv -o ../results/haplotypes/sample_OFF134_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF135_align.matches.tsv -o ../results/haplotypes/sample_OFF135_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF136_align.matches.tsv -o ../results/haplotypes/sample_OFF136_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF137_align.matches.tsv -o ../results/haplotypes/sample_OFF137_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF138_align.matches.tsv -o ../results/haplotypes/sample_OFF138_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF139_align.matches.tsv -o ../results/haplotypes/sample_OFF139_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF140_align.matches.tsv -o ../results/haplotypes/sample_OFF140_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF142_align.matches.tsv -o ../results/haplotypes/sample_OFF142_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF143_align.matches.tsv -o ../results/haplotypes/sample_OFF143_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF144_align.matches.tsv -o ../results/haplotypes/sample_OFF144_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF145_align.matches.tsv -o ../results/haplotypes/sample_OFF145_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF146_align.matches.tsv -o ../results/haplotypes/sample_OFF146_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF149_align.matches.tsv -o ../results/haplotypes/sample_OFF149_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF150_align.matches.tsv -o ../results/haplotypes/sample_OFF150_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF151_align.matches.tsv -o ../results/haplotypes/sample_OFF151_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF152_align.matches.tsv -o ../results/haplotypes/sample_OFF152_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF153_align.matches.tsv -o ../results/haplotypes/sample_OFF153_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF154_align.matches.tsv -o ../results/haplotypes/sample_OFF154_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF155_align.matches.tsv -o ../results/haplotypes/sample_OFF155_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF156_align.matches.tsv -o ../results/haplotypes/sample_OFF156_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF157_align.matches.tsv -o ../results/haplotypes/sample_OFF157_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF158_align.matches.tsv -o ../results/haplotypes/sample_OFF158_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF159_align.matches.tsv -o ../results/haplotypes/sample_OFF159_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF160_align.matches.tsv -o ../results/haplotypes/sample_OFF160_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF161_align.matches.tsv -o ../results/haplotypes/sample_OFF161_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF165_align.matches.tsv -o ../results/haplotypes/sample_OFF165_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF166_align.matches.tsv -o ../results/haplotypes/sample_OFF166_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF167_align.matches.tsv -o ../results/haplotypes/sample_OFF167_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF168_align.matches.tsv -o ../results/haplotypes/sample_OFF168_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF169_align.matches.tsv -o ../results/haplotypes/sample_OFF169_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF170_align.matches.tsv -o ../results/haplotypes/sample_OFF170_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF171_align.matches.tsv -o ../results/haplotypes/sample_OFF171_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF172_align.matches.tsv -o ../results/haplotypes/sample_OFF172_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF173_align.matches.tsv -o ../results/haplotypes/sample_OFF173_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF174_align.matches.tsv -o ../results/haplotypes/sample_OFF174_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF175_align.matches.tsv -o ../results/haplotypes/sample_OFF175_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF176_align.matches.tsv -o ../results/haplotypes/sample_OFF176_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF177_align.matches.tsv -o ../results/haplotypes/sample_OFF177_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF178_align.matches.tsv -o ../results/haplotypes/sample_OFF178_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF179_align.matches.tsv -o ../results/haplotypes/sample_OFF179_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF181_align.matches.tsv -o ../results/haplotypes/sample_OFF181_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF182_align.matches.tsv -o ../results/haplotypes/sample_OFF182_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF183_align.matches.tsv -o ../results/haplotypes/sample_OFF183_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF184_align.matches.tsv -o ../results/haplotypes/sample_OFF184_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF185_align.matches.tsv -o ../results/haplotypes/sample_OFF185_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF186_align.matches.tsv -o ../results/haplotypes/sample_OFF186_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF187_align.matches.tsv -o ../results/haplotypes/sample_OFF187_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF188_align.matches.tsv -o ../results/haplotypes/sample_OFF188_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF189_align.matches.tsv -o ../results/haplotypes/sample_OFF189_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM001_align.matches.tsv -o ../results/haplotypes/sample_PRM001_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM002_align.matches.tsv -o ../results/haplotypes/sample_PRM002_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM003_align.matches.tsv -o ../results/haplotypes/sample_PRM003_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM005_align.matches.tsv -o ../results/haplotypes/sample_PRM005_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM006_align.matches.tsv -o ../results/haplotypes/sample_PRM006_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM007_align.matches.tsv -o ../results/haplotypes/sample_PRM007_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM009_align.matches.tsv -o ../results/haplotypes/sample_PRM009_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM010_align.matches.tsv -o ../results/haplotypes/sample_PRM010_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM011_align.matches.tsv -o ../results/haplotypes/sample_PRM011_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM012_align.matches.tsv -o ../results/haplotypes/sample_PRM012_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM013_align.matches.tsv -o ../results/haplotypes/sample_PRM013_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM014_align.matches.tsv -o ../results/haplotypes/sample_PRM014_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM015_align.matches.tsv -o ../results/haplotypes/sample_PRM015_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM016_align.matches.tsv -o ../results/haplotypes/sample_PRM016_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM017_align.matches.tsv -o ../results/haplotypes/sample_PRM017_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM018_align.matches.tsv -o ../results/haplotypes/sample_PRM018_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM019_align.matches.tsv -o ../results/haplotypes/sample_PRM019_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM022_align.matches.tsv -o ../results/haplotypes/sample_PRM022_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM023_align.matches.tsv -o ../results/haplotypes/sample_PRM023_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM024_align.matches.tsv -o ../results/haplotypes/sample_PRM024_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM025_align.matches.tsv -o ../results/haplotypes/sample_PRM025_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM026_align.matches.tsv -o ../results/haplotypes/sample_PRM026_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM027_align.matches.tsv -o ../results/haplotypes/sample_PRM027_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM028_align.matches.tsv -o ../results/haplotypes/sample_PRM028_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM029_align.matches.tsv -o ../results/haplotypes/sample_PRM029_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM030_align.matches.tsv -o ../results/haplotypes/sample_PRM030_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM031_align.matches.tsv -o ../results/haplotypes/sample_PRM031_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM032_align.matches.tsv -o ../results/haplotypes/sample_PRM032_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM033_align.matches.tsv -o ../results/haplotypes/sample_PRM033_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM034_align.matches.tsv -o ../results/haplotypes/sample_PRM034_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM035-1_align.matches.tsv -o ../results/haplotypes/sample_PRM035-1_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM035-2_align.matches.tsv -o ../results/haplotypes/sample_PRM035-1_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM036_align.matches.tsv -o ../results/haplotypes/sample_PRM036_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM037_align.matches.tsv -o ../results/haplotypes/sample_PRM037_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM038_align.matches.tsv -o ../results/haplotypes/sample_PRM038_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM039_align.matches.tsv -o ../results/haplotypes/sample_PRM039_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM040_align.matches.tsv -o ../results/haplotypes/sample_PRM040_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM041_align.matches.tsv -o ../results/haplotypes/sample_PRM041_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM042_align.matches.tsv -o ../results/haplotypes/sample_PRM042_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM043_align.matches.tsv -o ../results/haplotypes/sample_PRM043_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM044_align.matches.tsv -o ../results/haplotypes/sample_PRM044_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM045_align.matches.tsv -o ../results/haplotypes/sample_PRM045_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM046_align.matches.tsv -o ../results/haplotypes/sample_PRM046_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM047_align.matches.tsv -o ../results/haplotypes/sample_PRM047_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM048_align.matches.tsv -o ../results/haplotypes/sample_PRM048_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM049_align.matches.tsv -o ../results/haplotypes/sample_PRM049_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM050_align.matches.tsv -o ../results/haplotypes/sample_PRM050_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM051_align.matches.tsv -o ../results/haplotypes/sample_PRM051_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM052_align.matches.tsv -o ../results/haplotypes/sample_PRM052_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM053_align.matches.tsv -o ../results/haplotypes/sample_PRM053_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM054_align.matches.tsv -o ../results/haplotypes/sample_PRM054_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM055_align.matches.tsv -o ../results/haplotypes/sample_PRM055_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM056_align.matches.tsv -o ../results/haplotypes/sample_PRM056_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM057_align.matches.tsv -o ../results/haplotypes/sample_PRM057_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM058_align.matches.tsv -o ../results/haplotypes/sample_PRM058_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM059_align.matches.tsv -o ../results/haplotypes/sample_PRM059_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM060_align.matches.tsv -o ../results/haplotypes/sample_PRM060_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM061_align.matches.tsv -o ../results/haplotypes/sample_PRM061_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM062_align.matches.tsv -o ../results/haplotypes/sample_PRM062_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM063_align.matches.tsv -o ../results/haplotypes/sample_PRM063_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM064_align.matches.tsv -o ../results/haplotypes/sample_PRM064_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM065_align.matches.tsv -o ../results/haplotypes/sample_PRM065_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM066_align.matches.tsv -o ../results/haplotypes/sample_PRM066_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM067_align.matches.tsv -o ../results/haplotypes/sample_PRM067_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM068_align.matches.tsv -o ../results/haplotypes/sample_PRM068_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM069_align.matches.tsv -o ../results/haplotypes/sample_PRM069_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM070_align.matches.tsv -o ../results/haplotypes/sample_PRM070_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM071_align.matches.tsv -o ../results/haplotypes/sample_PRM071_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM072_align.matches.tsv -o ../results/haplotypes/sample_PRM072_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM073_align.matches.tsv -o ../results/haplotypes/sample_PRM073_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM074_align.matches.tsv -o ../results/haplotypes/sample_PRM074_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM075_align.matches.tsv -o ../results/haplotypes/sample_PRM075_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM076_align.matches.tsv -o ../results/haplotypes/sample_PRM076_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM077_align.matches.tsv -o ../results/haplotypes/sample_PRM077_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM078_align.matches.tsv -o ../results/haplotypes/sample_PRM078_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM079_align.matches.tsv -o ../results/haplotypes/sample_PRM079_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM080_align.matches.tsv -o ../results/haplotypes/sample_PRM080_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM081_align.matches.tsv -o ../results/haplotypes/sample_PRM081_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM082_align.matches.tsv -o ../results/haplotypes/sample_PRM082_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM083_align.matches.tsv -o ../results/haplotypes/sample_PRM083_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM084_align.matches.tsv -o ../results/haplotypes/sample_PRM084_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM085_align.matches.tsv -o ../results/haplotypes/sample_PRM085_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM086-23_align.matches.tsv -o ../results/haplotypes/sample_PRM086-23_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM086R_align.matches.tsv -o ../results/haplotypes/sample_PRM086_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM087_align.matches.tsv -o ../results/haplotypes/sample_PRM087_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM088_align.matches.tsv -o ../results/haplotypes/sample_PRM088_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM089_align.matches.tsv -o ../results/haplotypes/sample_PRM089_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM090_align.matches.tsv -o ../results/haplotypes/sample_PRM090_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM091_align.matches.tsv -o ../results/haplotypes/sample_PRM091_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM092_align.matches.tsv -o ../results/haplotypes/sample_PRM092_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM093_align.matches.tsv -o ../results/haplotypes/sample_PRM093_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM094_align.matches.tsv -o ../results/haplotypes/sample_PRM094_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM095_align.matches.tsv -o ../results/haplotypes/sample_PRM095_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM096_align.matches.tsv -o ../results/haplotypes/sample_PRM096_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM097_align.matches.tsv -o ../results/haplotypes/sample_PRM097_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM098_align.matches.tsv -o ../results/haplotypes/sample_PRM098_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM099_align.matches.tsv -o ../results/haplotypes/sample_PRM099_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM100_align.matches.tsv -o ../results/haplotypes/sample_PRM100_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM101_align.matches.tsv -o ../results/haplotypes/sample_PRM101_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM102_align.matches.tsv -o ../results/haplotypes/sample_PRM102_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM103_align.matches.tsv -o ../results/haplotypes/sample_PRM103_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM104_align.matches.tsv -o ../results/haplotypes/sample_PRM104_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM105_align.matches.tsv -o ../results/haplotypes/sample_PRM105_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM106_align.matches.tsv -o ../results/haplotypes/sample_PRM106_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM107_align.matches.tsv -o ../results/haplotypes/sample_PRM107_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM108_align.matches.tsv -o ../results/haplotypes/sample_PRM108_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM109_align.matches.tsv -o ../results/haplotypes/sample_PRM109_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM110_align.matches.tsv -o ../results/haplotypes/sample_PRM110_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM111_align.matches.tsv -o ../results/haplotypes/sample_PRM111_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM112_align.matches.tsv -o ../results/haplotypes/sample_PRM112_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM113_align.matches.tsv -o ../results/haplotypes/sample_PRM113_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM114_align.matches.tsv -o ../results/haplotypes/sample_PRM114_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM115_align.matches.tsv -o ../results/haplotypes/sample_PRM115_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM116_align.matches.tsv -o ../results/haplotypes/sample_PRM116_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM117_align.matches.tsv -o ../results/haplotypes/sample_PRM117_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM118_align.matches.tsv -o ../results/haplotypes/sample_PRM118_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM119_align.matches.tsv -o ../results/haplotypes/sample_PRM119_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM120_align.matches.tsv -o ../results/haplotypes/sample_PRM120_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM121_align.matches.tsv -o ../results/haplotypes/sample_PRM121_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM122_align.matches.tsv -o ../results/haplotypes/sample_PRM122_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM123_align.matches.tsv -o ../results/haplotypes/sample_PRM123_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM124_align.matches.tsv -o ../results/haplotypes/sample_PRM124_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM125_align.matches.tsv -o ../results/haplotypes/sample_PRM125_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM126_align.matches.tsv -o ../results/haplotypes/sample_PRM126_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM127_align.matches.tsv -o ../results/haplotypes/sample_PRM127_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM128_align.matches.tsv -o ../results/haplotypes/sample_PRM128_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM129_align.matches.tsv -o ../results/haplotypes/sample_PRM129_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM130_align.matches.tsv -o ../results/haplotypes/sample_PRM130_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM131_align.matches.tsv -o ../results/haplotypes/sample_PRM131_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM132_align.matches.tsv -o ../results/haplotypes/sample_PRM132_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM133_align.matches.tsv -o ../results/haplotypes/sample_PRM133_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM134_align.matches.tsv -o ../results/haplotypes/sample_PRM134_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM135_align.matches.tsv -o ../results/haplotypes/sample_PRM135_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM136_align.matches.tsv -o ../results/haplotypes/sample_PRM136_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM137_align.matches.tsv -o ../results/haplotypes/sample_PRM137_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM138_align.matches.tsv -o ../results/haplotypes/sample_PRM138_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM139_align.matches.tsv -o ../results/haplotypes/sample_PRM139_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM140_align.matches.tsv -o ../results/haplotypes/sample_PRM140_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM141_align.matches.tsv -o ../results/haplotypes/sample_PRM141_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM142_align.matches.tsv -o ../results/haplotypes/sample_PRM142_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM143_align.matches.tsv -o ../results/haplotypes/sample_PRM143_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM144_align.matches.tsv -o ../results/haplotypes/sample_PRM144_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM145_align.matches.tsv -o ../results/haplotypes/sample_PRM145_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM146_align.matches.tsv -o ../results/haplotypes/sample_PRM146_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM147_align.matches.tsv -o ../results/haplotypes/sample_PRM147_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM148_align.matches.tsv -o ../results/haplotypes/sample_PRM148_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM149_align.matches.tsv -o ../results/haplotypes/sample_PRM149_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM150_align.matches.tsv -o ../results/haplotypes/sample_PRM150_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM151_align.matches.tsv -o ../results/haplotypes/sample_PRM151_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM152_align.matches.tsv -o ../results/haplotypes/sample_PRM152_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM153_align.matches.tsv -o ../results/haplotypes/sample_PRM153_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM154_align.matches.tsv -o ../results/haplotypes/sample_PRM154_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM155_align.matches.tsv -o ../results/haplotypes/sample_PRM155_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM156_align.matches.tsv -o ../results/haplotypes/sample_PRM156_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM157_align.matches.tsv -o ../results/haplotypes/sample_PRM157_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM158_align.matches.tsv -o ../results/haplotypes/sample_PRM158_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM159_align.matches.tsv -o ../results/haplotypes/sample_PRM159_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM160_align.matches.tsv -o ../results/haplotypes/sample_PRM160_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM161_align.matches.tsv -o ../results/haplotypes/sample_PRM161_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM162_align.matches.tsv -o ../results/haplotypes/sample_PRM162_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM163_align.matches.tsv -o ../results/haplotypes/sample_PRM163_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM164_align.matches.tsv -o ../results/haplotypes/sample_PRM164_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM165_align.matches.tsv -o ../results/haplotypes/sample_PRM165_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM166_align.matches.tsv -o ../results/haplotypes/sample_PRM166_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM167_align.matches.tsv -o ../results/haplotypes/sample_PRM167_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM168_align.matches.tsv -o ../results/haplotypes/sample_PRM168_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM169_align.matches.tsv -o ../results/haplotypes/sample_PRM169_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM170_align.matches.tsv -o ../results/haplotypes/sample_PRM170_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM171_align.matches.tsv -o ../results/haplotypes/sample_PRM171_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM172_align.matches.tsv -o ../results/haplotypes/sample_PRM172_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM173_align.matches.tsv -o ../results/haplotypes/sample_PRM173_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM174_align.matches.tsv -o ../results/haplotypes/sample_PRM174_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM175_align.matches.tsv -o ../results/haplotypes/sample_PRM175_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM176_align.matches.tsv -o ../results/haplotypes/sample_PRM176_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM177-1_align.matches.tsv -o ../results/haplotypes/sample_PRM177-1_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM177_align.matches.tsv -o ../results/haplotypes/sample_PRM177_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM178_align.matches.tsv -o ../results/haplotypes/sample_PRM178_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM179_align.matches.tsv -o ../results/haplotypes/sample_PRM179_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM180_align.matches.tsv -o ../results/haplotypes/sample_PRM180_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM181_align.matches.tsv -o ../results/haplotypes/sample_PRM181_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM182_align.matches.tsv -o ../results/haplotypes/sample_PRM182_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM183_align.matches.tsv -o ../results/haplotypes/sample_PRM183_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM184_align.matches.tsv -o ../results/haplotypes/sample_PRM184_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM185_align.matches.tsv -o ../results/haplotypes/sample_PRM185_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM186_align.matches.tsv -o ../results/haplotypes/sample_PRM186_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM187_align.matches.tsv -o ../results/haplotypes/sample_PRM187_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM188_align.matches.tsv -o ../results/haplotypes/sample_PRM188_haplotypes.txt
-../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM189_align.matches.tsv -o ../results/haplotypes/sample_PRM189_haplotypes.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM001_align.matches.tsv -o ../results/haplotypes/sample_FEM001_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM002_align.matches.tsv -o ../results/haplotypes/sample_FEM002_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM004_align.matches.tsv -o ../results/haplotypes/sample_FEM004_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM005_align.matches.tsv -o ../results/haplotypes/sample_FEM005_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM006_align.matches.tsv -o ../results/haplotypes/sample_FEM006_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM007_align.matches.tsv -o ../results/haplotypes/sample_FEM007_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM008_align.matches.tsv -o ../results/haplotypes/sample_FEM008_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM009_align.matches.tsv -o ../results/haplotypes/sample_FEM009_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM010_align.matches.tsv -o ../results/haplotypes/sample_FEM010_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM011_align.matches.tsv -o ../results/haplotypes/sample_FEM011_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM012_align.matches.tsv -o ../results/haplotypes/sample_FEM012_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM013_align.matches.tsv -o ../results/haplotypes/sample_FEM013_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM014_align.matches.tsv -o ../results/haplotypes/sample_FEM014_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM015_align.matches.tsv -o ../results/haplotypes/sample_FEM015_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM016_align.matches.tsv -o ../results/haplotypes/sample_FEM016_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM017_align.matches.tsv -o ../results/haplotypes/sample_FEM017_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM018_align.matches.tsv -o ../results/haplotypes/sample_FEM018_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM019_align.matches.tsv -o ../results/haplotypes/sample_FEM019_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM020_align.matches.tsv -o ../results/haplotypes/sample_FEM020_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM021_align.matches.tsv -o ../results/haplotypes/sample_FEM021_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM022_align.matches.tsv -o ../results/haplotypes/sample_FEM022_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM023_align.matches.tsv -o ../results/haplotypes/sample_FEM023_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM024_align.matches.tsv -o ../results/haplotypes/sample_FEM024_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM025_align.matches.tsv -o ../results/haplotypes/sample_FEM025_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM026_align.matches.tsv -o ../results/haplotypes/sample_FEM026_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM027_align.matches.tsv -o ../results/haplotypes/sample_FEM027_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM028_align.matches.tsv -o ../results/haplotypes/sample_FEM028_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM029_align.matches.tsv -o ../results/haplotypes/sample_FEM029_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM030_align.matches.tsv -o ../results/haplotypes/sample_FEM030_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM031_align.matches.tsv -o ../results/haplotypes/sample_FEM031_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM032_align.matches.tsv -o ../results/haplotypes/sample_FEM032_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM033_align.matches.tsv -o ../results/haplotypes/sample_FEM033_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM034_align.matches.tsv -o ../results/haplotypes/sample_FEM034_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM035_align.matches.tsv -o ../results/haplotypes/sample_FEM035_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM036_align.matches.tsv -o ../results/haplotypes/sample_FEM036_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM037_align.matches.tsv -o ../results/haplotypes/sample_FEM037_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM038_align.matches.tsv -o ../results/haplotypes/sample_FEM038_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM039_align.matches.tsv -o ../results/haplotypes/sample_FEM039_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM040_align.matches.tsv -o ../results/haplotypes/sample_FEM040_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM041_align.matches.tsv -o ../results/haplotypes/sample_FEM041_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM042_align.matches.tsv -o ../results/haplotypes/sample_FEM042_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM043_align.matches.tsv -o ../results/haplotypes/sample_FEM043_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM044_align.matches.tsv -o ../results/haplotypes/sample_FEM044_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM045_align.matches.tsv -o ../results/haplotypes/sample_FEM045_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM046_align.matches.tsv -o ../results/haplotypes/sample_FEM046_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM047_align.matches.tsv -o ../results/haplotypes/sample_FEM047_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM048_align.matches.tsv -o ../results/haplotypes/sample_FEM048_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM049_align.matches.tsv -o ../results/haplotypes/sample_FEM049_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM050_align.matches.tsv -o ../results/haplotypes/sample_FEM050_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM051_align.matches.tsv -o ../results/haplotypes/sample_FEM051_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM052_align.matches.tsv -o ../results/haplotypes/sample_FEM052_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM053_align.matches.tsv -o ../results/haplotypes/sample_FEM053_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM054-1_align.matches.tsv -o ../results/haplotypes/sample_FEM054-1_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM054_align.matches.tsv -o ../results/haplotypes/sample_FEM054_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM055_align.matches.tsv -o ../results/haplotypes/sample_FEM055_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM056_align.matches.tsv -o ../results/haplotypes/sample_FEM056_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM057_align.matches.tsv -o ../results/haplotypes/sample_FEM057_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM058_align.matches.tsv -o ../results/haplotypes/sample_FEM058_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM059_align.matches.tsv -o ../results/haplotypes/sample_FEM059_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM060_align.matches.tsv -o ../results/haplotypes/sample_FEM060_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM061_align.matches.tsv -o ../results/haplotypes/sample_FEM061_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM062_align.matches.tsv -o ../results/haplotypes/sample_FEM062_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM063_align.matches.tsv -o ../results/haplotypes/sample_FEM063_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM064_align.matches.tsv -o ../results/haplotypes/sample_FEM064_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM065_align.matches.tsv -o ../results/haplotypes/sample_FEM065_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM066_align.matches.tsv -o ../results/haplotypes/sample_FEM066_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM067_align.matches.tsv -o ../results/haplotypes/sample_FEM067_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM068_align.matches.tsv -o ../results/haplotypes/sample_FEM068_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM069_align.matches.tsv -o ../results/haplotypes/sample_FEM069_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM070_align.matches.tsv -o ../results/haplotypes/sample_FEM070_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM071_align.matches.tsv -o ../results/haplotypes/sample_FEM071_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM072_align.matches.tsv -o ../results/haplotypes/sample_FEM072_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM073_align.matches.tsv -o ../results/haplotypes/sample_FEM073_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM074_align.matches.tsv -o ../results/haplotypes/sample_FEM074_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM075_align.matches.tsv -o ../results/haplotypes/sample_FEM075_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM076_align.matches.tsv -o ../results/haplotypes/sample_FEM076_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM077_align.matches.tsv -o ../results/haplotypes/sample_FEM077_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM078_align.matches.tsv -o ../results/haplotypes/sample_FEM078_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM079_align.matches.tsv -o ../results/haplotypes/sample_FEM079_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM080_align.matches.tsv -o ../results/haplotypes/sample_FEM080_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM081_align.matches.tsv -o ../results/haplotypes/sample_FEM081_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM082_align.matches.tsv -o ../results/haplotypes/sample_FEM082_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM083_align.matches.tsv -o ../results/haplotypes/sample_FEM083_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM084_align.matches.tsv -o ../results/haplotypes/sample_FEM084_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM085_align.matches.tsv -o ../results/haplotypes/sample_FEM085_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM086_align.matches.tsv -o ../results/haplotypes/sample_FEM086_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_FEM087_align.matches.tsv -o ../results/haplotypes/sample_FEM087_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_NPM005_align.matches.tsv -o ../results/haplotypes/sample_NPM005_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_NPM006_align.matches.tsv -o ../results/haplotypes/sample_NPM006_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_NPM007_align.matches.tsv -o ../results/haplotypes/sample_NPM007_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_NPM008_align.matches.tsv -o ../results/haplotypes/sample_NPM008_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_NPM010_align.matches.tsv -o ../results/haplotypes/sample_NPM010_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_NPM011_align.matches.tsv -o ../results/haplotypes/sample_NPM011_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_NPM012_align.matches.tsv -o ../results/haplotypes/sample_NPM012_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_NPM1128_align.matches.tsv -o ../results/haplotypes/sample_NPM1128_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF001_align.matches.tsv -o ../results/haplotypes/sample_OFF001_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF004_align.matches.tsv -o ../results/haplotypes/sample_OFF004_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF005_align.matches.tsv -o ../results/haplotypes/sample_OFF005_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF006_align.matches.tsv -o ../results/haplotypes/sample_OFF006_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF007_align.matches.tsv -o ../results/haplotypes/sample_OFF007_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF008_align.matches.tsv -o ../results/haplotypes/sample_OFF008_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF009_align.matches.tsv -o ../results/haplotypes/sample_OFF009_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF010_align.matches.tsv -o ../results/haplotypes/sample_OFF010_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF011_align.matches.tsv -o ../results/haplotypes/sample_OFF011_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF012_align.matches.tsv -o ../results/haplotypes/sample_OFF012_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF013_align.matches.tsv -o ../results/haplotypes/sample_OFF013_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF014_align.matches.tsv -o ../results/haplotypes/sample_OFF014_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF015_align.matches.tsv -o ../results/haplotypes/sample_OFF015_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF016-1_align.matches.tsv -o ../results/haplotypes/sample_OFF016-1_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF016_align.matches.tsv -o ../results/haplotypes/sample_OFF016_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF017_align.matches.tsv -o ../results/haplotypes/sample_OFF017_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF018_align.matches.tsv -o ../results/haplotypes/sample_OFF018_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF020_align.matches.tsv -o ../results/haplotypes/sample_OFF020_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF022_align.matches.tsv -o ../results/haplotypes/sample_OFF022_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF024_align.matches.tsv -o ../results/haplotypes/sample_OFF024_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF025_align.matches.tsv -o ../results/haplotypes/sample_OFF025_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF026_align.matches.tsv -o ../results/haplotypes/sample_OFF026_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF027-1_align.matches.tsv -o ../results/haplotypes/sample_OFF027-1_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF027_align.matches.tsv -o ../results/haplotypes/sample_OFF027_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF028_align.matches.tsv -o ../results/haplotypes/sample_OFF028_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF029_align.matches.tsv -o ../results/haplotypes/sample_OFF029_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF030_align.matches.tsv -o ../results/haplotypes/sample_OFF030_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF031_align.matches.tsv -o ../results/haplotypes/sample_OFF031_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF032-1_align.matches.tsv -o ../results/haplotypes/sample_OFF032-1_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF032_align.matches.tsv -o ../results/haplotypes/sample_OFF032_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF033_align.matches.tsv -o ../results/haplotypes/sample_OFF033_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF034_align.matches.tsv -o ../results/haplotypes/sample_OFF034_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF035_align.matches.tsv -o ../results/haplotypes/sample_OFF035_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF036_align.matches.tsv -o ../results/haplotypes/sample_OFF036_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF037_align.matches.tsv -o ../results/haplotypes/sample_OFF037_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF038_align.matches.tsv -o ../results/haplotypes/sample_OFF038_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF039_align.matches.tsv -o ../results/haplotypes/sample_OFF039_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF041_align.matches.tsv -o ../results/haplotypes/sample_OFF041_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF042_align.matches.tsv -o ../results/haplotypes/sample_OFF042_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF043_align.matches.tsv -o ../results/haplotypes/sample_OFF043_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF044_align.matches.tsv -o ../results/haplotypes/sample_OFF044_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF045_align.matches.tsv -o ../results/haplotypes/sample_OFF045_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF046_align.matches.tsv -o ../results/haplotypes/sample_OFF046_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF047_align.matches.tsv -o ../results/haplotypes/sample_OFF047_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF049_align.matches.tsv -o ../results/haplotypes/sample_OFF049_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF050_align.matches.tsv -o ../results/haplotypes/sample_OFF050_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF051_align.matches.tsv -o ../results/haplotypes/sample_OFF051_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF052_align.matches.tsv -o ../results/haplotypes/sample_OFF052_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF053_align.matches.tsv -o ../results/haplotypes/sample_OFF053_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF054_align.matches.tsv -o ../results/haplotypes/sample_OFF054_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF055_align.matches.tsv -o ../results/haplotypes/sample_OFF055_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF056_align.matches.tsv -o ../results/haplotypes/sample_OFF056_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF057_align.matches.tsv -o ../results/haplotypes/sample_OFF057_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF058_align.matches.tsv -o ../results/haplotypes/sample_OFF058_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF059_align.matches.tsv -o ../results/haplotypes/sample_OFF059_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF060_align.matches.tsv -o ../results/haplotypes/sample_OFF060_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF061_align.matches.tsv -o ../results/haplotypes/sample_OFF061_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF064_align.matches.tsv -o ../results/haplotypes/sample_OFF064_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF066_align.matches.tsv -o ../results/haplotypes/sample_OFF066_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF067_align.matches.tsv -o ../results/haplotypes/sample_OFF067_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF068_align.matches.tsv -o ../results/haplotypes/sample_OFF068_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF070_align.matches.tsv -o ../results/haplotypes/sample_OFF070_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF071_align.matches.tsv -o ../results/haplotypes/sample_OFF071_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF072_align.matches.tsv -o ../results/haplotypes/sample_OFF072_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF073_align.matches.tsv -o ../results/haplotypes/sample_OFF073_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF074_align.matches.tsv -o ../results/haplotypes/sample_OFF074_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF075_align.matches.tsv -o ../results/haplotypes/sample_OFF075_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF076_align.matches.tsv -o ../results/haplotypes/sample_OFF076_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF077_align.matches.tsv -o ../results/haplotypes/sample_OFF077_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF078_align.matches.tsv -o ../results/haplotypes/sample_OFF078_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF079_align.matches.tsv -o ../results/haplotypes/sample_OFF079_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF080_align.matches.tsv -o ../results/haplotypes/sample_OFF080_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF081_align.matches.tsv -o ../results/haplotypes/sample_OFF081_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF083_align.matches.tsv -o ../results/haplotypes/sample_OFF083_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF084_align.matches.tsv -o ../results/haplotypes/sample_OFF084_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF085_align.matches.tsv -o ../results/haplotypes/sample_OFF085_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF08623_align.matches.tsv -o ../results/haplotypes/sample_OFF8623_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF086_align.matches.tsv -o ../results/haplotypes/sample_OFF086_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF088_align.matches.tsv -o ../results/haplotypes/sample_OFF088_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF089_align.matches.tsv -o ../results/haplotypes/sample_OFF089_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF090_align.matches.tsv -o ../results/haplotypes/sample_OFF090_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF091_align.matches.tsv -o ../results/haplotypes/sample_OFF091_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF092_align.matches.tsv -o ../results/haplotypes/sample_OFF092_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF093_align.matches.tsv -o ../results/haplotypes/sample_OFF093_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF094_align.matches.tsv -o ../results/haplotypes/sample_OFF094_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF095_align.matches.tsv -o ../results/haplotypes/sample_OFF095_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF096_align.matches.tsv -o ../results/haplotypes/sample_OFF096_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF097_align.matches.tsv -o ../results/haplotypes/sample_OFF097_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF100_align.matches.tsv -o ../results/haplotypes/sample_OFF100_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF101_align.matches.tsv -o ../results/haplotypes/sample_OFF101_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF102_align.matches.tsv -o ../results/haplotypes/sample_OFF102_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF103_align.matches.tsv -o ../results/haplotypes/sample_OFF103_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF105_align.matches.tsv -o ../results/haplotypes/sample_OFF105_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF106_align.matches.tsv -o ../results/haplotypes/sample_OFF106_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF110_align.matches.tsv -o ../results/haplotypes/sample_OFF110_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF111_align.matches.tsv -o ../results/haplotypes/sample_OFF111_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF112_align.matches.tsv -o ../results/haplotypes/sample_OFF112_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF113_align.matches.tsv -o ../results/haplotypes/sample_OFF113_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF114_align.matches.tsv -o ../results/haplotypes/sample_OFF114_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF115_align.matches.tsv -o ../results/haplotypes/sample_OFF115_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF117_align.matches.tsv -o ../results/haplotypes/sample_OFF117_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF118_align.matches.tsv -o ../results/haplotypes/sample_OFF118_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF119_align.matches.tsv -o ../results/haplotypes/sample_OFF119_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF120_align.matches.tsv -o ../results/haplotypes/sample_OFF120_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF121_align.matches.tsv -o ../results/haplotypes/sample_OFF121_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF122_align.matches.tsv -o ../results/haplotypes/sample_OFF122_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF123_align.matches.tsv -o ../results/haplotypes/sample_OFF123_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF124_align.matches.tsv -o ../results/haplotypes/sample_OFF124_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF125_align.matches.tsv -o ../results/haplotypes/sample_OFF125_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF126_align.matches.tsv -o ../results/haplotypes/sample_OFF126_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF127_align.matches.tsv -o ../results/haplotypes/sample_OFF127_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF134_align.matches.tsv -o ../results/haplotypes/sample_OFF134_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF135_align.matches.tsv -o ../results/haplotypes/sample_OFF135_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF136_align.matches.tsv -o ../results/haplotypes/sample_OFF136_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF137_align.matches.tsv -o ../results/haplotypes/sample_OFF137_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF138_align.matches.tsv -o ../results/haplotypes/sample_OFF138_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF139_align.matches.tsv -o ../results/haplotypes/sample_OFF139_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF140_align.matches.tsv -o ../results/haplotypes/sample_OFF140_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF142_align.matches.tsv -o ../results/haplotypes/sample_OFF142_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF143_align.matches.tsv -o ../results/haplotypes/sample_OFF143_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF144_align.matches.tsv -o ../results/haplotypes/sample_OFF144_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF145_align.matches.tsv -o ../results/haplotypes/sample_OFF145_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF146_align.matches.tsv -o ../results/haplotypes/sample_OFF146_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF149_align.matches.tsv -o ../results/haplotypes/sample_OFF149_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF150_align.matches.tsv -o ../results/haplotypes/sample_OFF150_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF151_align.matches.tsv -o ../results/haplotypes/sample_OFF151_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF152_align.matches.tsv -o ../results/haplotypes/sample_OFF152_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF153_align.matches.tsv -o ../results/haplotypes/sample_OFF153_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF154_align.matches.tsv -o ../results/haplotypes/sample_OFF154_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF155_align.matches.tsv -o ../results/haplotypes/sample_OFF155_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF156_align.matches.tsv -o ../results/haplotypes/sample_OFF156_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF157_align.matches.tsv -o ../results/haplotypes/sample_OFF157_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF158_align.matches.tsv -o ../results/haplotypes/sample_OFF158_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF159_align.matches.tsv -o ../results/haplotypes/sample_OFF159_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF160_align.matches.tsv -o ../results/haplotypes/sample_OFF160_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF161_align.matches.tsv -o ../results/haplotypes/sample_OFF161_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF165_align.matches.tsv -o ../results/haplotypes/sample_OFF165_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF166_align.matches.tsv -o ../results/haplotypes/sample_OFF166_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF167_align.matches.tsv -o ../results/haplotypes/sample_OFF167_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF168_align.matches.tsv -o ../results/haplotypes/sample_OFF168_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF169_align.matches.tsv -o ../results/haplotypes/sample_OFF169_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF170_align.matches.tsv -o ../results/haplotypes/sample_OFF170_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF171_align.matches.tsv -o ../results/haplotypes/sample_OFF171_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF172_align.matches.tsv -o ../results/haplotypes/sample_OFF172_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF173_align.matches.tsv -o ../results/haplotypes/sample_OFF173_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF174_align.matches.tsv -o ../results/haplotypes/sample_OFF174_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF175_align.matches.tsv -o ../results/haplotypes/sample_OFF175_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF176_align.matches.tsv -o ../results/haplotypes/sample_OFF176_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF177_align.matches.tsv -o ../results/haplotypes/sample_OFF177_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF178_align.matches.tsv -o ../results/haplotypes/sample_OFF178_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF179_align.matches.tsv -o ../results/haplotypes/sample_OFF179_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF181_align.matches.tsv -o ../results/haplotypes/sample_OFF181_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF182_align.matches.tsv -o ../results/haplotypes/sample_OFF182_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF183_align.matches.tsv -o ../results/haplotypes/sample_OFF183_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF184_align.matches.tsv -o ../results/haplotypes/sample_OFF184_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF185_align.matches.tsv -o ../results/haplotypes/sample_OFF185_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF186_align.matches.tsv -o ../results/haplotypes/sample_OFF186_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF187_align.matches.tsv -o ../results/haplotypes/sample_OFF187_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF188_align.matches.tsv -o ../results/haplotypes/sample_OFF188_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_OFF189_align.matches.tsv -o ../results/haplotypes/sample_OFF189_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM001_align.matches.tsv -o ../results/haplotypes/sample_PRM001_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM002_align.matches.tsv -o ../results/haplotypes/sample_PRM002_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM003_align.matches.tsv -o ../results/haplotypes/sample_PRM003_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM005_align.matches.tsv -o ../results/haplotypes/sample_PRM005_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM006_align.matches.tsv -o ../results/haplotypes/sample_PRM006_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM007_align.matches.tsv -o ../results/haplotypes/sample_PRM007_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM009_align.matches.tsv -o ../results/haplotypes/sample_PRM009_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM010_align.matches.tsv -o ../results/haplotypes/sample_PRM010_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM011_align.matches.tsv -o ../results/haplotypes/sample_PRM011_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM012_align.matches.tsv -o ../results/haplotypes/sample_PRM012_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM013_align.matches.tsv -o ../results/haplotypes/sample_PRM013_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM014_align.matches.tsv -o ../results/haplotypes/sample_PRM014_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM015_align.matches.tsv -o ../results/haplotypes/sample_PRM015_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM016_align.matches.tsv -o ../results/haplotypes/sample_PRM016_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM017_align.matches.tsv -o ../results/haplotypes/sample_PRM017_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM018_align.matches.tsv -o ../results/haplotypes/sample_PRM018_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM019_align.matches.tsv -o ../results/haplotypes/sample_PRM019_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM022_align.matches.tsv -o ../results/haplotypes/sample_PRM022_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM023_align.matches.tsv -o ../results/haplotypes/sample_PRM023_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM024_align.matches.tsv -o ../results/haplotypes/sample_PRM024_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM025_align.matches.tsv -o ../results/haplotypes/sample_PRM025_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM026_align.matches.tsv -o ../results/haplotypes/sample_PRM026_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM027_align.matches.tsv -o ../results/haplotypes/sample_PRM027_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM028_align.matches.tsv -o ../results/haplotypes/sample_PRM028_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM029_align.matches.tsv -o ../results/haplotypes/sample_PRM029_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM030_align.matches.tsv -o ../results/haplotypes/sample_PRM030_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM031_align.matches.tsv -o ../results/haplotypes/sample_PRM031_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM032_align.matches.tsv -o ../results/haplotypes/sample_PRM032_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM033_align.matches.tsv -o ../results/haplotypes/sample_PRM033_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM034_align.matches.tsv -o ../results/haplotypes/sample_PRM034_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM035-1_align.matches.tsv -o ../results/haplotypes/sample_PRM035-1_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM035-2_align.matches.tsv -o ../results/haplotypes/sample_PRM035-1_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM036_align.matches.tsv -o ../results/haplotypes/sample_PRM036_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM037_align.matches.tsv -o ../results/haplotypes/sample_PRM037_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM038_align.matches.tsv -o ../results/haplotypes/sample_PRM038_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM039_align.matches.tsv -o ../results/haplotypes/sample_PRM039_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM040_align.matches.tsv -o ../results/haplotypes/sample_PRM040_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM041_align.matches.tsv -o ../results/haplotypes/sample_PRM041_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM042_align.matches.tsv -o ../results/haplotypes/sample_PRM042_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM043_align.matches.tsv -o ../results/haplotypes/sample_PRM043_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM044_align.matches.tsv -o ../results/haplotypes/sample_PRM044_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM045_align.matches.tsv -o ../results/haplotypes/sample_PRM045_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM046_align.matches.tsv -o ../results/haplotypes/sample_PRM046_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM047_align.matches.tsv -o ../results/haplotypes/sample_PRM047_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM048_align.matches.tsv -o ../results/haplotypes/sample_PRM048_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM049_align.matches.tsv -o ../results/haplotypes/sample_PRM049_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM050_align.matches.tsv -o ../results/haplotypes/sample_PRM050_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM051_align.matches.tsv -o ../results/haplotypes/sample_PRM051_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM052_align.matches.tsv -o ../results/haplotypes/sample_PRM052_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM053_align.matches.tsv -o ../results/haplotypes/sample_PRM053_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM054_align.matches.tsv -o ../results/haplotypes/sample_PRM054_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM055_align.matches.tsv -o ../results/haplotypes/sample_PRM055_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM056_align.matches.tsv -o ../results/haplotypes/sample_PRM056_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM057_align.matches.tsv -o ../results/haplotypes/sample_PRM057_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM058_align.matches.tsv -o ../results/haplotypes/sample_PRM058_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM059_align.matches.tsv -o ../results/haplotypes/sample_PRM059_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM060_align.matches.tsv -o ../results/haplotypes/sample_PRM060_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM061_align.matches.tsv -o ../results/haplotypes/sample_PRM061_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM062_align.matches.tsv -o ../results/haplotypes/sample_PRM062_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM063_align.matches.tsv -o ../results/haplotypes/sample_PRM063_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM064_align.matches.tsv -o ../results/haplotypes/sample_PRM064_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM065_align.matches.tsv -o ../results/haplotypes/sample_PRM065_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM066_align.matches.tsv -o ../results/haplotypes/sample_PRM066_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM067_align.matches.tsv -o ../results/haplotypes/sample_PRM067_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM068_align.matches.tsv -o ../results/haplotypes/sample_PRM068_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM069_align.matches.tsv -o ../results/haplotypes/sample_PRM069_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM070_align.matches.tsv -o ../results/haplotypes/sample_PRM070_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM071_align.matches.tsv -o ../results/haplotypes/sample_PRM071_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM072_align.matches.tsv -o ../results/haplotypes/sample_PRM072_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM073_align.matches.tsv -o ../results/haplotypes/sample_PRM073_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM074_align.matches.tsv -o ../results/haplotypes/sample_PRM074_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM075_align.matches.tsv -o ../results/haplotypes/sample_PRM075_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM076_align.matches.tsv -o ../results/haplotypes/sample_PRM076_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM077_align.matches.tsv -o ../results/haplotypes/sample_PRM077_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM078_align.matches.tsv -o ../results/haplotypes/sample_PRM078_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM079_align.matches.tsv -o ../results/haplotypes/sample_PRM079_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM080_align.matches.tsv -o ../results/haplotypes/sample_PRM080_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM081_align.matches.tsv -o ../results/haplotypes/sample_PRM081_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM082_align.matches.tsv -o ../results/haplotypes/sample_PRM082_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM083_align.matches.tsv -o ../results/haplotypes/sample_PRM083_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM084_align.matches.tsv -o ../results/haplotypes/sample_PRM084_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM085_align.matches.tsv -o ../results/haplotypes/sample_PRM085_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM086-23_align.matches.tsv -o ../results/haplotypes/sample_PRM086-23_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM086R_align.matches.tsv -o ../results/haplotypes/sample_PRM086_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM087_align.matches.tsv -o ../results/haplotypes/sample_PRM087_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM088_align.matches.tsv -o ../results/haplotypes/sample_PRM088_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM089_align.matches.tsv -o ../results/haplotypes/sample_PRM089_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM090_align.matches.tsv -o ../results/haplotypes/sample_PRM090_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM091_align.matches.tsv -o ../results/haplotypes/sample_PRM091_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM092_align.matches.tsv -o ../results/haplotypes/sample_PRM092_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM093_align.matches.tsv -o ../results/haplotypes/sample_PRM093_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM094_align.matches.tsv -o ../results/haplotypes/sample_PRM094_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM095_align.matches.tsv -o ../results/haplotypes/sample_PRM095_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM096_align.matches.tsv -o ../results/haplotypes/sample_PRM096_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM097_align.matches.tsv -o ../results/haplotypes/sample_PRM097_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM098_align.matches.tsv -o ../results/haplotypes/sample_PRM098_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM099_align.matches.tsv -o ../results/haplotypes/sample_PRM099_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM100_align.matches.tsv -o ../results/haplotypes/sample_PRM100_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM101_align.matches.tsv -o ../results/haplotypes/sample_PRM101_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM102_align.matches.tsv -o ../results/haplotypes/sample_PRM102_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM103_align.matches.tsv -o ../results/haplotypes/sample_PRM103_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM104_align.matches.tsv -o ../results/haplotypes/sample_PRM104_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM105_align.matches.tsv -o ../results/haplotypes/sample_PRM105_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM106_align.matches.tsv -o ../results/haplotypes/sample_PRM106_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM107_align.matches.tsv -o ../results/haplotypes/sample_PRM107_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM108_align.matches.tsv -o ../results/haplotypes/sample_PRM108_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM109_align.matches.tsv -o ../results/haplotypes/sample_PRM109_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM110_align.matches.tsv -o ../results/haplotypes/sample_PRM110_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM111_align.matches.tsv -o ../results/haplotypes/sample_PRM111_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM112_align.matches.tsv -o ../results/haplotypes/sample_PRM112_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM113_align.matches.tsv -o ../results/haplotypes/sample_PRM113_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM114_align.matches.tsv -o ../results/haplotypes/sample_PRM114_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM115_align.matches.tsv -o ../results/haplotypes/sample_PRM115_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM116_align.matches.tsv -o ../results/haplotypes/sample_PRM116_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM117_align.matches.tsv -o ../results/haplotypes/sample_PRM117_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM118_align.matches.tsv -o ../results/haplotypes/sample_PRM118_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM119_align.matches.tsv -o ../results/haplotypes/sample_PRM119_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM120_align.matches.tsv -o ../results/haplotypes/sample_PRM120_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM121_align.matches.tsv -o ../results/haplotypes/sample_PRM121_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM122_align.matches.tsv -o ../results/haplotypes/sample_PRM122_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM123_align.matches.tsv -o ../results/haplotypes/sample_PRM123_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM124_align.matches.tsv -o ../results/haplotypes/sample_PRM124_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM125_align.matches.tsv -o ../results/haplotypes/sample_PRM125_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM126_align.matches.tsv -o ../results/haplotypes/sample_PRM126_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM127_align.matches.tsv -o ../results/haplotypes/sample_PRM127_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM128_align.matches.tsv -o ../results/haplotypes/sample_PRM128_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM129_align.matches.tsv -o ../results/haplotypes/sample_PRM129_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM130_align.matches.tsv -o ../results/haplotypes/sample_PRM130_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM131_align.matches.tsv -o ../results/haplotypes/sample_PRM131_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM132_align.matches.tsv -o ../results/haplotypes/sample_PRM132_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM133_align.matches.tsv -o ../results/haplotypes/sample_PRM133_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM134_align.matches.tsv -o ../results/haplotypes/sample_PRM134_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM135_align.matches.tsv -o ../results/haplotypes/sample_PRM135_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM136_align.matches.tsv -o ../results/haplotypes/sample_PRM136_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM137_align.matches.tsv -o ../results/haplotypes/sample_PRM137_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM138_align.matches.tsv -o ../results/haplotypes/sample_PRM138_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM139_align.matches.tsv -o ../results/haplotypes/sample_PRM139_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM140_align.matches.tsv -o ../results/haplotypes/sample_PRM140_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM141_align.matches.tsv -o ../results/haplotypes/sample_PRM141_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM142_align.matches.tsv -o ../results/haplotypes/sample_PRM142_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM143_align.matches.tsv -o ../results/haplotypes/sample_PRM143_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM144_align.matches.tsv -o ../results/haplotypes/sample_PRM144_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM145_align.matches.tsv -o ../results/haplotypes/sample_PRM145_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM146_align.matches.tsv -o ../results/haplotypes/sample_PRM146_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM147_align.matches.tsv -o ../results/haplotypes/sample_PRM147_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM148_align.matches.tsv -o ../results/haplotypes/sample_PRM148_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM149_align.matches.tsv -o ../results/haplotypes/sample_PRM149_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM150_align.matches.tsv -o ../results/haplotypes/sample_PRM150_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM151_align.matches.tsv -o ../results/haplotypes/sample_PRM151_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM152_align.matches.tsv -o ../results/haplotypes/sample_PRM152_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM153_align.matches.tsv -o ../results/haplotypes/sample_PRM153_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM154_align.matches.tsv -o ../results/haplotypes/sample_PRM154_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM155_align.matches.tsv -o ../results/haplotypes/sample_PRM155_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM156_align.matches.tsv -o ../results/haplotypes/sample_PRM156_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM157_align.matches.tsv -o ../results/haplotypes/sample_PRM157_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM158_align.matches.tsv -o ../results/haplotypes/sample_PRM158_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM159_align.matches.tsv -o ../results/haplotypes/sample_PRM159_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM160_align.matches.tsv -o ../results/haplotypes/sample_PRM160_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM161_align.matches.tsv -o ../results/haplotypes/sample_PRM161_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM162_align.matches.tsv -o ../results/haplotypes/sample_PRM162_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM163_align.matches.tsv -o ../results/haplotypes/sample_PRM163_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM164_align.matches.tsv -o ../results/haplotypes/sample_PRM164_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM165_align.matches.tsv -o ../results/haplotypes/sample_PRM165_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM166_align.matches.tsv -o ../results/haplotypes/sample_PRM166_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM167_align.matches.tsv -o ../results/haplotypes/sample_PRM167_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM168_align.matches.tsv -o ../results/haplotypes/sample_PRM168_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM169_align.matches.tsv -o ../results/haplotypes/sample_PRM169_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM170_align.matches.tsv -o ../results/haplotypes/sample_PRM170_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM171_align.matches.tsv -o ../results/haplotypes/sample_PRM171_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM172_align.matches.tsv -o ../results/haplotypes/sample_PRM172_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM173_align.matches.tsv -o ../results/haplotypes/sample_PRM173_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM174_align.matches.tsv -o ../results/haplotypes/sample_PRM174_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM175_align.matches.tsv -o ../results/haplotypes/sample_PRM175_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM176_align.matches.tsv -o ../results/haplotypes/sample_PRM176_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM177-1_align.matches.tsv -o ../results/haplotypes/sample_PRM177-1_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM177_align.matches.tsv -o ../results/haplotypes/sample_PRM177_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM178_align.matches.tsv -o ../results/haplotypes/sample_PRM178_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM179_align.matches.tsv -o ../results/haplotypes/sample_PRM179_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM180_align.matches.tsv -o ../results/haplotypes/sample_PRM180_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM181_align.matches.tsv -o ../results/haplotypes/sample_PRM181_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM182_align.matches.tsv -o ../results/haplotypes/sample_PRM182_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM183_align.matches.tsv -o ../results/haplotypes/sample_PRM183_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM184_align.matches.tsv -o ../results/haplotypes/sample_PRM184_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM185_align.matches.tsv -o ../results/haplotypes/sample_PRM185_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM186_align.matches.tsv -o ../results/haplotypes/sample_PRM186_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM187_align.matches.tsv -o ../results/haplotypes/sample_PRM187_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM188_align.matches.tsv -o ../results/haplotypes/sample_PRM188_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt
+../programs/convert_matches/convert_matches -i ../results/stacks/sample_PRM189_align.matches.tsv -o ../results/haplotypes/sample_PRM189_haplotypes.txt -w ../results/stacks/CatalogIDsToKeep.txt

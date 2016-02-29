@@ -84,11 +84,13 @@ int main(int argc, char* argv[])
 	size_t t, tt;
 	double temp;
 	string hap;
-	string matches_in_name, matches_out_name, line;
-	ifstream matches_in;
+	string matches_in_name, matches_out_name, line, whitelist_name;
+	ifstream matches_in, whitelist_file;
 	ofstream matches_out;
 	vector<locus> individual;
-	
+	vector <int> whitelisted_loci;
+	bool whitelist = false;
+	bool found = false;
 	
 	bool interactivemode = false;
 	string query;
@@ -103,11 +105,14 @@ int main(int argc, char* argv[])
 			cout << "\nProcess Matches Files from Stacks to get haplotypes per catalog locus\n";
 			cout << "-i:\tinput file (with path)\n";
 			cout << "-o:\toutput file name (with path)\n";
+			cout << "-w:\tOptional whitelist name (with path)\n";
 			cout << "no arguments:\tinteractive mode\n";
 			cout << "Input integer to quit\n";
 			cin >> end;
 			return 0;
 		}
+		if (query == "I" || query == "i")
+			interactivemode = true;
 	}
 
 	if (argc > 1)
@@ -118,6 +123,7 @@ int main(int argc, char* argv[])
 			cout << "\nProcess Matches Files from Stacks to get haplotypes per catalog locus\n";
 			cout << "-i:\tinput file (with path)\n";
 			cout << "-o:\toutput file name (with path)\n";
+			cout << "-w:\tOptional whitelist name (with path)\n";
 			cout << "no arguments:\tinteractive mode\n";
 			return 0;
 		}
@@ -134,6 +140,11 @@ int main(int argc, char* argv[])
 			matches_in_name = tempstring2;
 		if (tempstring1 == "-o")
 			matches_out_name = tempstring2;
+		if (tempstring1 == "-w")
+		{
+			whitelist = true;
+			whitelist_name = tempstring2;
+		}
 	}
 
 	if (interactivemode)
@@ -142,6 +153,14 @@ int main(int argc, char* argv[])
 		cin >> matches_in_name;
 		cout << "\nOutput Filename:\n";
 		cin >> matches_out_name;
+		cout << "\nWould you like to use a whitelist?\n";
+		cin >> tempstring1;
+		if (tempstring1 == "YES" || tempstring1 == "Y" || tempstring1 == "yes" || tempstring1 == "y" || tempstring1 == "Yes")
+		{
+			whitelist = true;
+			cout << "\nWhat is the file name (with path)?\n";
+			cin >> whitelist_name;
+		}
 	}
 
 	if (matches_in_name == "default")
@@ -160,13 +179,15 @@ int main(int argc, char* argv[])
 
 	cout << "\n\nInput File:\t" << matches_in_name;
 	cout << "\nOutput File:\t" << matches_out_name;
+	if (whitelist)
+		cout << "\nUsing whitelist:\t" << whitelist_name;
 
 	if (interactivemode)
 	{
 		cout << "\n\nProceed? (y to proceed)\n";
 		cin >> query;
 
-		if (query == "n" && query == "N")
+		if (query == "n" || query == "N" || query == "NO" || query == "no" || query == "No")
 		{
 			cout << "\n\nEnter an integer to exit!!\n";
 			cin >> query;
@@ -179,6 +200,20 @@ int main(int argc, char* argv[])
 		cout << "\nProceeding...\n";
 
 
+	if (whitelist)
+	{
+		whitelist_file.open(whitelist_name);
+		FileTest(whitelist_file, whitelist_name);
+		while (universal_getline(whitelist_file, line))
+		{
+			if (!whitelist_file.eof())
+			{
+				whitelisted_loci.push_back(atoi(line.c_str()));
+			}
+		}
+		whitelist_file.close();
+	}
+
 	matches_in.open(matches_in_name);
 	FileTest(matches_in, matches_in_name);
 	
@@ -189,48 +224,60 @@ int main(int argc, char* argv[])
 			stringstream ss;
 			ss.str(line);
 			ss >> temp1 >> temp2 >> loc >> temp3 >> temp4 >> hap >> count1 >> temp5;
-			if (individual.size() > 0)
+			if (whitelist)
 			{
-				loc_index = -5;
-				for (t = 0; t < individual.size(); t++)
+				found = false;
+				for (int i = 0; i < whitelisted_loci.size(); i++)
 				{
-					if (individual[t].cat_id == loc)
-						loc_index = t;
+					if (whitelisted_loci[i] == loc)
+						found = true;
 				}
-				if (loc_index >= 0)
+			}
+			if (!whitelist || found)
+			{
+				if (individual.size() > 0)
 				{
-					individual[loc_index].count++;
-					allele_index = -5;
-					for (tt = 0; tt < individual[loc_index].alleles.size(); tt++)
+					loc_index = -5;
+					for (t = 0; t < individual.size(); t++)
 					{
-						if (individual[loc_index].alleles[tt] == hap)
-							allele_index = tt;
+						if (individual[t].cat_id == loc)
+							loc_index = t;
 					}
-					if (allele_index < 0)
+					if (loc_index >= 0)
 					{
-						individual[loc_index].alleles.push_back(hap);
-						individual[loc_index].allele_count.push_back(count1);
+						individual[loc_index].count++;
+						allele_index = -5;
+						for (tt = 0; tt < individual[loc_index].alleles.size(); tt++)
+						{
+							if (individual[loc_index].alleles[tt] == hap)
+								allele_index = tt;
+						}
+						if (allele_index < 0)
+						{
+							individual[loc_index].alleles.push_back(hap);
+							individual[loc_index].allele_count.push_back(count1);
+						}
+						else
+							individual[loc_index].allele_count[allele_index] = count1;
 					}
 					else
-						individual[loc_index].allele_count[allele_index] = count1;
-				}
+					{
+						individual.push_back(locus());
+						individual.back().cat_id = loc;
+						individual.back().count = 1;
+						individual.back().alleles.push_back(hap);
+						individual.back().allele_count.push_back(count1);
+					}
+				}//individual
 				else
-				{
+				{//it's the first one
 					individual.push_back(locus());
 					individual.back().cat_id = loc;
 					individual.back().count = 1;
 					individual.back().alleles.push_back(hap);
 					individual.back().allele_count.push_back(count1);
 				}
-			}
-			else
-			{//it's the first one
-				individual.push_back(locus());
-				individual.back().cat_id = loc;
-				individual.back().count = 1;
-				individual.back().alleles.push_back(hap);
-				individual.back().allele_count.push_back(count1);
-			}
+			}//whitelist/found
 		}
 	}
 	matches_in.close();

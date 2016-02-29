@@ -65,12 +65,14 @@ int main(int argc, char* argv[])
 	int ID, count1, last_loc;
 	double temp;
 	string hap;
-	string alleles_in_name, alleles_out_name, line;
-	ifstream alleles_in;
+	string alleles_in_name, alleles_out_name, line, whitelist_name;
+	ifstream alleles_in, whitelist_file;
 	ofstream alleles_out;
 	bool interactivemode = false;
+	bool whitelist = false;
 	string query;
 	string tempstring1, tempstring2;
+	vector <int> whitelisted_loci;
 
 
 	if (argc == 1)
@@ -82,11 +84,14 @@ int main(int argc, char* argv[])
 			cout << "\nProcess Alleles Files from Stacks for selection components analysis\n";
 			cout << "-i:\tinput file (with path)\n";
 			cout << "-o:\toutput file name (with path)\n";
+			cout << "-w:\tOptional whitelist name (with path)\n";
 			cout << "no arguments:\tinteractive mode\n";
 			cout << "Input integer to quit\n";
 			cin >> end;
 			return 0;
 		}
+		if (query == "I" || query == "i")
+			interactivemode = true;
 	}
 
 	if (argc > 1)
@@ -97,6 +102,7 @@ int main(int argc, char* argv[])
 			cout << "\nProcess Alleles Files from Stacks for selection components analysis\n";
 			cout << "-i:\tinput file (with path)\n";
 			cout << "-o:\toutput file name (with path)\n";
+			cout << "-w:\tOptional whitelist name (with path)\n";
 			cout << "no arguments:\tinteractive mode\n";
 			return 0;
 		}
@@ -113,6 +119,12 @@ int main(int argc, char* argv[])
 			alleles_in_name = tempstring2;
 		if (tempstring1 == "-o")
 			alleles_out_name = tempstring2;
+		if (tempstring1 == "-w")
+		{
+			whitelist = true;
+			whitelist_name = tempstring2;
+		}
+
 	}
 
 	if (interactivemode)
@@ -121,6 +133,14 @@ int main(int argc, char* argv[])
 		cin >> alleles_in_name;
 		cout << "\nOutput Filename:\n";
 		cin >> alleles_out_name;
+		cout << "\nWould you like to use a whitelist?\n";
+		cin >> tempstring1;
+		if (tempstring1 == "YES" || tempstring1 == "Y" || tempstring1 == "yes" || tempstring1 == "y" || tempstring1 == "Yes")
+		{
+			whitelist = true;
+			cout << "\nWhat is the file name (with path)?\n";
+			cin >> whitelist_name;
+		}
 	}
 
 	if (alleles_in_name == "default")
@@ -139,13 +159,15 @@ int main(int argc, char* argv[])
 
 	cout << "\n\nInput File:\t" << alleles_in_name;
 	cout << "\nOutput File:\t" << alleles_out_name;
+	if (whitelist)
+		cout << "\nUsing whitelist:\t" << whitelist_name;
 
 	if (interactivemode)
 	{
 		cout << "\n\nProceed? (y to proceed)\n";
 		cin >> query;
 
-		if (query != "n" && query != "N")
+		if (query == "n" && query == "N")
 		{
 			cout << "\n\nEnter an integer to exit!!\n";
 			cin >> query;
@@ -155,6 +177,20 @@ int main(int argc, char* argv[])
 	else
 		cout << "\nProceeding...\n";
 	
+	if (whitelist)
+	{
+		whitelist_file.open(whitelist_name);
+		FileTest(whitelist_file, whitelist_name);
+		while (universal_getline(whitelist_file, line))
+		{
+			if (!whitelist_file.eof())
+			{
+				whitelisted_loci.push_back(atoi(line.c_str()));
+			}
+		}
+		whitelist_file.close();
+	}
+
 	alleles_in.open(alleles_in_name);
 	FileTest(alleles_in, alleles_in_name);
 	alleles_out.open(alleles_out_name);
@@ -167,11 +203,31 @@ int main(int argc, char* argv[])
 			stringstream ss;
 			ss.str(line);
 			ss >> temp1 >> temp2 >> ID >> hap >> temp >> count1;
-			if (last_loc == ID)
-				alleles_out << '\t' << hap << '\t' << count1;
+			if (whitelist)
+			{
+				bool found = false;
+				for (int i = 0; i < whitelisted_loci.size(); i++)
+				{
+					if (ID == whitelisted_loci[i])
+						found = true;
+				}
+				if (found)
+				{
+					if (last_loc == ID)
+						alleles_out << '\t' << hap << '\t' << count1;
+					else
+						alleles_out << '\n' << temp2 << '\t' << ID << '\t' << hap << '\t' << count1;
+					last_loc = ID;
+				}
+			}
 			else
-				alleles_out << '\n' << temp2 << '\t' << ID << '\t' << hap << '\t' << count1;
-			last_loc = ID;
+			{
+				if (last_loc == ID)
+					alleles_out << '\t' << hap << '\t' << count1;
+				else
+					alleles_out << '\n' << temp2 << '\t' << ID << '\t' << hap << '\t' << count1;
+				last_loc = ID;
+			}
 		}
 	}
 	alleles_in.close();
