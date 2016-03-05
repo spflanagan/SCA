@@ -18,6 +18,7 @@ overall$Freq1<-overall$Count1/(2*overall$N)
 overall$Freq2<-1-overall$Freq1		
 max.af<-apply(overall[,c("Freq1","Freq2")],1,max)
 af.hist<-hist(max.af, breaks=100)
-af.export<-data.frame(breaks=af.hist$breaks[2:101], density=af.hist$density)
+af.export<-data.frame(breaks=af.hist$breaks[2:length(af.hist$breaks)], 
+	density=af.hist$density)
 write.table(af.export, "empirical_allelefreqs.txt", 
 	quote=F, col.names=F, row.names=F)

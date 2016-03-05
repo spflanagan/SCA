@@ -124,8 +124,8 @@ int main()
 	bool first = true;
 
 	path = "../../../results/biallelic/";
-	dad_kid_name = "../../../results/stacks/dad.kid.pairs.fullnames.txt";
-	vcf_name = "../../../results/stacks/batch_1.pruned.vcf";
+	dad_kid_name = "../../../results/dad.kid.pairs.fullnames.txt";
+	vcf_name = "../../../results/stacks/batch_1.vcf";
 	summary_name = path + "biallelic_maternal.vcf";
 
 	
@@ -151,7 +151,7 @@ int main()
 	vcf.open(vcf_name);
 	FileTest(vcf, vcf_name);
 	summary.open(summary_name);
-	//summary << "##Includes Inferred Maternal Alleles";
+	summary << "##source='Includes Inferred Maternal Alleles'";
 	locus_index = line_count = snp_count = 0;
 	while (universal_getline(vcf, line))
 	{

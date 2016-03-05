@@ -2,117 +2,10 @@
 #Date: 11 February 2016
 #Purpose: Analyze the output from gwsca_biallelic.
 
+source("E:/ubuntushare/SCA/scripts/plotting_functions.R")
 setwd("E:/ubuntushare/SCA/results/biallelic")
 gw.fst<-read.delim("gwsca_fsts.txt")
 gw.sum<-read.delim("gwsca_summary.txt")
-
-#pstI only
-gw.psti.fst<-read.delim("gwsca_fsts_psti.txt")
-gw.psti.sum<-read.delim("gwsca_summary_psti.txt")
-gw.psti.fst$Locus<-paste(gw.psti.fst$Chrom,gw.psti.fst$Pos,sep=".")
-gw.psti.sum$Locus<-paste(gw.psti.sum$Chrom,gw.psti.sum$Pos,sep=".")
-gw.psti.sum<-gw.psti.sum[!is.na(gw.psti.sum$AA),]
-gw.psti.sum$AAexp<-gw.psti.sum$Allele1Freq*gw.psti.sum$Allele1Freq
-gw.psti.sum$aaexp<-gw.psti.sum$Allele2Freq*gw.psti.sum$Allele2Freq
-gw.psti.sum$Aaexp<-1-gw.psti.sum$aaexp-gw.psti.sum$AAexp
-gw.psti.sum$chi<-(((gw.psti.sum$AA-gw.psti.sum$AAexp)^2)/gw.psti.sum$AAexp)+
-	(((gw.psti.sum$Aa-gw.psti.sum$Aaexp)^2)/gw.psti.sum$Aaexp)+
-	(((gw.psti.sum$aa-gw.psti.sum$aaexp)^2)/gw.psti.sum$aaexp)
-gw.psti.sum$chi.result<-1-pchisq(gw.psti.sum$chi,1) #biallelic, df=1
-sum.sum<-tapply(gw.psti.sum$N,gw.psti.sum$Locus,sum)
-sum.sum<-sum.sum[as.numeric(sum.sum) > 87]#total N is 58*2<-this is 75%
-psum.prune<-gw.psti.sum[gw.psti.sum$Locus %in% names(sum.sum),]
-psum.list<-split(psum.prune, psum.prune$Pop)
-pfem.n<-psum.list$FEM[psum.list$FEM$N > 30,]
-pmal.n<-psum.list$PRM[psum.list$PRM$N>28,]
-#Now prune based on allele frequencies
-pfem.n<-pfem.n[pfem.n$Allele1Freq > 0.05 & pfem.n$Allele1Freq < 0.95,]
-pmal.n<-pmal.n[pmal.n$Allele1Freq > 0.05 & pmal.n$Allele1Freq < 0.95,]
-#comparisons
-pfm.prune<-gw.psti.fst[gw.psti.fst$Locus %in% pmal.n$Locus &
-	gw.psti.fst$Locus %in% pfem.n$Locus, ]
-pfm.prune<-pfm.prune[pfm.prune$FEM.PRM>0,]
-
-
-#all ddRAD inds
-dgw.fst<-read.delim("gwsca_fsts_ddRAD.txt")
-dgw.sum<-read.delim("gwsca_summary_ddRAD.txt")
-dgw.fst$Locus<-paste(dgw.fst$Chrom,dgw.fst$Pos,sep=".")
-dgw.sum$Locus<-paste(dgw.sum$Chrom,dgw.sum$Pos,sep=".")
-dgw.sum<-dgw.sum[!is.na(dgw.sum$AA),]
-dgw.sum$AAexp<-dgw.sum$Allele1Freq*dgw.sum$Allele1Freq
-dgw.sum$aaexp<-dgw.sum$Allele2Freq*dgw.sum$Allele2Freq
-dgw.sum$Aaexp<-1-dgw.sum$aaexp-dgw.sum$AAexp
-dgw.sum$chi<-(((dgw.sum$AA-dgw.sum$AAexp)^2)/dgw.sum$AAexp)+
-	(((dgw.sum$Aa-dgw.sum$Aaexp)^2)/dgw.sum$Aaexp)+
-	(((dgw.sum$aa-dgw.sum$aaexp)^2)/dgw.sum$aaexp)
-dgw.sum$chi.result<-1-pchisq(dgw.sum$chi,1) #biallelic, df=1
-sum.sum<-tapply(dgw.sum$N,dgw.sum$Locus,sum)
-sum.sum<-sum.sum[as.numeric(sum.sum) > 87]#total N is 58*2<-this is 75%
-dsum.prune<-dgw.sum[dgw.sum$Locus %in% names(sum.sum),]
-dsum.list<-split(dsum.prune, dsum.prune$Pop)
-dfem.n<-dsum.list$FEM[dsum.list$FEM$N > 30,]
-dmal.n<-dsum.list$PRM[dsum.list$PRM$N>28,]
-#Now prune based on allele frequencies
-dfem.n<-dfem.n[dfem.n$Allele1Freq > 0.05 & dfem.n$Allele1Freq < 0.95,]
-dmal.n<-dmal.n[dmal.n$Allele1Freq > 0.05 & dmal.n$Allele1Freq < 0.95,]
-#comparisons
-dfm.prune<-dgw.fst[dgw.fst$Locus %in% dmal.n$Locus &
-	dgw.fst$Locus %in% dfem.n$Locus, ]
-dfm.prune<-dfm.prune[dfm.prune$FEM.PRM>0,]
-
-#ddRAD subset
-dsgw.fst<-read.delim("gwsca_fsts_ddRADsub.txt")
-dsgw.sum<-read.delim("gwsca_summary_ddRADsub.txt")
-dsgw.fst$Locus<-paste(dsgw.fst$Chrom,dsgw.fst$Pos,sep=".")
-dsgw.sum$Locus<-paste(dsgw.sum$Chrom,dsgw.sum$Pos,sep=".")
-dsgw.sum<-dsgw.sum[!is.na(dsgw.sum$AA),]
-dsgw.sum$AAexp<-dsgw.sum$Allele1Freq*dsgw.sum$Allele1Freq
-dsgw.sum$aaexp<-dsgw.sum$Allele2Freq*dsgw.sum$Allele2Freq
-dsgw.sum$Aaexp<-1-dsgw.sum$aaexp-dsgw.sum$AAexp
-dsgw.sum$chi<-(((dsgw.sum$AA-dsgw.sum$AAexp)^2)/dsgw.sum$AAexp)+
-	(((dsgw.sum$Aa-dsgw.sum$Aaexp)^2)/dsgw.sum$Aaexp)+
-	(((dsgw.sum$aa-dsgw.sum$aaexp)^2)/dsgw.sum$aaexp)
-dsgw.sum$chi.result<-1-pchisq(dsgw.sum$chi,1) #biallelic, df=1
-sum.sum<-tapply(dsgw.sum$N,dsgw.sum$Locus,sum)
-sum.sum<-sum.sum[as.numeric(sum.sum) > 87]#total N is 58*2<-this is 75%
-dssum.prune<-dsgw.sum[dsgw.sum$Locus %in% names(sum.sum),]
-dssum.list<-split(dssum.prune, dssum.prune$Pop)
-dsfem.n<-dssum.list$FEM[dssum.list$FEM$N > 30,]
-dsmal.n<-dssum.list$PRM[dssum.list$PRM$N>28,]
-#Now prune based on allele frequencies
-dsfem.n<-dsfem.n[dsfem.n$Allele1Freq > 0.05 & dsfem.n$Allele1Freq < 0.95,]
-dsmal.n<-dsmal.n[dsmal.n$Allele1Freq > 0.05 & dsmal.n$Allele1Freq < 0.95,]
-#comparisons
-dsfm.prune<-dsgw.fst[dsgw.fst$Locus %in% dsmal.n$Locus &
-	dsgw.fst$Locus %in% dsfem.n$Locus, ]
-dsfm.prune<-dsfm.prune[dsfm.prune$FEM.PRM>0,]
-
-png("ddRADvoRAD.png",height=7,width=21,units="in",res=300)
-par(mfrow=c(1,3),mar=c(2,2,2,2),oma=c(2,2,2,2))
-plot(pfm.prune$FEM.PRM,ylab="",xlab="",axes=F,ylim=c(0,0.6))
-axis(1,pos=0)
-axis(2,pos=0,las=2,ylim=c(0,0.6))
-mtext("original RAD",3,outer=F)
-abline(h=0.025,col="grey")
-abline(h=0.05,col="grey")
-plot(dfm.prune$FEM.PRM,ylab="",xlab="",axes=F,ylim=c(0,0.6))
-axis(1,pos=0)
-axis(2,pos=0,las=2,ylim=c(0,0.6))
-mtext("ddRAD",3,outer=F)
-abline(h=0.025,col="grey")
-abline(h=0.05,col="grey")
-plot(dsfm.prune$FEM.PRM,ylab="",xlab="",axes=F,ylim=c(0,0.6))
-axis(1,pos=0)
-axis(2,pos=0,las=2,ylim=c(0,0.6))
-abline(h=0.025,col="grey")
-abline(h=0.05,col="grey")
-mtext("ddRAD Subset",3,outer=F)
-mtext("Index",1,outer=T,line=2)
-mtext("Fst",2,outer=T,line=2)
-dev.off()
-
-
 #gw.fst<-gw.fst[,c("Chrom","Pos","ADULT.JUVIE","MAL.FEM","PREGGER.OFF",
 #	"MOM.FEM")]
 gw.fst$Locus<-paste(gw.fst$Chrom,gw.fst$Pos,sep=".")
@@ -135,18 +28,18 @@ gw.hwe<-gw.sum[gw.sum$chi.result > 0.05,]
 sum.prune<-gw.hwe[gw.hwe$Pop=="ADULT" | gw.hwe$Pop=="JUVIE" | 
 	gw.hwe$Pop == "POP",]
 sum.sum<-tapply(sum.prune$N,sum.prune$Locus,sum)
-sum.sum<-sum.sum[as.numeric(sum.sum) > 846]#total N is 564*2<-this is ~75%
+sum.sum<-sum.sum[as.numeric(sum.sum) > 393]
 sum.prune<-gw.hwe[gw.hwe$Locus %in% names(sum.sum),]
 
 ##prune based on representation in the groups
 sum.list<-split(sum.prune, sum.prune$Pop)
-adt.n<-sum.list$ADULT[sum.list$ADULT$N > 255 & !is.na(sum.list$ADULT$Hs),]
+adt.n<-sum.list$ADULT[sum.list$ADULT$N > 216 & !is.na(sum.list$ADULT$Hs),]
 juv.n<-sum.list$JUVIE[sum.list$JUVIE$N > 157 & !is.na(sum.list$JUVIE$Hs),]
-fem.n<-sum.list$FEM[sum.list$FEM$N > 87& !is.na(sum.list$FEM$Hs),]#130
-mal.n<-sum.list$MAL[sum.list$MAL$N>168& !is.na(sum.list$MAL$Hs),]
-mom.n<-sum.list$MOM[sum.list$MOM$N>152& !is.na(sum.list$MOM$Hs),]
-pop.n<-sum.list$POP[sum.list$POP$N>87& !is.na(sum.list$POP$Hs),]
-prg.n<-sum.list$PREGGER[sum.list$PREGGER$N>200& !is.na(sum.list$PREGGER$Hs),]
+fem.n<-sum.list$FEM[sum.list$FEM$N > 57& !is.na(sum.list$FEM$Hs),]
+mal.n<-sum.list$MAL[sum.list$MAL$N>159& !is.na(sum.list$MAL$Hs),]
+mom.n<-sum.list$MOM[sum.list$MOM$N>133& !is.na(sum.list$MOM$Hs),]
+pop.n<-sum.list$POP[sum.list$POP$N>57& !is.na(sum.list$POP$Hs),]
+prg.n<-sum.list$PREGGER[sum.list$PREGGER$N>159& !is.na(sum.list$PREGGER$Hs),]
 non.n<-sum.list$NONPREG[sum.list$NONPREG$N>14& !is.na(sum.list$NONPREG$Hs),]
 
 #Now prune based on allele frequencies
@@ -164,9 +57,9 @@ non.n<-non.n[non.n$Allele1Freq > 0.05 & non.n$Allele1Freq < 0.95,]
 aj.prune<-gw.fst[gw.fst$Locus %in% adt.n$Locus&gw.fst$Locus %in% juv.n$Locus, ]
 aj.prune<-aj.prune[aj.prune$ADULT.JUVIE>0,]
 fm.prune<-gw.fst[gw.fst$Locus %in% mal.n$Locus&gw.fst$Locus %in% fem.n$Locus, ]
-fm.prune<-fm.prune[fm.prune$MAL.FEM>0,]
+fm.prune<-fm.prune[fm.prune$FEM.MOM>0,]
 mo.prune<-gw.fst[gw.fst$Locus %in% fem.n$Locus&gw.fst$Locus %in% mom.n$Locus, ]
-mo.prune<-mo.prune[mo.prune$MOM.FEM>0,]
+mo.prune<-mo.prune[mo.prune$FEM.MOM>0,]
 
 write.table(aj.plot, "aj.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
 write.table(fm.plot, "fm.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
@@ -179,14 +72,13 @@ gw.plot<-gw.fst[gw.fst$Locus %in% aj.prune$Locus |
 
 aj.ci<-c(mean(aj.prune$ADULT.JUVIE)+2.57583*sd(aj.prune$ADULT.JUVIE),
 	mean(aj.prune$ADULT.JUVIE)-2.57583*sd(aj.prune$ADULT.JUVIE))
-fm.ci<-c(mean(fm.prune$MAL.FEM)+2.57583*sd(fm.prune$MAL.FEM),
-	mean(fm.prune$MAL.FEM)-(2.57583*sd(fm.prune$MAL.FEM)))
-mo.ci<-c(mean(mo.prune$MOM.FEM)+(2.57583*sd(mo.prune$MOM.FEM)),
-	mean(mo.prune$MOM.FEM)-(2.57583*sd(mo.prune$MOM.FEM)))
+fm.ci<-c(mean(fm.prune$FEM.MAL)+2.57583*sd(fm.prune$FEM.MAL),
+	mean(fm.prune$FEM.MAL)-(2.57583*sd(fm.prune$FEM.MAL)))
+mo.ci<-c(mean(mo.prune$FEM.MOM)+(2.57583*sd(mo.prune$FEM.MOM)),
+	mean(mo.prune$FEM.MOM)-(2.57583*sd(mo.prune$FEM.MOM)))
 
 #get model data
-model<-read.delim("../sca_simulation_output/knowndist.ss0.2alleles.fst_out.txt")
-model<-read.delim("../sca_simulation_output/knowndist.ss0.2alleles.error01.fst_out.txt")
+model<-read.delim("../sca_simulation_output/ddraddist.ss0.2alleles.fst_out.txt")
 model.aj<-model[model$AOFst>0 & model$MaleAF < 0.95 & model$MaleAF > 0.05,]
 aj.null<-c(mean(model.aj$AOFst)+2.57583*sd(model.aj$AOFst),
 	mean(model.aj$AOFst)-2.57583*sd(model.aj$AOFst))
@@ -205,10 +97,10 @@ par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
 plot.fsts(aj.prune, ci.dat=aj.ci,fst.name="ADULT.JUVIE", chrom.name="Chrom"
 	, axis.size=0.75, bp.name="Pos")
 legend("top","Adult-Juvenile", cex=0.75,bty="n")
-plot.fsts(fm.prune, ci.dat=fm.ci,fst.name="MAL.FEM", chrom.name="Chrom"
+plot.fsts(fm.prune, ci.dat=fm.ci,fst.name="FEM.MAL", chrom.name="Chrom"
 	, axis.size=0.75,bp.name="Pos")
 legend("top","Male-Female", cex=0.75,bty="n")
-plot.fsts(mo.prune, ci.dat=mo.ci,fst.name="MOM.FEM", chrom.name="Chrom"
+plot.fsts(mo.prune, ci.dat=mo.ci,fst.name="FEM.MOM", chrom.name="Chrom"
 	, axis.size=0.75,bp.name="Pos")
 legend("top","Mothers-Females", cex=0.75,bty="n")
 mtext("Genomic Location", 1, outer=T, cex=1)
@@ -221,15 +113,25 @@ par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
 plot.fsts(aj.prune, ci.dat=aj.null,fst.name="ADULT.JUVIE", chrom.name="Chrom"
 	, axis.size=0.75, bp.name="Pos")
 legend("top","Adult-Juvenile", cex=0.75,bty="n")
-plot.fsts(fm.prune, ci.dat=mf.null,fst.name="MAL.FEM", chrom.name="Chrom"
+plot.fsts(fm.prune, ci.dat=mf.null,fst.name="FEM.MAL", chrom.name="Chrom"
 	, axis.size=0.75,bp.name="Pos")
 legend("top","Male-Female", cex=0.75,bty="n")
-plot.fsts(mo.prune, ci.dat=mo.null,fst.name="MOM.FEM", chrom.name="Chrom"
+plot.fsts(mo.prune, ci.dat=mo.null,fst.name="FEM.MOM", chrom.name="Chrom"
 	, axis.size=0.75,bp.name="Pos")
 legend("top","Mothers-Females", cex=0.75,bty="n")
 mtext("Genomic Location", 1, outer=T, cex=1)
 mtext("Fst", 2, outer=T, cex=1)
 dev.off()
+##TROUBLESHOOTING THE WEIRD PATTERNS
+#CALCULATE FST HERE
+fst.aj<-merge(adt.n,juv.n,by="Locus")
+fst.aj$AvgHs<-(fst.aj$Hs.x+fst.aj$Hs.y)/2
+fst.aj$pbar<-((fst.aj$Allele1Freq.x*fst.aj$N.x)+
+	(fst.aj$Allele1Freq.y*fst.aj$N.y))/(fst.aj$N.x+fst.aj$N.y)
+fst.aj$qbar<-((fst.aj$Allele2Freq.x*fst.aj$N.x)+
+	(fst.aj$Allele2Freq.y*fst.aj$N.y))/(fst.aj$N.x+fst.aj$N.y)
+fst.aj$ht<-1-((fst.aj$pbar*fst.aj$pbar)+(fst.aj$qbar*fst.aj$qbar))
+fst.aj$fst<-(fst.aj$ht-fst.aj$AvgHs)/fst.aj$ht
 
 ##TROUBLESHOOTING MALE-FEMALE COMPARISON
  weirdos<-fm.prune[fm.prune$MAL.FEM > 0.03,]

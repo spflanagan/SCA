@@ -50,3 +50,11 @@ rm(sumstats)
 
 files<-read.table("biallelic/samples_list.txt", stringsAsFactors=F)
 reformat<-lapply(files$V1, reformat.snp)
+
+
+#dads<-cbind(dads,gsub(".*(\\d{3}).*","\\1",dads))
+#colnames(dads)<-c("id","num")
+#off<-cbind(off,gsub(".*(\\d{3}).*","\\1",off))
+#colnames(off)<-c("id","num")
+#write.table(merge(dads,off,by="num"),"dad.kid.pairs.fullnames.txt",quote=F,
+#	col.names=F,row.names=F,sep="\t")

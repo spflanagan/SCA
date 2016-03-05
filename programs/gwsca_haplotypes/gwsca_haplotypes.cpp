@@ -114,7 +114,7 @@ int main()
 {
 	int i, ii, iii, end, pop_index, al1_count, al2_count, loc_id, index, al1i, al2i;
 	size_t t, tt, ttt;
-	string line, filename, ind_id, sex, age, status, allele1, allele2;
+	string line, filename, ind_id, sex, age, status, allele1, allele2, out_path;
 	string ind_info_name, fst_out_name, summary_out_name, alleles_out_name;
 	ifstream ind_info;
 	ofstream fst_out, summary_out, alleles_out;
@@ -122,7 +122,8 @@ int main()
 	vector<locus> reference;
 	vector<locus_statistics> pop_stats;
 
-	ind_info_name = "ind_info.txt";
+	out_path = "../../results/haplotypes/";
+	ind_info_name = "../../results/haplotypes/ind_info.txt";
 	ind_info.open(ind_info_name);
 	FileTest(ind_info, ind_info_name);
 	while (universal_getline(ind_info, line))
@@ -314,7 +315,7 @@ int main()
 	}
 
 	cout << "\nRecorded " << reference.size() << " RAD loci in " << inds.size() << " individuals spread among " << pop_stats.size() << " groups.\n";
-	summary_out_name = "gwsca_summary.txt";
+	summary_out_name = out_path + "gwsca_hap_summary.txt";
 	summary_out.open(summary_out_name);
 	summary_out << "Pop\tLocusName\tHs\tHo\tNumAlleles";
 	vector<vector<double>> fsts;
@@ -365,7 +366,7 @@ int main()
 	summary_out.close();
 
 	cout << "\nWriting Allele Information to File\n";
-	alleles_out_name = "gwsca_haplotypes_alleles.txt";
+	alleles_out_name = out_path + "gwsca_haplotypes_alleles.txt";
 	alleles_out.open(alleles_out_name);
 	alleles_out << "Locus\tAllele";
 	for (t = 0; t < pop_stats.size(); t++)
@@ -405,7 +406,7 @@ int main()
 	index = 0;
 
 	cout << "\nWriting Fst Values to File.\n";
-	fst_out_name = "gwsca_fsts.txt";
+	fst_out_name = out_path + "gwsca_hap_fsts.txt";
 	fst_out.open(fst_out_name);
 	fst_out << "Locus";
 	for (t = 0; t < pop_stats.size(); t++)
@@ -456,7 +457,7 @@ int main()
 	}
 	
 	cout << "\nWriting Lumped Fst Values to File.\n";
-	fst_out_name = "gwsca_fsts_lumped.txt";
+	fst_out_name = out_path + "gwsca_fsts_lumped.txt";
 	fst_out.open(fst_out_name);
 	fst_out << "Locus";
 	for (t = 0; t < pop_stats.size(); t++)

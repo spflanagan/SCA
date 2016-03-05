@@ -2,6 +2,92 @@ Selection Components Analysis Log File
 This is being started on 27 January 2016 so it's a bit late, and I've already filled my lab notebook with >50 pages
 Outline of the approach:
 1. Run Stacks, prune dataset, calculate Fsts among groups, compare those Fst distributions to null distributions from simulation models.
+	Programs utilized:
+	-> ref_map.pl (Stacks)
+	-> populations (Stacks)
+	biallelic:
+		-> scripts/convert_snps.R 
+		-> infer_maternal_contribution/infer_mat_vcf/infer_mat_vcf 
+		-> vcftools (extract_gt_info.sh)
+		-> merge_vcfs.R 
+		-> gwsca_biallelic 
+		-> generate_empiricalAFS.R 
+		-> sca_simulation 
+		-> gwsca_biallelic_analysis.R
+	haplotypes:
+		-> convert_matches 
+		-> infer_maternal_contribution 
+		-> gwsca_haplotypes
+		->R to compare to model (from sca_simulation)
+		relatedness/parentage:
+			-> prune_cervus_genotypes.R
+			-> CERVUS 
+			-> calculate_relatedness 
+			-> band_sharing
+			-> mom_female_fst (?)
+	
+2. Run GATK pipeline, prune dataset, and follow Monnahan et al. approach to analyze selection components analysis.
+	Programs utilized:
+	-> scripts/pre_gatk.sh
+	-> scripts/run_gatk.sh
+	-> use gatk to filter
+	-> het_v_depth.py
+	-> Monnahan analysis
+
+
+
+#############################################LAB BOOK######################################################
+#####Friday, 4 March 2016
+I have no idea what's causing the weird pattern in ADULT-JUVIE comparison. It's only happening in the gwsca_biallelic_vcf Fst calculations, it's not in the calculations from Stacks. This is a bit concerning. I wonder if there's a bug in my program?
+
+The haplotypes are doing it to a small extent too--they just don't have as high Fsts to start with and the group is located in a different part of the axis (probably because it's in a different order).
+
+This is something in my program. I don't know what but it's there. I re-did it in R and it works just fine. I should de-bug the program but I think I'm just going to use R, at least for now. I should figure out what's going wrong.
+
+I ran GATK's VariantFiltration module to filter the gatk dataset. It doesn't restrict it to biallelic loci, though, so I might have to do that myself.
+#####Thursday, 3 March 2016
+There are 133 dad-kid pairs. Ran infer_mat_vcf. Now I need to merge the batch_1.vcf and the biallelic_maternal.
+Then ran extract_gt_info.sh to run vcftools to extract the relevant info.
+For some reason vcftools isn't recognizing genotypes in biallelic_maternal.vcf. There was a space before the first header entry and this broke it. jeeez. I changed this in the infer_mat_vcf code so now this problem shouldn't come up.
+Then merge_vcfs.R
+Need to create ind_info_vcf.txt
+OK, I want to include only one instance of individuals that were sequenced twice (OFF016,OFF027,OFF032,PRM177). I'll want to do some analysis with them to estimate error rates and see how reliably the parentage analysis etc works but for the biallelic gwsca I don't want to include them. So going back to infer_mat_vcf in the pipeline.
+Now I've run infer_mat_vcf,vcftools, merge_vcfs,gwsca_biallelic_vcf, generate_empiricalAFS
+And I've started the sca simulation.
+Meanwhile, looking at the gwsca results:
+> dim(aj.prune)
+[1] 34084    31
+> dim(fm.prune)
+[1] 40182    31
+> dim(mo.prune)
+[1] 40093    31
+OK, something weird is happening in the adult-offspring comparison. I can't explain it but there's a big bunch of loci that have high Fsts in the middle of the set......
+
+I also started run_gatk.sh with the subset of individuals (not including duplicated ones, so excluding OFF016-1,OFF-27-1,OFF-32-1, and PRM177-1). pre_gatk didn't need to be run because it's run on each individual separately anyway.
+
+Also running convert_matches using run_convert_matches.sh. And now running infer_maternal_contribution. Now running gwsca_haplotypes. Let's see if weird patterns pop up there too. 
+
+
+#####Wednesday, 2 March 2016
+The ref_map script ran populations as:
+populations -b 1 -P ./results/stacks -s -t 2 -r 0.5 -a 0.05 --fstats --vcf --plink -p 3 -M ./sca_popmap_ddrad.txt
+And it resulted in 51356 SNPs (I think--that's the number of lines in batch_1.sumstats.tsv).
+These seem like reasonable filters--minor allele frequency of 0.05, present in 3 populations (of PRM,NPM,FEM,OFF), and present in half of each population. 
+
+I'll move forward with the biallelic analysis. convert_snps is done!
+I need to make a dad.kid.pairs.fullnames.txt file.
+
+#####Tuesday, 1 March 2016
+So...ddRAD and oRAD apparently have very different allelic dropout/error rates. So I'm going to re-do the SCA with just the ddRAD individuals. 
+I should re-do this all from the beginning, including the stacks analysis.
+Yayyyyyyy
+I re-installed stacks to have newest version (v1.37) and re-made a popmap with the 384 ddRAD individuals.
+I'm running ref_map.pl using run_refmap_ddrad.sh
+
+
+#####Monday, 29 February 2016
+OLD INFO FROM UP ABOVE:
+1. Run Stacks, prune dataset, calculate Fsts among groups, compare those Fst distributions to null distributions from simulation models.
 Programs utilized:
 ->ref_map.pl (Stacks)
 ->populations (Stacks)
@@ -45,8 +131,18 @@ Programs I used:
 Solution 2: Re-run GATK to start from scratch and then use vcftools to filter vcf
 (vcftools)
 
+#THIS ENTRY
+It turns out the Moms weren't specified correctly in the ind.info.vcf.txt file! They were missing the individual identifier and a few were even marked as males. I'm going to re-run the analysis and then run it with ind.info.datasets.txt, where there are three "status" options: ddRAD, oRAD, or MOM.
 
-#############################################LAB BOOK######################################################
+Somehow five PRM records seem to be missing from the biallelic.gt.vcf: PRM040,PRM063,PRM116,PRM141, and PRM180. Are they found in the output from convert_snps?? They are in convert_snps.R. Maybe they're not getting kept by infer_mat_vcf?? Oh, they probably don't have offspring in the dataset. Yep! That's it. I should probably include them. 
+
+I added 30 PRM and 3 OFF to the extract_from_vcf file.
+vcftools --vcf ../stacks/batch_1.pruned.vcf --keep extract_from_vcf.txt --extract-FORMAT-info GT --out fem
+Then merge_vcfs.R to re-write biallelic.gt.vcf
+
+Added those individuals to ind.info.vcf.txt and ind.info.datasets.txt. Now re-running gwsca_biallelic_vcf with both cases.
+Did that. The Fsts between the two datasets are pretty high...
+
 #####Sunday, 28 February 2016
 I don't need to change convert_snps.R, I think I just need to use my batch_1.pruned.vcf file in inver_mat_vcf.
 I'm running that analysis now. Had to change the way files were being named because I must have changed the dad.kid.pairs.txt file to just be PRM001 and OFF001 instead of sample_PRM001_align. Anyway, now it's running. I should be back on-track soon!  

@@ -158,7 +158,7 @@ int main()
 	int tmp1, tmp2, id, samp_id, loc_id, depth, last_allele;
 	string haplotype;
 	double log_like, perc;
-	string paired_list_name, dad_name, off_name, path, consensus_name, output_name, summary_name, mom_name, cat_alleles_name;
+	string paired_list_name, dad_name, off_name, in_path, out_path, consensus_name, output_name, summary_name, mom_name, cat_alleles_name;
 	string line, line1, line2;
 	ifstream paired_list, dad, off, cat_alleles;
 	ofstream consensus, output, summary, mom;
@@ -167,10 +167,11 @@ int main()
 	summary_structure consensus_loci;
 	vector<catalog> cat;
 
-	path = "E://ubuntushare//SCA//";
-	cat_alleles_name = path + "batch_1.alleles.tsv";
-	paired_list_name = path + "fathers_offspring//dad.kid.pairs.txt";//"pair001.txt";//
-	summary_name = path + "fathers_offspring//infer_maternal_summary.txt";
+	in_path = "../../results/stacks/"; 
+	out_path = "../../results/haplotypes/";
+	cat_alleles_name = in_path + "batch_1.catalog.alleles.tsv";
+	paired_list_name = out_path + "dad.kid.pairs.txt";
+	summary_name = out_path + "infer_maternal_summary.txt";
 
 	////read in catalog
 	//cat_alleles.open(cat_alleles_name);
@@ -206,13 +207,13 @@ int main()
 		{
 			stringstream ss;
 			ss.str(line);
-			ss >> end >> dad_name >> off_name;
+			ss >> dad_name >> off_name;
 			one_pair dad_off;
 			dad_off.dad_id = dad_name;
 			dad_off.off_id = off_name;
 			summary << '\n' << dad_name << '\t' << off_name;
-			dad_name = path + "sample_" + dad_name + "_align.matches.tsv";
-			off_name = path + "sample_" + off_name + "_align.matches.tsv";
+			dad_name = in_path + "sample_" + dad_name + "_align.matches.tsv";
+			off_name = in_path + "sample_" + off_name + "_align.matches.tsv";
 			dad.open(dad_name);
 			FileTest(dad, dad_name);
 			line_count = count = 0;
@@ -373,9 +374,9 @@ int main()
 			cout << "\nFound " << count << " loci in offspring file " << off_name << " that matched parent 1 alleles.\n";
 			summary << '\t' << count;
 			//now infer female allele and write to file
-			mom_name = path + "MOM" + dad_off.off_id.substr(3) + ".txt";
+			mom_name = out_path + "MOM" + dad_off.off_id.substr(3) + ".txt";
 			mom.open(mom_name);
-			output_name = path + dad_off.dad_id + "-" + dad_off.off_id + ".txt";
+			output_name = out_path + dad_off.dad_id + "-" + dad_off.off_id + ".txt";
 			output.open(output_name);
 			cout << "\nWriting informative loci and inferred maternal alleles to file " << output_name << " and to " << mom_name << '\n';
 			mom << "LocusID\tInferredAllele";
@@ -516,7 +517,7 @@ int main()
 	paired_list.close();
 	summary.close();
 	cout << "\nWriting summary data per locus to file.\n";
-	consensus_name = path + "loci_summary.txt";
+	consensus_name = out_path + "loci_summary.txt";
 	consensus.open(consensus_name);
 	consensus << "LocusID\tNumAlleles\tAllelesCSV\tNumDadsWithLocus\tNumMomsInferred";
 	for (size_t t = 0; t < consensus_loci.locus_id.size(); t++)

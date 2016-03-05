@@ -140,18 +140,19 @@ int main()
 	int i, count, index, pos, line_count, removed_count;
 	size_t t, tt, ttt;
 	string line, filename, ind_id, snp_id, sex, age, status, allele1, allele2, stemp, quality, chrom;
-	string ind_info_name, fst_out_name, summary_out_name, alleles_out_name, vcf_name;
+	string ind_info_name, fst_out_name, summary_out_name, alleles_out_name, vcf_name, debug_out_name;
 	ifstream ind_info, vcf;
-	ofstream fst_out, summary_out;
+	ofstream fst_out, summary_out, debug_out;
 	vector<int> indices;
 	vector<individual> inds;
 	vector<locus> reference;
 	vector<locus_statistics> pop_stats;
 
-	ind_info_name = "E://ubuntushare//SCA//results//biallelic//ind.info.vcf.txt";
+	ind_info_name = "E://ubuntushare//SCA//results//biallelic//ind_info_vcf.txt";//"../../../results/biallelic/id.names.txt";//
 	vcf_name = "E://ubuntushare//SCA//results//biallelic//biallelic.gt.vcf";
 	summary_out_name = "E://ubuntushare//SCA//results//biallelic//gwsca_summary.txt";
 	fst_out_name = "E://ubuntushare//SCA//results//biallelic//gwsca_fsts.txt";
+	debug_out_name = "../../../results/biallelic/group_assingments.txt";
 	
 	ind_info.open(ind_info_name);
 	FileTest(ind_info, ind_info_name);
@@ -257,7 +258,7 @@ int main()
 
 	fst_out.open(fst_out_name);
 	fst_out << "Chrom\tPos";
-	for (t = 0; t < pop_stats.size(); t++)
+	for (t = 0; t < pop_stats.size() - 1; t++)
 	{
 		for (tt = t + 1; tt < pop_stats.size(); tt++)
 		{
@@ -267,7 +268,8 @@ int main()
 
 	summary_out.open(summary_out_name);
 	summary_out << "Pop\tChrom\tPos\tN\tHs\tHo\tAllele1Freq\tAllele2Freq\tAA\tAa\taa";
-
+	debug_out.open(debug_out_name);
+	debug_out << "IndCount\tIndID\tPopIndex\tPopName";
 	vcf.open(vcf_name);
 	FileTest(vcf, vcf_name);
 	removed_count = line_count = 0;
@@ -326,6 +328,7 @@ int main()
 						//for each of those groups, add the counts
 						for (ttt = 0; ttt < inds[indices[count]].pop_indices.size(); ttt++)
 						{
+							debug_out << '\n' << count << '\t' << inds[indices[count]].ind_id << '\t' << inds[indices[count]].pop_indices[ttt] << '\t' << pop_stats[inds[indices[count]].pop_indices[ttt]].group_name;
 							pop_stats[inds[indices[count]].pop_indices[ttt]].two_n++;
 							/*if (pop_stats[inds[indices[count]].pop_indices[ttt]].group_name == "NONPREG")
 								cout << "pause for nonpreg\n";*/
@@ -354,7 +357,7 @@ int main()
 					}//end if
 					count++;
 				}//end of reading in individuals
-				
+				debug_out.close();
 				for (i = 0; i < pop_stats.size(); i++)
 					pop_stats[i].two_n = pop_stats[i].two_n * 2;
 				//now calculate frequencies
@@ -388,7 +391,7 @@ int main()
 
 				vector<double> fsts;
 				vector<double> ht;
-				for (t = 0; t < pop_stats.size(); t++)
+				for (t = 0; t < pop_stats.size() -1; t++)
 				{
 					for (tt = t + 1; tt < pop_stats.size(); tt++)
 					{
@@ -402,7 +405,7 @@ int main()
 
 				//calculate ht for every comparison.
 				index = 0;
-				for (t = 0; t < pop_stats.size(); t++)
+				for (t = 0; t < pop_stats.size() - 1; t++)
 				{
 					for (tt = t + 1; tt < pop_stats.size(); tt++)
 					{
@@ -424,7 +427,7 @@ int main()
 				}
 				fst_out << '\n' << chrom << '\t' << pos;
 				index = 0;
-				for (t = 0; t < pop_stats.size(); t++)
+				for (t = 0; t < pop_stats.size() - 1; t++)
 				{
 					for (tt = t + 1; tt < pop_stats.size(); tt++)
 					{
@@ -446,9 +449,11 @@ int main()
 				for (t = 0; t < pop_stats.size(); t++)
 				{
 					pop_stats[t].freq1 = pop_stats[t].freq2 = 0;
+					pop_stats[t].allele1 = "0";
+					pop_stats[t].allele2 = "1";
+					pop_stats[t].two_n = 0;
 					pop_stats[t].ho = pop_stats[t].hs = 0;
 					pop_stats[t].AA = pop_stats[t].Aa = pop_stats[t].aa = 0;
-					pop_stats[t].two_n = 0;
 				}
 				
 				line_count++;
