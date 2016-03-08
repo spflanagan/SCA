@@ -4,16 +4,20 @@
 
 setwd("E:/ubuntushare/SCA/results/biallelic")
 vcf1<-read.delim("biallelic_maternal.GT.FORMAT")
-dups<-grep("align.1",colnames(vcf1))
-vcf1<-vcf1[,-dups]
 vcf2<-read.delim("fem.GT.FORMAT")
-#vcf1$index<-paste(vcf1$CHROM,vcf1$POS,sep=".")
-#vcf2$index<-paste(vcf2$CHROM,".vcf2$POS,sep=".")
-vcf<-merge(vcf1,vcf2, by=c("CHROM","POS"))
-vcf$index<-apply(vcf,1,function(x){ idx<-paste(x[1],".",x[2],sep="") })
-addedon<-vcf[duplicated(vcf$index),"index"]
-vcf<-vcf[!(vcf$index %in% addedon),]
+vcf1$index<-paste(vcf1$CHROM,vcf1$POS,sep=".")
+vcf2$index<-paste(vcf2$CHROM,vcf2$POS,sep=".")
+vcf<-merge(vcf1,vcf2, by="index")
 
-write.table(vcf[,1:(ncol(vcf)-1)],"biallelic.gt.vcf",col.names=T,row.names=F,
+#remove the oddly duplicated ones
+addedon<-vcf[duplicated(vcf$index),"index"]
+if(!is.null(dim(addedon))) vcf<-vcf[!(vcf$index %in% addedon),]
+
+#otherwise, clean it up and write to file.
+drops<-c("index","CHROM.y","POS.y")
+vcf<-vcf[,!(colnames(vcf) %in% drops)]
+colnames(vcf)[1:2]<-c("CHROM","POS")
+write.table(vcf,"biallelic.gt.vcf",col.names=T,row.names=F,
 	quote=F,sep='\t')
+
 

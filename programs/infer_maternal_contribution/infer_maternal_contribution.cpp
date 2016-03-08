@@ -386,32 +386,39 @@ int main()
 				if (dad_off.off_alleles.catalog[t] == dad_off.dad_alleles.catalog[t]) //make sure they match
 				{
 					//compare dad's allele 1 to offspring alleles
-					vector <string> mom_allele;
-					if (dad_off.dad_alleles.hap1[t].hap == dad_off.off_alleles.hap1[t].hap)
-						mom_allele.push_back(dad_off.off_alleles.hap2[t].hap);
-					if (dad_off.dad_alleles.hap1[t].hap == dad_off.off_alleles.hap2[t].hap)
-						mom_allele.push_back(dad_off.off_alleles.hap1[t].hap);
-					if (dad_off.dad_alleles.hap2[t].hap == dad_off.off_alleles.hap1[t].hap)
-						mom_allele.push_back(dad_off.off_alleles.hap2[t].hap);
-					if (dad_off.dad_alleles.hap2[t].hap == dad_off.off_alleles.hap2[t].hap)
-						mom_allele.push_back(dad_off.off_alleles.hap1[t].hap);
-
-					if (mom_allele.size() > 1)
+					string mom_allele = "0";
+					string dad1 = dad_off.dad_alleles.hap1[t].hap;
+					string dad2 = dad_off.dad_alleles.hap2[t].hap;
+					string kid1 = dad_off.off_alleles.hap1[t].hap;
+					string kid2 = dad_off.off_alleles.hap2[t].hap;
+					if (dad1 == dad2 && kid1 == kid2) //the case where both are homozygous
 					{
-						vector<string>::iterator it;
-						it = unique(mom_allele.begin(), mom_allele.end());
-						mom_allele.resize(distance(mom_allele.begin(), it));
+						if (dad1 == kid1)
+							mom_allele = dad1;
 					}
-					
-					if (mom_allele.size() == 1)//otherwise it's not an informative locus
+					if (dad1 == dad2 && kid1 != kid2)//the case where dad is homozygous but kid is het
 					{
-						dad_off.mom_allele[t] = mom_allele[0];
-						output << '\n' << dad_off.dad_alleles.catalog[t] << '\t' << dad_off.dad_alleles.hap1[t].hap << '\t' << dad_off.dad_alleles.hap1[t].count
-							<< '\t' << dad_off.dad_alleles.hap2[t].hap << '\t' << dad_off.dad_alleles.hap2[t].count << '\t' << dad_off.off_alleles.hap1[t].hap
-							<< '\t' << dad_off.off_alleles.hap1[t].count << '\t' << dad_off.off_alleles.hap2[t].hap << '\t' << dad_off.off_alleles.hap2[t].count
-							<< '\t' << dad_off.mom_allele[t];
-						mom << '\n' << dad_off.dad_alleles.catalog[t] << '\t' << dad_off.mom_allele[t] << "\t0\t-\t0";
+						if (dad1 == kid1)
+							mom_allele = kid2;
+						if (dad1 == kid2)
+							mom_allele = kid1;
 					}
+					if (dad1 != dad2 && kid1 == kid2) //the case where dad is het but off is hom
+					{
+						if (dad1 == kid1 || dad2 == kid1)
+							mom_allele = kid1;
+					}
+					if (dad1 != dad2 && kid1 != kid2)//if they're both hets you can't do anything with it.
+						mom_allele = "0";
+					if (dad1 == "0" || kid1 == "0")
+						mom_allele = "0";
+				
+					dad_off.mom_allele[t] = mom_allele;
+					output << '\n' << dad_off.dad_alleles.catalog[t] << '\t' << dad_off.dad_alleles.hap1[t].hap << '\t' << dad_off.dad_alleles.hap1[t].count
+						<< '\t' << dad_off.dad_alleles.hap2[t].hap << '\t' << dad_off.dad_alleles.hap2[t].count << '\t' << dad_off.off_alleles.hap1[t].hap
+						<< '\t' << dad_off.off_alleles.hap1[t].count << '\t' << dad_off.off_alleles.hap2[t].hap << '\t' << dad_off.off_alleles.hap2[t].count
+						<< '\t' << dad_off.mom_allele[t];
+					mom << '\n' << dad_off.dad_alleles.catalog[t] << '\t' << dad_off.mom_allele[t] << "\t0\t-\t0";
 				}
 			}
 			output.close();

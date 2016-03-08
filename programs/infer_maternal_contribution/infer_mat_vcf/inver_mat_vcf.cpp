@@ -252,32 +252,32 @@ int main()
 					}
 					kid1 = vectemp[0];
 					kid2 = vectemp[1];
-					vector <string> mom_allele;
-					if (dad1 == kid1)
-						mom_allele.push_back(dad1);
-					if (dad1 == kid2)
-						mom_allele.push_back(dad1);
-					if (dad2 == kid1)
-						mom_allele.push_back(dad1);
-					if (dad2 == kid2)
-						mom_allele.push_back(dad1);
-
-					if (mom_allele.size() > 1)
-					{
-						vector<string>::iterator it;
-						it = unique(mom_allele.begin(), mom_allele.end());
-						mom_allele.resize(distance(mom_allele.begin(), it));
-					}
-
-					if (mom_allele.size() == 1)//otherwise it's not an informative locus
-					{
-						dad_kid[i].mom_allele.push_back(mom_allele[0]);
-					}
-					else
-						dad_kid[i].mom_allele.push_back(".");
-					summary << '\t' << dad1 << "/" << dad2 << '\t' << kid1 << "/" << kid2 << '\t' << dad_kid[i].mom_allele[locus_index] << "/" << dad_kid[i].mom_allele[locus_index];
 					
-					
+					string mom_allele = ".";
+					if (dad1 == dad2 && kid1 == kid2) //the case where both are homozygous
+					{
+						if (dad1 == kid1)
+							mom_allele = dad1;
+					}
+					if (dad1 == dad2 && kid1 != kid2)//the case where dad is homozygous but kid is het
+					{
+						if (dad1 == kid1)
+							mom_allele = kid2;
+						if (dad1 == kid2)
+							mom_allele = kid1;
+					}
+					if (dad1 != dad2 && kid1 == kid2) //the case where dad is het but off is hom
+					{
+						if (dad1 == kid1 || dad2 == kid1)
+							mom_allele = kid1;
+					}
+					if (dad1 != dad2 && kid1 != kid2)//if they're both hets you can't do anything with it.
+						mom_allele = ".";
+					if (dad1 == "." || kid1 == ".")
+						mom_allele = ".";
+					dad_kid[i].mom_allele.push_back(mom_allele);
+					summary << '\t' << dad1 << "/" << dad2 << '\t' << kid1 << "/" << kid2 << '\t' << mom_allele << "/" << mom_allele;
+			
 				}	//dad_kid.size()
 				if (snp_count == 20000)
 				{

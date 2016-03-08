@@ -1,4 +1,4 @@
-﻿Build started 3/3/2016 10:02:14 AM.
+﻿Build started 3/8/2016 3:34:31 PM.
      1>Project "E:\ubuntushare\SCA\programs\sca_simulation\sca_simulation.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt sca_simulation.cpp
@@ -24,13 +24,18 @@
      1>e:\ubuntushare\sca\programs\sca_simulation\population.h(686): warning C4101: 'rnd2' : unreferenced local variable
      1>e:\ubuntushare\sca\programs\sca_simulation\population.h(874): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
      1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1069): warning C4101: 'jjj' : unreferenced local variable
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1087): warning C4101: 'rand_num' : unreferenced local variable
      1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1086): warning C4101: 'jjj' : unreferenced local variable
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1129): warning C4018: '<' : signed/unsigned mismatch
      1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1140): warning C4018: '<' : signed/unsigned mismatch
-     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1151): warning C4018: '<' : signed/unsigned mismatch
-     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1160): warning C4101: 'jjj' : unreferenced local variable
-     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1160): warning C4101: 'jj' : unreferenced local variable
-     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1265): warning C4018: '<' : signed/unsigned mismatch
-     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1326): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1152): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1154): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1161): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1163): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1171): warning C4101: 'jjj' : unreferenced local variable
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1171): warning C4101: 'jj' : unreferenced local variable
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1282): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1343): warning C4018: '<' : signed/unsigned mismatch
      1>sca_simulation.cpp(123): warning C4018: '<' : signed/unsigned mismatch
      1>sca_simulation.cpp(126): warning C4018: '<' : signed/unsigned mismatch
      1>sca_simulation.cpp(129): warning C4018: '<' : signed/unsigned mismatch
@@ -46,4 +51,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:03.04
+Time Elapsed 00:00:02.75

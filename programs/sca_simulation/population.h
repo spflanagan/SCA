@@ -207,7 +207,7 @@ public:
 		female_samplesize = 196;//males in pipefish
 		dad_samplesize = 160;//moms in pipefish
 
-		error_rate = 0.03;
+		error_rate = 0.01;
 		recombination_rate = 0.2;
 		environmental_variance = 0;
 		environmental_sd = sqrt(environmental_variance);
@@ -1081,7 +1081,7 @@ public:
 		}
 	}
 	
-	void infer_genotype(int adult_index, int off_index, int dad_index, bool allelic_dropout)
+	void infer_genotype(int adult_index, int off_index, int dad_index)
 	{
 		int j, jj, jjj;
 		double rand_num;
@@ -1090,41 +1090,30 @@ public:
 		{
 			for (jj = 0; jj < num_markers; jj++)
 			{//sample the way I sampled the actual population
-				vector <int> mom_allele;
-				if (adults[adult_index].paternal[j].loci[jj] == offspring[off_index].paternal[j].loci[jj])
-					mom_allele.push_back(offspring[off_index].paternal[j].loci[jj]);
-				if (adults[adult_index].paternal[j].loci[jj] == offspring[off_index].maternal[j].loci[jj])
-					mom_allele.push_back(offspring[off_index].maternal[j].loci[jj]);
-				if (adults[adult_index].maternal[j].loci[jj] == offspring[off_index].paternal[j].loci[jj])
-					mom_allele.push_back(offspring[off_index].paternal[j].loci[jj]);
-				if (adults[adult_index].maternal[j].loci[jj] == offspring[off_index].maternal[j].loci[jj])
-					mom_allele.push_back(offspring[off_index].maternal[j].loci[jj]);
-
-				if (!allelic_dropout)
-					rand_num = 1.0;
-				else
-					rand_num = genrand();
-				if (rand_num < error_rate)
+				int mom_allele = -1;
+				if (adults[adult_index].paternal[j].loci[jj] == adults[adult_index].maternal[j].loci[jj] && offspring[off_index].paternal[j].loci[jj] == offspring[off_index].maternal[j].loci[jj]) //the case where both are homozygous
 				{
-					if (genrand() < 0.5)
-						inferred_dads[dad_index][j].loci[jj] = adults[adult_index].paternal[j].loci[jj];
-					else
-						inferred_dads[dad_index][j].loci[jj] = adults[adult_index].maternal[j].loci[jj];
+					if (adults[adult_index].paternal[j].loci[jj] == offspring[off_index].paternal[j].loci[jj])
+						mom_allele = adults[adult_index].paternal[j].loci[jj];
 				}
-				else
+				if (adults[adult_index].paternal[j].loci[jj] == adults[adult_index].maternal[j].loci[jj] && offspring[off_index].paternal[j].loci[jj] != offspring[off_index].maternal[j].loci[jj])//the case where dad is homozygous but kid is het
 				{
-					if (mom_allele.size() > 1)
-					{
-						vector<int>::iterator it;
-						it = unique(mom_allele.begin(), mom_allele.end());
-						mom_allele.resize(distance(mom_allele.begin(), it));
-					}
-
-					if (mom_allele.size() == 1)//otherwise it's not an informative locus
-					{
-						inferred_dads[dad_index][j].loci[jj] = mom_allele[0];
-					}
+					if (adults[adult_index].paternal[j].loci[jj] == offspring[off_index].paternal[j].loci[jj])
+						mom_allele = offspring[off_index].maternal[j].loci[jj];
+					if (adults[adult_index].paternal[j].loci[jj] == offspring[off_index].maternal[j].loci[jj])
+						mom_allele = offspring[off_index].paternal[j].loci[jj];
 				}
+				if (adults[adult_index].paternal[j].loci[jj] != adults[adult_index].maternal[j].loci[jj] && offspring[off_index].paternal[j].loci[jj] == offspring[off_index].maternal[j].loci[jj]) //the case where dad is het but off is hom
+				{
+					if (adults[adult_index].paternal[j].loci[jj] == offspring[off_index].paternal[j].loci[jj] || adults[adult_index].maternal[j].loci[jj] == offspring[off_index].paternal[j].loci[jj])
+						mom_allele = offspring[off_index].paternal[j].loci[jj];
+				}
+				if (adults[adult_index].paternal[j].loci[jj] != adults[adult_index].maternal[j].loci[jj] && offspring[off_index].paternal[j].loci[jj] != offspring[off_index].maternal[j].loci[jj])//if they're both hets you can't do anything with it.
+					mom_allele = int();
+				if (adults[adult_index].paternal[j].loci[jj] == -1 || offspring[off_index].paternal[j].loci[jj] == -1)
+					mom_allele = int();
+				
+				inferred_dads[dad_index][j].loci[jj] = mom_allele;
 			}
 			for (jj = 0; jj < num_qtl; jj++)
 			{
@@ -1155,6 +1144,28 @@ public:
 		}
 	}
 
+	void drop_alleles(int index, bool adult)
+	{
+		int j, jj;
+		if (adult)
+		{
+			for (j = 0; j < adults[index].paternal.size(); j++)
+			{
+				for (jj = 0; jj < adults[index].paternal[j].loci.size(); jj++)
+					if (genrand() < error_rate)
+						adults[index].maternal[j].loci[jj] = adults[index].paternal[j].loci[jj];
+			}
+		}
+		else
+		{
+			for (j = 0; j < offspring[index].paternal.size(); j++)
+			{
+				for (jj = 0; jj < offspring[index].paternal[j].loci.size(); jj++)
+					if (genrand() < error_rate)
+						offspring[index].maternal[j].loci[jj] = offspring[index].paternal[j].loci[jj];
+			}
+		}
+	}
 	void sample_pop(bool allelic_dropout)
 	{
 		int j, jj, jjj, off_counter, fem_counter, mal_counter;
@@ -1191,6 +1202,8 @@ public:
 				if (adults[rand1].alive)//only sample if it's alive
 				{
 					sampled_adults.push_back(rand1);
+					if (allelic_dropout)
+						drop_alleles(sampled_adults[j], true);
 					if (adults[sampled_adults[j]].female)
 					{
 						if (fem_counter < female_samplesize)
@@ -1200,15 +1213,17 @@ public:
 							{
 								rand2 = randnum(adults[sampled_females[fem_counter]].offspring_index.size());
 								sampled_off.push_back(adults[sampled_females[fem_counter]].offspring_index[rand2]);
+								if (allelic_dropout)
+									drop_alleles(sampled_off[off_counter], false);
 								//infer dad's genotype
-								infer_genotype(sampled_adults[j], sampled_off[off_counter], off_counter, allelic_dropout);
+								infer_genotype(sampled_adults[j], sampled_off[off_counter], off_counter);
 								sampled_dads.push_back(off_counter);
 							}
 						}
 						off_counter++;
 						fem_counter++;
 					}
-					else
+					else//it's male
 					{
 						if (mal_counter < male_samplesize)
 							sampled_males.push_back(rand1);
@@ -1221,34 +1236,36 @@ public:
 					rand1 = randnum(pop_size);
 				if (taken[rand1] == false)
 				{
-					if (adults[sampled_adults[j]].alive)//only sample live individuals
+					if (adults[rand1].alive)//only sample if it's alive
 					{
-						if (adults[rand1].alive)//only sample if it's alive
+						sampled_adults.push_back(rand1);
+						if (allelic_dropout)
+							drop_alleles(sampled_adults[j], true);
+						if (adults[sampled_adults[j]].female)
 						{
-							sampled_adults.push_back(rand1);
-							if (adults[sampled_adults[j]].female)
+							if (fem_counter < female_samplesize)
 							{
-								if (fem_counter < female_samplesize)
+								sampled_females.push_back(rand1);
+								if (off_counter < offspring_samplesize)
 								{
-									sampled_females.push_back(rand1);
-									if (off_counter < offspring_samplesize)
-									{
-										rand2 = randnum(adults[sampled_females[fem_counter]].offspring_index.size());
-										sampled_off.push_back(adults[sampled_females[fem_counter]].offspring_index[rand2]);
-										//infer dad's genotype
-										infer_genotype(sampled_adults[j], sampled_off[off_counter], off_counter, allelic_dropout);
-									}
+									rand2 = randnum(adults[sampled_females[fem_counter]].offspring_index.size());
+									sampled_off.push_back(adults[sampled_females[fem_counter]].offspring_index[rand2]);
+									if (allelic_dropout)
+										drop_alleles(sampled_off[off_counter], false);
+									//infer dad's genotype
+									infer_genotype(sampled_adults[j], sampled_off[off_counter], off_counter);
 								}
-								off_counter++;
-								fem_counter++;
 							}
-							else
-							{
-								if (mal_counter < male_samplesize)
-									sampled_males.push_back(rand1);
-							}
+							off_counter++;
+							fem_counter++;
+						}
+						else
+						{
+							if (mal_counter < male_samplesize)
+								sampled_males.push_back(rand1);
 						}
 					}
+					
 				}//if you find one
 			}//else
 		}
