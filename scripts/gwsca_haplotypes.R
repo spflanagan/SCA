@@ -4,7 +4,8 @@
 ###############################gwSCA haplotypes############################
 #*************************************************************************#
 ###########################################################################
-setwd("../haplotypes")
+source("E:/ubuntushare/SCA/scripts/plotting_functions.R")
+setwd("E:/ubuntushare/SCA/results/haplotypes")
 hap.fst<-read.delim("gwsca_hap_fsts.txt")
 hap.sum<-read.delim("gwsca_hap_summary.txt")
 gw.fst.lump<-read.delim("gwsca_fsts_lumped.txt")
@@ -12,23 +13,23 @@ gw.alleles<-read.delim("gwsca_haplotypes_alleles.txt")
 gw.cat<-read.delim("../stacks/batch_1.catalog.tags.tsv",header=F)
 
 #Summarize number of alleles
-summary(gw.sum[(gw.sum$LocusName %in% aj.loci) & 
-	(gw.sum$Pop=="ADULT" | gw.sum$Pop=="JUVIE")
+summary(hap.sum[(hap.sum$LocusName %in% aj.loci) & 
+	(hap.sum$Pop=="ADULT" | hap.sum$Pop=="JUVIE")
 	,"NumAlleles"])
-summary(gw.sum[(gw.sum$LocusName %in% fm.loci) &
-	(gw.sum$Pop=="MAL" | gw.sum$Pop=="FEM")
+summary(hap.sum[(hap.sum$LocusName %in% fm.loci) &
+	(hap.sum$Pop=="MAL" | hap.sum$Pop=="FEM")
 	,"NumAlleles"])
-summary(gw.sum[(gw.sum$LocusName %in% mo.loci) &
-	(gw.sum$Pop=="MOM" | gw.sum$Pop=="POP")
+summary(hap.sum[(hap.sum$LocusName %in% mo.loci) &
+	(hap.sum$Pop=="MOM" | hap.sum$Pop=="POP")
 	,"NumAlleles"])
-summary(gw.sum[(gw.sum$LocusName %in% np.loci) &
-	(gw.sum$Pop=="PREGGER" | gw.sum$Pop=="NONPREG")
+summary(hap.sum[(hap.sum$LocusName %in% np.loci) &
+	(hap.sum$Pop=="PREGGER" | hap.sum$Pop=="NONPREG")
 	,"NumAlleles"])
 
 ###########PRUNING THE DATA##########
 #create different structures
 gw.all.loc<-split(gw.alleles, gw.alleles$Locus)
-gw.all.sum<-lapply(gw.all.loc, function(x) colSums(x[,3:11]))
+gw.all.sum<-lapply(gw.all.loc, function(x) colSums(x[,3:10]))
 gw.loc.count<-data.frame(matrix(unlist(gw.all.sum), nrow=length(gw.all.sum), byrow=T),stringsAsFactors=FALSE)
 colnames(gw.loc.count)<-names(gw.all.sum[[1]])
 rownames(gw.loc.count)<-names(gw.all.loc)
@@ -56,9 +57,9 @@ non.af<-unlist(lapply(gw.all.loc,calc.max.af,y=7))
 names(non.af)<-names(gw.all.loc)
 juv.af<-unlist(lapply(gw.all.loc,calc.max.af,y=8))
 names(juv.af)<-names(gw.all.loc)
-prg.af<-unlist(lapply(gw.all.loc,calc.max.af,y=10))
+prg.af<-unlist(lapply(gw.all.loc,calc.max.af,y=9))
 names(prg.af)<-names(gw.all.loc)
-mom.af<-unlist(lapply(gw.all.loc,calc.max.af,y=11))
+mom.af<-unlist(lapply(gw.all.loc,calc.max.af,y=10))
 names(mom.af)<-names(gw.all.loc)
 
 #prune allele frequencies (this method works!)
@@ -73,26 +74,26 @@ non.af.trim<-non.af[non.af<=0.95 & non.af>=0.05]
 #the comparisons
 aj.maf<-names(adt.af.trim[names(adt.af.trim) %in% names(juv.af.trim)])
 fm.maf<-names(fem.af.trim[names(fem.af.trim) %in% names(mal.af.trim)])
-mo.maf<-names(mom.af.trim[names(mom.af.trim) %in% names(pop.af.trim)])
+mo.maf<-names(mom.af.trim[names(mom.af.trim) %in% names(fem.af.trim)])
 np.maf<-names(prg.af[names(prg.af.trim) %in% names(non.af.trim)])
 
 ##NOW prune based on representation in the groups
-adt.grp.trim<-rownames(gw.loc.count[gw.loc.count$ADULTCount>440,])
-juv.grp.trim<-rownames(gw.loc.count[gw.loc.count$JUVIECount>160,])
-fem.grp.trim<-rownames(gw.loc.count[gw.loc.count$FEMCount>130,])
-mal.grp.trim<-rownames(gw.loc.count[gw.loc.count$MALCount>196,])
-mom.grp.trim<-rownames(gw.loc.count[gw.loc.count$MOMCount>10,])
-pop.grp.trim<-rownames(gw.loc.count[gw.loc.count$POPCount>87,])
-prg.grp.trim<-rownames(gw.loc.count[gw.loc.count$PREGGERCount>188,])
+adt.grp.trim<-rownames(gw.loc.count[gw.loc.count$ADULTCount>216,])
+juv.grp.trim<-rownames(gw.loc.count[gw.loc.count$JUVIECount>159,])
+fem.grp.trim<-rownames(gw.loc.count[gw.loc.count$FEMCount>57,])
+mal.grp.trim<-rownames(gw.loc.count[gw.loc.count$MALCount>159,])
+mom.grp.trim<-rownames(gw.loc.count[gw.loc.count$MOMCount>130,])
+pop.grp.trim<-rownames(gw.loc.count[gw.loc.count$POPCount>57,])
+prg.grp.trim<-rownames(gw.loc.count[gw.loc.count$PREGGERCount>159,])
 non.grp.trim<-rownames(gw.loc.count[gw.loc.count$NONPREGCount>8,])
 #the comparisons
-aj.loci<-rownames(gw.loc.count[gw.loc.count$ADULTCount>440 & 
-	gw.loc.count$JUVIECount>160,])
-fm.loci<-rownames(gw.loc.count[gw.loc.count$FEMCount>130 & 
-	gw.loc.count$MALCount>196,])
-mo.loci<-rownames(gw.loc.count[gw.loc.count$POPCount>87 & 
-	gw.loc.count$MOMCount>10,])
-np.loci<-rownames(gw.loc.count[gw.loc.count$PREGGERCount>188 & 
+aj.loci<-rownames(gw.loc.count[gw.loc.count$ADULTCount>216 & 
+	gw.loc.count$JUVIECount>159,])
+fm.loci<-rownames(gw.loc.count[gw.loc.count$FEMCount>57 & 
+	gw.loc.count$MALCount>159,])
+mo.loci<-rownames(gw.loc.count[gw.loc.count$FEMCount>57 & 
+	gw.loc.count$MOMCount>25,])
+np.loci<-rownames(gw.loc.count[gw.loc.count$PREGGERCount>159 & 
 	gw.loc.count$NONPREGCount>8,])
 
 #apply both filters
@@ -117,9 +118,9 @@ write.table(all.pruned, "pruned_alleles_gwsca.txt",header=T,row.names=F,
 	quote=F,sep='\t')
 ###############PLOTTING################
 #generate plotting structure
-gw.plot<-data.frame(Locus=gw.fst$Locus,Adult.Juvie=gw.fst$ADULT.JUVIE, 
-	Fem.Mal=gw.fst$FEM.MAL, Fem.Mom=gw.fst$POP.MOM, 
-	Nonpreg.Pregger=gw.fst$NONPREG.PREGGER)
+gw.plot<-data.frame(Locus=hap.fst$Locus,Adult.Juvie=hap.fst$ADULT.JUVIE, 
+	Fem.Mal=hap.fst$FEM.MAL, Fem.Mom=hap.fst$FEM.MOM, 
+	Nonpreg.Pregger=hap.fst$NONPREG.PREGGER)
 gw.loc.info<-data.frame(Locus=gw.cat[,3],Chrom=gw.cat[,4],BP=gw.cat[,5])
 gw.plot<-merge(gw.plot, gw.loc.info, by.x="Locus",by.y="Locus")
 

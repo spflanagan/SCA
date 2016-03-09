@@ -97,7 +97,7 @@ int main()
 	ofstream gen_file, par_file, off_file;
 
 	locus_file_name = "../../results/haplotypes/loci_summary.txt";
-	file_list_name = "../../results/haplotypes/haplotype_files.txt";
+	file_list_name = "../../results/haplotypes/haplotypes_files.txt";
 	dad_kid_name = "../../results/haplotypes/dad.kid.pairs.txt";
 
 	gen_name = "../../results/parentage/genotypes.txt";
