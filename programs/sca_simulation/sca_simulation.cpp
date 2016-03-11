@@ -20,7 +20,7 @@ using namespace std;
 int main()
 {
 	int num_reps = 1;
-	string base_name = "E://ubuntushare//SCA//results//sca_simulation_output//ddraddist.ss0.2alleles.error01";
+	string base_name = "E://ubuntushare//SCA//results//sca_simulation_output//ddraddist.ss0.2alleles.error001";
 	bool known_qtl = false;
 	bool empirical_afs = true;
 	bool add_allelic_dropout = true;
@@ -39,6 +39,7 @@ int main()
 	{
 		pop.set_parameters();
 		pop.initialize(known_qtl, empirical_afs);
+		cout << "\nStarting the " << pop.num_gen << " generations.";
 		for (generations = 0; generations < pop.num_gen; generations++)
 		{
 			pop.determine_pop_size();
@@ -118,7 +119,7 @@ int main()
 			pop.mutation();
 			pop.sample_pop(add_allelic_dropout);
 			ofstream sampled_inds;
-			sampled_inds.open("sampled.inds.txt");
+			sampled_inds.open(base_name + "sampled.inds.txt");
 			sampled_inds << "Adults";
 			for (int sampled = 0; sampled < pop.sampled_adults.size(); sampled++)
 				sampled_inds << '\t' << pop.sampled_adults[sampled];

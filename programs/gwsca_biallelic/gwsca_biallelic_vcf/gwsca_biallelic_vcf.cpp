@@ -148,11 +148,11 @@ int main()
 	vector<locus> reference;
 	vector<locus_statistics> pop_stats;
 
-	ind_info_name = "E://ubuntushare//SCA//results//biallelic//ind_info_vcf.txt";//"../../../results/biallelic/id.names.txt";//
-	vcf_name = "E://ubuntushare//SCA//results//biallelic//biallelic.gt.vcf";
-	summary_out_name = "E://ubuntushare//SCA//results//biallelic//gwsca_summary.txt";
-	fst_out_name = "E://ubuntushare//SCA//results//biallelic//gwsca_fsts.txt";
-	debug_out_name = "../../../results/biallelic/group_assingments.txt";
+	ind_info_name = "../../../results/gatk/gatk_gwsca/gatk.ind.info.txt";//"E://ubuntushare//SCA//results//biallelic//ind_info_vcf.txt";//"../../../results/biallelic/id.names.txt";//
+	vcf_name = "E://ubuntushare//SCA//results//gatk//gatk_gwsca//gatk.gt.vcf";//"E://ubuntushare//SCA//results//biallelic//biallelic.gt.vcf";
+	summary_out_name = "../../../results/gatk/gatk_gwsca/gatk_gwsca_summary";//"E://ubuntushare//SCA//results//biallelic//gwsca_summary.txt";
+	fst_out_name = "../../../results/gatk/gatk_gwsca/gatk_gwsca_fsts";//"E://ubuntushare//SCA//results//biallelic//gwsca_fsts.txt";
+	debug_out_name = "../../../results/gatk/gatk_gwsca/gatk_group_assingments.txt";//"../../../results/biallelic/group_assingments.txt";
 	
 	ind_info.open(ind_info_name);
 	FileTest(ind_info, ind_info_name);

@@ -80,8 +80,8 @@ keep.names<-c("ID",unlist(lapply(as.list(keep.loci$locus.name),function(x){
 gen.keep<-gen90[,colnames(gen90) %in% keep.names]
 
 #prune for higher coverage
-pruned<-prune.loci(gen.keep, 0.03)
-#write.table(pruned,"PolymorphicIn97PercIndsHWE.txt", quote=F,sep="\t",row.names=F)
+pruned<-prune.loci(gen.keep, 0.01)
+#write.table(pruned,"PolymorphicIn99PercIndsHWE.txt", quote=F,sep="\t",row.names=F)
 
 #sample
 nloci<-c(50,100,200,400,800,1600)

@@ -38,7 +38,7 @@ juv.n<-sum.list$JUVIE[sum.list$JUVIE$N > 157 & !is.na(sum.list$JUVIE$Hs),]
 fem.n<-sum.list$FEM[sum.list$FEM$N > 57& !is.na(sum.list$FEM$Hs),]
 mal.n<-sum.list$MAL[sum.list$MAL$N>159& !is.na(sum.list$MAL$Hs),]
 mom.n<-sum.list$MOM[sum.list$MOM$N>133& !is.na(sum.list$MOM$Hs),]
-pop.n<-sum.list$POP[sum.list$POP$N>57& !is.na(sum.list$POP$Hs),]
+#pop.n<-sum.list$POP[sum.list$POP$N>57& !is.na(sum.list$POP$Hs),]
 prg.n<-sum.list$PREGGER[sum.list$PREGGER$N>159& !is.na(sum.list$PREGGER$Hs),]
 non.n<-sum.list$NONPREG[sum.list$NONPREG$N>14& !is.na(sum.list$NONPREG$Hs),]
 
@@ -48,7 +48,7 @@ juv.n<-juv.n[juv.n$Allele1Freq > 0.05 & juv.n$Allele1Freq < 0.95,]
 fem.n<-fem.n[fem.n$Allele1Freq > 0.05 & fem.n$Allele1Freq < 0.95,]
 mal.n<-mal.n[mal.n$Allele1Freq > 0.05 & mal.n$Allele1Freq < 0.95,]
 mom.n<-mom.n[mom.n$Allele1Freq > 0.05 & mom.n$Allele1Freq < 0.95,]
-pop.n<-pop.n[pop.n$Allele1Freq > 0.05 & pop.n$Allele1Freq < 0.95,]
+#pop.n<-pop.n[pop.n$Allele1Freq > 0.05 & pop.n$Allele1Freq < 0.95,]
 prg.n<-prg.n[prg.n$Allele1Freq > 0.05 & prg.n$Allele1Freq < 0.95,]
 non.n<-non.n[non.n$Allele1Freq > 0.05 & non.n$Allele1Freq < 0.95,]
 
@@ -57,13 +57,13 @@ non.n<-non.n[non.n$Allele1Freq > 0.05 & non.n$Allele1Freq < 0.95,]
 aj.prune<-gw.fst[gw.fst$Locus %in% adt.n$Locus&gw.fst$Locus %in% juv.n$Locus, ]
 aj.prune<-aj.prune[aj.prune$ADULT.JUVIE>0,]
 fm.prune<-gw.fst[gw.fst$Locus %in% mal.n$Locus&gw.fst$Locus %in% fem.n$Locus, ]
-fm.prune<-fm.prune[fm.prune$FEM.MOM>0,]
+fm.prune<-fm.prune[fm.prune$MAL.FEM>0,]
 mo.prune<-gw.fst[gw.fst$Locus %in% fem.n$Locus&gw.fst$Locus %in% mom.n$Locus, ]
-mo.prune<-mo.prune[mo.prune$FEM.MOM>0,]
+mo.prune<-mo.prune[mo.prune$MOM.FEM>0,]
 
-write.table(aj.plot, "aj.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
-write.table(fm.plot, "fm.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
-write.table(gw.plot, "mo.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
+write.table(aj.prune, "aj.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
+write.table(fm.prune, "fm.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
+write.table(mo.prune, "mo.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
 
 
 gw.plot<-gw.fst[gw.fst$Locus %in% aj.prune$Locus |
@@ -113,10 +113,10 @@ par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
 plot.fsts(aj.prune, ci.dat=aj.null,fst.name="ADULT.JUVIE", chrom.name="Chrom"
 	, axis.size=0.75, bp.name="Pos")
 legend("top","Adult-Juvenile", cex=0.75,bty="n")
-plot.fsts(fm.prune, ci.dat=mf.null,fst.name="FEM.MAL", chrom.name="Chrom"
+plot.fsts(fm.prune, ci.dat=mf.null,fst.name="MAL.FEM", chrom.name="Chrom"
 	, axis.size=0.75,bp.name="Pos")
 legend("top","Male-Female", cex=0.75,bty="n")
-plot.fsts(mo.prune, ci.dat=mo.null,fst.name="FEM.MOM", chrom.name="Chrom"
+plot.fsts(mo.prune, ci.dat=mo.null,fst.name="MOM.FEM", chrom.name="Chrom"
 	, axis.size=0.75,bp.name="Pos")
 legend("top","Mothers-Females", cex=0.75,bty="n")
 mtext("Genomic Location", 1, outer=T, cex=1)

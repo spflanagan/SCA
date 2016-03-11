@@ -1,4 +1,4 @@
-﻿Build started 3/8/2016 1:09:35 PM.
+﻿Build started 3/10/2016 11:48:05 AM.
      1>Project "E:\ubuntushare\SCA\programs\infer_maternal_contribution\infer_mat_vcf\infer_mat_vcf.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt inver_mat_vcf.cpp
@@ -7,11 +7,11 @@
      1>inver_mat_vcf.cpp(191): warning C4018: '<' : signed/unsigned mismatch
      1>inver_mat_vcf.cpp(235): warning C4018: '<' : signed/unsigned mismatch
      1>inver_mat_vcf.cpp(287): warning C4018: '<' : signed/unsigned mismatch
-     1>inver_mat_vcf.cpp(293): warning C4018: '<' : signed/unsigned mismatch
-     1>inver_mat_vcf.cpp(309): warning C4018: '<' : signed/unsigned mismatch
-     1>inver_mat_vcf.cpp(314): warning C4018: '<' : signed/unsigned mismatch
-     1>inver_mat_vcf.cpp(344): warning C4018: '<' : signed/unsigned mismatch
-     1>inver_mat_vcf.cpp(349): warning C4018: '<' : signed/unsigned mismatch
+     1>inver_mat_vcf.cpp(301): warning C4018: '<' : signed/unsigned mismatch
+     1>inver_mat_vcf.cpp(317): warning C4018: '<' : signed/unsigned mismatch
+     1>inver_mat_vcf.cpp(330): warning C4018: '<' : signed/unsigned mismatch
+     1>inver_mat_vcf.cpp(360): warning C4018: '<' : signed/unsigned mismatch
+     1>inver_mat_vcf.cpp(373): warning C4018: '<' : signed/unsigned mismatch
      1>inver_mat_vcf.cpp(113): warning C4101: 'iii' : unreferenced local variable
      1>inver_mat_vcf.cpp(115): warning C4101: 'prog_start' : unreferenced local variable
      1>inver_mat_vcf.cpp(114): warning C4101: 'num_off' : unreferenced local variable
@@ -26,4 +26,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.84
+Time Elapsed 00:00:01.71

@@ -192,7 +192,7 @@ public:
 	void set_parameters()
 	{
 		carrying_cap = 5000;
-		num_gen = 200;
+		num_gen = 2;
 
 		num_chrom = 4;
 		num_markers = 2000;
@@ -201,13 +201,13 @@ public:
 		prior_qtl = false;
 		afs_file_name = "E://ubuntushare//SCA//results//biallelic//empirical_allelefreqs.txt";
 
-		adult_samplesize = 440;
-		offspring_samplesize = 160;
-		male_samplesize = 87;//females in pipefish
-		female_samplesize = 196;//males in pipefish
-		dad_samplesize = 160;//moms in pipefish
+		adult_samplesize = 216;
+		offspring_samplesize = 131;
+		male_samplesize = 57;//females in pipefish
+		female_samplesize = 159;//males in pipefish
+		dad_samplesize = 131;//moms in pipefish
 
-		error_rate = 0.01;
+		error_rate = 0.001;
 		recombination_rate = 0.2;
 		environmental_variance = 0;
 		environmental_sd = sqrt(environmental_variance);
@@ -1007,6 +1007,8 @@ public:
 				Dprime = -5;
 
 		}
+		else
+			d_allele_avgs = Dprime = -5;
 
 		result.d = d_allele_avgs;
 		result.dprime = Dprime;
@@ -1109,9 +1111,7 @@ public:
 						mom_allele = offspring[off_index].paternal[j].loci[jj];
 				}
 				if (adults[adult_index].paternal[j].loci[jj] != adults[adult_index].maternal[j].loci[jj] && offspring[off_index].paternal[j].loci[jj] != offspring[off_index].maternal[j].loci[jj])//if they're both hets you can't do anything with it.
-					mom_allele = int();
-				if (adults[adult_index].paternal[j].loci[jj] == -1 || offspring[off_index].paternal[j].loci[jj] == -1)
-					mom_allele = int();
+					mom_allele = -1;
 				
 				inferred_dads[dad_index][j].loci[jj] = mom_allele;
 			}
@@ -1283,9 +1283,12 @@ public:
 		{
 			if (adults[sampled[caa]].alive || includeDead)
 			{
-				tempallelefreq[adults[sampled[caa]].maternal[whichchromosome].loci[marker]]++;
-				tempallelefreq[adults[sampled[caa]].paternal[whichchromosome].loci[marker]]++;
-				allelecounter = allelecounter + 2;
+				if (adults[sampled[caa]].maternal[whichchromosome].loci[marker] >= 0)
+				{
+					tempallelefreq[adults[sampled[caa]].maternal[whichchromosome].loci[marker]]++;
+					tempallelefreq[adults[sampled[caa]].paternal[whichchromosome].loci[marker]]++;
+					allelecounter = allelecounter + 2;
+				}
 			}
 		}
 		for (caa = 0; caa < num_alleles; caa++)
@@ -1316,9 +1319,12 @@ public:
 		{
 			if (offspring[sampled_off[caa]].alive || includeDead)
 			{
-				tempallelefreq[offspring[sampled_off[caa]].maternal[whichchromosome].loci[marker]]++;
-				tempallelefreq[offspring[sampled_off[caa]].paternal[whichchromosome].loci[marker]]++;
-				allelecounter = allelecounter + 2;
+				if (offspring[sampled_off[caa]].maternal[whichchromosome].loci[marker] >= 0)
+				{
+					tempallelefreq[offspring[sampled_off[caa]].maternal[whichchromosome].loci[marker]]++;
+					tempallelefreq[offspring[sampled_off[caa]].paternal[whichchromosome].loci[marker]]++;
+					allelecounter = allelecounter + 2;
+				}
 			}
 		}
 		for (caa = 0; caa < num_alleles; caa++)
@@ -1342,8 +1348,11 @@ public:
 		double allelecounter = 0;
 		for (caa = 0; caa < inferred_dads.size(); caa++)
 		{
-			tempallelefreq[inferred_dads[caa][whichchromosome].loci[marker]]++;
-			allelecounter = allelecounter++;
+			if (inferred_dads[caa][whichchromosome].loci[marker] >= 0)
+			{
+				tempallelefreq[inferred_dads[caa][whichchromosome].loci[marker]]++;
+				allelecounter = allelecounter++;
+			}
 		}
 		for (caa = 0; caa < num_alleles; caa++)
 			tempallelefreq[caa] = tempallelefreq[caa] / allelecounter;

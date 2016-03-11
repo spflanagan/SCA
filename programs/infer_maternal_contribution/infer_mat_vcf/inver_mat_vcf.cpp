@@ -123,10 +123,10 @@ int main()
 	vector<locus_data> locus_info;
 	bool first = true;
 
-	path = "../../../results/biallelic/";
-	dad_kid_name = "../../../results/dad.kid.pairs.fullnames.txt";
-	vcf_name = "../../../results/stacks/batch_1.vcf";
-	summary_name = path + "biallelic_maternal.vcf";
+	path = "../../../results/gatk/gatk_gwsca/";
+	dad_kid_name = "../../../results/gatk/dad.kid.pairs.gatk.txt";
+	vcf_name = "../../../results/gatk/filtered_bi.vcf";
+	summary_name = path + "gatk_maternal.vcf";
 
 	
 	dad_kid_file.open(dad_kid_name);
@@ -286,8 +286,16 @@ int main()
 					{
 						for (i = 0; i < dad_kid.size(); i++)
 						{
-							int second_und = dad_kid[i].kid_name.size() - 16;
-							string mom_name = path + "MOM" + dad_kid[i].kid_name.substr(10, second_und) + ".bi.txt";
+							string mom_name;
+							if (dad_kid[i].kid_name.size() > 16)
+							{
+								int second_und = dad_kid[i].kid_name.size() - 16;
+								mom_name = path + "MOM" + dad_kid[i].kid_name.substr(10, second_und) + ".bi.txt";
+							}
+							else
+							{
+								mom_name = path + "MOM" + dad_kid[i].kid_name.substr(3, dad_kid[i].kid_name.size()) + ".bi.txt";
+							}
 							mom.open(mom_name);
 							mom << "SNPID\tAllele1\tAllele2";
 							for (ii = 0; ii < locus_info.size(); ii++)
@@ -308,8 +316,16 @@ int main()
 					{
 						for (i = 0; i < dad_kid.size(); i++)
 						{
-							int second_und = dad_kid[i].kid_name.size() - 16;
-							string mom_name = path + "MOM" + dad_kid[i].kid_name.substr(10, second_und) + ".bi.txt"; 
+							string mom_name;
+							if (dad_kid[i].kid_name.size() > 16)
+							{
+								int second_und = dad_kid[i].kid_name.size() - 16;
+								mom_name = path + "MOM" + dad_kid[i].kid_name.substr(10, second_und) + ".bi.txt";
+							}
+							else
+							{
+								mom_name = path + "MOM" + dad_kid[i].kid_name.substr(3, dad_kid[i].kid_name.size()) + ".bi.txt";
+							}
 							mom.open(mom_name, ios::app);
 							for (ii = 0; ii < locus_info.size(); ii++)
 							{
@@ -343,8 +359,16 @@ int main()
 
 	for (i = 0; i < dad_kid.size(); i++)
 	{
-		int second_und = dad_kid[i].kid_name.size() - 16;
-		string mom_name = path + "MOM" + dad_kid[i].kid_name.substr(10, second_und) + ".bi.txt"; 
+		string mom_name;
+		if (dad_kid[i].kid_name.size() > 16)
+		{
+			int second_und = dad_kid[i].kid_name.size() - 16;
+			mom_name = path + "MOM" + dad_kid[i].kid_name.substr(10, second_und) + ".bi.txt";
+		}
+		else
+		{
+			mom_name = path + "MOM" + dad_kid[i].kid_name.substr(3, dad_kid[i].kid_name.size()) + ".bi.txt";
+		}
 		mom.open(mom_name, ios::app);
 		for (ii = 0; ii < locus_info.size(); ii++)
 		{
