@@ -57,18 +57,18 @@ non.n<-non.n[non.n$Allele1Freq > 0.05 & non.n$Allele1Freq < 0.95,]
 aj.prune<-gw.fst[gw.fst$Locus %in% adt.n$Locus&gw.fst$Locus %in% juv.n$Locus, ]
 aj.prune<-aj.prune[aj.prune$ADULT.JUVIE>0,]
 fm.prune<-gw.fst[gw.fst$Locus %in% mal.n$Locus&gw.fst$Locus %in% fem.n$Locus, ]
-fm.prune<-fm.prune[fm.prune$MAL.FEM>0,]
+fm.prune<-fm.prune[fm.prune$FEM.MAL>0,]
 mo.prune<-gw.fst[gw.fst$Locus %in% fem.n$Locus&gw.fst$Locus %in% mom.n$Locus, ]
-mo.prune<-mo.prune[mo.prune$MOM.FEM>0,]
+mo.prune<-mo.prune[mo.prune$FEM.MOM>0,]
 
 write.table(aj.prune, "aj.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
 write.table(fm.prune, "fm.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
 write.table(mo.prune, "mo.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
 
 
-gw.plot<-gw.fst[gw.fst$Locus %in% aj.prune$Locus |
-	gw.fst$Locus %in% fm.prune$Locus |
-	gw.fst$Locus %in% mo.prune$Locus,]
+#gw.plot<-gw.fst[gw.fst$Locus %in% aj.prune$Locus &
+#	gw.fst$Locus %in% fm.prune$Locus &
+#	gw.fst$Locus %in% mo.prune$Locus,]
 
 aj.ci<-c(mean(aj.prune$ADULT.JUVIE)+2.57583*sd(aj.prune$ADULT.JUVIE),
 	mean(aj.prune$ADULT.JUVIE)-2.57583*sd(aj.prune$ADULT.JUVIE))
@@ -76,6 +76,17 @@ fm.ci<-c(mean(fm.prune$FEM.MAL)+2.57583*sd(fm.prune$FEM.MAL),
 	mean(fm.prune$FEM.MAL)-(2.57583*sd(fm.prune$FEM.MAL)))
 mo.ci<-c(mean(mo.prune$FEM.MOM)+(2.57583*sd(mo.prune$FEM.MOM)),
 	mean(mo.prune$FEM.MOM)-(2.57583*sd(mo.prune$FEM.MOM)))
+
+#top 5%
+aj.plot<-aj.prune[order(aj.prune$ADULT.JUVIE),] #ascending
+aj.top5<-c(aj.plot[round(nrow(aj.plot)*0.975),"ADULT.JUVIE"],
+	aj.plot[round(nrow(aj.plot)*0.025),"ADULT.JUVIE"])
+fm.plot<-fm.prune[order(fm.prune$FEM.MAL),]#ascending
+fm.top5<-c(fm.plot[round(nrow(fm.plot)*0.975),"FEM.MAL"],
+	fm.plot[round(nrow(fm.plot)*0.025),"FEM.MAL"])
+mo.plot<-mo.prune[order(mo.prune$FEM.MOM),]#ascending
+mo.top5<-c(mo.plot[round(nrow(mo.plot)*0.975),"FEM.MOM"],
+	mo.plot[round(nrow(mo.plot)*0.025),"FEM.MOM"])
 
 #get model data
 model<-read.delim("../sca_simulation_output/ddraddist.ss0.2alleles.fst_out.txt")
@@ -122,158 +133,96 @@ legend("top","Mothers-Females", cex=0.75,bty="n")
 mtext("Genomic Location", 1, outer=T, cex=1)
 mtext("Fst", 2, outer=T, cex=1)
 dev.off()
-##TROUBLESHOOTING THE WEIRD PATTERNS
-#CALCULATE FST HERE
-fst.aj<-merge(adt.n,juv.n,by="Locus")
-fst.aj$AvgHs<-(fst.aj$Hs.x+fst.aj$Hs.y)/2
-fst.aj$pbar<-((fst.aj$Allele1Freq.x*fst.aj$N.x)+
-	(fst.aj$Allele1Freq.y*fst.aj$N.y))/(fst.aj$N.x+fst.aj$N.y)
-fst.aj$qbar<-((fst.aj$Allele2Freq.x*fst.aj$N.x)+
-	(fst.aj$Allele2Freq.y*fst.aj$N.y))/(fst.aj$N.x+fst.aj$N.y)
-fst.aj$ht<-1-((fst.aj$pbar*fst.aj$pbar)+(fst.aj$qbar*fst.aj$qbar))
-fst.aj$fst<-(fst.aj$ht-fst.aj$AvgHs)/fst.aj$ht
 
-##TROUBLESHOOTING MALE-FEMALE COMPARISON
- weirdos<-fm.prune[fm.prune$MAL.FEM > 0.03,]
-weirdos<-weirdos[,c("Locus","Chrom","Pos","MAL.FEM")]
-weirdsum<-gw.sum[gw.sum$Locus %in% weirdos$Locus,]
-weirdsum<-weirdsum[weirdsum$Pop == "MAL" | weirdsum$Pop == "FEM",]
-weirdos$hobs<-1-weirdos$Ho
-regsum<-gw.sum[gw.sum$Locus %in% fm.prune$Locus,] 
-regsum<-regsum[regsum$Pop=="MAL" | regsum$Pop == "FEM",]
-regsum<-regsum[!(regsum$Locus %in% weirdsum$Locus),]
-regsum$hobs<-1-regsum$Ho
-
-png("HsvHo.png",height=7,width=7,units="in",res=300)
-par(mfrow=c(2,2), oma=c(2,2,2,2),mar=c(2,2,2,2))
-plot(regsum[regsum$Pop=="FEM",c("hobs","Hs")])
-mtext("Regular, Females",3,outer=F)
-plot(regsum[regsum$Pop=="MAL",c("hobs","Hs")])
-mtext("Regular, Males",3,outer=F)
-plot(weirdos[weirdos$Pop=="FEM",c("hobs","Hs")])
-mtext("Weird, Females",3,outer=F)
-plot(weirdos[weirdos$Pop=="MAL",c("hobs","Hs")])
-mtext("Weird, Males",3,outer=F)
-mtext("Observed Heterozygosity",1,outer=T)
-mtext("Expected Heterozygosity (Hs)",2,outer=T)
+#plot with the top5%
+png("fst.biallelic.pruned.top5.png",height=300,width=300,units="mm",res=300)
+par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
+aj<-plot.fsts(aj.plot, ci.dat=aj.top5,fst.name="ADULT.JUVIE", chrom.name="Chrom"
+	, axis.size=0.75, bp.name="Pos")
+legend("top","Adult-Juvenile", cex=0.75,bty="n")
+fm<-plot.fsts(fm.plot, ci.dat=fm.top5,fst.name="FEM.MAL", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos")
+legend("top","Male-Female", cex=0.75,bty="n")
+mo<-plot.fsts(mo.plot, ci.dat=mo.top5,fst.name="FEM.MOM", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos")
+legend("top","Mothers-Females", cex=0.75,bty="n")
+mtext("Genomic Location", 1, outer=T, cex=1)
+mtext("Fst", 2, outer=T, cex=1)
 dev.off()
 
-png("HsInWeirdMalFemLoci.png",height=7,width=7,units="in",res=300)
-par(mfrow=c(2,2), oma=c(2,2,2,2),mar=c(2,2,2,2))
-hist(weirdsum[weirdsum$Pop=="MAL","Hs"], breaks=50, main="",ylab="",xlab="")
-legend("topright",bty="n","Weird Loci, Males")
-hist(regsum[regsum$Pop=="MAL","Hs"], breaks=50, main="",ylab="",xlab="")
-legend("top",bty="n","Regular Loci, Males")
-hist(weirdsum[weirdsum$Pop=="FEM","Hs"], breaks=50, main="",ylab="",xlab="")
-legend("top",bty='n',"Weird Loci, Females")
-hist(regsum[regsum$Pop=="FEM","Hs"], breaks=50, main="",ylab="",xlab="")
-legend("top",bty='n',"Regular Loci, Females")
-mtext("Hs",1,outer=T)
-mtext("Frequency",2,outer=T)
+###COMPARISONS
+aj.out<-aj[aj$ADULT.JUVIE >= aj.top5[1] |	aj$ADULT.JUVIE <= aj.top5[2],]
+fm.out<-fm[fm$FEM.MAL >= fm.top5[1] | fm$FEM.MAL <= fm.top5[2],]
+mo.out<-mo[mo$FEM.MOM >= mo.top5[1] | mo$FEM.MOM <= mo.top5[2],]
+
+aj.unique<-aj.out[!(aj.out$Locus %in% fm.out$Locus) & 
+	!(aj.out$Locus %in% mo.out$Locus),]
+fm.unique<-fm.out[!(fm.out$Locus %in% aj.out$Locus) & 
+	!(fm.out$Locus %in% mo.out$Locus),]
+mo.unique<-mo.out[!(mo.out$Locus %in% aj.out$Locus) &
+	!(mo.out$Locus %in% fm.out$Locus),]
+
+plot(aj$Pos, aj$ADULT.JUVIE,pch=19,col="light grey")
+points(aj.out$Pos,aj.out$ADULT.JUVIE,pch=19,col="dark grey")
+points(aj.unique$Pos,aj.unique$ADULT.JUVIE,pch=19,col="dark green")
+
+plot(fm$Pos, fm$FEM.MAL,pch=19,col="light grey")
+points(fm.out$Pos,fm.out$FEM.MAL,pch=19,col="dark grey")
+points(fm.unique$Pos,fm.unique$FEM.MAL,pch=19,col="dark green")
+
+plot(mo$Pos, mo$FEM.MOM,pch=19,col="light grey")
+points(mo.out$Pos,mo.out$FEM.MOM,pch=19,col="dark grey")
+points(mo.unique$Pos,mo.unique$FEM.MOM,pch=19,col="dark green")
+
+###top 1%
+aj.plot<-aj[order(aj$ADULT.JUVIE),] #ascending
+aj.top1<-aj.plot[round(nrow(aj.plot)*0.99),"ADULT.JUVIE"]
+aj.out1<-aj[aj$ADULT.JUVIE >= aj.top1,]
+fm.plot<-fm[order(fm$FEM.MAL),]#ascending
+fm.top1<-fm.plot[round(nrow(fm.plot)*0.99),"FEM.MAL"]
+fm.out1<-fm[fm$FEM.MAL >= fm.top1,]
+mo.plot<-mo[order(mo$FEM.MOM),]#ascending
+mo.top1<-mo.plot[round(nrow(mo.plot)*0.99),"FEM.MOM"]
+mo.out1<-mo[mo$FEM.MOM >= mo.top1,]
+
+aj.un1<-aj.out1[!(aj.out1$Locus %in% fm.out1$Locus) &
+	 !(aj.out1$Locus %in% mo.out1$Locus),]
+fm.un1<-fm.out1[!(fm.out1$Locus %in% aj.out1$Locus) &
+	!(fm.out1$Locus %in% mo.out1$Locus),]
+mo.un1<-mo.out1[!(mo.out1$Locus %in% aj.out1$Locus) &
+	!(mo.out1$Locus %in% fm.out1$Locus),]
+
+
+png("biallelic.top1.png",width=7.5,height=10,units="in",res=300)
+par(mfrow=c(3,1),lwd=1.3,las=1)
+plot(aj$Pos, aj$ADULT.JUVIE,pch=19,col="light grey",axes=F,xlab="",
+	ylab="")
+points(aj.out1$Pos,aj.out1$ADULT.JUVIE,pch=19,col="dark blue")
+points(aj.un1$Pos,aj.un1$ADULT.JUVIE,pch=19,col="dark green")
+axis(2,pos=0)
+mtext("Adults-Juveniles",3)
+legend("topright",c("Shared","Unique"),col=c("dark blue","dark green"),
+	pch=19,bty='n')
+
+plot(fm$Pos, fm$FEM.MAL,pch=19,col="light grey",axes=F,xlab="",
+	ylab="")
+points(fm.out1$Pos,fm.out1$FEM.MAL,pch=19,col="dark blue")
+points(fm.un1$Pos,fm.un1$FEM.MAL,pch=19,col="dark green")
+axis(2,pos=0)
+mtext("Females-Males",3)
+mtext("Fst",2,las=0,outer=T)
+
+plot(mo$Pos, mo$FEM.MOM,pch=19,col="light grey",axes=F,xlab="",
+	ylab="")
+points(mo.out1$Pos,mo.out1$FEM.MOM,pch=19,col="dark blue")
+points(mo.un1$Pos,mo.un1$FEM.MOM,pch=19,col="dark green")
+axis(2,pos=0)
+mtext("Females-Mothers",3)
+mtext("Location on genome",1,outer=T)
 dev.off()
 
-
-png("HvNInWeirdMalFemLoci.png",height=7,width=7,units="in",res=300)
-par(mfrow=c(2,2), oma=c(2,2,2,2),mar=c(2,2,2,2))
-plot(weirdsum[weirdsum$Pop=="MAL",c("N","Hs")],ylab="",xlab="",pch=15)
-legend("bottomleft",bty="n","Hs Males",text.col="red")
-plot(weirdsum[weirdsum$Pop=="MAL",c("N","Ho")],ylab="",xlab="",pch=15,col="blue")
-legend("bottomleft",bty="n","Ho, Males",text.col="red")
-plot(weirdsum[weirdsum$Pop=="FEM",c("N","Hs")],ylab="",xlab="",pch=19)
-legend("bottomright",bty='n',"Hs, Females",text.col="red")
-plot(weirdsum[weirdsum$Pop=="FEM",c("N","Ho")],ylab="",xlab="",pch=19,col="blue")
-legend("bottomleft",bty='n',"Ho, Females",text.col="red")
-mtext("Heterozygosity",2,outer=T)
-mtext("N",1,outer=T)
-mtext("Weird Loci",3,outer=T)
-dev.off()
-
- par(mfrow=c(2,2), oma=c(2,2,2,2),mar=c(2,2,2,2))
-plot(regsum[regsum$Pop=="MAL",c("N","Hs")],ylab="",xlab="",pch=15)
-legend("bottomleft",bty="n","Hs Males",text.col="red")
-plot(regsum[regsum$Pop=="MAL",c("N","Ho")],ylab="",xlab="",pch=15,col="blue")
-legend("bottomleft",bty="n","Ho, Males",text.col="red")
-plot(regsum[regsum$Pop=="FEM",c("N","Hs")],ylab="",xlab="",pch=19)
-legend("bottomright",bty='n',"Hs, Females",text.col="red")
-plot(regsum[regsum$Pop=="FEM",c("N","Ho")],ylab="",xlab="",pch=19,col="blue")
-legend("bottomleft",bty='n',"Ho, Females",text.col="red")
-mtext("Heterozygosity",2,outer=T)
-mtext("N",1,outer=T)
-mtext("Weird Loci",3,outer=T)
+write.table(rownames(aj.un1),"unique.top1.aj.txt",quote=F,row.names=F,col.names=F)
+write.table(rownames(fm.un1),"unique.top1.fm.txt",quote=F,row.names=F,col.names=F)
+write.table(rownames(mo.un1),"unique.top1.mo.txt",quote=F,row.names=F,col.names=F)
 
 
-fem.n<-sum.list$FEM[!is.na(sum.list$FEM$Hs),]
- plot(gw.fst[gw.fst$Locus %in% fem.n$Locus & gw.fst$MAL.FEM > 0,"MAL.FEM"])#OK
-fem.n<-fem.n[fem.n$Allele1Freq > 0.05 & fem.n$Allele1Freq < 0.95,]
-plot(gw.fst[gw.fst$Locus %in% fem.n$Locus & gw.fst$MAL.FEM > 0,"MAL.FEM"])#OK
-fem.n<-fem.n[fem.n$N>100,]
-plot(gw.fst[gw.fst$Locus %in% fem.n$Locus & gw.fst$MAL.FEM > 0,"MAL.FEM"])#goodbye
-
-removedfem<-fem.n[fem.n$N < 100,]
-plot(gw.fst[gw.fst$Locus %in% removedfem$Locus & gw.fst$MAL.FEM > 0,"MAL.FEM"])
-rem.fem<-gw.fst[gw.fst$Locus %in% removedfem$Locus & gw.fst$MAL.FEM > 0.025 
-	& gw.fst$MAL.FEM < 0.05,c("Locus","Chrom","Pos","MAL.FEM")]
-rem.fem<-merge(rem.fem, removedfem,by="Locus")
-
-rem.mal<-gw.sum[gw.sum$Locus %in% rem.fem$Locus & gw.sum$Pop=="MAL",]
-
-mal.n<-sum.list$MAL[sum.list$MAL$N>160& !is.na(sum.list$MAL$Hs),]
- plot(gw.fst[gw.fst$Locus %in% mal.n$Locus & gw.fst$MAL.FEM > 0,"MAL.FEM"])
-
-png("CoverageOfLocusGroups.png",height=7,width=14,units="in",res=300)
-par(mfrow=c(2,4), oma=c(2,2,2,2),mar=c(2,2,2,2))
-hist(regsum[regsum$Pop=="MAL","N"], breaks=50, main="",ylab="",xlab="")
-mtext("Regular (kept) Loci, Males",3,outer=F)
-hist(weirdsum[weirdsum$Pop=="MAL","N"], breaks=50, main="",ylab="",xlab="")
-mtext("Weird Loci, Males",3,outer=F)
-hist(gw.sum[gw.sum$Locus %in% removedfem$Locus & gw.sum$Pop=="MAL","N"], breaks=50, main="",ylab="",xlab="")
-mtext("All Pruned-Out Loci, Males",3,outer=F)
-hist(rem.mal$N, breaks=50, main="",ylab="",xlab="")
-mtext("Pruned-Out Loci in Fst Gap, Males",3,outer=F)
-hist(regsum[regsum$Pop=="FEM","N"], breaks=50, main="",ylab="",xlab="")
-mtext("Regular (kept) Loci, Females",3,outer=F)
-hist(weirdsum[weirdsum$Pop=="FEM","N"], breaks=50, main="",ylab="",xlab="")
-mtext("Weird Loci, Females",3,outer=F)
-hist(removedfem$N, breaks=50, main="",ylab="",xlab="")
-mtext("All Pruned-Out Loci, Females",3,outer=F)
-hist(rem.fem$N, breaks=50, main="",ylab="",xlab="")
-mtext("Pruned-Out Loci in Fst Gap, Females",3,outer=F)
-mtext("N",1,outer=T)
-mtext("Frequency",2,outer=T)
-dev.off()
-
-gw.uber<-merge(gw.sum,gw.fst,by="Locus") 
-png("NvFst.png",height=7,width=7,units="in",res=300)
-par(mfrow=c(1,2))
-plot(gw.uber[gw.uber$Pop=="MAL" & gw.uber$MAL.FEM > 0,c("N","MAL.FEM")],ylab="Fst")
-mtext("Males",3,outer=F)
-plot(gw.uber[gw.uber$Pop=="FEM" & gw.uber$MAL.FEM > 0,c("N","MAL.FEM")],ylab="Fst")
-mtext("Females",3,outer=F)
-dev.off()
-
-
-
-tags<-read.table("../stacks/batch_1.catalog.tags.tsv",sep='\t')
-colnames(tags)<-c("SqlID","SampleID","LocusID","Chr","BP","Strand","SeqType",
-	"StackComponent","SeqID","Sequence","Deleveraged","Blacklist",
-	"Lumberjackstack","loglike")
-snps<-read.table("../stacks/batch_1.catalog.snps.tsv",sep='\t')
-colnames(snps)<-c("SqlID","SampleID","LocusID","Col","Type","LikelihoodRatio",
-	"Rank1","Rank2","Rank3","Rank4")
-sumstats<-read.table("../stacks/batch_1.sumstats.tsv",sep='\t')
-colnames(sumstats)<-c("BatchID","LocusID","Chr","BP","Col","PopID","P","Q",
-	"NumInd","FreqP","ObsHet","ObsHom","ExpHet","ExpHom","Pi","SmoothPi",
-	"SmoothPiP","Fis","SmoothFis","SmoothFisP","Private")
-sumstats$Locus<-paste(sumstats$Chr,".",sumstats$BP,sep="")
-tagsnps<-merge(tags,snps,"LocusID")
-tagsnps$BPCol<-tagsnps$BP+tagsnps$Col+1
-tagsnps$Locus<-paste(tagsnps$Chr,".",tagsnps$BPCol,sep="")
-tagsnps<-merge(tagsnps,sumstats,"Locus")
-weird.tags<-tagsnps[tagsnps$Locus %in% weirdos$Locus,]
-weird.tags<-weird.tags[,c("LocusID","Chr.x","BP.x","Chr.y","BP.y",
-	"Sequence","loglike","LikelihoodRatio","Col.y","PopID","Rank1",
-	"Rank2","P","Q","NumInd","FreqP","ObsHet","ObsHom","ExpHet",
-	"ExpHom","Pi","Fis","Private","Locus")]
-weird.tags.out<-merge(weirdos,tagsnps,"Locus")
-write.table(weird.tags.out,"WeirdFstsInfo.txt",sep='\t',quote=F,row.names=F)
-#...what now???

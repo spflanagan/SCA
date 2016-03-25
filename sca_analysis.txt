@@ -1,0 +1,767 @@
+Selection Components Analysis Log File
+This is being started on 27 January 2016 so it's a bit late, and I've already filled my lab notebook with >50 pages
+Outline of the approach:
+1. Run Stacks, prune dataset, calculate Fsts among groups, compare those Fst distributions to null distributions from simulation models.
+	Programs utilized:
+	-> ref_map.pl (Stacks)
+	-> populations (Stacks)
+	biallelic:
+		-> scripts/convert_snps.R 
+		-> infer_maternal_contribution/infer_mat_vcf/infer_mat_vcf 
+		-> vcftools (extract_gt_info.sh)
+		-> merge_vcfs.R 
+		-> gwsca_biallelic 
+		-> generate_empiricalAFS.R 
+		-> sca_simulation 
+		-> gwsca_biallelic_analysis.R
+		-> annotate top 1% outliers	
+			-> blastn RAD seqs
+			-> align to annotated genome with bowtie2
+			-> extract 5kb region surrounding RAD seq and blastx
+	haplotypes:
+		-> convert_matches 
+		-> infer_maternal_contribution 
+		-> gwsca_haplotypes
+		-> R to compare to model (from sca_simulation)
+		relatedness/parentage:
+			(make haplotypes_files.txt)
+			-> haplotypes_to_cervus
+			-> prune_cervus_genotypes.R
+			-> CERVUS 
+			-> calculate_relatedness 
+			-> band_sharing
+			-> mom_female_fst (?)
+	
+2. Run GATK pipeline, prune dataset, and follow Monnahan et al. approach to analyze selection components analysis.
+	Programs utilized:
+	-> scripts/pre_gatk.sh
+	-> scripts/run_gatk.sh
+	-> use gatk to filter
+	-> het_v_depth.py
+	-> Monnahan analysis
+
+
+
+#############################################LAB BOOK######################################################]
+#####Friday, 25 March 2016
+395 of my RAD loci that mapped to the annotated scovelli genome are in annotated regions. Of those, 6 are in the 5' UTR and 19 are in 3'UTR and the rest are just in gene/mRNA/CDS regions.
+
+####Thursday, 24 March 2016
+I was able to compare the mapped file to the gff file to see if any of my RAD loci map to annotated regions of the genome.
+
+#####Wednesday, 23 March 2016
+I ran subset_fasta_file to extract the 494 scaffolds that contain SCA outliers. I'm making one fasta file per scaffold so I can subset them using extract_sequence_part. It found 492 matches (so some didn't match? probably at least one empty line..) but that was because of a bug so I fixed it and got all of them.
+Then I ran extract_sequence_part and then used cat and sed to merge all the files into one. Then I blasted (both blastn and blastx) the merged extracted sequence bits on putty.
+
+To annotate my sam file with info from the gff file, I need to 
+
+#####Tuesday, 22 March 2016
+Something weird is going on with the locus identification. the map locus IDs don't quite match the locus IDs in gwsca. Quitting the plink map approach and switching to sumstats.tsv. That worked. There are 688 RAD loci containing outliers.
+Using fasta_from_stacks_catalog I'm extracting the RAD loci so I can blast them and find them in the genome and try to identify what they are/what they're near.
+On TIGGS I ran blastn search but it doesn't give good output.
+So I'm trying xsede...in $SCRATCH/blastdb2 I did 
+	$module load blast/2.2.29
+	$update_blastdb.pl --decompress nt
+Then I ran sca_blast.sh on putty.
+
+I'm also going to align them to the annotated genome. Done! 
+688 reads; of these:
+  688 (100.00%) were unpaired; of these:
+    11 (1.60%) aligned 0 times
+    548 (79.65%) aligned exactly 1 time
+    129 (18.75%) aligned >1 times
+98.40% overall alignment rate
+
+
+#####Monday, 21 March 2016
+Using a 1% cutoff threshold I identified 356 A-J outliers, 384 F-M outliers, and 383 M-O outliers.
+Of the A-J outliers, 332 are unique; F-M has 180 unique; and M-O has 195 unique loci.
+
+
+#####Thursday, 10 March 2016
+To compare stacks and GATK, I'm going to do the gwsca_biallelic_vcf on filtered_bi.vcf.
+First I need to create an ind info map.
+	grep "CHROM" filtered_bi.vcf > gatk.ind.info.txt
+I should probably also do infer_mat_vcf. 
+vcftools --vcf filtered_bi.vcf --keep extract_from_vcf_gatk.txt --extract-FORMAT-info GT --out ./gatk_gwsca/non_fam
+filtered_bi.vcf has 30087 sites.
+vcftools --vcf gatk_maternal.vcf --extract-FORMAT-info GT --out gatk_maternal
+then used merge_vcfs.R to merge them.
+
+To investigate some of what's going on:
+grep "CHROM" filtered_bi.vcf > hets_w_1read.txt
+grep "0/1:1,0:1:0:35,0,0" filtered_bi.vcf >> hets_w_1read.txt
+grep "0/1:0,1:1:73:73,0,73" filtered_bi.vcf >> hets_w_1read.txt
+grep "0/1:0,1:1:37:39,0,37" filtered_bi.vcf >> hets_w_1read.txt
+grep "0/1:0,1:1:31:74,0,31" filtered_bi.vcf >> hets_w_1read.txt
+grep "0/1:0,1:1:31:71,0,31" filtered_bi.vcf >> hets_w_1read.txt
+grep "0/1:0,1:1:31:74,0,31" filtered_bi.vcf >> hets_w_1read.txt
+grep "0/1:0,1:1:1:76,0,1" filtered_bi.vcf >> hets_w_1read.txt
+grep "0/1:0,1:1:29:74,0,29" filtered_bi.vcf >> hets_w_1read.txt
+grep "0/1:0,1:1:19:39,0,19" filtered_bi.vcf >> hets_w_1read.txt
+These are 
+scaffold_70	86152
+scaffold_209	276764
+scaffold_343	42436
+scaffold_1247	6286
+scaffold_1247	6286
+scaffold_1247	6286
+scaffold_1247	49375
+scaffold_1247	49375
+I've changed filter_gatk.sh adding --setFilteredGtToNocall to the VariantFiltration and --minFilteredGenotypes 100 to SelectVariants
+	...it gives me some warnings about --filterName allelenum
+	I had to change some of the logical statements so that --filterName marks BAD ones (not good)
+		so that it can remove them.
+		
+	Getting error "ERROR MESSAGE: Argument depthhas a bad value. Invalid expression used (DP < 1 || DP => 100). Please see the JEXL docs for correct syntax."
+Doing SelectVariants before VariantFiltration worked! Because before pruning for biallelic AF refers to a list and not a double so it breaks.
+Other problem: --minFilteredGenotypes doesn't work the way I thought/want. I need another way to remove those loci not present in a certain number of individuals (75% or something=223 individuals)..not sure that's gonna work. The filtering steps didn't remove the weird ones. 
+
+#***CERVUS***#
+Ran prune_cervus_genotypes and recovered 1642 loci in HWE and in 99% of individuals. I subsampled those to run Cervus a bunch of times.
+
+	
+
+#####Wednesday, 9 March 2016
+#***Haplotypes gwsca***#
+It seems that inferring mother alleles in the haplotype dataset is going to be tricky--too many of the haplotypes don't match up? I guess. Using a threshold of 25 alleles only yields ~8500 loci.
+
+#***Parentage***#
+To do the parentage analyses, I had to create a list of haplotype files.
+ls results/haplotypes/*_haplotypes.txt > results/haplotypes/haplotypes_files.txt
+Then I edited it in Notepad++ to have haplotypes_file_name,ind_id, pop_id format.
+Then ran haplotypes_to_cervus.
+
+#***GATK***#
+vcftools --vcf filtered_output.vcf --min-alleles 2 --max-alleles 2 --out filtered_bi --recode
+Kept 33315 of 33615 loci.
+Copied that file to monnahan. Then ran het_v_depth_mod.py.
+Now I've got 9 that are called heterozygotes with a read depth of 1...
+m = 1 and het, ['0/1', '1,0', '1', '0', '35,0,0'] 10049
+m = 1 and het, ['0/1', '0,1', '1', '73', '73,0,73'] 16864
+m = 1 and het, ['0/1', '0,1', '1', '37', '39,0,37'] 21063
+m = 1 and het, ['0/1', '0,1', '1', '31', '74,0,31'] 33909
+m = 1 and het, ['0/1', '0,1', '1', '31', '71,0,31'] 33909
+m = 1 and het, ['0/1', '0,1', '1', '31', '74,0,31'] 33909
+m = 1 and het, ['0/1', '0,1', '1', '1', '76,0,1'] 34037
+m = 1 and het, ['0/1', '0,1', '1', '29', '74,0,29'] 34037
+m = 1 and het, ['0/1', '0,1', '1', '19', '39,0,19'] 36218
+Could this be vcftools being unreliable? Maybe I should pull out those 33315 biallelic loci using GATK?
+I found this on GATK:
+java -jar GenomeAnalysisTK.jar \
+   -R ref.fasta \
+   -T SelectVariants \
+   -R reference.fasta \
+   -V input.vcf \
+   -o output.vcf \
+	--restrictAllelesTo BIALLELIC
+	
+I added that to filter_gatk.sh and ran it (commenting out the previous filtering). I'll see if that makes het_v_depth work any better. 
+This has the same problem:
+m = 1 and het, ['0/1', '1,0', '1', '0', '35,0,0'] 9410
+m = 1 and het, ['0/1', '0,1', '1', '73', '73,0,73'] 15584
+m = 1 and het, ['0/1', '0,1', '1', '37', '39,0,37'] 19348
+m = 1 and het, ['0/1', '0,1', '1', '31', '74,0,31'] 30949
+m = 1 and het, ['0/1', '0,1', '1', '31', '71,0,31'] 30949
+m = 1 and het, ['0/1', '0,1', '1', '31', '74,0,31'] 30949
+m = 1 and het, ['0/1', '0,1', '1', '1', '76,0,1'] 31075
+m = 1 and het, ['0/1', '0,1', '1', '29', '74,0,29'] 31075
+GT:AD:DP:GQ:PL, where AD is the allele depth for each allele and DP is the approximate read depth (maybe this is what's being used??)
+
+
+#####Tuesday, 8 March 2016
+This is something in the calling of maternal alleles, I think.
+I went back over infer_mat_vcf and I think the way I'd been assigning maternal alleles was just wrong. I've re-done it so hopefully it's better (maybe it'll fix the problems??). I'll need to re-do the haplotypes infer_maternal_contribution and the model now. I think this has fixed the problem!!!
+
+What is the missing symbol in haplotypes?? I think it's "0".
+
+I added allelic dropout to the model so that for every individual that is sampled, their loci are assigned random numbers. If a locus gets a random number that is less than the error rate (0.01), that locus's maternal allele gets assigned as the paternal allele, so there's an increase in homozygotes. Running that with 200 generations now.
+
+#####Monday, 7 March 2016
+Could it be in the vcf-merge file? Where does it arise? 
+
+#####Friday, 4 March 2016
+I have no idea what's causing the weird pattern in ADULT-JUVIE comparison. It's only happening in the gwsca_biallelic_vcf Fst calculations, it's not in the calculations from Stacks. This is a bit concerning. I wonder if there's a bug in my program?
+
+The haplotypes are doing it to a small extent too--they just don't have as high Fsts to start with and the group is located in a different part of the axis (probably because it's in a different order).
+
+This is something in my program. I don't know what but it's there. I re-did it in R and it works just fine. I should de-bug the program but I think I'm just going to use R, at least for now. I should figure out what's going wrong.
+
+I ran GATK's VariantFiltration module to filter the gatk dataset. It doesn't restrict it to biallelic loci, though, so I might have to do that myself.
+#####Thursday, 3 March 2016
+There are 133 dad-kid pairs. Ran infer_mat_vcf. Now I need to merge the batch_1.vcf and the biallelic_maternal.
+Then ran extract_gt_info.sh to run vcftools to extract the relevant info.
+For some reason vcftools isn't recognizing genotypes in biallelic_maternal.vcf. There was a space before the first header entry and this broke it. jeeez. I changed this in the infer_mat_vcf code so now this problem shouldn't come up.
+Then merge_vcfs.R
+Need to create ind_info_vcf.txt
+OK, I want to include only one instance of individuals that were sequenced twice (OFF016,OFF027,OFF032,PRM177). I'll want to do some analysis with them to estimate error rates and see how reliably the parentage analysis etc works but for the biallelic gwsca I don't want to include them. So going back to infer_mat_vcf in the pipeline.
+Now I've run infer_mat_vcf,vcftools, merge_vcfs,gwsca_biallelic_vcf, generate_empiricalAFS
+And I've started the sca simulation.
+Meanwhile, looking at the gwsca results:
+> dim(aj.prune)
+[1] 34084    31
+> dim(fm.prune)
+[1] 40182    31
+> dim(mo.prune)
+[1] 40093    31
+OK, something weird is happening in the adult-offspring comparison. I can't explain it but there's a big bunch of loci that have high Fsts in the middle of the set......
+
+I also started run_gatk.sh with the subset of individuals (not including duplicated ones, so excluding OFF016-1,OFF-27-1,OFF-32-1, and PRM177-1). pre_gatk didn't need to be run because it's run on each individual separately anyway.
+
+Also running convert_matches using run_convert_matches.sh. And now running infer_maternal_contribution. Now running gwsca_haplotypes. Let's see if weird patterns pop up there too. 
+
+
+#####Wednesday, 2 March 2016
+The ref_map script ran populations as:
+populations -b 1 -P ./results/stacks -s -t 2 -r 0.5 -a 0.05 --fstats --vcf --plink -p 3 -M ./sca_popmap_ddrad.txt
+And it resulted in 51356 SNPs (I think--that's the number of lines in batch_1.sumstats.tsv).
+These seem like reasonable filters--minor allele frequency of 0.05, present in 3 populations (of PRM,NPM,FEM,OFF), and present in half of each population. 
+
+I'll move forward with the biallelic analysis. convert_snps is done!
+I need to make a dad.kid.pairs.fullnames.txt file.
+
+#####Tuesday, 1 March 2016
+So...ddRAD and oRAD apparently have very different allelic dropout/error rates. So I'm going to re-do the SCA with just the ddRAD individuals. 
+I should re-do this all from the beginning, including the stacks analysis.
+Yayyyyyyy
+I re-installed stacks to have newest version (v1.37) and re-made a popmap with the 384 ddRAD individuals.
+I'm running ref_map.pl using run_refmap_ddrad.sh
+
+
+#####Monday, 29 February 2016
+OLD INFO FROM UP ABOVE:
+1. Run Stacks, prune dataset, calculate Fsts among groups, compare those Fst distributions to null distributions from simulation models.
+Programs utilized:
+->ref_map.pl (Stacks)
+->populations (Stacks)
+->prune_for_coverage_oRADddRAD.R
+->process_alleles_files (?)
+->scripts/convert_snps.R | infer_maternal_contribution/infer_mat_vcf/infer_mat_vcf | vcftools | merge_vcfs.R | gwsca_biallelic | generate_empiricalAFS.R | sca_simulation | gwsca_biallelic_analysis.R
+->convert_matches | infer_maternal_contribution | gwsca_haplotypes
+->convert_matches | prune_cervus_genotypes.R | CERVUS or calculate_relatedness or band_sharing
+->R to compare to model (from sca_simulation)
+->mom_female_fst
+2. Run GATK pipeline, prune dataset, and follow Monnahan et al. approach to analyze selection components analysis.
+->scripts/pre_gatk.sh
+->scripts/run_gatk.sh
+->filter_vcf (but this didn't work right)
+
+For #1: Problem is that Fsts are elevated relative to model by quite a bit. 
+Solution 1: Maybe using haplotypes was not the best approach. So, let's look at biallelic SNPs
+Programs utilized:
+->ref_map.pl (Stacks)
+->populations (Stacks)
+->scripts/convert_snps.R (R) | infer_maternal_contribution/infer_mat_vcf/infer_mat_vcf | gwsca_biallelic
+->R to compare to model (from sca_simulation)
+
+Solution 2: Maybe there really are elevated Fsts due to increased relatedness. Need to calculate pairwise relatedness and estimate parentage
+->haplotypes_to_cervus | CERVUS
+->calculate_relatedness
+->band_sharing
+
+For #2: I ran into the problem that my filter_vcf file somehow messed up the format of the vcf so it was no longer readable.
+Also, I hadn't included all of my samples.
+Solution 1: Maybe GATK pipeline was messing things up? So I tried to convert my bowtie alignments and the stacks output
+^This was not the problem.
+Programs I used:
+->scripts/run_bowite_for_gatk.sh
+->scripts/sam_to_bam.sh
+->scripts/sort_bam.sh
+->scripts/test_bwtgatk.sh
+->convert_vcf_for_sca
+->subset_plink_file
+
+Solution 2: Re-run GATK to start from scratch and then use vcftools to filter vcf
+(vcftools)
+
+#THIS ENTRY
+It turns out the Moms weren't specified correctly in the ind.info.vcf.txt file! They were missing the individual identifier and a few were even marked as males. I'm going to re-run the analysis and then run it with ind.info.datasets.txt, where there are three "status" options: ddRAD, oRAD, or MOM.
+
+Somehow five PRM records seem to be missing from the biallelic.gt.vcf: PRM040,PRM063,PRM116,PRM141, and PRM180. Are they found in the output from convert_snps?? They are in convert_snps.R. Maybe they're not getting kept by infer_mat_vcf?? Oh, they probably don't have offspring in the dataset. Yep! That's it. I should probably include them. 
+
+I added 30 PRM and 3 OFF to the extract_from_vcf file.
+vcftools --vcf ../stacks/batch_1.pruned.vcf --keep extract_from_vcf.txt --extract-FORMAT-info GT --out fem
+Then merge_vcfs.R to re-write biallelic.gt.vcf
+
+Added those individuals to ind.info.vcf.txt and ind.info.datasets.txt. Now re-running gwsca_biallelic_vcf with both cases.
+Did that. The Fsts between the two datasets are pretty high...
+
+#####Sunday, 28 February 2016
+I don't need to change convert_snps.R, I think I just need to use my batch_1.pruned.vcf file in inver_mat_vcf.
+I'm running that analysis now. Had to change the way files were being named because I must have changed the dad.kid.pairs.txt file to just be PRM001 and OFF001 instead of sample_PRM001_align. Anyway, now it's running. I should be back on-track soon!  
+Now that I've done infer_mat_vcf, I need to merge files. First, I had to add at least one line with ## (I did ##fileformat=VCFv4.0)
+vcftools --vcf biallelic_maternal.vcf --extract-FORMAT-info GT --out biallelic_maternal
+vcftools --vcf ../stacks/batch_1.pruned.vcf --keep extract_from_vcf.txt --out fem --recode-INFO-all --recode
+vcftools --vcf fem.recode.vcf --extract-FORMAT-info GT --out fem
+Then I'm using merge_vcfs.R to combine the maternal one with females.
+
+Well, this didn't completely eliminate the male-female issue in biallelic Fst comparisons....frackkkkkk
+
+#####Saturday, 27 February 2016
+Making progress on pruning...counting the number of times "./.:0:.,.:.,.,." occurs in each line for each group.
+Used grep to get the vcf header, saved it as a file batch_1.vcf.header.txt. Then subsetted vcf files using ind.info.ddRAD.txt and ind.info.psti.txt.
+
+Then kept the loci in both sets, and there are 122845. Wrote those to text file stacks/LociToKeep.txt and to stacks/CatalogIDsToKeep.txt and I subsetted the vcf in stacks/batch_1.pruned.vcf
+
+I modified process_alleles_files to accept a whitelist and only keep the loci in the whitelist. Re-running that with run_process_alleles_files.sh in VirtualBox. I'm not sure this program is necessary.
+
+I also modified convert_matches (which outputs the "haplotypes.txt" files) to accept a whitelist and am running it with matches.txt in VirtualBox.
+
+calculate_relatedness was running but very slowly, and I'm going to have to re-start it later anyway because I have to prune the loci. So I stopped it. I might also switch to doing the relatedness calculations in R, I think it might be faster. 
+
+
+#####Friday, 26 February 2016
+Working on pruning the batch_1.vcf file in R to keep loci only in both groups of sequencing libraries.
+
+#####Thursday, 25 February 2016
+I'm going to try pruning for HWE first, and then I'll see if that fixes it.
+According to my calculations, all biallelic SNPs adhere to hardy weinberg expectations...which seems improbable.
+But it's the result so I'm going to try comparing males and females from psti lane only (maybe there's a difference between ddRAD and oRAD)
+vcftools --vcf ../stacks/batch_1.vcf --keep extract_psti_vcf.txt --out psti --recode-INFO-all --recode
+vcftools --vcf psti.recode.vcf --extract-FORMAT-info GT --out psti
+This resulted in a file named psti.GT.FORMAT
+grep 'CHROM' psti.GT.FORMAT > ind.info.psti.txt
+and then I manually edited it in Notepad++ to get it into the correct format and ran gwsca_biallelic_vcf.
+This actually looks basically right. Let's look at Fsts from ddRAD only..
+vcftools --vcf ../stacks/batch_1.vcf --remove extract_psti_vcf.txt --out ddRAD --recode-INFO-all --recode
+vcftools --vcf ddRAD.recode.vcf --extract-FORMAT-info GT --out ddRAD
+grep 'CHROM' ddRAD.GT.FORMAT > ind.info.ddRAD.txt
+and then I manually edited it in Notepad++ to get it into the correct format and ran gwsca_biallelic_vcf.
+This also looks normal.
+Now let's compare a random subset of ddRAD that is the same number as PstI (30 females, 28 males)
+vcftools --vcf ../stacks/batch_1.vcf --keep extract_ddRADsub.txt --out ddRADsub --recode-INFO-all --recode
+vcftools --vcf ddRADsub.recode.vcf --extract-FORMAT-info GT --out ddRADsub
+I already have the correct info file.
+
+
+#####Wednesday, 24 February 2016
+There is a negative relationship between Fst and N in both males and females. And a dearth of low-Hs values for low-N values. 
+The loci with Fsts in the gap range (0.025-0.05) have low N in males, which causes them to be lost during pruning.
+I improved the pruning pipeline to have loci present in 75% of all individuals and then make sure they're present in 50% of each population, plus the polymorphic and allele frequency requirements. But this isn't helping!!
+The high-Fst group seems to have high homozygosity compared to the others and Hs is skewed in males but not in females. Could these simply just not be in HWE? If I want to address this I'll need different output from gwsca_biallelic_vcf. 
+Meanwhile, I'm working on looking at the actual SNPs and sequences. Merging snps, tags, and sumstats files in R. Assuming I don't crash everything.
+I'm having trouble matching up the tags, snps, and sumstats files. Sumstats has the catalog ID, which should be the Locus ID reported in the tags and snps files, as per a google groups post from Julian Catchen on 10/25/15:
+
+	Each RAD locus is considered a single object. The RAD or GBS locus was 
+	created by the restriction enzyme shearing the DNA and the subsequent 
+	sequencing of the downstream bases. Given 100bp Illumina reads, each RAD 
+	locus should be 100bp in length (slightly shorter if inline barcodes 
+	were used). 
+
+	If there are multiple SNPs in that locus, they are all recorded to that 
+	same locus, and the haplotype, the combination of all those SNPs, is the 
+	RAD locus. Each RAD locus in each individual has it's own local ID, 
+	however, the Catalog ID is the population-wide representative of each 
+	locus (after they have been lined up across individuals). This is the ID 
+	reported in the catalog files and all downstream exports. All SNPs are 
+	reported by the catalog ID they originated from, and the haplotype is 
+	the full RAD locus, so it also is reported with the same catalog ID. 
+		https://groups.google.com/forum/#!searchin/stacks-users/locus	$20id$20in$20catalog.tags/stacks-users/UmpYi34jddg/-DPDWXyRBQAJ
+
+So...what is going on??
+
+
+#####Tuesday, 23 February 2016
+The simulation finished running the 200 generations with the inferred moms getting dad alleles occasionally--did it affect Fsts?? It looks like it reduced the percentage of outliers from 47% to 24% in the MOM-FEM comparison. Question: Have I been running it with 200 generations only?? Yes, that's what I ran the model paper with.
+
+I think I'm going to have to adjust the relatedness program to empty out its allele containers after several hundred loci so that it can handle thousands of haplotypes...it's crashed and I don't know why, but I'm thinking it's out of memory. I updated it to be similar to band_sharing and hopefully now it will run smoothly. 
+
+I'm also re-running simulation model with an error rate of 0.03.
+
+What I want to discuss with Adam:
+-should I have allele dropout in the 'actual' individuals, not just the inferred maternal alleles?
+-Any ideas as to what could be causing the weird male-female pattern?
+-What else to do??
+-Band sharing: do these seem like reasonable values? 
+-relatedness (if I get it to run): What can we learn from this?
+After talking to Adam, I need to focus on the male-female FST weirdness. 
+
+It comes from the pruning step where fem.n<-sum.list$FEM[sum.list$FEM$N>100& !is.na(sum.list$FEM$Hs),]
+if I change the N threshold to be 87, the gap is not as obvious but it's still there. WHY????
+>tapply(weirdsum$Hs,factor(weirdsum$Pop),summary)
+$FEM
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.09764 0.45010 0.46470 0.45970 0.47940 0.50000 
+
+$MAL
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.09717 0.22480 0.25270 0.25760 0.27960 0.49990 
+
+> tapply(regsum$Hs,factor(regsum$Pop),summary)
+$FEM
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.09614 0.17790 0.28340 0.29880 0.42850 0.50000 
+
+$MAL
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.09557 0.18100 0.28750 0.30200 0.43220 0.50000 
+
+So what am I removing that opens up the gap? 
+
+Meanwhile, I'm figuring out what's going on with het_v_depth. It looks like vcftools filtering steps somehow messed up the calls?? The top is the out.vcf bit and the bottom is genotype_output.vcf.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	FEM001	FEM002	FEM004	FEM005	FEM006	FEM007	FEM008	FEM009	FEM010	FEM011	FEM012	FEM013	FEM014	FEM015	FEM016	FEM017	FEM018	FEM019	FEM020	FEM021	FEM022	FEM023	FEM024	FEM025	FEM026	FEM027	FEM028	FEM029	FEM030	FEM031	FEM032	FEM033	FEM034	FEM035	FEM036	FEM037	FEM038	FEM039	FEM040	FEM041	FEM042	FEM043	FEM044	FEM045	FEM046	FEM047	FEM048	FEM049	FEM050	FEM051	FEM052	FEM053	FEM054	FEM054-1	FEM055	FEM056	FEM057	FEM058	FEM059	FEM060	FEM061	FEM062	FEM063	FEM064	FEM065	FEM066	FEM067	FEM068	FEM069	FEM070	FEM071	FEM072	FEM073	FEM074	FEM075	FEM076	FEM077	FEM078	FEM079	FEM080	FEM081	FEM082	FEM083	FEM084	FEM085	FEM086	FEM087	NPM005	NPM006	NPM007	NPM008	NPM010	NPM011	NPM012	NPM1128	PRM001	PRM002	PRM003	PRM005	PRM006	PRM007	PRM009	PRM010	PRM011	PRM012	PRM013	PRM014	PRM015	PRM016	PRM017	PRM018	PRM019	PRM022	PRM023	PRM024	PRM025	PRM026	PRM027	PRM028	PRM029	PRM030	PRM031	PRM032	PRM033	PRM034	PRM035	PRM035-2	PRM036	PRM037	PRM038	PRM039	PRM040	PRM041	PRM042	PRM043	PRM044	PRM045	PRM046	PRM047	PRM048	PRM049	PRM050	PRM051	PRM052	PRM053	PRM054	PRM055	PRM056	PRM057	PRM058	PRM059	PRM060	PRM061	PRM062	PRM063	PRM064	PRM065	PRM066	PRM067	PRM068	PRM069	PRM070	PRM071	PRM072	PRM073	PRM074	PRM075	PRM076	PRM077	PRM078	PRM079	PRM080	PRM081	PRM082	PRM083	PRM084	PRM085	PRM086-23	PRM086R	PRM087	PRM088	PRM089	PRM090	PRM091	PRM092	PRM093	PRM094	PRM095	PRM096	PRM097	PRM098	PRM099	PRM100	PRM101	PRM102	PRM103	PRM104	PRM105	PRM106	PRM107	PRM108	PRM109	PRM110	PRM111	PRM112	PRM113	PRM114	PRM115	PRM116	PRM117	PRM118	PRM119	PRM120	PRM121	PRM122	PRM123	PRM124	PRM125	PRM126	PRM127	PRM128	PRM129	PRM130	PRM131	PRM132	PRM133	PRM134	PRM135	PRM135-1	PRM136	PRM137	PRM138	PRM139	PRM140	PRM141	PRM142	PRM143	PRM144	PRM145	PRM146	PRM147	PRM148	PRM149	PRM150	PRM151	PRM152	PRM153	PRM154	PRM155	PRM156	PRM157	PRM158	PRM159	PRM160	PRM161	PRM162	PRM163	PRM164	PRM165	PRM166	PRM167	PRM168	PRM169	PRM170	PRM171	PRM172	PRM173	PRM174	PRM175	PRM176	PRM177	PRM177-1	PRM178	PRM179	PRM180	PRM181	PRM182	PRM183	PRM184	PRM185	PRM186	PRM187	PRM188	PRM189	ROFF016	ROFF027	ROFF032OFF001	OFF004	OFF005	OFF006	OFF007	OFF008	OFF009	OFF010	OFF011	OFF012	OFF013	OFF014	OFF015	OFF016	OFF017	OFF018	OFF020	OFF022	OFF024	OFF025	OFF026	OFF027	OFF028	OFF029	OFF030	OFF031	OFF032	OFF033	OFF034	OFF035	OFF036	OFF037	OFF038	OFF039	OFF041	OFF042	OFF043	OFF044	OFF045	OFF046	OFF047	OFF049	OFF050	OFF051	OFF052	OFF053	OFF054	OFF055	OFF056	OFF057	OFF058	OFF059	OFF060	OFF061	OFF064	OFF066	OFF067	OFF068	OFF070	OFF071	OFF072	OFF073	OFF074	OFF075	OFF076	OFF077	OFF078	OFF079	OFF080	OFF081	OFF083	OFF084	OFF085	OFF086	OFF08623	OFF088	OFF089	OFF090	OFF091	OFF092	OFF093	OFF094	OFF095	OFF096	OFF097	OFF100	OFF101	OFF102	OFF103	OFF105	OFF106	OFF110	OFF111	OFF112	OFF113	OFF114	OFF115	OFF117	OFF118	OFF119	OFF120	OFF121	OFF122	OFF123	OFF124	OFF125	OFF126	OFF127	OFF134	OFF135	OFF136	OFF137	OFF138	OFF139	OFF140	OFF142	OFF143	OFF144	OFF145	OFF146	OFF149	OFF150	OFF151	OFF152	OFF153	OFF154	OFF155	OFF156	OFF157	OFF158	OFF159	OFF160	OFF161	OFF165	OFF166	OFF167	OFF168	OFF169	OFF170	OFF171	OFF172	OFF173	OFF174	OFF175	OFF176	OFF177	OFF178	OFF179	OFF181	OFF182	OFF183	OFF184	OFF185	OFF186	OFF187	OFF188	OFF189	
+scaffold_1247	49375	.	G	A	18960.5	.	AC=293;AF=0.921;AN=318;BaseQRankSum=-7.310e-01;ClippingRankSum=0.727;DP=577;FS=20.813;InbreedingCoeff=-0.0605;MLEAC=297;MLEAF=0.934;MQ=50.49;MQRankSum=-7.310e-01;QD=30.42;ReadPosRankSum=0.736;SOR=0.012	GT:AD:DP:GQ:PL	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	1/1:0,2:2:6:90,6,0	./.:1,0:1:.:.	./.:0,0:0:.:.	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	0/0:2,0:2:0:0,0,5	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:2,0:2:.:.	1/1:0,3:3:9:135,9,0	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	0/1:1,1:2:39:39,0,76	./.:1,0:1:.:.	1/1:0,2:2:6:90,6,0	1/1:0,4:4:12:180,12,0	./.:0,0:0:.:.	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	0/1:1,4:5:67:162,0,67	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	0/1:0,2:2:67:78,0,67	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	0/1:1,2:3:29:81,0,29	./.:0,0:0:.:.	1/1:0,3:3:9:130,9,0	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	1/1:0,2:2:6:90,6,0	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	1/1:0,4:4:12:180,12,0	1/1:0,3:3:9:128,9,0	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	1/1:0,2:2:6:90,6,0	1/1:0,4:4:12:180,12,0	1/1:0,3:3:9:135,9,0	1/1:0,2:2:6:90,6,0	1/1:0,2:2:6:82,6,0	1/1:0,2:2:6:90,6,0	1/1:0,4:4:12:180,12,0	0/1:1,3:4:67:123,0,67	./.:2,0:2:.:.	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	1/1:0,3:3:9:135,9,0	./.:1,0:1:.:.	1/1:0,11:11:33:495,33,0	./.:0,0:0:.:.	./.:1,0:1:.:.	0/1:1,5:6:27:207,0,27	./.:1,0:1:.:.	./.:1,0:1:.:.	1/1:0,3:3:9:135,9,0	./.:0,0:0:.:.	1/1:0,1:1:3:45,3,0	1/1:0,2:2:6:90,6,0	1/1:0,3:3:9:135,9,0	./.:1,0:1:.:.	./.:0,0:0:.:.	1/1:0,3:3:9:135,9,0	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	0/1:1,2:3:78:78,0,78	./.:1,0:1:.:.	1/1:0,2:2:6:90,6,0	0/1:0,4:4:27:165,0,27	1/1:0,5:5:15:225,15,0	./.:1,0:1:.:.	./.:0,0:0:.:.	1/1:0,3:3:9:135,9,0	1/1:0,2:2:6:90,6,0	0/1:0,1:1:1:76,0,1	./.:1,0:1:.:.	./.:0,0:0:.:.	1/1:0,3:3:9:135,9,0	1/1:0,4:4:12:180,12,0	1/1:0,4:4:12:180,12,0	1/1:0,5:5:18:263,18,0	1/1:0,4:4:12:172,12,0	1/1:0,4:4:12:180,12,0	1/1:0,5:5:15:225,15,0	0/0:2,0:2:0:0,0,8	./.:1,0:1:.:.	1/1:0,4:4:12:180,12,0	./.:0,0:0:.:.	1/1:0,5:5:15:225,15,0	./.:1,0:1:.:.	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	1/1:0,2:2:6:90,6,0	1/1:0,2:2:6:90,6,0	1/1:0,2:2:6:90,6,0	1/1:0,2:2:6:90,6,0	./.:1,0:1:.:.	./.:1,0:1:.:.	1/1:0,3:3:9:131,9,0	./.:0,0:0:.:.	1/1:0,3:3:9:134,9,0	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	1/1:0,3:3:9:135,9,0	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	1/1:0,1:1:6:70,6,0	1/1:0,5:5:15:205,15,0	1/1:0,2:2:6:90,6,0	1/1:0,1:1:3:45,3,0	./.:1,0:1:.:.	0/1:1,3:4:36:123,0,36	./.:1,0:1:.:.	./.:1,0:1:.:.	1/1:0,3:3:9:135,9,0	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	0/1:0,3:3:33:115,0,33	./.:1,0:1:.:.	1/1:0,4:4:12:172,12,0	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:2,0:2:.:.	./.:0,0:0:.:.	1/1:0,2:2:6:79,6,0	1/1:0,4:4:12:180,12,0	1/1:0,2:2:9:115,9,0	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	1/1:0,3:3:9:130,9,0	1/1:0,5:5:15:225,15,0	./.:1,0:1:.:.	./.:0,0:0:.:.	1/1:0,3:3:9:135,9,0	0/1:1,4:5:30:165,0,30	./.:0,0:0:.:.	1/1:0,4:4:12:180,12,0	./.:0,0:0:.:.	1/1:0,3:3:9:131,9,0	./.:1,0:1:.:.	0/1:0,3:3:33:123,0,33	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	./.:1,0:1:.:.	1/1:0,1:1:3:45,3,0	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	1/1:0,2:2:6:90,6,0	1/1:0,2:2:6:86,6,0	./.:2,0:2:.:.	./.:1,0:1:.:.	0/1:0,3:3:33:123,0,33	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	1/1:0,4:4:12:180,12,0	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	1/1:0,3:3:9:132,9,0	1/1:0,4:4:12:179,12,0	1/1:0,3:3:9:135,9,0	./.:0,0:0:.:.	1/1:0,4:4:12:180,12,0	./.:1,0:1:.:.	./.:2,0:2:.:.	./.:0,0:0:.:.	1/1:0,1:1:3:39,3,0	./.:0,0:0:.:.	1/1:0,4:4:12:180,12,0	./.:0,0:0:.:.	./.:0,0:0:.:.	1/1:0,2:2:6:90,6,0	./.:1,0:1:.:.	./.:1,0:1:.:.	1/1:0,2:2:6:90,6,0	1/1:0,2:2:6:90,6,0	./.:1,0:1:.:.	1/1:0,1:1:3:45,3,0	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	0/1:0,1:1:29:74,0,29	./.:1,0:1:.:.	./.:0,0:0:.:.	1/1:0,1:1:6:85,6,0	./.:1,0:1:.:.	1/1:0,3:3:9:135,9,0	./.:0,0:0:.:.	1/1:0,7:7:21:315,21,0	1/1:0,2:2:6:90,6,0	1/1:0,3:3:9:122,9,0	1/1:0,1:1:3:45,3,0	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	1/1:0,3:3:9:135,9,0	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	1/1:0,4:4:12:180,12,0	0/1:1,2:3:36:81,0,36	1/1:0,2:2:6:90,6,0	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	1/1:0,2:2:6:90,6,0	1/1:0,1:1:3:45,3,0	1/1:0,1:1:6:85,6,0	./.:0,0:0:.:.	./.:2,0:2:.:.	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	./.:0,0:0:.:.	1/1:0,3:3:9:135,9,0	./.:0,0:0:.:.	1/1:0,3:3:9:135,9,0	./.:1,0:1:.:.	1/1:0,2:2:6:90,6,0	./.:1,0:1:.:.	./.:0,0:0:.:.	1/1:0,2:2:6:90,6,0	1/1:0,1:1:3:45,3,0	1/1:0,3:3:9:135,9,0	./.:2,0:2:.:.	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	./.:1,0:1:.:.	1/1:0,6:6:18:259,18,0	./.:1,0:1:.:.	1/1:0,3:3:9:135,9,0	1/1:0,5:5:15:224,15,0	1/1:0,3:3:9:135,9,0	./.:1,0:1:.:.	0/0:2,0:2:0:0,0,12	./.:1,0:1:.:.	1/1:0,1:1:3:45,3,0	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	1/1:0,4:4:12:180,12,0	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	1/1:0,6:6:18:262,18,0	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	1/1:0,3:3:9:135,9,0	1/1:0,3:3:9:135,9,0	1/1:0,2:2:6:90,6,0	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	./.:2,0:2:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	1/1:0,2:2:6:90,6,0	1/1:0,4:4:12:180,12,0	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	1/1:0,2:2:6:90,6,0	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	1/1:0,2:2:6:86,6,0	./.:1,0:1:.:.	./.:1,0:1:.:.	0/0:2,0:2:0:0,0,6	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	1/1:0,1:1:3:45,3,0	0/1:0,3:3:26:97,0,26	./.:0,0:0:.:.	1/1:0,3:3:9:135,9,0	1/1:0,2:2:6:90,6,0	1/1:0,3:3:9:135,9,0	./.:0,0:0:.:.	./.:1,0:1:.:.	1/1:0,2:2:6:90,6,0	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	1/1:0,3:3:9:135,9,0	./.:0,0:0:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:1,0:1:.:.	./.:0,0:0:.:.	1/1:0,3:3:9:133,9,0	1/1:0,2:2:6:90,6,0	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:0,0:0:.:.	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.	./.:1,0:1:.:.	1/1:0,1:1:3:38,3,0	./.:0,0:0:.:.	1/1:0,1:1:3:45,3,0	./.:1,0:1:.:.	./.:0,0:0:.:.	./.:1,0:1:.:.	1/1:0,1:1:3:45,3,0	1/1:0,4:4:12:180,12,0	1/1:0,3:3:9:135,9,0	./.:0,0:0:.:.	1/1:0,3:3:9:135,9,0	1/1:0,2:2:6:90,6,0	./.:0,0:0:.:.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	FEM001	FEM002	FEM004	FEM005	FEM006	FEM007	FEM008	FEM009	FEM010	FEM011	FEM012	FEM013	FEM014	FEM015	FEM016	FEM017	FEM018	FEM019	FEM020	FEM021	FEM022	FEM023	FEM024	FEM025	FEM026	FEM027	FEM028	FEM029	FEM030	FEM031	FEM032	FEM033	FEM034	FEM035	FEM036	FEM037	FEM038	FEM039	FEM040	FEM041	FEM042	FEM043	FEM044	FEM045	FEM046	FEM047	FEM048	FEM049	FEM050	FEM051	FEM052	FEM053	FEM054	FEM054-1	FEM055	FEM056	FEM057	FEM058	FEM059	FEM060	FEM061	FEM062	FEM063	FEM064	FEM065	FEM066	FEM067	FEM068	FEM069	FEM070	FEM071	FEM072	FEM073	FEM074	FEM075	FEM076	FEM077	FEM078	FEM079	FEM080	FEM081	FEM082	FEM083	FEM084	FEM085	FEM086	FEM087	NPM005	NPM006	NPM007	NPM008	NPM010	NPM011	NPM012	NPM1128	OFF001	OFF004	OFF005	OFF006	OFF007	OFF008	OFF009	OFF010	OFF011	OFF012	OFF013	OFF014	OFF015	OFF016	OFF017	OFF018	OFF020	OFF022	OFF024	OFF025	OFF026	OFF027	OFF028	OFF029	OFF030	OFF031	OFF032	OFF033	OFF034	OFF035	OFF036	OFF037	OFF038	OFF039	OFF041	OFF042	OFF043	OFF044	OFF045	OFF046	OFF047	OFF049	OFF050	OFF051	OFF052	OFF053	OFF054	OFF055	OFF056	OFF057	OFF058	OFF059	OFF060	OFF061	OFF064	OFF066	OFF067	OFF068	OFF070	OFF071	OFF072	OFF073	OFF074	OFF075	OFF076	OFF077	OFF078	OFF079	OFF080	OFF081	OFF083	OFF084	OFF085	OFF086	OFF08623OFF088	OFF089	OFF090	OFF091	OFF092	OFF093	OFF094	OFF095	OFF096	OFF097	OFF100	OFF101	OFF102	OFF103	OFF105	OFF106	OFF110	OFF111	OFF112	OFF113	OFF114	OFF115	OFF117	OFF118	OFF119	OFF120	OFF121	OFF122	OFF123	OFF124	OFF125	OFF126	OFF127	OFF134	OFF135	OFF136	OFF137	OFF138	OFF139	OFF140	OFF142	OFF143	OFF144	OFF145	OFF146	OFF149	OFF150	OFF151	OFF152	OFF153	OFF154	OFF155	OFF156	OFF157	OFF158	OFF159	OFF160	OFF161	OFF165	OFF166	OFF167	OFF168	OFF169	OFF170	OFF171	OFF172	OFF173	OFF174	OFF175	OFF176	OFF177	OFF178	OFF179	OFF181	OFF182	OFF183	OFF184	OFF185	OFF186	OFF187	OFF188	OFF189	PRM001	PRM002	PRM003	PRM005	PRM006	PRM007	PRM009	PRM010	PRM011	PRM012	PRM013	PRM014	PRM015	PRM016	PRM017	PRM018	PRM019	PRM022	PRM023	PRM024	PRM025	PRM026	PRM027	PRM028	PRM029	PRM030	PRM031	PRM032	PRM033	PRM034	PRM035	PRM035-2	PRM036	PRM037	PRM038	PRM039	PRM040	PRM041	PRM042	PRM043	PRM044	PRM045	PRM046	PRM047	PRM048	PRM049	PRM050	PRM051	PRM052	PRM053	PRM054	PRM055	PRM056	PRM057	PRM058	PRM059	PRM060	PRM061	PRM062	PRM063	PRM064	PRM065	PRM066	PRM067	PRM068	PRM069	PRM070	PRM071	PRM072	PRM073	PRM074	PRM075	PRM076	PRM077	PRM078	PRM079	PRM080	PRM081	PRM082	PRM083	PRM084	PRM085	PRM086-23	PRM086R	PRM087	PRM088	PRM089	PRM090	PRM091	PRM092	PRM093	PRM094	PRM095	PRM096	PRM097	PRM098	PRM099	PRM100	PRM101	PRM102	PRM103	PRM104	PRM105	PRM106	PRM107	PRM108	PRM109	PRM110	PRM111	PRM112	PRM113	PRM114	PRM115	PRM116	PRM117	PRM118	PRM119	PRM120	PRM121	PRM122	PRM123	PRM124	PRM125	PRM126	PRM127	PRM128	PRM129	PRM130	PRM131	PRM132	PRM133	PRM134	PRM135	PRM135-1	PRM136	PRM137	PRM138	PRM139	PRM140	PRM141	PRM142	PRM143	PRM144	PRM145	PRM146	PRM147	PRM148	PRM149	PRM150	PRM151	PRM152	PRM153	PRM154	PRM155	PRM156	PRM157	PRM158	PRM159	PRM160	PRM161	PRM162	PRM163	PRM164	PRM165	PRM166	PRM167	PRM168	PRM169	PRM170	PRM171	PRM172	PRM173	PRM174	PRM175	PRM176	PRM177	PRM177-1	PRM178	PRM179	PRM180	PRM181	PRM182	PRM183	PRM184	PRM185	PRM186	PRM187	PRM188	PRM189	ROFF016	ROFF027	ROFF032	
+scaffold_1247	49375	.	G	A	18960.54	.	AC=293;AF=0.921;AN=318;BaseQRankSum=-7.310e-01;ClippingRankSum=0.727;DP=577;FS=20.813;InbreedingCoeff=-0.0605;MLEAC=297;MLEAF=0.934;MQ=50.49;MQRankSum=-7.310e-01;QD=30.42;ReadPosRankSum=0.736;SOR=0.012	GT:AD:DP:GQ:PL	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:1,0:1	./.:0,0:0	./.:0,0:0	1/1:0,2:2:6:90,6,0	./.:1,0:1	./.:0,0:0	1/1:0,2:2:6:90,6,0	./.:0,0:0	./.:0,0:0	./.:1,0:1	./.:1,0:1	./.:1,0:1	./.:1,0:1	./.:1,0:1	0/0:2,0:2:0:0,0,5	./.:1,0:1	./.:1,0:1	./.:2,0:2	1/1:0,3:3:9:135,9,0	./.:1,0:1	./.:1,0:1	./.:1,0:1	./.:0,0:0	./.:1,0:1	./.:1,0:1	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	0/1:1,1:2:39:39,0,76	./.:1,0:1	1/1:0,2:2:6:90,6,0	1/1:0,4:4:12:180,12,0	./.:0,0:0	1/1:0,2:2:6:90,6,0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	0/1:1,4:5:67:162,0,67	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	0/1:0,2:2:67:78,0,67	./.:1,0:1	./.:0,0:0	./.:0,0:0	0/1:1,2:3:29:81,0,29	./.:0,0:0	1/1:0,3:3:9:130,9,0	./.:0,0:0	./.:1,0:1	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:1,0:1	./.:0,0:0	1/1:0,2:2:6:90,6,0	./.:1,0:1	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:1,0:1	./.:0,0:0	./.:1,0:1	./.:0,0:0	./.:0,0:0	1/1:0,4:4:12:180,12,0	1/1:0,3:3:9:128,9,0	./.:0,0:0	./.:1,0:1	./.:1,0:1	./.:1,0:1	./.:1,0:1	./.:0,0:0	./.:0,0:0	./.:0,0:0	1/1:0,2:2:6:90,6,0	1/1:0,4:4:12:180,12,0	1/1:0,3:3:9:135,9,0	1/1:0,2:2:6:90,6,0	1/1:0,2:2:6:82,6,0	1/1:0,2:2:6:90,6,0	1/1:0,4:4:12:180,12,0	0/1:1,3:4:67:123,0,67	./.:2,0:2	1/1:0,1:1:3:45,3,0	./.:0,0:0	./.:1,0:1	./.:1,0:1	./.:1,0:1	1/1:0,3:3:9:135,9,0	./.:1,0:1	./.:0,0:0	./.:1,0:1	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:1,0:1	1/1:0,4:4:12:180,12,0	0/1:1,2:3:36:81,0,36	1/1:0,2:2:6:90,6,0	1/1:0,2:2:6:90,6,0	./.:0,0:0	./.:1,0:1	./.:0,0:0	./.:1,0:1	./.:1,0:1	./.:0,0:0	1/1:0,2:2:6:90,6,0	1/1:0,1:1:3:45,3,0	1/1:0,1:1:6:85,6,0	./.:0,0:0	./.:2,0:2	1/1:0,2:2:6:90,6,0	./.:0,0:0	./.:1,0:1	./.:1,0:1	1/1:0,2:2:6:90,6,0	./.:0,0:0	./.:0,0:0	1/1:0,3:3:9:135,9,0	./.:0,0:0	1/1:0,3:3:9:135,9,0	./.:1,0:1	1/1:0,2:2:6:90,6,0	./.:1,0:1	./.:0,0:0	1/1:0,2:2:6:90,6,0	1/1:0,1:1:3:45,3,0	1/1:0,3:3:9:135,9,0	./.:2,0:2	1/1:0,2:2:6:90,6,0	./.:0,0:0	./.:1,0:1	1/1:0,6:6:18:259,18,0	./.:1,0:1	1/1:0,3:3:9:135,9,0	1/1:0,5:5:15:224,15,0	1/1:0,3:3:9:135,9,0	./.:1,0:1	0/0:2,0:2:0:0,0,12	./.:1,0:1	1/1:0,1:1:3:45,3,0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:1,0:1	./.:1,0:1	./.:1,0:1	1/1:0,4:4:12:180,12,0	./.:1,0:1	./.:1,0:1	./.:0,0:0	./.:0,0:0	./.:1,0:1	1/1:0,6:6:18:262,18,0	./.:0,0:0	./.:0,0:0	./.:1,0:1	./.:0,0:0	./.:1,0:1	1/1:0,3:3:9:135,9,0	1/1:0,3:3:9:135,9,0	1/1:0,2:2:6:90,6,0	1/1:0,2:2:6:90,6,0	./.:0,0:0	./.:2,0:2	./.:0,0:0	./.:1,0:1	1/1:0,2:2:6:90,6,0	1/1:0,4:4:12:180,12,0	./.:1,0:1	./.:1,0:1	./.:1,0:1	./.:1,0:1	./.:0,0:0	./.:0,0:0	./.:0,0:0	1/1:0,2:2:6:90,6,0	./.:1,0:1	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:1,0:1	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:1,0:1	./.:1,0:1	./.:1,0:1	1/1:0,2:2:6:86,6,0	./.:1,0:1	./.:1,0:1	0/0:2,0:2:0:0,0,6	./.:0,0:0	./.:1,0:1	./.:0,0:0	./.:0,0:0	1/1:0,1:1:3:45,3,0	0/1:0,3:3:26:97,0,26	./.:0,0:0	1/1:0,3:3:9:135,9,0	1/1:0,2:2:6:90,6,0	1/1:0,3:3:9:135,9,0	./.:0,0:0	./.:1,0:1	1/1:0,2:2:6:90,6,0	./.:1,0:1	./.:0,0:0	./.:0,0:0	1/1:0,3:3:9:135,9,0	./.:0,0:0	./.:1,0:1	./.:1,0:1	./.:1,0:1	./.:0,0:0	1/1:0,3:3:9:133,9,0	1/1:0,2:2:6:90,6,0	./.:1,0:1	./.:0,0:0	./.:0,0:0	1/1:0,2:2:6:90,6,0	./.:0,0:0	./.:1,0:1	1/1:0,1:1:3:38,3,0	./.:0,0:0	1/1:0,1:1:3:45,3,0	./.:1,0:1	./.:0,0:0	./.:1,0:1	1/1:0,1:1:3:45,3,0	1/1:0,4:4:12:180,12,0	1/1:0,3:3:9:135,9,0	./.:0,0:0	1/1:0,3:3:9:135,9,0	1/1:0,2:2:6:90,6,0	./.:0,0:0	1/1:0,2:2:6:90,6,0	./.:0,0:0	1/1:0,3:3:9:135,9,0	./.:1,0:1	1/1:0,11:11:33:495,33,0	./.:0,0:0	./.:1,0:1	0/1:1,5:6:27:207,0,27	./.:1,0:1	./.:1,0:1	1/1:0,3:3:9:135,9,0	./.:0,0:0	1/1:0,1:1:3:45,3,0	1/1:0,2:2:6:90,6,0	1/1:0,3:3:9:135,9,0	./.:1,0:1	./.:0,0:0	1/1:0,3:3:9:135,9,0	./.:1,0:1	./.:0,0:0	./.:1,0:1	1/1:0,2:2:6:90,6,0	./.:0,0:0	./.:1,0:1	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	0/1:1,2:3:78:78,0,78	./.:1,0:1	1/1:0,2:2:6:90,6,0	0/1:0,4:4:27:165,0,27	1/1:0,5:5:15:225,15,0	./.:1,0:1	./.:0,0:0	1/1:0,3:3:9:135,9,0	1/1:0,2:2:6:90,6,0	0/1:0,1:1:1:76,0,1	./.:1,0:1	./.:0,0:0	1/1:0,3:3:9:135,9,0	1/1:0,4:4:12:180,12,0	1/1:0,4:4:12:180,12,0	1/1:0,5:5:18:263,18,0	1/1:0,4:4:12:172,12,0	1/1:0,4:4:12:180,12,0	1/1:0,5:5:15:225,15,0	0/0:2,0:2:0:0,0,8	./.:1,0:1	1/1:0,4:4:12:180,12,0	./.:0,0:0	1/1:0,5:5:15:225,15,0	./.:1,0:1	1/1:0,2:2:6:90,6,0	./.:0,0:0	1/1:0,2:2:6:90,6,0	1/1:0,2:2:6:90,6,0	1/1:0,2:2:6:90,6,0	1/1:0,2:2:6:90,6,0	./.:1,0:1	./.:1,0:1	1/1:0,3:3:9:131,9,0	./.:0,0:0	1/1:0,3:3:9:134,9,0	1/1:0,2:2:6:90,6,0	./.:0,0:0	1/1:0,3:3:9:135,9,0	./.:1,0:1	./.:1,0:1	./.:0,0:0	./.:0,0:0	1/1:0,1:1:6:70,6,0	1/1:0,5:5:15:205,15,0	1/1:0,2:2:6:90,6,0	1/1:0,1:1:3:45,3,0	./.:1,0:1	0/1:1,3:4:36:123,0,36	./.:1,0:1	./.:1,0:1	1/1:0,3:3:9:135,9,0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	1/1:0,2:2:6:90,6,0	./.:0,0:0	0/1:0,3:3:33:115,0,33	./.:1,0:1	1/1:0,4:4:12:172,12,0	./.:1,0:1	./.:0,0:0	./.:2,0:2	./.:0,0:0	1/1:0,2:2:6:79,6,0	1/1:0,4:4:12:180,12,0	1/1:0,2:2:9:115,9,0	1/1:0,2:2:6:90,6,0	./.:0,0:0	./.:1,0:1	./.:1,0:1	./.:0,0:0	1/1:0,2:2:6:90,6,0	./.:0,0:0	./.:0,0:0	./.:0,0:0	1/1:0,3:3:9:130,9,0	1/1:0,5:5:15:225,15,0	./.:1,0:1	./.:0,0:0	1/1:0,3:3:9:135,9,0	0/1:1,4:5:30:165,0,30	./.:0,0:0	1/1:0,4:4:12:180,12,0	./.:0,0:0	1/1:0,3:3:9:131,9,0	./.:1,0:1	0/1:0,3:3:33:123,0,33	1/1:0,2:2:6:90,6,0	./.:0,0:0	./.:1,0:1	1/1:0,1:1:3:45,3,0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:0,0:0	./.:1,0:1	./.:1,0:1	./.:0,0:0	1/1:0,2:2:6:90,6,0	./.:0,0:0	./.:0,0:0	./.:0,0:0	1/1:0,2:2:6:90,6,0	1/1:0,2:2:6:86,6,0	./.:2,0:2	./.:1,0:1	0/1:0,3:3:33:123,0,33	./.:1,0:1	./.:1,0:1	./.:0,0:0	./.:0,0:0	./.:1,0:1	./.:1,0:1	1/1:0,4:4:12:180,12,0	./.:0,0:0	./.:1,0:1	./.:0,0:0	./.:0,0:0	1/1:0,2:2:6:90,6,0	./.:0,0:0	1/1:0,3:3:9:132,9,0	1/1:0,4:4:12:179,12,0	1/1:0,3:3:9:135,9,0	./.:0,0:0	1/1:0,4:4:12:180,12,0	./.:1,0:1	./.:2,0:2	./.:0,0:0	1/1:0,1:1:3:39,3,0	./.:0,0:0	1/1:0,4:4:12:180,12,0	./.:0,0:0	./.:0,0:0	1/1:0,2:2:6:90,6,0	./.:1,0:1	./.:1,0:1	1/1:0,2:2:6:90,6,0	1/1:0,2:2:6:90,6,0	./.:1,0:1	1/1:0,1:1:3:45,3,0	./.:0,0:0	./.:0,0:0	./.:0,0:0	0/1:0,1:1:29:74,0,29	./.:1,0:1	./.:0,0:0	1/1:0,1:1:6:85,6,0	./.:1,0:1	1/1:0,3:3:9:135,9,0	./.:0,0:0	1/1:0,7:7:21:315,21,0	1/1:0,2:2:6:90,6,0	1/1:0,3:3:9:122,9,0
+
+
+#####Monday, 22 February 2016
+Ok, so what if I check band sharing with calculations in R? Plus manually counting for a small number of loci? Just to see if my program is doing it correctly? I can count at least a few comparisons for the 10 loci one. 
+Counting the 10 loci confirms that the relatedness seem to be correct. 
+But I think I want to verify that in R. I checked it in R and it matches.
+I couldn't find the genotypes.txt file to play around with so I'm re-writing the genotypes file from haplotypes using haplotypes_to_cervus.
+
+I added an option to the infer_maternal_allele part of the sca_simulation to opt in to allele dropout. If a random number is below the error rate (0.01), then the mother gets assigned the paternal allele no matter what. I didn't change the offspring alleles but maybe I should...we'll see what this does, I guess.
+
+I'm calculating relatedness on the 22934 haplotypes that are present in 90% of individuals (but not HWE-pruned). Also running the band_sharing program on the same file (/parentage/PolymorphicIn90PercInds.txt)
+
+Then I'll also do it on the HWE pruned set, and see what distributions I get.
+
+
+#####Wednesday, 17 February 2016
+The number of bands shared just seems improbable. It's incredibly frustrating.
+
+#####Tuesday, 16 February 2016
+Band sharing resulted in sharing = 1 and 0 incompatible loci for the biallelic dataset. That just doesn't seem right.
+And relatedness isn't working right either. Why is this so difficult???
+OK, so the relatedness program issue was because of loci with only one allele...which was shared so the denominator of rxy was 0. I think that's fixed, now we'll see what the values look like.
+That's fixed, but now I'm getting unusual values. With 1600 loci, the majority of the values are less than 0, and most father-offspring pairs have negative relatedness values.
+
+#####Monday, 15 February 2016
+I finished running all of the CERVUS combinations yesterday (up to 1600 loci), so now I need to analyze those data.
+I'm extracting delta, num assignments, and percentage of assignments for each one. 
+I think it would also be useful to see how many times females are assigned and if each time they're assigned to the same offspring...still figuring out how to get that info.
+So I think I've got decent summaries. Though I'm not sure I'm really graphically representing info in the best way possible. But I'll show it to Adam.
+I'm going to show Adam:
+	-gwsca_biallelic plot
+	-Structure plot
+	-CERVUS summary info
+	-Batemanator output and selection differentials
+And ask what to do. (sort of)
+
+OK, so after talking with Adam:
+1. Batemanator results and selection differentials help for  proof-of-principle thing.
+2. Re-make histograms for 100,200,1600 loci or something--number of assignments and MS
+3. Relatedness should be summed over all loci
+4. Calculate band-sharing as well (this generates the distribution of values for male-offspring pairs)
+5. Add simulation of offspring allele dropout to the gwsca biallelic simulation
+6. Calculate proportion of loci in which fathers and offspring are compatible.
+
+I re-made the CERVUS histograms (saved as parentage/CERVUS_incremental_snps/CervusMaternitySummary.png).
+I'm re-running the calculate_relatedness with 1600 loci.
+Calculating band-sharing and the proportion of incompatible father-offspring genotypes using band_sharing program.
+I'm getting really high band-sharing numbers (~0.95), which I guess suggests most loci are homozygous for the same allele in fathers and offspring. 
+I'm trying this on the biallelic.vcf file to see what it looks like for biallelic snps.
+
+Something is really not working with the relatedness calculations. It's spitting out a bunch of -1.#IND r-values. I'm not sure when or why it's happening...at first I thought it was because I was including missing loci, but that's not it.
+
+#####Sunday, 14 February 2016
+I calculated the selection differentials for various morphometric tratis using relative mating success, number of offspring, and number of non-reduced offspring based on the parentage analysis from gen1600_8
+
+                        SVL SnoutLength SnoutDepth    TailLength      BandNum MeanBandArea
+Mating Success    0.1282916   0.1634555  0.1188022 -0.0003594433  0.006399823   0.02001239
+Total Num Embryos 0.2685957   0.2396699  0.2319460 -0.0104568167 -0.052075048   0.16136224
+Surviving Embryos 0.2858035   0.2461369  0.2421699 -0.0132749882 -0.038329322   0.16094581
+
+
+#####Saturday, 13 February 2016
+I worked on the relatedness code. I switched to using Lynch & Ritland (1999) formulas, but it's not giving me reasonable output.
+I'm not sure what to do about that...maybe there's a program to use to calculate relatedness?
+Maybe I shouldn't do the weighting??
+
+#####Friday, 12 February 2016
+In the simulation model I had calculated Fst as 1-(hs1+hs2)/(2*ht) whereas in my calculations I'd done ht-avg(hs)/ht...which I believe is mathematically identical but I changed it just to be safe.
+I also output the allele frequencies and re-ran gwsca_biallelic_vcf. Next I'm going to extract the allele frequency spectrum from the biallelic data and run the model with that AFS, just to be sure that I'm using the best possible model.
+
+#####Thursday, 11 February 2016
+I think I figured out the indexing problm, though it's a little broken at the moment. 
+Fixed it! Now it's done and it runs much more quickly! A few minutes tops! Woo hoo!!
+So the biallelic pipeline is no longer convert_snps.R | infer_mat_vcf | gwsca_biallelic, it's now
+stacks/batch_1 | infer_mat_vcf | vcftools --extract-FORMAT-info GT | merge_vcfs.R | gwsca_biallelic_vcf
+I have to fix a few bugs...first the alleles weren't being designated correctly, then the Fst values are off.
+Some of the allele2s are NULL...I don't think I check for that scenario when calculating Fsts.
+It's mostly fixed but for some reason the NONPREG group is having frequencies > 1...it's saying there are 45 instances of allele 1!! But the ind info file is correct and there are only 8 non pregnant males and only 8 individuals marked as NONPREG...so something in the code. It looks like I hadn't cleared the freq counters...did that, we'll see if it's fixed.
+
+Re-zeroing the frequency counts seems to have fixed it. Though some of the max Fst values were a little high (0.8).
+I didn't output the allele frequencies so I'm not sure I can prune based on major allele freq.
+
+OK, so I got rid of any NAs and any with Fst < 0 and kept those above certain N cutoffs.
+
+#####Wednesday, 10 February 2016
+For some reason R does not like me asking if sum(allelefreqs)=="1". So I just removed that sanity check and will assume that the expected allele frequencies always sum to 1. 
+This resulted in 11202 loci. Then I'm pruning to 97% coverage, which yields 3119 loci.
+Now I just need to sample! Done. Now just need to run through CERVUS...perfect thing to do while watching TV ;)
+
+Meanwhile, worked on the gwsca_biallelic code. I can do one locus at a time in the vcf format so I don't have to store much of anything. I just need to assign indices for the popstats? or something. I am not sure how this is going to work yet... I should also do a biallelic sanity check. I need to figure out a way to index the individuals in the pop stats one.
+
+#####Tuesday, 9 February 2016
+Working on pruning for hardy weinberg equilibrium...I think I figured it out. I'm calculated the Chi-Squared test statistic myself and then using 1-pchisq(x,df) to calculate the p-value based on df=num alleles -1.
+Now I need to choose those with p>0.05 and then take those loci from the main dataframe.
+
+Thinking about the biallelic gwsca, I could read in the first ~20000 columns, save those and save the index of the last column, and do the calculations, empty the vectors, and read in those columns to tmp and then do the next 20000...I think this could work...except I have to go through each individual I guess? That could make it more complicated. But I think it's still do-able...
+PROBLEM! The individuals don't have the locus IDs that they're missing! This would be easier in vcf format...
+I have vcf format from the infer_maternal_contribution!
+I think the solution is going to be to re-do gwsca_biallelic using vcf input
+Got all the vcf ind names with 
+	sarah@sarah-vb:~/sf_ubuntushare/SCA/results/biallelic$ grep '#CHROM' biallelic_maternal.vcf > ind.info.bi.vcf.txt
+sarah@sarah-vb:~/sf_ubuntushare/SCA/results/biallelic$ grep '#CHROM' ../stacks/batch_1.vcf > all_seqd.vcf.txt
+manually removed all PRM and OFF, keeping only FEM and NPM
+sarah@sarah-vb:~/sf_ubuntushare/SCA/results/biallelic$ vcftools --vcf ../stacks/batch_1.vcf --keep extract_from_vcf.txt --out fem --recode-INFO-all --recode
+*Had to remove ##Includes inferred maternal alleles header *
+vcf-merge is not working!!! I don't know why.
+In the fem.vcf file, the header with FORMAT info said AD field should have 1 number but it has 2. I just changed that to say that it should have "." numbers.
+Now checking them with vcf-validator.
+
+vcf-sort biallelic_maternal.vcf > maternal.vcf
+bgzip maternal.vcf
+tabix -p vcf maternal.vcf.gz
+vcf-sort fem.recode.vcf > fem.vcf
+bgzip fem.vcf
+tabix -p vcf fem.vcf.gz
+vcf-merge fem.vcf.gz maternal.vcf.gz > merged.vcf
+STILL NOT WORKING!
+Probably because some individuals were duplicated, so I'm just doing this in R
+Found some loci that have the same scaffold and position but a different REF, so I'm just removing those from the dataset because that's too confusing for me. Re-wrote a vcf (biallelic.vcf) with 312755 loci and 565 genotypes (including inferred mothers).
+
+Using Notepad++ I created a ind.info.vcf.txt file with the individual information.
+
+Now I just have to re-write the program...
+
+
+
+**could I do this with the assigned maternity rather than the inferred allele?
+
+
+#####Monday, 8 February 2016
+Well, I accidentally permanently deleted parse_structure_output. Just FYI. I'll have to rewrite it at some point.
+
+So to run CERVUS a bunch of times, I need to test to see if loci are in hardy-weinberg first. 
+I'm going to start with the full genotypes file, and start playing around with that. 
+This is going OK, although I need to account for non-alphabetical order of genotype calls..or sort it first? maybe that will work...
+
+gwsca_biallelic crashed again--after OFF026, I'm pretty sure it's just running out of memory.
+
+#####Sunday, 7 February 2016
+The structure run had finished, so I zipped all of the output files (from structure/Results/ directory) and uploaded them to Structure Harvester. Downloaded the structure harvester output.
+in the scovelli_popgen/saltwater/programs is a program called parse_structure_output. Ran that in Linux for all of my results files.
+It appears that K=2 is the best. It has the highes L'(K) and the highest Delta(K) values
+Using R I plotted the structure output.
+
+Also, gwsca_biallelic is not finding non-biallelic alleles with the updated new.snps.txt files. I'm going to re-start it in "Release" mode because then it should run faster. And I'll see if it runs out of memory more quickly. In release mode it is finding a few loci with more than two alleles, but not very many. Probably Ns or something. 
+
+Meanwhile, started in on the relatedness code. I'm writing it on my home computer for now. I need to ask Adam about a few things re: calculating relatedness.
+ 
+
+#####Saturday, 6 February 2016
+I'm debugging gwsca_biallelic. It looks like the 'new.snps.txt' files aren't actually reduced? And maybe something's wrong with the way they're output.
+So when I merge snps and matches the dataframe becomes huge, but then I make it smaller using keep.snp and pruning for stack depth<-becomes larger because there are duplicate entries for "LocusID".
+Two things:
+	1. I'm going to remove any from snps that have a type = "U"...that suggests that the likelihood ratio was too low to call het/hom so it's not worth including.
+	2. If Type="O" I need to recode the genotypes (I haven't been doing that)<-this is critical for calculating allele frequencies.
+Maybe this will help? Really there shouldn't be ANY loci that aren't biallelic.
+I don't know if it will help with the memory issues, but I worry about trying to break it up and messing up the calculations. I could probably calculate allele frequencies (or at least count the number of alleles) and not have to save everything to file...
+
+#####Friday, 5 February 2016
+gwsca_biallelic crashed--it either ran out of memory or deleted too many alleles. It's difficult to say.
+So I'm going to try pruning the sumstats file to just biallelic loci. Well, actually, they're all biallelic...so there must be something buggy about my program. I'm re-starting it in debug mode. 
+
+
+#####Thursday, 4 February 2016
+I re-started gwsca_biallelic with the pre-pruned files.
+
+GATK: finished running! Now I'm doing the Monnahan pipeline but it's a bit confusing. 
+I'm renaming the scripts so that they're in order and my fixes/updates are in them. Done!
+Ran het_v_depth successfully, and then also the first file (bigVCF_v1.py). But the next files require a file that's in a format I don't know and I don't really feel like trying to figure it out from the code (because it's really not obvious) so I emailed John Kelly. I asked him several questions, including what to do with the females.
+John Kelly pointed out that I have an excess of heterozygotes (lots near 0.6). Could this explain elevated Fsts? I don't have a good answer...Why might there be elevated heterozygosity?
+
+KINGROUP is not working correctly? Maybe? Or it's just buggy in general? I can't tell.
+I should look up when it was last cited.
+Adam recommends calculating relatedness myself, and just looking at the point estimates.
+Also he thinks we should do a parentage/relatedness paper.
+
+ALSO! I should do a structure analysis to see if females are different than others.
+populations -b 1 -P ./results/stacks -M ./results/stacks/sca.null.map.txt -W ./results/stacks/shared_loci.txt -t 3 --plink
+Then to prune:
+../Nerophis_ophidion/results/plink --file ./results/stacks/batch_1.plink --r2 --ld-window-r2 0.2 --hardy --geno 0.05 --maf 0.05 --max-maf 0.95 --noweb --allow-no-sex --write-snplist --out ./results/stacks/pruned
+[this removes those with LD > 0.2, not in HWE, minimum allele freq between 0.05 and 0.95, and present in <95% of individuals. Leaves 3041 loci]
+../Nerophis_ophidion/results/plink --file ./results/stacks/batch_1.plink --extract ./results/stacks/pruned.snplist --noweb --allow-no-sex --recode --recode-structure --out ./results/stacks/pruned
+Running STRUCTURE on 3041 pruned loci in 443 individuals
+	missing value = 0 (unless specified with --output-missing-genotype)
+	one row per individual
+	row 1 = locus name
+	row 2 = map distance?
+	column 1 = individual id
+	column 2 = sampling location
+Now it's running with 10,000 burn-in, 10000 MCMC, admixture, and correlated frequencies; 
+batch job with K=1 through K=4 with 10 iterations.
+
+
+
+
+
+#####Wednesday, 3 February 2016
+Although KINGROUP accepts CERVUS format files, it doesn't if you want to run it with 1000 loci. So I wrote a C++ program to re-format CERVUS files in KINSHIP format (cervus_to_kinship). It seems to have worked! It replaces "0" with "/".
+
+I ran CERVUS with the 99% present loci (394) but it only assigned 10% of offspring, and the critical delta was 0?? I wonder if ~400 loci is too many. 
+
+**Not all of these loci are polymorphic!! If they're "consensus" then they're not polymorphic...**
+
+In KINGROUP v2 I'm running Pairwise Relatedness, Maximum Likelihood method from Goodknight & Queller (1999), calculating allele frequencies, displaying p-values and half matrix, and sorting descending by ID (it's very slow to respond).
+
+Re-ran CERVUS with 1744 polymorphic loci found in 98% of individuals, which resulted in a 19% assignment rate (30 offspring assigned). And all those not assigned were excluded (Delta = 0, LOC < 0).
+
+For gwsca_biallelic, it occurred to me that I could prune the input files before the C++ program in R so that I only have the reference SNPs..this prunes the input file from 4,848,705 to 230,650 SNPs.
+
+#####Tuesday, 2 February 2016
+VirtualBox crashed while GATK HaplotypeCaller was running OFF113...so I created rerun_haplotypecaller.sh and re-ran it.
+Organized the significant and moderately-significant maternity results in a table to print and put in lab notebook to discuss with Adam.
+OK, so I need to run CERVUS with another set of loci to see if I can reproduce the same results. Then I need to start ramping up the number of loci included in the analysis until CERVUS breaks. So I'm using R to subset each of the subsetted files and also write one to file that has loci present in 98% of the individuals. 
+
+Also, downloaded KINGROUP v.2, which is a java program to analyze pairwise relatedness. It accepts up to 1000 loci in CERVUS format, so I can use my subsetting in R to create a useful file.
+	[1] "genotypes14  had no loci present in 98% of individuals"
+	[1] "genotypes19  had no loci present in 98% of individuals"
+	[1] "genotypes27  had no loci present in 98% of individuals"
+	[1] "genotypes28  had no loci present in 98% of individuals"
+	[1] "genotypes29  had no loci present in 98% of individuals"
+	[1] "genotypes30  had no loci present in 98% of individuals"
+	[1] "genotypes31  had no loci present in 98% of individuals"
+	[1] "genotypes32  had no loci present in 98% of individuals"
+	[1] "genotypes35  had no loci present in 98% of individuals"
+	[1] "genotypes37  had no loci present in 98% of individuals"
+	[1] "genotypes43  had no loci present in 98% of individuals"
+	[1] "genotypes44  had no loci present in 98% of individuals"
+	[1] "genotypes45  had no loci present in 98% of individuals"
+	[1] "genotypes47  had no loci present in 98% of individuals"
+	[1] "genotypes54  had no loci present in 98% of individuals"
+	[1] "genotypes56  had no loci present in 98% of individuals"
+	[1] "genotypes57  had no loci present in 98% of individuals"
+	[1] "genotypes58  had no loci present in 98% of individuals"
+	[1] "genotypes59  had no loci present in 98% of individuals"
+	[1] "genotypes6  had no loci present in 98% of individuals"
+	[1] "genotypes60  had no loci present in 98% of individuals"
+	[1] "genotypes61  had no loci present in 98% of individuals"
+	[1] "genotypes62  had no loci present in 98% of individuals"
+	[1] "genotypes7  had no loci present in 98% of individuals"
+	[1] "genotypes8  had no loci present in 98% of individuals"
+
+	
+...meanwhile biallelic SCA is still chugging along....
+
+
+#####Monday, 1 February 2016
+Figuring out CERVUS simulations:
+"you should not simulate the number of offspring in your actual analysis"
+"The average number of candidate parents per offspring should be estimated"<-so this should be one?
+"Prop. sampled...you should not set this parameter to one unless you are certain that you have sampled all observed candidate parents and there is no possibility that there are candidate parents which have eluded observation."
+"Prop. loci typed...allows for missing data and should be an average value...simulation should select the calculated value by default."
+"Prop. loci mistyped...by default the proportion of loci mistyped is also used as the error rate in the likelihood calculations (both by the simulation and in actual parentage analysis)...default value is 0.01."
+"Minimum typed loci. By default this parameter is set to half the total number of loci."
+set 10000 offspring, 1000 candidate mothers, .25 prop sampled, typed .75 and mistyped .02 and minimum typed = 1500
+
+It keeps giving me a floating point error...
+
+I'm going to sub-sample 100-200 loci all of which are present in at least 75% of individuals.
+Using R, I found 143 loci in genotypes0.txt that are present in 98% of individuals. 
+
+Ran CERVUS but noticed that the output said that most known fathers weren't typed...because the offspring file specified offspring as their own father. Manually fixing that file.
+
+Cervus results:
+
+	Mother given known father:
+
+	Level       Confidence (%)  Critical Delta  Assignments        Assignment Rate  
+												Observed Expected  Observed Expected
+	Strict               95.00            5.88       20 (     14)      13%    (  9%)
+	Relaxed              90.00            4.50       25 (     15)      16%    ( 10%)
+	Unassigned                                      130 (    140)      84%    ( 90%)
+	Total                                           155 (    155)     100%    (100%)
+
+
+	**** Number of individuals tested ****
+
+	Offspring (total):                                           160
+	  Tested (typed at 72 or more loci):                         159
+		Known father typed at 72 or more loci:                   155
+		Known father typed at fewer than 72 loci:                  4
+	  Not tested (typed at fewer than 72 loci):                    1
+
+	Candidate mothers (total):                                    87
+	  Tested (typed at 72 or more loci):                          87
+	  Not tested (typed at fewer than 72 loci):                    0
+	  Average number of candidate mothers per offspring:          87
+	  Average proportion of sampled candidate mothers:             1.0000
+
+
+	**** Files ****
+
+	Input
+	  Offspring file:                 offspring.txt
+	  Candidate mother file:          candidate_parents.txt
+	  Genotype file:                  genotypes0.pruned.txt
+	  Allele frequency file:          genotypes0.pruned_allelefreqs.alf
+	  Simulation data file:           genotypes0.pruned_simulation.sim
+
+	Output
+	  Parentage summary file:         genotypes0.pruned_maternity.txt
+	  Parentage data file:            genotypes0.pruned_maternity.csv
+
+...now what??
+
+
+#####Sunday, 31 January 2016
+I wrote a program to parse the genotypes.txt file into multiple smaller files, each with 3000 loci. 
+This seemed to work, although I noticed some of the alleles are coded as "consensus"...but since all individuals are compared to the same "consensus" sequence then this is just as good as having the haplotype sequence. We'll see what happens.
+To run CERVUS, I need to run the allele frequency thing first. So I'm doing that with genotypes0.txt
+Then ran maternity analysis simulation with 10000 offspring, 1000 mothers, sampled .25, typed 0.25 loci and mistyped 0.05, with minimum typed loci = 3000. Confidence using delta and relaxed Confidence level = 90% and strict = 95%.
+Finally, I ran the maternity analysis...but 0% assigned! Is this right or is there something about the simulatio that I did wrong??
+
+#####Saturday, 30 January 2016
+CERVUS can't handle all of my loci. So I need to split the file...maybe rewrite the haplotypes_to_cervus to output a certain number of loci per file and just run a bunch of different files? 
+
+#####Friday, 29 January 2016
+So today haplotypes_to_cervus finished running, but problem: CERVUS didn't accept the input! 
+It turns out I misunderstood their instructions. I need three files:
+	1. File with just offspring INFO (Off ID, Known Parent ID, etc.)
+	2. File with just candidate parent INFO (just a list of parent ids)
+	3. File with ALL genotypes
+So I modified haplotypes_to_cervus and am re-running it.
+
+GATK is still running.
+So is gwsca_biallelic. It's finding loci that are not biallelic and removing them. Hopefully it's not *all* of the loci. Also, this is freaking slow. I don't know if there is but there should seriously be a better way to go about doing this. Or something faster, IDK. Maybe there's a different way to index vectors (or arrays) than I've been using.
+
+
+#####Thursday, 28 January 2016
+When I arrived this morning, ./convert_matches had finished running to generate new sample_*_haplotypes.txt files.
+GATK had finished running.
+gwsca_biallelic was still running through the first individual's file! And then it ran out of memory and crashed.
+
+So now I'm running haplotypes_to_cervus with the new haplotype files...
+	and thinking about a way to fix the gwsca_biallelic issue. Maybe I need a different format, or I need a list 
+	of SNPs, or maybe I should create a whitelist of loci.
+	
+OK, gwsca_biallelic:
+Can I have a reference and then not store individual info?
+Another problem: MOMs have different "SNPID"s than population individuals: 
+	MOMs use CatID.Pos, whereas the others have CatID.Col, where column is the position in the RAD locus not the	
+	reference basepair.
+
+	I can fix that with batch_1.sumstats.tsv, plus that may help prune some loci since the loci have to have 
+	minor allele frequency >= 0.05.
+	
+**Note: haplotypes_to_cervus needed me to re-enter the name for sample_NPM1128_haplotypes.txt and sample_PRM087
+**Also, the ./results/parentage directory didn't exist so I had to re-run haplotypes_to_cervus.
+
+So I don't think I'll be able to append to files the way I did with infer_maternal_contribution, although I guess
+	it could be possible. Instead I'm creating the reference up-front and then disregarding any loci that aren't
+	in the reference. So far it's successfully read in the reference (sans allele info), so that's good. 
+	Ran into a few other small issues debugging but those were mostly me being sloppy. We'll see what else pops up.
+	It's finding a lot of loci not in the reference...
+	
+NOW GATK!
+So I was able to run vcftools and filter by allele frequency (between 0.05 and 0.95) and depth (between 1 and 100)
+	and restrict it to biallelic loci. This resulted in only 1662 loci! f***
+Anyway, when I ran het_v_depth.py it didn't produce any depths. It looks like this might be because of a modification
+	I made to the python code. When I changed that, I got an error. So now I have to figure that out.
+That is due to the fact that the GATK output sometimes has 5 fields and sometimes it has 7. Sometimes it includes PGT and PID
+	I didn't run HaplotypeCaller with -doNotRunPhysicalPhasing. FML.
+	Re-running HaplotypeCaller and GenotypeGVCFs using ./scripts/run_haplotypecaller.sh

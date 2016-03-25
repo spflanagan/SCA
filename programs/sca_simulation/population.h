@@ -192,7 +192,7 @@ public:
 	void set_parameters()
 	{
 		carrying_cap = 5000;
-		num_gen = 2;
+		num_gen = 200;
 
 		num_chrom = 4;
 		num_markers = 2000;

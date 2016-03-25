@@ -74,19 +74,91 @@ public:
 };
 
 
-int main()
+int main(int argc, char* argv[])
 {
 	int end, start, count, i;
 	string fasta_name, line, fasta_subset_name;
 	ifstream fasta;
 	ofstream fasta_subset;
 	fasta_record seq;
-	cout << "\nEnter file with a fasta seqence.\n";
-	cin >> fasta_name;
-	cout << "\nEnter start bp\n";
-	cin >> start;
-	cout << "\nEnter end bp\n";
-	cin >> end;
+	string tempstring1, tempstring2, query;
+	bool interactivemode;
+
+	if (argc == 1)
+	{
+		cout << "\n(I)nteractive or (H)elp?\n";
+		cin >> query;
+		if (query == "H" || query == "h")
+		{
+			cout << "\nextract_sequence_part\n";
+			cout << "Extract from a fasta sequence a specific region in BP number\n";
+			cout << "-f:\tfasta file input\n";
+			cout << "-s:\tStart bp number.\n";
+			cout << "-c:\tEnd bp number.\n";
+			cout << "-h:\tPrints this message\n";
+			cout << "no arguments:\tinteractive mode\n";
+			return 0;
+		}
+		if (query == "I" || query == "i")
+			interactivemode = true;
+	}
+
+	if (argc > 1)
+	{
+		tempstring1 = argv[1];
+		if (tempstring1 == "-h")
+		{
+			cout << "\nextract_sequence_part\n";
+			cout << "Extract from a fasta sequence a specific region in BP number\n";
+			cout << "-f:\tfasta file input\n";
+			cout << "-s:\tStart bp number.\n";
+			cout << "-c:\tEnd bp number.\n";
+			cout << "-h:\tPrints this message\n";
+			cout << "no arguments:\tinteractive mode\n";
+			return 0;
+		}
+	}
+
+	for (i = 1; i < argc - 1; i++)
+	{
+		interactivemode = false;
+		tempstring1 = argv[i];
+		//tempstring2 = argv[i + 1];
+		if (tempstring1 == "-f")
+			fasta_name = argv[i + 1];
+		if (tempstring1 == "-s")
+			start = atoi(argv[i + 1]);
+		if (tempstring1 == "-e")
+			end = atoi(argv[i + 1]);
+	}
+
+	if (interactivemode)
+	{
+		cout << "\nEnter file with a fasta seqence.\n";
+		cin >> fasta_name;
+		cout << "\nEnter start bp\n";
+		cin >> start;
+		cout << "\nEnter end bp\n";
+		cin >> end;
+	}
+
+	cout << "\nInput file:\t" << fasta_name;
+	cout << "\nStart BP:\t" << start;
+	cout << "\nEnd BP:\t" << end;
+	if (interactivemode)
+	{
+		cout << "\n\nProceed? (y to proceed)\n";
+		cin >> query;
+		if (query != "y" || query != "Y")
+		{
+			cout << "\n\nEnter an integer to exit!!\n";
+			cin >> i;
+			return 0;
+		}
+	}
+	else
+		cout << "\n\nProceeding...\n";
+	
 
 	fasta.open(fasta_name);
 	FileTest(fasta, fasta_name);
@@ -112,9 +184,10 @@ int main()
 	fasta.close();
 
 	fasta_subset_name = fasta_name.substr(0, fasta_name.length() - 6);
-	fasta_subset_name = fasta_subset_name + "_subset.fasta";
-	fasta_subset.open(fasta_subset_name);
-	fasta_subset << seq.seq_id << "_" << start << "-" << end << '\n';
+	stringstream subset_name;
+	subset_name << fasta_subset_name << start << end << ".fasta";
+	fasta_subset.open(subset_name.str());
+	fasta_subset << ">" << seq.seq_id << "_" << start << "-" << end << '\n';
 	for (i = 0; i < seq.sequence.length(); i++)
 	{
 		if (i > start && i < end)
@@ -122,7 +195,13 @@ int main()
 	}
 	fasta_subset.close();
 
-	cout << "\nDone! Enter integer to quit.\n";
-	cin >> end;
-	return 0;
+	cout << "\nDone!";
+	if (interactivemode)
+	{
+		cout << "Enter integer to quit.\n";
+		cin >> end;
+		return 0;
+	}
+	else
+		return 0;
 }
