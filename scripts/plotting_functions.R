@@ -96,6 +96,8 @@ plot.fsts<-function(fst.dat,ci.dat,
 		labels=seq(round(y.min,2),round(y.max,2),
 			round((y.max-y.min)/2, digits=2)),
 		las=1,tck = -0.01, xlab="", ylab="", cex.axis=axis.size)
+	xes<-do.call("rbind",all.scaff)
+	return(xes)
 }
 
 
