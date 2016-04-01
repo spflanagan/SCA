@@ -43,6 +43,11 @@ Outline of the approach:
 
 
 #############################################LAB BOOK######################################################]
+#####Friday, 1 April 2016
+So, problem: the vcftools --extract-FORMAT-info GT somehow creates duplicate entries for SNPs...the POS field is unique in batch_1.vcf but it's not in biallelic.gt.vcf. So, I need to figure out a way around this. I'm thinking of just gleaning the GT field from the vcf file in the gwsca_biallelic_vcf, but this will take some work. GRRRRRRRRRRRRRRRR
+
+I am running CERVUS on the 99% found in HWE dataset . I'm running the simulation with 10000 offspring, 57 candidate mothers, prop. sampled = 0.05, prop loci typed = 0.99, prop. loci mistyped = 0.01, minimum loci typed = 821, relaxed%=90,strict=95.
+
 #####Friday, 25 March 2016
 395 of my RAD loci that mapped to the annotated scovelli genome are in annotated regions. Of those, 6 are in the 5' UTR and 19 are in 3'UTR and the rest are just in gene/mRNA/CDS regions.
 
