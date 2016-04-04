@@ -199,7 +199,7 @@ public:
 		num_qtl = 2;
 		num_alleles = 2;
 		prior_qtl = false;
-		afs_file_name = "E://ubuntushare//SCA//results//biallelic//empirical_allelefreqs.txt";
+		afs_file_name = "../../results/biallelic/empirical_allelefreqs.txt";
 
 		adult_samplesize = 216;
 		offspring_samplesize = 131;
@@ -1168,7 +1168,7 @@ public:
 	}
 	void sample_pop(bool allelic_dropout)
 	{
-		int j, jj, jjj, off_counter, fem_counter, mal_counter;
+		int j, jj, jjj, off_counter, fem_counter, mal_counter, adult_counter;
 		vector<bool> taken;
 		int rand1, rand2;
 		
@@ -1193,81 +1193,57 @@ public:
 		sampled_dads.resize(0);
 		sampled_off.resize(0);
 		//from a single collection of adults, we'll fill in all of the other things
-		off_counter = fem_counter = mal_counter = 0;
-		for (j = 0; j < adult_samplesize; j++)
+		off_counter = fem_counter = mal_counter = adult_counter = 0;
+		while (adult_counter < adult_samplesize)
 		{
 			rand1 = randnum(pop_size);
 			if (taken[rand1] == false)
 			{
 				if (adults[rand1].alive)//only sample if it's alive
 				{
-					sampled_adults.push_back(rand1);
-					if (allelic_dropout)
-						drop_alleles(sampled_adults[j], true);
-					if (adults[sampled_adults[j]].female)
+					
+					if (adults[rand1].female && fem_counter < female_samplesize)
 					{
-						if (fem_counter < female_samplesize)
-						{
-							sampled_females.push_back(rand1);
-							if (off_counter < offspring_samplesize)
-							{
-								rand2 = randnum(adults[sampled_females[fem_counter]].offspring_index.size());
-								sampled_off.push_back(adults[sampled_females[fem_counter]].offspring_index[rand2]);
-								if (allelic_dropout)
-									drop_alleles(sampled_off[off_counter], false);
-								//infer dad's genotype
-								infer_genotype(sampled_adults[j], sampled_off[off_counter], off_counter);
-								sampled_dads.push_back(off_counter);
-							}
-						}
-						off_counter++;
+						
+						sampled_adults.push_back(rand1);
+						if (allelic_dropout)
+							drop_alleles(sampled_adults[adult_counter], true);
+
+						sampled_females.push_back(rand1);
 						fem_counter++;
+						adult_counter++;
 					}
 					else//it's male
 					{
 						if (mal_counter < male_samplesize)
+						{
+							sampled_adults.push_back(rand1);
+							if (allelic_dropout)
+								drop_alleles(sampled_adults[adult_counter], true);
+
 							sampled_males.push_back(rand1);
-					}
-				}
-			}
-			else
-			{
-				while (taken[rand1] == true)
-					rand1 = randnum(pop_size);
-				if (taken[rand1] == false)
-				{
-					if (adults[rand1].alive)//only sample if it's alive
-					{
-						sampled_adults.push_back(rand1);
-						if (allelic_dropout)
-							drop_alleles(sampled_adults[j], true);
-						if (adults[sampled_adults[j]].female)
-						{
-							if (fem_counter < female_samplesize)
-							{
-								sampled_females.push_back(rand1);
-								if (off_counter < offspring_samplesize)
-								{
-									rand2 = randnum(adults[sampled_females[fem_counter]].offspring_index.size());
-									sampled_off.push_back(adults[sampled_females[fem_counter]].offspring_index[rand2]);
-									if (allelic_dropout)
-										drop_alleles(sampled_off[off_counter], false);
-									//infer dad's genotype
-									infer_genotype(sampled_adults[j], sampled_off[off_counter], off_counter);
-								}
-							}
-							off_counter++;
-							fem_counter++;
-						}
-						else
-						{
-							if (mal_counter < male_samplesize)
-								sampled_males.push_back(rand1);
+							mal_counter++;
+							adult_counter++;
 						}
 					}
 					
-				}//if you find one
-			}//else
+				}//alive
+			}	
+		}//while adult
+		off_counter = 0;
+		for (j = 0; j < female_samplesize; j++)
+		{
+			if (off_counter < offspring_samplesize)
+			{
+				rand2 = randnum(adults[sampled_females[j]].offspring_index.size());
+				sampled_off.push_back(adults[sampled_females[j]].offspring_index[rand2]);
+				if (allelic_dropout)
+					drop_alleles(sampled_off[off_counter], false);
+				//infer dad's genotype
+				infer_genotype(sampled_females[j], sampled_off[off_counter], off_counter);
+				sampled_dads.push_back(off_counter);
+				off_counter++;
+			}
 		}
 	}//sample pop
 
