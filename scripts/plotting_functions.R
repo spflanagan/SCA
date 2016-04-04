@@ -39,7 +39,7 @@ plot.genome.wide<-function(bp,var,y.max,x.max, rect.xs=NULL,y.min=0,x.min=0,
 #PLOT ALL THE SCAFFOLDS
 #***************************************************************************#
 
-plot.fsts<-function(fst.dat,ci.dat, 
+plot.fsts<-function(fst.dat,ci.dat, sig.col=c("red","yellow"),
 	fst.name="Fst", chrom.name="Chrom", bp.name="BP",axis.size=0.5){
 	all.scaff<-split(fst.dat, factor(fst.dat[,chrom.name]))
 	last.max<-0
@@ -73,7 +73,7 @@ plot.fsts<-function(fst.dat,ci.dat,
 		if(i%%2 == 0) {
 			rect.color<-"white"
 		} else {
-			rect.color<-"gray96"
+			rect.color<-"gray75"
 		}
 		rect(rect.xs[i,1],y.min,rect.xs[i,2],y.max, 
 			col=rect.color, border=NA)
@@ -81,14 +81,15 @@ plot.fsts<-function(fst.dat,ci.dat,
 	for(i in 1:length(all.scaff)){
 		plot.genome.wide(all.scaff[[i]][,bp.name], 
 			all.scaff[[i]][,fst.name],plot.rect=FALSE,
-			y.max,x.max, rect.xs[i,],y.min=0,x.min=0, pt.col="grey53",
+			y.max,x.max, rect.xs[i,],y.min=y.min,x.min=x.min, 
+			pt.col="grey7",
 			plot.new=TRUE, plot.axis=FALSE, rect.color, pt.cex=0.5)
 		temp.sig<-all.scaff[[i]][all.scaff[[i]][,fst.name] >= ci.dat[1],]
 		points(temp.sig[,bp.name], temp.sig[,fst.name], 
-			col="red", pch=19, cex=0.5)
+			col=sig.col[1], pch=19, cex=0.5)
 		temp.sig<-all.scaff[[i]][all.scaff[[i]][,fst.name] <= ci.dat[2],]
 		points(temp.sig[,bp.name], temp.sig[,fst.name], 
-			col="yellow", pch=19, cex=0.5)
+			col=sig.col[2], pch=19, cex=0.5)
 	}
 	axis(2, at = seq(round(y.min,2),round(y.max,2),
 			round((y.max-y.min)/2, digits=2)),
@@ -96,6 +97,7 @@ plot.fsts<-function(fst.dat,ci.dat,
 		labels=seq(round(y.min,2),round(y.max,2),
 			round((y.max-y.min)/2, digits=2)),
 		las=1,tck = -0.01, xlab="", ylab="", cex.axis=axis.size)
+	xes<-do.call("rbind",all.scaff)
+	return(xes)
 }
-
 
