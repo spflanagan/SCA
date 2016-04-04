@@ -213,7 +213,7 @@ public:
 		environmental_sd = sqrt(environmental_variance);
 		mutation_rate = 0;
 		mutational_variance = 0;
-		max_fecundity = 4;
+		max_fecundity = 3;
 		max_num_prog = max_fecundity*carrying_cap;
 		max_encounters = 50;
 		gaussian_preference_mean = 4;
@@ -322,7 +322,11 @@ public:
 			adults.push_back(individual());
 			adults[j].initialize_individual(num_chrom, num_markers, num_alleles);
 		}
-		
+		for (j = 0; j < max_num_prog; j++)
+		{
+			offspring.push_back(individual());
+			offspring[j].initialize_individual(num_chrom, num_markers, num_alleles);
+		}
 		//tracker structures
 		adult_offspring.stats_initialize(num_chrom, num_markers, num_alleles);
 		male_female.stats_initialize(num_chrom, num_markers, num_alleles);
@@ -577,7 +581,6 @@ public:
 		MeanFemaleTrait = 0;
 		counter1 = counter2 = counter3 = 0;
 		//determine mean male trait
-		offspring.resize(0);
 		for (males = 0; males < pop_size; males++)
 		{
 			adults[males].mate = 0;
@@ -648,8 +651,7 @@ public:
 					{
 						adults[FemaleID].offspring_index.push_back(NumProg);
 						adults[MaleID].offspring_index.push_back(NumProg);
-						offspring.push_back(individual());
-						offspring[NumProg].initialize_individual(num_chrom, num_markers, num_qtl);
+						offspring[NumProg].alive;
 						//calculate phenotype in mutation once the genotype is determined
 						for (cc = 0; cc < num_chrom; cc++)//go through chromosome by chromosome
 						{

@@ -29,7 +29,7 @@ bandsharing<-function(genotypes, pairs){
 shared1600<-bandsharing(info,dadkid)
 
 polyshared<-read.table("PolymorphicIn90PercInds.bandsharing.txt",header=T)
-polyhweshared<-read.table("PolymorphicIn90PercIndsHWE.bandsharing.txt",header=T)
+polyhweshared<-read.table("PolymorphicIn99PercIndsHWE.bandsharing.txt",header=T)
 
 png("BandSharing.png",width=7,height=7,units="in",res=300)
 par(mfrow=c(2,2),oma=c(2,2,2,2),mar=c(2,2,2,2))

@@ -14,10 +14,10 @@ Outline of the approach:
 		-> generate_empiricalAFS.R 
 		-> sca_simulation 
 		-> gwsca_biallelic_analysis.R
-		-> annotate top 1% outliers	
+		-> annotate top 5% outliers	
 			-> blastn RAD seqs
 			-> align to annotated genome with bowtie2
-			-> extract 5kb region surrounding RAD seq and blastx
+			-> extract 5kb region surrounding RAD seq and blastn
 	haplotypes:
 		-> convert_matches 
 		-> infer_maternal_contribution 
@@ -42,7 +42,129 @@ Outline of the approach:
 
 
 
-#############################################LAB BOOK######################################################]
+#############################################LAB BOOK###########################################
+#####Monday, 4 April 2016
+I'm running band_sharing to estimate error rates and calculate band sharing stats.
+The simulation model is running now, but loci near each other all have identical Fst values, even though I ran it for 200 generations. 
+PRM077 and OFF077 have a mean incompatibility of 0.95 or something so they clearly aren't actually father and offspring. I'm removing MOM077 from the analysis and re-doing gwsca.
+Now I need to re-do the outlier analyses.
+Ran extract_outlier_radloc.sh
+Ran align_outliers_to_annotated.sh
+	Time loading reference: 00:00:48
+	Time loading forward index: 00:00:02
+	Time loading mirror index: 00:00:01
+	Multiseed full-index search: 00:00:00
+	254 reads; of these:
+	  254 (100.00%) were unpaired; of these:
+		7 (2.76%) aligned 0 times
+		205 (80.71%) aligned exactly 1 time
+		42 (16.54%) aligned >1 times
+	97.24% overall alignment rate
+	Time searching: 00:00:51
+	Overall time: 00:00:51
+	Time loading reference: 00:02:32
+	Time loading forward index: 00:00:10
+	Time loading mirror index: 00:00:05
+	Multiseed full-index search: 00:00:00
+	192 reads; of these:
+	  192 (100.00%) were unpaired; of these:
+		2 (1.04%) aligned 0 times
+		168 (87.50%) aligned exactly 1 time
+		22 (11.46%) aligned >1 times
+	98.96% overall alignment rate
+	Time searching: 00:02:48
+	Overall time: 00:02:48
+	Time loading reference: 00:01:31
+	Time loading forward index: 00:00:01
+	Time loading mirror index: 00:00:01
+	Multiseed full-index search: 00:00:01
+	335 reads; of these:
+	  335 (100.00%) were unpaired; of these:
+		2 (0.60%) aligned 0 times
+		305 (91.04%) aligned exactly 1 time
+		28 (8.36%) aligned >1 times
+	99.40% overall alignment rate
+	Time searching: 00:01:34
+	Overall time: 00:01:34
+
+530 scaffolds, creating one file for each. Then edited the extract.sh files written by R to run extract_sequence_part for each comparison. Ran those and then created cat files and created fastas.
+
+Now I need to run blastx on all of these.....doing the outlier loci on xsede with time of 24 hr, hopefully it doesn't run out of time..I changed it so that it's using 16 threads. batch job 6841006.
+
+#####Sunday, 3 April 2016
+After re-doing that, I'm re-making figures etc.
+AJ: 44937 loci, 2247 5% outliers, 1390 unique
+FM: 40334 loci, 2017 5% outliers, 1596 unique
+MO: 28434 loci, 1423 5% outliers, 1093 unique
+PJ: 45289 loci, 2265 5% outliers, 1427 unique
+132 outliers shared for viability.
+3 shared in all.
+
+Exported the RAD locus to files. Then created a fasta file for each outlier set using fasta_from_catalog (run using extract_outlier_radloc.sh in linux).
+
+Used subset_fasta_file to extract scaffold-specific fasta files from allpaths_cms1.scaff.fa based on scaffold names in rad_region/top5_scaffolds.txt. There are 1340 scaffolds. Then used comparison-specific .sh files to run extract_sequence_part. Then cat-ed the extracted bits with comparison-specific cat scripts (mo_cat.sh in rad_region/mo). 
+
+Moved all fasta files to the XSEDE database and ran blast on XSEDE. Also am running blast in blast2go.
+
+Aligning the RAD loci (in rad_locus/) to the annotated genome with align_outliers_to_annotated.sh.
+AJ:
+Time loading reference: 00:00:48
+Time loading forward index: 00:00:02
+Time loading mirror index: 00:00:01
+Multiseed full-index search: 00:00:00
+1270 reads; of these:
+  1270 (100.00%) were unpaired; of these:
+    16 (1.26%) aligned 0 times
+    1076 (84.72%) aligned exactly 1 time
+    178 (14.02%) aligned >1 times
+98.74% overall alignment rate
+FM:
+Time searching: 00:00:51
+Overall time: 00:00:51
+Time loading reference: 00:00:51
+Time loading forward index: 00:00:02
+Time loading mirror index: 00:00:07
+Multiseed full-index search: 00:00:00
+1369 reads; of these:
+  1369 (100.00%) were unpaired; of these:
+    18 (1.31%) aligned 0 times
+    1149 (83.93%) aligned exactly 1 time
+    202 (14.76%) aligned >1 times
+98.69% overall alignment rate
+MO:
+Time searching: 00:01:00
+Overall time: 00:01:00
+Time loading reference: 00:00:56
+Time loading forward index: 00:00:02
+Time loading mirror index: 00:00:01
+Multiseed full-index search: 00:00:01
+984 reads; of these:
+  984 (100.00%) were unpaired; of these:
+    10 (1.02%) aligned 0 times
+    913 (92.78%) aligned exactly 1 time
+    61 (6.20%) aligned >1 times
+98.98% overall alignment rate
+PJ:
+Time searching: 00:01:00
+Overall time: 00:01:00
+Time loading reference: 00:04:29
+Time loading forward index: 00:00:03
+Time loading mirror index: 00:00:01
+Multiseed full-index search: 00:00:01
+1280 reads; of these:
+  1280 (100.00%) were unpaired; of these:
+    13 (1.02%) aligned 0 times
+    1100 (85.94%) aligned exactly 1 time
+    167 (13.05%) aligned >1 times
+98.98% overall alignment rate
+Time searching: 00:04:34
+Overall time: 00:04:34
+
+I  ran CERVUS on all of the subsetted datasets and combined the data. Next, I need to calculate relatedness and error rates. Maybe I can include both in my thesis?
+
+#####Saturday, 2 April 2016
+I re-did the merge_vcfs.R code to combine vcfs and make them both only contain GT scores. Also did some minor edits to the gwsca_biallelic_vcf program to accommade slightly different formatting and to keep the ID field
+
 #####Friday, 1 April 2016
 So, problem: the vcftools --extract-FORMAT-info GT somehow creates duplicate entries for SNPs...the POS field is unique in batch_1.vcf but it's not in biallelic.gt.vcf. So, I need to figure out a way around this. I'm thinking of just gleaning the GT field from the vcf file in the gwsca_biallelic_vcf, but this will take some work. GRRRRRRRRRRRRRRRR
 

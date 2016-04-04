@@ -143,8 +143,8 @@ int main()
 	string empty_char;
 	
 	pairs_name = "../../results/dad.kid.pairs.txt";
-	output_name = "../../results/relatedness/PolymorphicIn90PercIndsHWE.bandsharing.txt";
-	kinship_name = "../../results/parentage/PolymorphicIn90PercIndsHWE.txt";
+	output_name = "../../results/relatedness/PolymorphicIn99PercIndsHWE.bandsharing.txt";
+	kinship_name = "../../results/parentage/PolymorphicIn99PercIndsHWE.txt";
 	vcf = false;
 
 	if (vcf)

@@ -4,7 +4,7 @@
 #of loci
 
 rm(list=ls())
-setwd("E:/ubuntushare/SCA/results/parentage/CERVUS_incremental_snps")
+setwd("E:/ubuntushare/SCA/results/parentage")
 maternity.files<-list.files(pattern="maternity.csv")
 stats.files<-list.files(pattern="maternity.txt")
 

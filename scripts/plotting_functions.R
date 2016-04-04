@@ -79,11 +79,14 @@ plot.fsts<-function(fst.dat,ci.dat, sig.col=c("red","yellow"),
 			col=rect.color, border=NA)
 	}
 	for(i in 1:length(all.scaff)){
-		plot.genome.wide(all.scaff[[i]][,bp.name], 
-			all.scaff[[i]][,fst.name],plot.rect=FALSE,
-			y.max,x.max, rect.xs[i,],y.min=y.min,x.min=x.min, 
-			pt.col="grey7",
-			plot.new=TRUE, plot.axis=FALSE, rect.color, pt.cex=0.5)
+		points(all.scaff[[i]][,bp.name], all.scaff[[i]][,fst.name], 
+			pch=19, cex=0.5,col="grey7",
+			xlim=c(x.min,x.max),ylim=c(y.min, y.max))
+		#plot.genome.wide(all.scaff[[i]][,bp.name], 
+		#	all.scaff[[i]][,fst.name],plot.rect=FALSE,
+		#	y.max,x.max, y.min=y.min,x.min=x.min, 
+		#	pt.col="grey7",#rect.xs[i,],rect.color,
+		#	plot.new=TRUE, plot.axis=FALSE,  pt.cex=0.5)
 		temp.sig<-all.scaff[[i]][all.scaff[[i]][,fst.name] >= ci.dat[1],]
 		points(temp.sig[,bp.name], temp.sig[,fst.name], 
 			col=sig.col[1], pch=19, cex=0.5)

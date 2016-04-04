@@ -4,12 +4,12 @@
 
 source("E:/ubuntushare/SCA/scripts/plotting_functions.R")
 setwd("E:/ubuntushare/SCA/results/biallelic")
-gw.fst<-read.delim("gwsca_fsts.txt")
-gw.sum<-read.delim("gwsca_summary.txt")
+gw.fst<-read.delim("gwsca_fsts_new.txt")
+gw.sum<-read.delim("gwsca_summary_new.txt")
 #gw.fst<-gw.fst[,c("Chrom","Pos","ADULT.JUVIE","MAL.FEM","PREGGER.OFF",
 #	"MOM.FEM")]
-gw.fst$Locus<-paste(gw.fst$Chrom,gw.fst$Pos,sep=".")
-gw.sum$Locus<-paste(gw.sum$Chrom,gw.sum$Pos,sep=".")
+gw.fst$Locus<-paste(gw.fst$Chrom,gw.fst$LocID,gw.fst$Pos,sep=".")
+gw.sum$Locus<-paste(gw.sum$Chrom,gw.sum$LocID,gw.sum$Pos,sep=".")
 
 #remove any that are not polymorphic
 gw.sum<-gw.sum[!is.na(gw.sum$AA),]
@@ -55,8 +55,8 @@ non.n<-non.n[non.n$Allele1Freq > 0.05 & non.n$Allele1Freq < 0.95,]
 
 #comparisons
 #viability
-aj.prune<-gw.fst[gw.fst$Locus %in% adt.n$Locus&gw.fst$Locus %in% juv.n$Locus, ]
-aj.prune<-aj.prune[aj.prune$ADULT.JUVIE>0,]
+#aj.prune<-gw.fst[gw.fst$Locus %in% adt.n$Locus&gw.fst$Locus %in% juv.n$Locus, ]
+#aj.prune<-aj.prune[aj.prune$ADULT.JUVIE>0,]
 fm.prune<-gw.fst[gw.fst$Locus %in% mal.n$Locus&gw.fst$Locus %in% fem.n$Locus, ]
 fm.prune<-fm.prune[fm.prune$FEM.MAL>0,]
 #sexual
@@ -67,15 +67,153 @@ pj.prune<-gw.fst[gw.fst$Locus %in% prg.n$Locus&gw.fst$Locus %in% juv.n$Locus, ]
 pj.prune<-pj.prune[pj.prune$JUVIE.PREGGER>0,]
 
 
-write.table(aj.prune, "aj.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
+write.table(pj.prune, "pj.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
 write.table(fm.prune, "fm.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
 write.table(mo.prune, "mo.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
 
 
-#gw.plot<-gw.fst[gw.fst$Locus %in% aj.prune$Locus &
-#	gw.fst$Locus %in% fm.prune$Locus &
-#	gw.fst$Locus %in% mo.prune$Locus,]
+#aj.plot<-aj[order(aj$ADULT.JUVIE),] #ascending
+#aj.top1<-aj.plot[round(nrow(aj.plot)*0.99),"ADULT.JUVIE"]
+#aj.out1<-aj[aj$ADULT.JUVIE >= aj.top1,]
+fm.plot<-fm.prune[order(fm.prune$FEM.MAL),]#ascending
+fm.top1<-fm.plot[round(nrow(fm.plot)*0.99),"FEM.MAL"]
+fm.out1<-fm.prune[fm.prune$FEM.MAL >= fm.top1,]
+mo.plot<-mo.prune[order(mo.prune$FEM.MOM),]#ascending
+mo.top1<-mo.plot[round(nrow(mo.plot)*0.99),"FEM.MOM"]
+mo.out1<-mo.prune[mo.prune$FEM.MOM >= mo.top1,]
+pj.plot<-pj.prune[order(pj.prune$JUVIE.PREGGER),] #ascending
+pj.top1<-pj.plot[round(nrow(pj.plot)*0.99),"JUVIE.PREGGER"]
+pj.out1<-pj.prune[pj.prune$JUVIE.PREGGER >= pj.top1,]
 
+#plot with the top1%
+png("fst.top1.comp3.png",height=300,width=300,units="mm",res=300)
+par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
+
+fm<-plot.fsts(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos",sig.col=c("red","black"))
+legend("top","Male-Female", cex=0.75,bty="n")
+mtext("Genomic Location", 1, outer=T, cex=1)
+mtext("Fst", 2, outer=T, cex=1)
+
+mo<-plot.fsts(mo.plot, ci.dat=c(mo.top1,0),fst.name="FEM.MOM", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos",sig.col=c("red","black"))
+legend("top","Mothers-Females", cex=0.75,bty="n")
+mtext("Genomic Location", 1, outer=T, cex=1)
+mtext("Fst", 2, outer=T, cex=1)
+
+pj<-plot.fsts(pj.plot, ci.dat=c(pj.top1,0),fst.name="JUVIE.PREGGER", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos",sig.col=c("red","black"))
+legend("top","Pregnant Males-Offspring", cex=0.75,bty="n")
+mtext("Genomic Location", 1, outer=T, cex=1)
+mtext("Fst", 2, outer=T, cex=1)
+dev.off()
+
+
+
+###COMPARISONS
+#aj.out<-aj[aj$ADULT.JUVIE >= aj.top1[1],]
+fm.out<-fm[fm$FEM.MAL >= fm.top1[1],]
+mo.out<-mo[mo$FEM.MOM >= mo.top1[1],]
+pj.out<-pj[pj$JUVIE.PREGGER >= pj.top1[1],]
+#vi.out<-aj.out[aj.out$Locus %in% fm.out$Locus,]
+
+#aj.unique<-aj.out[!(aj.out$Locus %in% fm.out$Locus) & 
+#	!(aj.out$Locus %in% mo.out$Locus) & !(aj.out$Locus %in% pj.out$Locus),]
+fm.unique<-fm.out[#!(fm.out$Locus %in% aj.out$Locus) & 
+	!(fm.out$Locus %in% mo.out$Locus) & !(fm.out$Locus %in% pj.out$Locus),]
+mo.unique<-mo.out[#!(mo.out$Locus %in% aj.out$Locus) &
+	!(mo.out$Locus %in% fm.out$Locus) & !(mo.out$Locus %in% pj.out$Locus),]
+pj.unique<-pj.out[#!(pj.out$Locus %in% aj.out$Locus) &
+	!(pj.out$Locus %in% fm.out$Locus) & !(pj.out$Locus %in% mo.out$Locus),]
+
+shared<-pj.out[(pj.out$LocID %in% fm.out$LocID) & 
+	(pj.out$LocID %in% mo.out$LocID),]
+
+
+png("fst.selection.episodes.png",height=300,width=300,units="mm",res=300)
+par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
+#aj<-plot.fsts(aj.plot, ci.dat=aj.top5,fst.name="ADULT.JUVIE", chrom.name="Chrom"
+#	, axis.size=0.75, bp.name="Pos",sig.col=c("green4","green4"))
+#points(vi.out$Pos,vi.out$ADULT.JUVIE,col="dodgerblue",pch=16)
+#points(shared$Pos,shared$ADULT.JUVIE,col="red",pch=8)
+#legend("top","Adult-Juvenile",bty='n',cex=0.75)
+fm<-plot.fsts(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos",sig.col=c("green4","black"))
+#points(vi.out$Pos,vi.out$FEM.MAL,col="dodgerblue",pch=16)
+points(fm.out$Pos[fm.out$Locus %in% shared$Locus],
+	fm.out$FEM.MAL[fm.out$Locus %in% shared$Locus],col="red",pch=8)
+legend("top","Male-Female",bty='n',cex=0.75)
+mtext("Genomic Location", 1, outer=T, cex=1)
+mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1)
+
+mo<-plot.fsts(mo.plot, ci.dat=c(mo.top1,0),fst.name="FEM.MOM", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos",sig.col=c("purple3","black"))
+points(mo.out$Pos[mo.out$Locus %in% shared$Locus],
+	mo.out$FEM.MOM[mo.out$Locus %in% shared$Locus],col="red",pch=8)
+legend("top","Females-Inferred Mothers",bty='n',cex=0.75)
+mtext("Genomic Location", 1, outer=T, cex=1)
+mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1)
+
+pj<-plot.fsts(pj.plot, ci.dat=c(pj.top1,0),fst.name="JUVIE.PREGGER", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos",sig.col=c("dodgerblue","black"))
+points(pj.out$Pos[pj.out$Locus %in% shared$Locus],
+	pj.out$JUVIE.PREGGER[pj.out$Locus %in% shared$Locus],col="red",pch=8)
+legend("top","Pregnant Males-Offspring",bty='n',cex=0.75)
+mtext("Genomic Location", 1, outer=T, cex=1)
+mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1)
+par(fig = c(0, 1, 0, 1), oma=c(2,1,0,1), mar = c(0, 0, 0, 0), new = TRUE,
+	cex=1)
+plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
+legend("top",col=c("green4","purple3","dodgerblue","red"),pch=c(19,19,19,8),
+	c("Viability Selection","Sexual Selection","Gametic Selection",
+		"Shared in all"),
+	bg="white",ncol=4,box.lty=0)
+dev.off()
+
+##WRITE TO FILE
+#write.table(levels(as.factor(aj.unique$LocID)),
+#	"../biallelic_outliers/AJ_outliers.txt",quote=F,
+#	col.names=F,row.names=F,sep='\t')
+write.table(levels(as.factor(fm.unique$LocID)),
+	"../biallelic_outliers/FM_1outliers.txt",quote=F,
+	col.names=F,row.names=F,sep='\t')
+write.table(levels(as.factor(mo.unique$LocID)),
+	"../biallelic_outliers/MO_1outliers.txt",quote=F,
+	col.names=F,row.names=F,sep='\t')
+write.table(levels(as.factor(pj.unique$LocID)),
+	"../biallelic_outliers/PJ_1outliers.txt",quote=F,
+	col.names=F,row.names=F,sep='\t')
+#write.table(levels(as.factor(vi.out$LocID)),
+#	"../biallelic_outliers/viability_outliers.txt",quote=F,
+#	col.names=F,row.names=F,sep='\t')
+write.table(levels(as.factor(shared$LocID)),
+	"../biallelic_outliers/shared1.txt",quote=F,
+	col.names=F,row.names=F,sep='\t')
+
+all.chrom<-levels(as.factor(c(#as.character(factor(aj.unique$Chrom)),
+	as.character(factor(fm.unique$Chrom)),
+	as.character(factor(mo.unique$Chrom)),
+	as.character(factor(pj.unique$Chrom)))))
+write.table(all.chrom,"../biallelic_outliers/rad_region/top1_scaffolds.txt",
+	quote=F,col.names=F,row.names=F)
+
+#aj.rad.region<-data.frame(aj.unique$Chrom,as.numeric(aj.unique$Pos)-2500,
+#	as.numeric(aj.unique$Pos)+2500)
+#write.table(aj.rad.region,"../biallelic_outliers/rad_region/aj_extract.sh",
+#	quote=F,col.names=F,row.names=F,sep="\t")
+fm.rad.region<-data.frame(fm.unique$Chrom,as.numeric(fm.unique$Pos)-2500,
+	as.numeric(fm.unique$Pos)+2500)
+write.table(fm.rad.region,"../biallelic_outliers/rad_region/fm_1extract.sh",
+	quote=F,col.names=F,row.names=F,sep="\t")
+mo.rad.region<-data.frame(mo.unique$Chrom,as.numeric(mo.unique$Pos)-2500,
+	as.numeric(mo.unique$Pos)+2500)
+write.table(mo.rad.region,"../biallelic_outliers/rad_region/mo_1extract.sh",
+	quote=F,col.names=F,row.names=F,sep="\t")
+pj.rad.region<-data.frame(pj.unique$Chrom,as.numeric(pj.unique$Pos)-2500,
+	as.numeric(pj.unique$Pos)+2500)
+write.table(pj.rad.region,"../biallelic_outliers/rad_region/pj_1extract.sh",
+	quote=F,col.names=F,row.names=F,sep="\t")
+############################################################################
 aj.ci<-c(mean(aj.prune$ADULT.JUVIE)+2.57583*sd(aj.prune$ADULT.JUVIE),
 	mean(aj.prune$ADULT.JUVIE)-2.57583*sd(aj.prune$ADULT.JUVIE))
 fm.ci<-c(mean(fm.prune$FEM.MAL)+2.57583*sd(fm.prune$FEM.MAL),
@@ -143,110 +281,6 @@ legend("top","Mothers-Females", cex=0.75,bty="n")
 mtext("Genomic Location", 1, outer=T, cex=1)
 mtext("Fst", 2, outer=T, cex=1)
 dev.off()
-
-#plot with the top5%
-png("fst.viability.top5.png",height=300,width=300,units="mm",res=300)
-par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
-aj<-plot.fsts(aj.plot, ci.dat=aj.top5,fst.name="ADULT.JUVIE", chrom.name="Chrom"
-	, axis.size=0.75, bp.name="Pos")
-legend("top","Adult-Juvenile", cex=0.75,bty="n")
-fm<-plot.fsts(fm.plot, ci.dat=fm.top5,fst.name="FEM.MAL", chrom.name="Chrom"
-	, axis.size=0.75,bp.name="Pos")
-legend("top","Male-Female", cex=0.75,bty="n")
-mtext("Genomic Location", 1, outer=T, cex=1)
-mtext("Fst", 2, outer=T, cex=1)
-dev.off()
-
-png("fst.sexual.top5.png",height=150,width=300,units="mm",res=300)
-par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
-mo<-plot.fsts(mo.plot, ci.dat=mo.top5,fst.name="FEM.MOM", chrom.name="Chrom"
-	, axis.size=0.75,bp.name="Pos")
-legend("top","Mothers-Females", cex=0.75,bty="n")
-mtext("Genomic Location", 1, outer=T, cex=1)
-mtext("Fst", 2, outer=T, cex=1)
-dev.off()
-
-png("fst.gametic.top5.png",height=150,width=300,units="mm",res=300)
-par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
-pj<-plot.fsts(pj.plot, ci.dat=pj.top5,fst.name="JUVIE.PREGGER", chrom.name="Chrom"
-	, axis.size=0.75,bp.name="Pos")
-legend("top","Mothers-Females", cex=0.75,bty="n")
-mtext("Genomic Location", 1, outer=T, cex=1)
-mtext("Fst", 2, outer=T, cex=1)
-dev.off()
-
-
-
-###COMPARISONS
-aj.out<-aj[aj$ADULT.JUVIE >= aj.top5[1] |	aj$ADULT.JUVIE <= aj.top5[2],]
-fm.out<-fm[fm$FEM.MAL >= fm.top5[1] | fm$FEM.MAL <= fm.top5[2],]
-mo.out<-mo[mo$FEM.MOM >= mo.top5[1] | mo$FEM.MOM <= mo.top5[2],]
-pj.out<-pj[pj$JUVIE.PREGGER >= pj.top5[1] | pj$JUVIE.PREGGER <= pj.top5[2],]
-vi.out<-aj.out[aj.out$Locus %in% fm.out$Locus,]
-
-aj.unique<-aj.out[!(aj.out$Locus %in% fm.out$Locus) & 
-	!(aj.out$Locus %in% mo.out$Locus) & !(aj.out$Locus %in% pj.out$Locus),]
-fm.unique<-fm.out[!(fm.out$Locus %in% aj.out$Locus) & 
-	!(fm.out$Locus %in% mo.out$Locus) & !(fm.out$Locus %in% pj.out$Locus),]
-mo.unique<-mo.out[!(mo.out$Locus %in% aj.out$Locus) &
-	!(mo.out$Locus %in% fm.out$Locus) & !(mo.out$Locus %in% pj.out$Locus),]
-pj.unique<-pj.out[!(pj.out$Locus %in% aj.out$Locus) &
-	!(pj.out$Locus %in% fm.out$Locus) & !(pj.out$Locus %in% mo.out$Locus),]
-
-shared<-aj.out[(aj.out$Locus %in% fm.out$Locus) & 
-	(aj.out$Locus %in% mo.out$Locus) & (aj.out$Locus %in% pj.out$Locus),]
-
-
-png("fst.viability.png",height=300,width=300,units="mm",res=300)
-par(mfrow=c(2,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
-plot.fsts(aj.plot, ci.dat=aj.top5,fst.name="ADULT.JUVIE", chrom.name="Chrom"
-	, axis.size=0.75, bp.name="Pos",sig.col=c("green4","green4"))
-points(vi.out$Pos,vi.out$ADULT.JUVIE,col="dodgerblue",pch=16)
-points(shared$Pos,shared$ADULT.JUVIE,col="red",pch=8)
-legend("top","Adult-Juvenile",bty='n',cex=0.75)
-plot.fsts(fm.plot, ci.dat=fm.top5,fst.name="FEM.MAL", chrom.name="Chrom"
-	, axis.size=0.75,bp.name="Pos",sig.col=c("green4","green4"))
-points(vi.out$Pos,vi.out$FEM.MAL,col="dodgerblue",pch=16)
-points(shared$Pos,shared$FEM.MAL,col="red",pch=8)
-legend("top","Male-Female",bty='n',cex=0.75)
-mtext("Genomic Location", 1, outer=T, cex=1)
-mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1)
-par(fig = c(0, 1, 0, 1), oma=c(2,1,0,1), mar = c(0, 0, 0, 0), new = TRUE,
-	cex=1)
-plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
-legend("top",col=c("green4","dodgerblue","red"),pch=c(19,16,8),
-	c("5% Outliers","Viability Selection","Shared in all"),
-	bg="white",ncol=3,box.lty=0)
-dev.off()
-
-png("fst.sexual.png",height=150,width=300,units="mm",res=300)
-par(oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
-mo<-plot.fsts(mo.plot, ci.dat=mo.top5,fst.name="FEM.MOM", chrom.name="Chrom"
-	, axis.size=0.75,bp.name="Pos",sig.col=c("purple3","purple3"))
-points(shared$Pos,shared$FEM.MOM,col="red",pch=8)
-mtext("Genomic Location", 1, outer=T, cex=1)
-mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1)
-par(fig = c(0, 1, 0, 1), oma=c(2,1,0,1), mar = c(0, 0, 0, 0), new = TRUE,
-	cex=1)
-plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
-legend("top",col=c("purple3","red"),pch=c(19,8),
-	c("5% Outliers","Shared in all"),bg="white",ncol=2,box.lty=0)
-dev.off()
-
-png("fst.gametic.png",height=150,width=300,units="mm",res=300)
-par(oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
-pj<-plot.fsts(pj.plot, ci.dat=pj.top5,fst.name="JUVIE.PREGGER", chrom.name="Chrom"
-	, axis.size=0.75,bp.name="Pos",sig.col=c("goldenrod","goldenrod"))
-points(shared$Pos,shared$JUVIE.PREGGER,col="red",pch=8)
-mtext("Genomic Location", 1, outer=T, cex=1)
-mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1)
-par(fig = c(0, 1, 0, 1), oma=c(2,1,0,1), mar = c(0, 0, 0, 0), new = TRUE,
-	cex=1)
-plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
-legend("top",col=c("goldenrod","red"),pch=c(19,8),
-	c("5% Outliers","Shared in all"),bg="white",ncol=2,box.lty=0)
-dev.off()
-
 
 
 

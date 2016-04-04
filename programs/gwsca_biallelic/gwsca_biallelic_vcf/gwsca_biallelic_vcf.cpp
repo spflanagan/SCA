@@ -148,11 +148,11 @@ int main()
 	vector<locus> reference;
 	vector<locus_statistics> pop_stats;
 
-	ind_info_name = "../../../results/gatk/gatk_gwsca/gatk.ind.info.txt";//"E://ubuntushare//SCA//results//biallelic//ind_info_vcf.txt";//"../../../results/biallelic/id.names.txt";//
-	vcf_name = "E://ubuntushare//SCA//results//gatk//gatk_gwsca//gatk.gt.vcf";//"E://ubuntushare//SCA//results//biallelic//biallelic.gt.vcf";
-	summary_out_name = "../../../results/gatk/gatk_gwsca/gatk_gwsca_summary";//"E://ubuntushare//SCA//results//biallelic//gwsca_summary.txt";
-	fst_out_name = "../../../results/gatk/gatk_gwsca/gatk_gwsca_fsts";//"E://ubuntushare//SCA//results//biallelic//gwsca_fsts.txt";
-	debug_out_name = "../../../results/gatk/gatk_gwsca/gatk_group_assingments.txt";//"../../../results/biallelic/group_assingments.txt";
+	ind_info_name = "E://ubuntushare//SCA//results//biallelic//ind_info_vcf.txt";//"../../../results/biallelic/id.names.txt";//"../../../results/gatk/gatk_gwsca/gatk.ind.info.txt";//
+	vcf_name = "E://ubuntushare//SCA//results//biallelic//biallelic_merge.vcf"; //"E://ubuntushare//SCA//results//gatk//gatk_gwsca//gatk.gt.vcf";//
+	summary_out_name = "E://ubuntushare//SCA//results//biallelic//gwsca_summary_new.txt";//"../../../results/gatk/gatk_gwsca/gatk_gwsca_summary";//
+	fst_out_name = "E://ubuntushare//SCA//results//biallelic//gwsca_fsts_new.txt";//"../../../results/gatk/gatk_gwsca/gatk_gwsca_fsts";//
+	debug_out_name = "../../../results/biallelic/group_assignments_new.txt";//"../../../results/gatk/gatk_gwsca/gatk_group_assingments.txt";//
 	
 	ind_info.open(ind_info_name);
 	FileTest(ind_info, ind_info_name);
@@ -257,7 +257,7 @@ int main()
 	cout << "\n\n";
 
 	fst_out.open(fst_out_name);
-	fst_out << "Chrom\tPos";
+	fst_out << "Chrom\tPos\tLocID";
 	for (t = 0; t < pop_stats.size() - 1; t++)
 	{
 		for (tt = t + 1; tt < pop_stats.size(); tt++)
@@ -267,7 +267,7 @@ int main()
 	}
 
 	summary_out.open(summary_out_name);
-	summary_out << "Pop\tChrom\tPos\tN\tHs\tHo\tAllele1Freq\tAllele2Freq\tAA\tAa\taa";
+	summary_out << "Pop\tChrom\tPos\tLocID\tN\tHs\tHo\tAllele1Freq\tAllele2Freq\tAA\tAa\taa";
 	debug_out.open(debug_out_name);
 	debug_out << "IndCount\tIndID\tPopIndex\tPopName";
 	vcf.open(vcf_name);
@@ -285,7 +285,7 @@ int main()
 				count = index = 0;
 				while (ss >> stemp)
 				{
-					if (count > 1)
+					if (count > 8)
 					{//need to identify which individual is where
 						bool found = false;
 						for (t = 0; t < inds.size(); t++)
@@ -302,17 +302,37 @@ int main()
 					count++;
 				}//while ss >>stemp
 			}
-			else//then it's a new locus
+			if (line.substr(0, 1) != "#" && line.substr(0, 5) != "CHROM") //then it's a new locus
 			{
-
+				string ID, alt,ref, filter, info, format,temp;
+				int gt_index;
 				stringstream ss;
 				ss.str(line);
-				ss >> chrom >> pos;
+				ss >> chrom >> pos >> ID >> ref >> alt >> quality >> filter >> info >> format;
 				
+				stringstream ssi;
+				ssi << format;
+				count = 0;
+				vector<string> format_fields;
+				while (getline(ssi, temp, ':'))
+				{
+					if (temp == "GT") //determine which slot in the FORMAT is the genotype (GT)
+						gt_index = count;
+					count++;
+				}
+
+				index = 0;
 				vector<string> alleles;
 				count = 0;
 				while (ss >> stemp)
 				{
+					stringstream ssii;
+					ssii << stemp;
+					vector<string> vectemp;
+					while (getline(ssii, temp, ':'))
+					{
+						vectemp.push_back(temp);
+					}
 					alleles.push_back(stemp);
 					if (stemp != "./.")
 					{
@@ -377,15 +397,15 @@ int main()
 							pop_stats[t].freq1 = pop_stats[t].freq1 / pop_stats[t].two_n;
 							pop_stats[t].freq2 = pop_stats[t].freq2 / pop_stats[t].two_n;
 							pop_stats[t].hs = 1 - ((pop_stats[t].freq1 * pop_stats[t].freq1) + (pop_stats[t].freq2*pop_stats[t].freq2));
-							summary_out << '\n' << pop_stats[t].group_name << '\t' << chrom << '\t' << pos << '\t' << pop_stats[t].two_n << '\t' << pop_stats[t].hs << '\t'
+							summary_out << '\n' << pop_stats[t].group_name << '\t' << chrom << '\t' << pos << '\t' << ID << '\t' << pop_stats[t].two_n << '\t' << pop_stats[t].hs << '\t'
 								<< pop_stats[t].ho << '\t' << pop_stats[t].freq1 << '\t' << pop_stats[t].freq2 << '\t' << pop_stats[t].AA << '\t' << pop_stats[t].Aa << '\t' << pop_stats[t].aa;
 						}
 						else
-							summary_out << '\n' << pop_stats[t].group_name << '\t' << chrom << '\t' << pos << '\t' << pop_stats[t].two_n << '\t' << '\t' << '\t' << pop_stats[t].allele1 << '\t' << pop_stats[t].allele2
+							summary_out << '\n' << pop_stats[t].group_name << '\t' << chrom << '\t' << pos << '\t' << ID << '\t' << pop_stats[t].two_n << '\t' << '\t' << '\t' << pop_stats[t].allele1 << '\t' << pop_stats[t].allele2
 							<< '\t' << '\t' << '\t';
 					}
 					else
-						summary_out << '\n' << pop_stats[t].group_name << '\t' << chrom << '\t' << pos << '\t' << pop_stats[t].two_n << '\t' << '\t' << '\t' << pop_stats[t].allele1 << '\t' << pop_stats[t].allele2
+						summary_out << '\n' << pop_stats[t].group_name << '\t' << chrom << '\t' << pos << '\t' << ID << '\t' << pop_stats[t].two_n << '\t' << '\t' << '\t' << pop_stats[t].allele1 << '\t' << pop_stats[t].allele2
 						<< '\t' << '\t' << '\t';
 				}
 
@@ -425,7 +445,7 @@ int main()
 						}
 					}
 				}
-				fst_out << '\n' << chrom << '\t' << pos;
+				fst_out << '\n' << chrom << '\t' << pos << '\t' << ID;
 				index = 0;
 				for (t = 0; t < pop_stats.size() - 1; t++)
 				{
