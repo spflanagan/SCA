@@ -186,7 +186,7 @@ public:
 	vector<int> sampled_adults, sampled_males, sampled_females, sampled_off, sampled_dads;
 	vector<ld_info> pop_ld;
 	vector<vector<chromosome>> inferred_dads;
-	locus_statistics adult_offspring, male_female, males_dads;
+	locus_statistics adult_offspring, male_female, males_dads, females_offspring;
 
 
 	void set_parameters()
@@ -207,7 +207,7 @@ public:
 		female_samplesize = 159;//males in pipefish
 		dad_samplesize = 131;//moms in pipefish
 
-		error_rate = 0.001;
+		error_rate = 0.1;
 		recombination_rate = 0.2;
 		environmental_variance = 0;
 		environmental_sd = sqrt(environmental_variance);
@@ -331,6 +331,7 @@ public:
 		adult_offspring.stats_initialize(num_chrom, num_markers, num_alleles);
 		male_female.stats_initialize(num_chrom, num_markers, num_alleles);
 		males_dads.stats_initialize(num_chrom, num_markers, num_alleles);
+		females_offspring.stats_initialize(num_chrom, num_markers, num_alleles);
 		for (j = 0; j < num_chrom; j++)
 		{
 			qtl_tracker.push_back(chromosome_emulator());

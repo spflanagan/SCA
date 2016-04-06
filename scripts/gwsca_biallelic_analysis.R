@@ -52,7 +52,9 @@ mom.n<-mom.n[mom.n$Allele1Freq > 0.05 & mom.n$Allele1Freq < 0.95,]
 prg.n<-prg.n[prg.n$Allele1Freq > 0.05 & prg.n$Allele1Freq < 0.95,]
 non.n<-non.n[non.n$Allele1Freq > 0.05 & non.n$Allele1Freq < 0.95,]
 
-
+#write these out to read in for error analysis
+write.table(prg.n[,2:4],"LociInPregMales.txt",col.names=T,row.names=F,quote=F)
+write.table(juv.n[,2:4],"LociInOffspring.txt",col.names=T,row.names=F,quote=F)
 #comparisons
 #viability
 #aj.prune<-gw.fst[gw.fst$Locus %in% adt.n$Locus&gw.fst$Locus %in% juv.n$Locus, ]
@@ -67,9 +69,9 @@ pj.prune<-gw.fst[gw.fst$Locus %in% prg.n$Locus&gw.fst$Locus %in% juv.n$Locus, ]
 pj.prune<-pj.prune[pj.prune$JUVIE.PREGGER>0,]
 
 
-write.table(pj.prune, "pj.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
-write.table(fm.prune, "fm.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
-write.table(mo.prune, "mo.plot.txt",row.names=F,col.names=F,quote=F,sep='\t')
+write.table(pj.prune, "pj.plot.txt",row.names=F,col.names=T,quote=F,sep='\t')
+write.table(fm.prune, "fm.plot.txt",row.names=F,col.names=T,quote=F,sep='\t')
+write.table(mo.prune, "mo.plot.txt",row.names=F,col.names=T,quote=F,sep='\t')
 
 
 #aj.plot<-aj[order(aj$ADULT.JUVIE),] #ascending
@@ -128,7 +130,9 @@ pj.unique<-pj.out[#!(pj.out$Locus %in% aj.out$Locus) &
 
 shared<-pj.out[(pj.out$LocID %in% fm.out$LocID) & 
 	(pj.out$LocID %in% mo.out$LocID),]
-
+pj.fm<-pj.out[(pj.out$LocID %in% fm.out$LocID),]
+pj.mo<-pj.out[(pj.out$LocID %in% mo.out$LocID),]
+fm.mo<-fm.out[fm.out$LocID %in% mo.out$LocID,]
 
 png("fst.selection.episodes.png",height=300,width=300,units="mm",res=300)
 par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
@@ -189,30 +193,83 @@ write.table(levels(as.factor(pj.unique$LocID)),
 write.table(levels(as.factor(shared$LocID)),
 	"../biallelic_outliers/shared1.txt",quote=F,
 	col.names=F,row.names=F,sep='\t')
-
-all.chrom<-levels(as.factor(c(#as.character(factor(aj.unique$Chrom)),
-	as.character(factor(fm.unique$Chrom)),
-	as.character(factor(mo.unique$Chrom)),
-	as.character(factor(pj.unique$Chrom)))))
-write.table(all.chrom,"../biallelic_outliers/rad_region/top1_scaffolds.txt",
-	quote=F,col.names=F,row.names=F)
+write.table(levels(as.factor(pj.fm$LocID)),
+	"../biallelic_outliers/pjfm.shared.txt",quote=F,
+	col.names=F,row.names=F,sep='\t')
+write.table(levels(as.factor(pj.mo$LocID)),
+	"../biallelic_outliers/pjmo.shared.txt",quote=F,
+	col.names=F,row.names=F,sep='\t')
+write.table(levels(as.factor(fm.mo$LocID)),
+	"../biallelic_outliers/fmmo.shared.txt",quote=F,
+	col.names=F,row.names=F,sep='\t')
 
 #aj.rad.region<-data.frame(aj.unique$Chrom,as.numeric(aj.unique$Pos)-2500,
 #	as.numeric(aj.unique$Pos)+2500)
 #write.table(aj.rad.region,"../biallelic_outliers/rad_region/aj_extract.sh",
 #	quote=F,col.names=F,row.names=F,sep="\t")
+fm.unique<-fm.plot[fm.plot$Locus %in% fm.unique$Locus,]
 fm.rad.region<-data.frame(fm.unique$Chrom,as.numeric(fm.unique$Pos)-2500,
 	as.numeric(fm.unique$Pos)+2500)
 write.table(fm.rad.region,"../biallelic_outliers/rad_region/fm_1extract.sh",
 	quote=F,col.names=F,row.names=F,sep="\t")
+mo.unique<-mo.plot[mo.plot$Locus %in% mo.unique$Locus,]
 mo.rad.region<-data.frame(mo.unique$Chrom,as.numeric(mo.unique$Pos)-2500,
 	as.numeric(mo.unique$Pos)+2500)
 write.table(mo.rad.region,"../biallelic_outliers/rad_region/mo_1extract.sh",
 	quote=F,col.names=F,row.names=F,sep="\t")
+pj.unique<-pj.plot[pj.plot$Locus %in% pj.unique$Locus,]
 pj.rad.region<-data.frame(pj.unique$Chrom,as.numeric(pj.unique$Pos)-2500,
 	as.numeric(pj.unique$Pos)+2500)
 write.table(pj.rad.region,"../biallelic_outliers/rad_region/pj_1extract.sh",
 	quote=F,col.names=F,row.names=F,sep="\t")
+
+pj.fm<-pj.plot[pj.plot$Locus %in% pj.fm$Locus,]
+pj.fm.region<-data.frame(pj.fm$Chrom, as.numeric(pj.fm$Pos)-2500,
+	as.numeric(pj.fm$Pos)+2500)
+write.table(pj.fm.region,"../biallelic_outliers/rad_region/pjfm_extract.sh",
+	quote=F,col.names=F,row.names=F,sep='\t')
+pj.mo<-pj.plot[pj.plot$Locus %in% pj.mo$Locus,]
+pj.mo.region<-data.frame(pj.mo$Chrom, as.numeric(pj.mo$Pos)-2500,
+	as.numeric(pj.mo$Pos)+2500)
+write.table(pj.mo.region,"../biallelic_outliers/rad_region/pjmo_extract.sh",
+	quote=F,col.names=F,row.names=F,sep='\t')
+fm.mo<-fm.plot[fm.plot$Locus %in% fm.mo$Locus,]
+fm.mo.region<-data.frame(fm.mo$Chrom, as.numeric(fm.mo$Pos)-2500,
+	as.numeric(fm.mo$Pos)+2500)
+write.table(fm.mo.region,"../biallelic_outliers/rad_region/fmmo_extract.sh",
+	quote=F,col.names=F,row.names=F,sep='\t')
+
+shared.chrom<-levels(as.factor(c(as.character(pj.mo.region[,1]),
+	as.character(pj.fm.region[,1]),
+	as.character(fm.mo.region[,1]))))
+write.table(shared.chrom,"../biallelic_outliers/rad_region/top1shared_scaffolds.txt",
+	quote=F,col.names=F,row.names=F,eol='\n')
+all.chrom<-levels(as.factor(c(as.character(fm.rad.region[,1]),
+	as.character(mo.rad.region[,1]),
+	as.character(pj.rad.region[,1]))))
+write.table(all.chrom,"../biallelic_outliers/rad_region/top1_scaffolds.txt",
+	quote=F,col.names=F,row.names=F)
+
+###########LOOK INTO THE EXTREME OUTLIERS
+fm.extreme<-fm[fm$FEM.MAL >=0.11,]
+mo.extreme<-mo[mo$FEM.MOM >= 0.08,]
+pj.extreme<-pj[pj$JUVIE.PREGGER >= 0.04,]
+fm.extreme[fm.extreme$Chrom %in% mo.extreme$Chrom & 
+	fm.extreme$Chrom %in% pj.extreme$Chrom,]#0
+mo.extreme[mo.extreme$LocID %in% pj.extreme$LocID,]
+mo.extreme[mo.extreme$Chrom %in% pj.extreme$Chrom,]
+fm.mo<-fm.extreme[fm.extreme$LocID %in% mo.extreme$LocID,]
+points(fm.mo$Pos,fm.mo$FEM.MAL,pch=15,col="red")
+fm.extreme[fm.extreme$Chrom %in% pj.extreme$Chrom,]
+fm.extreme[fm.extreme$LocID %in% mo.extreme$LocID,]
+fm.extreme[fm.extreme$Chrom %in% mo.extreme$Chrom,]
+
+###########COMPARE TO PSTFST SIGNIFICANT LOCI
+pstfst.bands<-scan(what="numeric",
+	"E:/ubuntushare/popgen/sw_results/pstfst/sig_regions/Bands_extract.sh")
+length(pstfst.scaff$V1[pstfst.scaff$V1 %in% fm.out$Chrom])
+length(pstfst.scaff$V1[pstfst.scaff$V1 %in% mo.out$Chrom])
+length(pstfst.scaff$V1[pstfst.scaff$V1 %in% pj.out$Chrom])
 ############################################################################
 aj.ci<-c(mean(aj.prune$ADULT.JUVIE)+2.57583*sd(aj.prune$ADULT.JUVIE),
 	mean(aj.prune$ADULT.JUVIE)-2.57583*sd(aj.prune$ADULT.JUVIE))
@@ -237,14 +294,14 @@ pj.top5<-c(pj.plot[round(nrow(pj.plot)*0.975),"JUVIE.PREGGER"],
 
 
 #get model data
-model<-read.delim("../sca_simulation_output/ddraddist.ss0.2alleles.fst_out.txt")
-model.aj<-model[model$AOFst>0 & model$MaleAF < 0.95 & model$MaleAF > 0.05,]
-aj.null<-c(mean(model.aj$AOFst)+2.57583*sd(model.aj$AOFst),
-	mean(model.aj$AOFst)-2.57583*sd(model.aj$AOFst))
+model<-read.delim("../sca_simulation_output/ddraddist.ss0.2alleles.error1.fst_out.txt")
+model.pj<-model[model$POFst>0 & model$MaleAF < 0.95 & model$MaleAF > 0.05,]
+pj.null<-c(mean(model.pj$POFst)+2.57583*sd(model.pj$POFst),
+	mean(model.pj$POFst)-2.57583*sd(model.pj$POFst))
 
-model.mo<-model[model$MDFst>0 & model$FemAF < 0.95 & model$FemAF > 0.05,]
-mo.null<-c(mean(model.mo$MDFst)+2.57583*sd(model.mo$MDFst),
-	mean(model.mo$MDFst)-(2.57583*sd(model.mo$MDFst)))
+model.mo<-model[model$MFFst>0 & model$FemAF < 0.95 & model$FemAF > 0.05,]
+mo.null<-c(mean(model.mo$MFFst)+2.57583*sd(model.mo$MFFst),
+	mean(model.mo$MFFst)-(2.57583*sd(model.mo$MFFst)))
 
 model.mf<-model[model$MFFst>0 & model$MaleAF < 0.95 & model$MaleAF > 0.05,]
 mf.null<-c(mean(model.mf$MFFst)+(2.57583*sd(model.mf$MFFst)),
@@ -269,13 +326,13 @@ dev.off()
 #plot with the model CIs
 png("fst.biallelic.pruned.model.png",height=300,width=300,units="mm",res=300)
 par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
-plot.fsts(aj.prune, ci.dat=aj.null,fst.name="ADULT.JUVIE", chrom.name="Chrom"
+plot.fsts(pj.prune, ci.dat=pj.null,fst.name="ADULT.JUVIE", chrom.name="Chrom"
 	, axis.size=0.75, bp.name="Pos")
 legend("top","Adult-Juvenile", cex=0.75,bty="n")
-plot.fsts(fm.prune, ci.dat=mf.null,fst.name="MAL.FEM", chrom.name="Chrom"
+plot.fsts(fm.prune, ci.dat=mf.null,fst.name="FEM.MAL", chrom.name="Chrom"
 	, axis.size=0.75,bp.name="Pos")
 legend("top","Male-Female", cex=0.75,bty="n")
-plot.fsts(mo.prune, ci.dat=mo.null,fst.name="MOM.FEM", chrom.name="Chrom"
+plot.fsts(mo.prune, ci.dat=mo.null,fst.name="FEM.MOM", chrom.name="Chrom"
 	, axis.size=0.75,bp.name="Pos")
 legend("top","Mothers-Females", cex=0.75,bty="n")
 mtext("Genomic Location", 1, outer=T, cex=1)

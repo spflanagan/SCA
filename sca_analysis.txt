@@ -43,6 +43,27 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Wednesday, 6 April 2016
+I need to calculate error rate. Maybe run band sharing on my matches? I did a quick thing in R
+	OFF016          OFF027       
+	Mode :logical   Mode :logical  
+	FALSE:20685     FALSE:18572    
+	TRUE :30671     TRUE :32784    
+	NA's :0         NA's :0        
+
+	OFF032          PRM177       
+	Mode :logical   Mode :logical  
+	FALSE:27408     FALSE:17465    
+	TRUE :23948     TRUE :33891    
+	NA's :0         NA's :0        
+
+TRUE means they match. But this doesn't account for some that are genotyped in one but not another. I might do a C++ program because I feel like I know better how to deal with that. 
+
+#####Tuesday, 5 April 2016
+I hadn't blasted overlapping SNPs--just the unique snps. So now I'm looking at those. Need to run extract codes to make fasta files. Doing that and running blast on TIGGS database now.
+
+Also the model is MUCH faster now that I'm not re-allocating memory all the time.
+
 #####Monday, 4 April 2016
 I'm running band_sharing to estimate error rates and calculate band sharing stats.
 The simulation model is running now, but loci near each other all have identical Fst values, even though I ran it for 200 generations. 

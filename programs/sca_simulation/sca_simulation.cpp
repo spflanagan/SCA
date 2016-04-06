@@ -20,7 +20,7 @@ using namespace std;
 int main()
 {
 	int num_reps = 1;
-	string base_name = "../../results/sca_simulation_output/ddraddist.ss0.2alleles.error001";
+	string base_name = "../../results/sca_simulation_output/ddraddist.ss0.2alleles.error1";
 	bool known_qtl = false;
 	bool empirical_afs = true;
 	bool add_allelic_dropout = true;
@@ -33,8 +33,8 @@ int main()
 	ofstream fst_out;
 	ofstream ld_out;
 	
-	/*ld_out.open(ld_out_name);
-	ld_out << "Reps\tGens\tMeanD'LD\tMeanPairwiseD\tMeanLD";*/
+	ld_out.open(ld_out_name);
+	ld_out << "Reps\tGens\tMeanD'LD\tMeanPairwiseD\tMeanLD";
 	for (reps = 0; reps < num_reps; reps++)
 	{
 		pop.set_parameters();
@@ -54,52 +54,52 @@ int main()
 			pop.density_regulation();
 			pop.calc_mean_trait_values();
 			//ld summary stats
-			//double mean_new_longdist_d, mean_new_longdist_dprime;
-			//mean_new_longdist_d = mean_new_longdist_dprime = 0;
-			//ld_count = 0;
-			//while (ld_count < pop.num_ld)
-			//{
-			//	returned_data = pop.adult_pop_ld(randnum(pop.num_chrom), randnum(pop.num_chrom), randnum(pop.num_markers), randnum(pop.num_markers));
-			//	if (returned_data.dprime != -5)
-			//	{
-			//		mean_new_longdist_d = mean_new_longdist_d + returned_data.d;
-			//		mean_new_longdist_dprime = mean_new_longdist_dprime + returned_data.dprime;
-			//		ld_count++;
-			//	}
-			//}
-			//mean_new_longdist_d = mean_new_longdist_d / pop.num_ld;
-			//mean_new_longdist_dprime = mean_new_longdist_dprime / pop.num_ld;
-			//for (int c = 0; c < pop.num_chrom; c++)
-			//{
-			//	for (int cc = 0; cc < pop.num_markers - 1; cc++)
-			//	{//Pairwise
-			//		returned_data = pop.adult_pop_ld(c, c, cc, cc + 1);
-			//		pop.avg_pairwise_d = pop.avg_pairwise_d + returned_data.d;
-			//		pop.avg_ld = pop.avg_ld + returned_data.dprime;
-			//	}
-			//	//adams_avg_dprime[c] = 0;
-			//	pop.pop_ld[c].d = 0;
-			//	ld_count = 0;
-			//	pop.pop_ld[c].dprime = 0;
-			//	mean_dp_ldistchrom = 0;
-			//	while (ld_count < 100)
-			//	{//random within-chromosomes
-			//		returned_data = pop.adult_pop_ld(c, c, randnum(pop.num_markers), randnum(pop.num_markers));
-			//		if (returned_data.dprime != -5)
-			//		{
-			//			pop.pop_ld[c].d = pop.pop_ld[c].d + returned_data.d;
-			//			pop.pop_ld[c].dprime = pop.pop_ld[c].dprime + returned_data.dprime;
-			//			mean_dp_ldistchrom = mean_dp_ldistchrom + returned_data.dprime;
-			//			ld_count++;
-			//		}
-			//	}
-			//	pop.pop_ld[c].d = pop.pop_ld[c].d / 100;
-			//	pop.pop_ld[c].dprime = pop.pop_ld[c].dprime / 100;
-			//}
-			//mean_dp_ldistchrom = mean_dp_ldistchrom / (pop.num_chrom * 100);
-			//pop.avg_ld = pop.avg_ld / (pop.num_chrom*pop.num_markers);
-			//pop.avg_pairwise_d = pop.avg_pairwise_d / (pop.num_chrom*pop.num_markers);
-			//ld_out << '\n' << reps << '\t' << generations << '\t' << mean_dp_ldistchrom << '\t' << pop.avg_pairwise_d << '\t' << pop.avg_ld;
+			double mean_new_longdist_d, mean_new_longdist_dprime;
+			mean_new_longdist_d = mean_new_longdist_dprime = 0;
+			ld_count = 0;
+			while (ld_count < pop.num_ld)
+			{
+				returned_data = pop.adult_pop_ld(randnum(pop.num_chrom), randnum(pop.num_chrom), randnum(pop.num_markers), randnum(pop.num_markers));
+				if (returned_data.dprime != -5)
+				{
+					mean_new_longdist_d = mean_new_longdist_d + returned_data.d;
+					mean_new_longdist_dprime = mean_new_longdist_dprime + returned_data.dprime;
+					ld_count++;
+				}
+			}
+			mean_new_longdist_d = mean_new_longdist_d / pop.num_ld;
+			mean_new_longdist_dprime = mean_new_longdist_dprime / pop.num_ld;
+			for (int c = 0; c < pop.num_chrom; c++)
+			{
+				for (int cc = 0; cc < pop.num_markers - 1; cc++)
+				{//Pairwise
+					returned_data = pop.adult_pop_ld(c, c, cc, cc + 1);
+					pop.avg_pairwise_d = pop.avg_pairwise_d + returned_data.d;
+					pop.avg_ld = pop.avg_ld + returned_data.dprime;
+				}
+				//adams_avg_dprime[c] = 0;
+				pop.pop_ld[c].d = 0;
+				ld_count = 0;
+				pop.pop_ld[c].dprime = 0;
+				mean_dp_ldistchrom = 0;
+				while (ld_count < 100)
+				{//random within-chromosomes
+					returned_data = pop.adult_pop_ld(c, c, randnum(pop.num_markers), randnum(pop.num_markers));
+					if (returned_data.dprime != -5)
+					{
+						pop.pop_ld[c].d = pop.pop_ld[c].d + returned_data.d;
+						pop.pop_ld[c].dprime = pop.pop_ld[c].dprime + returned_data.dprime;
+						mean_dp_ldistchrom = mean_dp_ldistchrom + returned_data.dprime;
+						ld_count++;
+					}
+				}
+				pop.pop_ld[c].d = pop.pop_ld[c].d / 100;
+				pop.pop_ld[c].dprime = pop.pop_ld[c].dprime / 100;
+			}
+			mean_dp_ldistchrom = mean_dp_ldistchrom / (pop.num_chrom * 100);
+			pop.avg_ld = pop.avg_ld / (pop.num_chrom*pop.num_markers);
+			pop.avg_pairwise_d = pop.avg_pairwise_d / (pop.num_chrom*pop.num_markers);
+			ld_out << '\n' << reps << '\t' << generations << '\t' << mean_dp_ldistchrom << '\t' << pop.avg_pairwise_d << '\t' << pop.avg_ld;
 			if ((generations + 1) % 100 == 0)
 				cout << "Generation " << generations + 1 << " complete.\t";
 		}
@@ -140,6 +140,7 @@ int main()
 			pop.calculate_fsts(pop.adult_offspring, pop.sampled_adults, pop.sampled_off, true, false, base_name + "ao");
 			pop.calculate_fsts(pop.male_female, pop.sampled_males, pop.sampled_females, false, false, base_name + "mf");
 			pop.calculate_fsts(pop.males_dads, pop.sampled_males, pop.sampled_dads, false, true, base_name + "gp");
+			pop.calculate_fsts(pop.females_offspring, pop.sampled_females, pop.sampled_off, true, false, base_name + "po");
 			//Calculate LD
 			for (int c = 0; c < pop.num_chrom; c++)
 			{
@@ -153,7 +154,7 @@ int main()
 			pop.avg_ld = pop.avg_ld / (pop.num_chrom*pop.num_markers);
 			pop.avg_pairwise_d = pop.avg_pairwise_d / (pop.num_chrom*pop.num_markers);
 			fst_out.open(fst_out_name);
-			fst_out << "Locus\tAOFst\tMFFst\tMDFst\tAdultAF\tAdultN\tOffAF\tOffN\tMaleAF\tMaleN\tFemAF\tFemN\tDadAF\tDadN";
+			fst_out << "Locus\tAOFst\tMFFst\tGPFst\tPOFst\tAdultAF\tAdultN\tOffAF\tOffN\tMaleAF\tMaleN\tFemAF\tFemN\tDadAF\tDadN";
 			for (i = 0; i < pop.num_chrom; i++)
 			{
 				for (ii = 0; ii < pop.num_markers; ii++)
@@ -162,6 +163,7 @@ int main()
 					fst_out << '\t' << pop.adult_offspring.fst[i].locus_emulator[ii];
 					fst_out << '\t' << pop.male_female.fst[i].locus_emulator[ii];
 					fst_out << '\t' << pop.males_dads.fst[i].locus_emulator[ii];
+					fst_out << '\t' << pop.females_offspring.fst[i].locus_emulator[ii];
 					fst_out << '\t' << pop.determine_major_af(pop.adult_offspring.pop1_freqs[i].freqs[ii]);
 					fst_out << '\t' << pop.adult_offspring.num_alleles[i][ii];
 					fst_out << '\t' << pop.determine_major_af(pop.adult_offspring.pop2_freqs[i].freqs[ii]);
