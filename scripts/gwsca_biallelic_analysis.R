@@ -264,6 +264,48 @@ fm.extreme[fm.extreme$Chrom %in% pj.extreme$Chrom,]
 fm.extreme[fm.extreme$LocID %in% mo.extreme$LocID,]
 fm.extreme[fm.extreme$Chrom %in% mo.extreme$Chrom,]
 
+################Blast2Go Annotations
+shared<-rbind(pj.fm,pj.mo,fm.mo)
+shared<-shared[,c("Chrom","Pos","LocID","Locus")]
+shared$comparison<-c(rep("PJ-FM",nrow(pj.fm)),rep("PJ-MO",nrow(pj.mo)),
+	rep("FM-MO",nrow(fm.mo)))
+shared2<-shared[shared$Chrom!="scaffold_985",]
+shared2$start<-shared2$Pos-2500
+shared2$end<-shared2$Pos+2500
+shared2$start[shared2$start<0]<-0
+shared2$SeqName<-paste(shared2$Chrom,"_",shared2$start,"-",shared2$end,sep="")
+sharedb2g<-read.delim("rad_region/shared_region.blast2go.txt",
+	header=T,sep='\t')
+sh2<-merge(shared2,sharedb2g,by="SeqName",all=T)
+write.table(sh2,"sharedintwo_blast2go.txt",row.names=F,col.names=T,quote=F,sep='\t')
+
+#shared in three
+sharedb2g[grep("scaffold_985",sharedb2g$SeqName),]#no hits
+
+pj.unique<-pj.plot[pj.plot$Locus %in% pj.unique$Locus,
+	c("Chrom","Pos","LocID","Locus")]
+pj.unique$start<-pj.unique$Pos-2500
+pj.unique$end<-pj.unique$Pos+2500
+pj.unique$start[pj.unique$start < 0]<-"0"
+pj.unique$SeqName<-paste(pj.unique$Chrom,"_",pj.unique$start,"-",
+	pj.unique$end,sep="")
+pjb2g<-read.delim("rad_region/pj_region.blast2go.txt",header=T,sep='\t')
+pj.b2g<-merge(pj.unique,pjb2g,by="SeqName",all=T)
+write.table(pj.b2g,"pj_region_withloc.blast2go.txt",row.names=F,col.names=T,sep='\t')
+
+mo.unique<-mo.plot[mo.plot$Locus %in% mo.unique$Locus,
+	c("Chrom","Pos","LocID","Locus")]
+mo.unique$start<-mo.unique$Pos-2500
+mo.unique$end<-mo.unique$Pos+2500
+mo.unique$start[mo.unique$start < 0]<-"0"
+mo.unique$SeqName<-paste(mo.unique$Chrom,"_",mo.unique$start,"-",
+	mo.unique$end,sep="")
+mob2g<-read.delim("rad_region/mo_region.blast2go.txt",header=T,sep='\t')
+mo.b2g<-merge(mo.unique,mob2g,by="SeqName",all=T)
+write.table(mo.b2g,"mo_region_withloc.blast2go.txt",row.names=F,col.names=T,sep='\t')
+
+
+
 ###########COMPARE TO PSTFST SIGNIFICANT LOCI
 pstfst.bands<-scan(what="numeric",
 	"E:/ubuntushare/popgen/sw_results/pstfst/sig_regions/Bands_extract.sh")

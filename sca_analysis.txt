@@ -43,6 +43,21 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Thursday, 7 April 2016
+Investigating the blast results, starting with shared loci
+This one is in all three:
+ Chrom   Pos LocID                    Locus
+50953  scaffold_985 22374 41888 scaffold_985.41888.22374
+50960  scaffold_985 22430 41888 scaffold_985.41888.22430
+50957  scaffold_985 22398 41888 scaffold_985.41888.22398
+509531 scaffold_985 22374 41888 scaffold_985.41888.22374
+509601 scaffold_985 22430 41888 scaffold_985.41888.22430
+509571 scaffold_985 22398 41888 scaffold_985.41888.22398
+50955  scaffold_985 22389 41888 scaffold_985.41888.22389
+509572 scaffold_985 22398 41888 scaffold_985.41888.22398
+
+Reformatted blast tables to make them supplementary. I need to figure out how to make GO charts.
+
 #####Wednesday, 6 April 2016
 I need to calculate error rate. Maybe run band sharing on my matches? I did a quick thing in R
 	OFF016          OFF027       
