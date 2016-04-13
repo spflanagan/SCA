@@ -210,7 +210,7 @@ write.table(levels(as.factor(fm.mo$LocID)),
 fm.unique<-fm.plot[fm.plot$Locus %in% fm.unique$Locus,]
 fm.rad.region<-data.frame(fm.unique$Chrom,as.numeric(fm.unique$Pos)-2500,
 	as.numeric(fm.unique$Pos)+2500)
-write.table(fm.rad.region,"../biallelic_outliers/rad_region/fm_1extract.sh",
+write.table(fm.rad.region,"../biallelic_outliers/rad_region/fm_1extract_redo.sh",
 	quote=F,col.names=F,row.names=F,sep="\t")
 mo.unique<-mo.plot[mo.plot$Locus %in% mo.unique$Locus,]
 mo.rad.region<-data.frame(mo.unique$Chrom,as.numeric(mo.unique$Pos)-2500,

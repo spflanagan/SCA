@@ -84,12 +84,12 @@ string find_and_replace(string &s, string toReplace, string replaceWith)
 class individual
 {
 public:
-	string filename, ind_id, sex, age, status;
+	string filename, ind_id, sex, age, status, phenotype;
 	vector<int> pop_indices;
 
 	individual()
 	{
-		filename = ind_id = sex = age = status = string();
+		filename = ind_id = sex = age = status = phenotype = string();
 		pop_indices = vector<int>();
 	}
 };
@@ -139,7 +139,7 @@ int main()
 {
 	int i, count, index, pos, line_count, removed_count;
 	size_t t, tt, ttt;
-	string line, filename, ind_id, snp_id, sex, age, status, allele1, allele2, stemp, quality, chrom;
+	string line, filename, ind_id, snp_id, sex, age, status, allele1, allele2, stemp, quality, chrom, phen;
 	string ind_info_name, fst_out_name, summary_out_name, alleles_out_name, vcf_name, debug_out_name;
 	ifstream ind_info, vcf;
 	ofstream fst_out, summary_out, debug_out;
@@ -162,13 +162,14 @@ int main()
 		{
 			stringstream ss;
 			ss.str(line);
-			ss >> filename >> ind_id >> sex >> age >> status;
+			ss >> filename >> ind_id >> sex >> age >> status >> phen;
 			inds.push_back(individual());
 			inds.back().filename = filename;
 			inds.back().ind_id = ind_id;
 			inds.back().age = age;
 			inds.back().status = status;
 			inds.back().sex = sex;
+			inds.back().phenotype = phen;
 		}
 	}
 	ind_info.close();
@@ -176,10 +177,10 @@ int main()
 	cout << "\nRead in data for " << inds.size() << " individuals.\n";
 
 	//establish the population statistics counters
-	bool age_found, sex_found, status_found;
+	bool age_found, sex_found, status_found, phen_found;
 	for (t = 0; t < inds.size(); t++)
 	{
-		age_found = sex_found = status_found = false;
+		age_found = sex_found = status_found = phen_found = false;
 		for (tt = 0; tt < pop_stats.size(); tt++)
 		{
 			if (inds[t].sex == pop_stats[tt].group_name)
@@ -195,6 +196,11 @@ int main()
 			if (inds[t].status == pop_stats[tt].group_name)
 			{
 				status_found = true;
+				pop_stats[tt].num_inds++;
+			}
+			if (inds[t].phenotype == pop_stats[tt].group_name)
+			{
+				phen_found = true;
 				pop_stats[tt].num_inds++;
 			}
 		}
@@ -225,6 +231,15 @@ int main()
 				pop_stats.back().num_inds = 1;
 			}
 		}
+		if (phen_found == false)
+		{
+			if (inds[t].phenotype != "0")
+			{
+				pop_stats.push_back(locus_statistics());
+				pop_stats.back().group_name = inds[t].phenotype;
+				pop_stats.back().num_inds = 1;
+			}
+		}
 	}
 	for (t = 0; t < inds.size(); t++)
 	{
@@ -236,6 +251,8 @@ int main()
 			if (inds[t].age == pop_stats[tt].group_name)
 				inds[t].pop_indices.push_back(tt);
 			if (inds[t].status == pop_stats[tt].group_name)
+				inds[t].pop_indices.push_back(tt);
+			if (inds[t].phenotype == pop_stats[tt].group_name)
 				inds[t].pop_indices.push_back(tt);
 		}
 	}

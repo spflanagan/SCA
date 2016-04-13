@@ -43,6 +43,31 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Wednesday, 13 April 2016
+In revisiting Christiansen & Frydenberg, I realized that I should be focusing on the adult-offspring comparison for viability selection, the inferred moms-female comparison for sexual selection, and that if I want to address gametic selection I need to compare offspring and the inferred breeding population (inferred moms and pregnant males). So I need to calculate Fsts for the last set.
+
+I updated the gwsca_biallelic_vcf to accept a 'phenotype', which I've set MOMs and PREGGERs to "BREEDER" (others are 0).
+
+Now that I'm using those three comparisons,
+> dim(shared)<-this is one RAD locus, 4 SNPs
+[1]  4 32
+> dim(bj.unique)
+[1] 306  32
+> dim(mo.unique)
+[1] 251  32
+> dim(aj.unique)
+[1] 302  32
+> dim(aj.bj)#shared
+[1] 133  32
+> dim(aj.mo)
+[1] 39 32
+> dim(bj.mo)
+[1]  9 32
+
+The shared locus is 41888 on scaffold_985, and not all SNPs are significant in each analysis. 
+
+I'm going to have to re-do all of the blasting...le sigh.
+I'm doing this and have streamlined the process a bit by moving the files after making them.
 #####Thursday, 7 April 2016
 Investigating the blast results, starting with shared loci
 This one is in all three:
