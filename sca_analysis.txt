@@ -43,6 +43,39 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Thursday, 14 April 2016
+I started looking at the SNPs that are extreme outliers and noticed that the RAD loci they're on have many SNPs, so I started looking at that more formally. There is a significant difference, if I do a linear model with comparison (AO,BO,FM) as a blocking factor:
+spr.lm<-lm(as.numeric(NumSNPs)~Comparison+SNPType,data=snps.per.rad)
+#> anova(spr.lm)
+#Analysis of Variance Table
+#
+#Response: as.numeric(NumSNPs)
+#              Df   Sum Sq Mean Sq F value    Pr(>F)    
+#Comparison     2      877   438.5  2.2405    0.1064    
+#SNPType        2    10365  5182.6 26.4778 3.206e-12 ***
+#Residuals  59097 11567337   195.7 
+
+This either means the outliers are from more erroneous regions or from more polymorphic regions. 
+
+Do they have a higher proportion of N SNPs?
+AO and BO do, but Mo not really...and it's hard to say. Not sure how to statistically test this. 
+
+Do they have higher likelihoods?<-these data aren't actually available for the catalogs. 
+
+For outliers on loci with a bunch of SNPs, are most of the SNPs significant?
+Nope. Most have <20% of SNPs as outliers
+> summary(aj.out.dat$NumSNPsOut/aj.out.dat$NumSNPs)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.04167 0.08333 0.11110 0.15760 0.20000 1.00000 
+> summary(bj.out.dat$NumSNPsOut/bj.out.dat$NumSNPs)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.03846 0.08333 0.12500 0.15320 0.20000 1.00000 
+> summary(mo.out.dat$NumSNPsOut/mo.out.dat$NumSNPs)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.03846 0.09091 0.12500 0.16100 0.20000 1.00000 
+
+Adam says not to worry about this too much for the SCA paper, but to look into differences between ddRAD and sdRAD datasets (e.g. can we discern the type of error? Are rates the same?)
+
 #####Wednesday, 13 April 2016
 In revisiting Christiansen & Frydenberg, I realized that I should be focusing on the adult-offspring comparison for viability selection, the inferred moms-female comparison for sexual selection, and that if I want to address gametic selection I need to compare offspring and the inferred breeding population (inferred moms and pregnant males). So I need to calculate Fsts for the last set.
 
