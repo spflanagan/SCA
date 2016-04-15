@@ -20,19 +20,22 @@ using namespace std;
 int main()
 {
 	int num_reps = 1;
-	string base_name = "../../results/sca_simulation_output/ddraddist.ss0.2alleles.error1";
+	string base_name = "../../results/sca_simulation_output/ddraddist.test.afs";
 	bool known_qtl = false;
 	bool empirical_afs = true;
-	bool add_allelic_dropout = true;
+	bool add_allelic_dropout = false;
 	int end, generations, reps, i, ii, iii, ld_count;
 	population pop;
 	ld_info returned_data;
 	double mean_dp_ldistchrom;
 	string ld_out_name = base_name + ".ld_out.txt";
 	string fst_out_name = base_name + ".fst_out.txt";
+	string genotypes_start_name = base_name + ".genotypes.start.tx";
+	string genotypes_end_name = base_name + ".genotypes.end.txt";
 	ofstream fst_out;
 	ofstream ld_out;
-	
+	ofstream genotypes_start, genotypes_end;
+
 	ld_out.open(ld_out_name);
 	ld_out << "Reps\tGens\tMeanD'LD\tMeanPairwiseD\tMeanLD";
 	for (reps = 0; reps < num_reps; reps++)
@@ -100,6 +103,44 @@ int main()
 			pop.avg_ld = pop.avg_ld / (pop.num_chrom*pop.num_markers);
 			pop.avg_pairwise_d = pop.avg_pairwise_d / (pop.num_chrom*pop.num_markers);
 			ld_out << '\n' << reps << '\t' << generations << '\t' << mean_dp_ldistchrom << '\t' << pop.avg_pairwise_d << '\t' << pop.avg_ld;
+			if (generations == 0)
+			{
+				genotypes_start.open(genotypes_start_name);
+				for (i = 0; i < pop.adults.size(); i++)
+				{
+					if (i > 0)
+						genotypes_start << "\nAdult" << i;
+					else
+						genotypes_start << "Adult" << i;
+					for (ii = 0; ii < pop.num_chrom; ii++)
+					{
+						for (iii = 0; iii < pop.num_markers; iii++)
+						{
+							genotypes_start << '\t' << pop.adults[i].maternal[ii].loci[iii] << "/" << pop.adults[i].paternal[ii].loci[iii];
+						}
+					}
+				}
+				genotypes_start.close();
+			}
+			if (generations == pop.num_gen - 1)
+			{
+				genotypes_end.open(genotypes_end_name);
+				for (i = 0; i < pop.adults.size(); i++)
+				{
+					if (i > 0)
+						genotypes_end << "\nAdult" << i;
+					else
+						genotypes_end << "Adult" << i;
+					for (ii = 0; ii < pop.num_chrom; ii++)
+					{
+						for (iii = 0; iii < pop.num_markers; iii++)
+						{
+							genotypes_end << '\t' << pop.adults[i].maternal[ii].loci[iii] << "/" << pop.adults[i].paternal[ii].loci[iii];
+						}
+					}
+				}
+				genotypes_end.close();
+			}
 			if ((generations + 1) % 100 == 0)
 				cout << "Generation " << generations + 1 << " complete.\t";
 		}
