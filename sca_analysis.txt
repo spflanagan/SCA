@@ -43,6 +43,68 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Friday, 15 April 2016
+FML I was wrong AGAIN!! 
+Gametic selection: do heterozygous moms/dads have 50% heterozygous offspring?
+Sexual selection: breeders vs non breeders (this one's ok)
+Viability selection: adults-offspring and males-females.
+**Adults-offspring assumes HWE.
+
+So I need to ditch the breeders-offspring thing and re-institute the males-females. I was right originally. alwefjaoivj;kljuiwerjao;ijfajf;oijf
+
+So, I'm re-doing all the 5kb for blast extraction stuff.
+1. subset_fasta_file
+2. 
+***********************************
+Last night I worked on the simulation model and figured out that the negative LD values pop up only when I use the empirical AFS. I'm wondering if maybe negative values are OK? So I'm testing to make sure genotypes are OK etc. by outputting the genotypes of all individuals at the first generation and then at the last generation. 
+
+Summary stats:
+dim(aj.prune)
+[1] 44937    32
+> dim(bj.prune)
+[1] 42382    32
+> dim(mo.prune)
+[1] 28435    32
+> mean(aj.prune$ADULT.JUVIE)
+[1] 0.001372477
+> mean(mo.prune$FEM.MOM)
+[1] 0.005170965
+> mean(bj.prune$JUVIE.BREEDER)
+[1] 0.0007825038
+> length(levels(as.factor(c(as.character(aj.bj$Locus[aj.bj$LocID!=41888]),
++ as.character(aj.mo$Locus[aj.mo$LocID!=41888]),
++ as.character(bj.mo$Locus[bj.mo$LocID!=41888])))))
+[1] 172
+> length(levels(as.factor(c(as.character(aj.bj$Chrom[aj.bj$LocID!=41888]),
++ as.character(aj.mo$Chrom[aj.mo$LocID!=41888]),
++ as.character(bj.mo$Chrom[bj.mo$LocID!=41888])))))
+[1] 122
+> length(levels(as.factor(c(as.character(aj.bj$LocID[aj.bj$LocID!=41888]),
++ as.character(aj.mo$LocID[aj.mo$LocID!=41888]),
++ as.character(bj.mo$LocID[bj.mo$LocID!=41888])))))
+[1] 136
+
+> dim(mo.unique)
+[1] 251  32
+> length(levels(as.factor(mo.unique$LocID)))
+[1] 206
+> length(levels(factor(mo.unique$Chrom)))
+[1] 182
+> dim(bj.unique)
+[1] 306  32
+> length(levels(as.factor(bj.unique$LocID)))
+[1] 260
+> length(levels(factor(bj.unique$Chrom)))
+[1] 222
+> > dim(aj.unique)
+[1] 302  32
+> length(levels(as.factor(aj.unique$LocID)))
+[1] 258
+> length(levels(factor(aj.unique$Chrom)))
+[1] 222
+
+
+For the supplemental files, I want to create files with RAD locus ID,Number of SNPs, Chromosome, First BP, RAD sequence, and blast and GO results.
 #####Thursday, 14 April 2016
 I started looking at the SNPs that are extreme outliers and noticed that the RAD loci they're on have many SNPs, so I started looking at that more formally. There is a significant difference, if I do a linear model with comparison (AO,BO,FM) as a blocking factor:
 spr.lm<-lm(as.numeric(NumSNPs)~Comparison+SNPType,data=snps.per.rad)
