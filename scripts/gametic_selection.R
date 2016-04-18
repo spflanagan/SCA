@@ -4,7 +4,19 @@
 
 setwd("E:/ubuntushare/SCA/results/biallelic")
 vcf<-read.table("biallelic_merge.vcf",header=T)
-pairs.names<-read.table("../dad.kid.pairs.fullnames.txt")
+pairs.names<-read.table("../dad.kid.pairs.fullnames.txt",stringsAsFactors=F)
+pairs.names$V1[pairs.names$V1=="sample_PRM086-23_align"]<-"sample_PRM086.23_align"
+remove<-"sample_PRM077_align"
+pairs.names<-pairs.names[pairs.names$V1 != remove,]
+prg.n.loc<-read.table("LociInPregMales.txt",header=T)
+juv.n.loc<-read.table("LociInOffspring.txt",header=T)
+prg.n.loc$Locus<-paste(prg.n.loc$Chrom,prg.n.loc$LocID,prg.n.loc$Pos,sep=".")
+juv.n.loc$Locus<-paste(juv.n.loc$Chrom,juv.n.loc$LocID,juv.n.loc$Pos,sep=".")
+vcf$Locus<-paste(vcf$CHROM,vcf$ID,vcf$POS,sep=".")
+
+vcf.prune<-vcf[vcf$Locus %in% prg.n.loc$Locus & 
+	vcf$Locus %in% juv.n.loc$Locus,]
+vcf.prune<-vcf.prune[,colnames(vcf.prune)!="Locus"]
 
 gametic.selection<-function(vcf.file,parent.off.pair){
 	print(parent.off.pair)
@@ -15,4 +27,6 @@ gametic.selection<-function(vcf.file,parent.off.pair){
 	prop<-nrow(dad.het.off.het)/nrow(dad.het)
 }
 
-gs<-apply(pairs.names,1,gametic.selection,vcf.file=vcf)
+gs<-apply(pairs.names,1,gametic.selection,vcf.file=vcf.prune)
+t.test(gs,mu=0.5)
+sem<-sd(gs)/sqrt(length(gs))

@@ -43,6 +43,10 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Saturday, 16 April 2016
+All the blast runs were done so I did blast2go and made supplementary files and graphs.
+
+
 #####Friday, 15 April 2016
 FML I was wrong AGAIN!! 
 Gametic selection: do heterozygous moms/dads have 50% heterozygous offspring?
@@ -54,7 +58,9 @@ So I need to ditch the breeders-offspring thing and re-institute the males-femal
 
 So, I'm re-doing all the 5kb for blast extraction stuff.
 1. subset_fasta_file
-2. 
+2. extract_sequence_part
+3. cat together
+4. blastx
 ***********************************
 Last night I worked on the simulation model and figured out that the negative LD values pop up only when I use the empirical AFS. I'm wondering if maybe negative values are OK? So I'm testing to make sure genotypes are OK etc. by outputting the genotypes of all individuals at the first generation and then at the last generation. 
 
