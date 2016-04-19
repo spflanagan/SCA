@@ -82,9 +82,10 @@ gen.keep<-gen90[,colnames(gen90) %in% keep.names]
 #prune for higher coverage
 pruned<-prune.loci(gen.keep, 0.01)
 #write.table(pruned,"PolymorphicIn99PercIndsHWE.txt", quote=F,sep="\t",row.names=F)
-
+pruned<-read.table("PolymorphicIn99PercIndsHWE.txt")
 #sample
 nloci<-c(50,100,200,400,800,1600)
+nloci<-c(150,300)
 for(i in 1:10){ #do ten replicates of each set
 	for(j in 1:length(nloci)){
 		cols<-sample(seq(2,ncol(pruned),2),nloci[j],replace=F)
