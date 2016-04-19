@@ -4,7 +4,7 @@
 
 rm(list=ls())
 library(ggplot2)
-setwd("C:/Users/Sarah/OneDrive/blastresults/SCA")
+setwd("C:/Users/Sarah/OneDrive/blastresults/SCA2")
 
 go.plot<-function(file.list, file.name,analysis.list=NULL){
 	dat<-read.table(file.list[1],skip=1,sep='\t')
@@ -47,7 +47,7 @@ go.plot<-function(file.list, file.name,analysis.list=NULL){
 	dev.off()
 	return(dat)
 }	
-unique<-c("aj_","bj_","mo_")
+unique<-c("aj_","fm_","mo_")
 bio.files<-list.files(pattern="bio.txt")
 bio2.files<-list.files(pattern="bio2.txt")
 cell.files<-list.files(pattern="cell.txt")
@@ -62,10 +62,10 @@ cell2.unique<-cell2.files[sub("(\\w{2}_)\\w+.*","\\1",cell2.files) %in% unique]
 mol.unique<-mol.files[sub("(\\w{2}_)\\w+.*","\\1",mol.files) %in% unique]
 mol2.unique<-mol2.files[sub("(\\w{2}_)\\w+.*","\\1",mol2.files) %in% unique]
 
-analysis.names<-c("Adult-Offspring","Breeders-Offspring","Mothers-Females")
-bio.dat<-go.plot(bio.unique,"Biology",analysis.names)
-bio2.dat<-go.plot(bio2.unique,"Biology2",analysis.names)
-cell.dat<-go.plot(cell.unique,"Cell",analysis.names)
-cell2.dat<-go.plot(cell2.unique,"Cell2",analysis.names)
-mol.dat<-go.plot(mol.unique,"Molecular",analysis.names)
-mol2.dat<-go.plot(mol2.unique,"Molecular2",analysis.names)
+analysis.names<-c("Adult-Offspring","Males-Females","Mothers-Females","Shared")
+bio.dat<-go.plot(bio.files,"Biology",analysis.names)
+bio2.dat<-go.plot(bio2.files,"Biology2",analysis.names)
+cell.dat<-go.plot(cell.files,"Cell",analysis.names)
+cell2.dat<-go.plot(cell2.files,"Cell2",analysis.names)
+mol.dat<-go.plot(mol.files,"Molecular",analysis.names)
+mol2.dat<-go.plot(mol2.files,"Molecular2",analysis.names)
