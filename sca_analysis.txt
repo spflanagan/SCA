@@ -43,6 +43,9 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Tuesday, 19 April 2016
+I am running CERVUS on the 99% found in HWE dataset subsetted 10 times with 150 and 300 loci. I'm running the simulation with 10000 offspring, 57 candidate mothers, prop. sampled = 0.05, prop loci typed = 0.99, prop. loci mistyped = 0.01, minimum loci typed = 0.5*num loci, relaxed%=90,strict=95.
+
 #####Saturday, 16 April 2016
 All the blast runs were done so I did blast2go and made supplementary files and graphs.
 
