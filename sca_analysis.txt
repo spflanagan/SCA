@@ -43,6 +43,9 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Monday, 25 April 2016
+I re-made the CERVUS figure. Also downloaded a bunch of papers and outlined the MS. I need to figure out how many haplotypes were identified by convert_matches.
+
 #####Sunday, 24 April 2016
 I ran Batemanator. First stpe is:
 Variable       	Estimate	LowerCI	UpperCI	(95.0%)	LowerCI	UpperCI	(90.0%)
