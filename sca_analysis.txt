@@ -43,6 +43,68 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Sunday, 24 April 2016
+I ran Batemanator. First stpe is:
+Variable       	Estimate	LowerCI	UpperCI	(95.0%)	LowerCI	UpperCI	(90.0%)
+MeanMS         	1.421	1.158	1.684		1.211	1.632
+MeanRS         	25.842	19.158	33.105		20.000	32.053
+StDevMS     	0.607	0.375	0.769		0.419	0.761
+StDevRS     	15.756	7.406	20.207		9.534	19.450
+OppSexSel(Is)  	0.182	0.103	0.256		0.113	0.237
+OppSelec(I)    	0.372	0.144	0.544		0.177	0.509
+BatemanGradient	19.794	10.205	30.048		12.090	28.133
+StandardizedBG	1.088	0.597	1.592		0.722	1.482
+S'max         	0.465	0.198	0.613		0.264	0.593
+
+Then I added the demographic data
+mean mating succes of females = males  = 0.93596
+mean reproductive success females = males = 16.27072
+sex ratio males/males+females = females/males+females = 0.30
+estimated number males = females = 100
+number clutches = 27
+
+max sd ms = 30 
+number of ms intervals = 200
+
+ Estimate mating success:
+Results:
+Mean Male Mating Success: 	2.1839
+Standard Deviation in MS: 	2.6614
+Opp. for Sexual Selection:	1.4850
+Std. Dev. for Simulation: 	6.9391
+
+ Estimate SD and Bateman Gradient
+Mean of the Top 10 Solutions:
+Mean MS:    	2.180
+Mean RS:    	37.969
+StDev MS:   	2.624
+StDev RS:   	49.214
+BateGrad:   	17.894
+BG,no 0s:   	18.407
+BG':           	1.027
+Is:              	1.459
+I:               	1.691
+S'max:         	1.236
+RS incr./mate:	20.339
+StDev RS param.	22.050
+
+Final:
+Variable       	Estimate	LowerCI	UpperCI	(95.0%)	LowerCI	UpperCI	(90.0%)
+MeanMS         	2.18	2.18	2.18		2.18	2.18
+MeanRS         	37.97	37.97	37.97		37.97	37.97
+Std.Dev.MS     	2.61	2.32	2.66		2.39	2.66
+Std.Dev.RS     	47.20	36.89	50.09		38.73	49.92
+OppSexSel(Is)  	1.43	1.13	1.48		1.20	1.48
+OppSelec(I)    	1.57	0.95	1.75		1.05	1.74
+BatemanGradient	17.37	14.08	18.14		14.70	18.08
+BateGrad(no0s) 	17.36	10.53	18.87		11.76	18.79
+Standardized BG	1.00	0.81	1.04		0.84	1.04
+S'max            	1.19	0.93	1.25		0.98	1.25
+SDmsForEstim.  	6.65	4.15	6.94		4.68	6.94
+RS incr./mate 	18.43	8.55	20.55		9.49	20.55
+StDev RS param	18.46	1.64	28.61		2.00	27.52
+
+
 #####Tuesday, 19 April 2016
 I am running CERVUS on the 99% found in HWE dataset subsetted 10 times with 150 and 300 loci. I'm running the simulation with 10000 offspring, 57 candidate mothers, prop. sampled = 0.05, prop loci typed = 0.99, prop. loci mistyped = 0.01, minimum loci typed = 0.5*num loci, relaxed%=90,strict=95.
 
