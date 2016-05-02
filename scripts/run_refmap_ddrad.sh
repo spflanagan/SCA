@@ -1,6 +1,7 @@
 #!/bin/bash
 
-ref_map.pl -T 2 -m 3 -n 2 \
+ref_map.pl -T 4 -m 3 \
+	-X "cstacks:-n 2" \
 	-b 1 -D "SCA with ddRAD only" -S \
 	-X "populations:-r 0.5"\
 	-X "populations:-a 0.05" -X "populations:--fstats" \
@@ -85,6 +86,7 @@ ref_map.pl -T 2 -m 3 -n 2 \
 	-s ./samples/sample_OFF013_align.sam \
 	-s ./samples/sample_OFF014_align.sam \
 	-s ./samples/sample_OFF015_align.sam \
+	-s ./samples/sample_OFF016-1_align.sam \
 	-s ./samples/sample_OFF016_align.sam \
 	-s ./samples/sample_OFF017_align.sam \
 	-s ./samples/sample_OFF018_align.sam \
@@ -93,11 +95,13 @@ ref_map.pl -T 2 -m 3 -n 2 \
 	-s ./samples/sample_OFF024_align.sam \
 	-s ./samples/sample_OFF025_align.sam \
 	-s ./samples/sample_OFF026_align.sam \
+	-s ./samples/sample_OFF027-1_align.sam \
 	-s ./samples/sample_OFF027_align.sam \
 	-s ./samples/sample_OFF028_align.sam \
 	-s ./samples/sample_OFF029_align.sam \
 	-s ./samples/sample_OFF030_align.sam \
 	-s ./samples/sample_OFF031_align.sam \
+	-s ./samples/sample_OFF032-1_align.sam \
 	-s ./samples/sample_OFF032_align.sam \
 	-s ./samples/sample_OFF033_align.sam \
 	-s ./samples/sample_OFF034_align.sam \
@@ -387,7 +391,4 @@ ref_map.pl -T 2 -m 3 -n 2 \
 	-s ./samples/sample_PRM186_align.sam \
 	-s ./samples/sample_PRM187_align.sam \
 	-s ./samples/sample_PRM188_align.sam \
-	-s ./samples/sample_PRM189_align.sam \
-	-s ./samples/sample_OFF016-1_align.sam \
-	-s ./samples/sample_OFF027-1_align.sam \
-	-s ./samples/sample_OFF032-1_align.sam
+	-s ./samples/sample_PRM189_align.sam

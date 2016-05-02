@@ -123,10 +123,10 @@ int main()
 	vector<locus_data> locus_info;
 	bool first = true;
 
-	path = "../../../results/gatk/gatk_gwsca/";
-	dad_kid_name = "../../../results/gatk/dad.kid.pairs.gatk.txt";
-	vcf_name = "../../../results/gatk/filtered_bi.vcf";
-	summary_name = path + "gatk_maternal.vcf";
+	path = "../../../results/stacks/biallelic/";
+	dad_kid_name = "../../../results/biallelic/dad.kid.pairs.txt";
+	vcf_name = "../../../results/stacks/batch_1.vcf";
+	summary_name = path + "maternal.vcf";
 
 	
 	dad_kid_file.open(dad_kid_name);

@@ -43,6 +43,9 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Saturday, 30 April 2016
+Stacks finished and the vcf file is empty. I'm running populations again. I've run convert_snps, which hopefully worked, and now I'm gonna try infer_mat_vcf. Hopefully everything isn't ruined.
+
 #####Monday, 25 April 2016
 I re-made the CERVUS figure. Also downloaded a bunch of papers and outlined the MS. I need to figure out how many haplotypes were identified by convert_matches.
 
