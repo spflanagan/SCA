@@ -39,25 +39,36 @@ plot.genome.wide<-function(bp,var,y.max,x.max, rect.xs=NULL,y.min=0,x.min=0,
 #PLOT ALL THE SCAFFOLDS
 #***************************************************************************#
 
-plot.fsts<-function(fst.dat,ci.dat, sig.col=c("red","yellow"),
-	fst.name="Fst", chrom.name="Chrom", bp.name="BP",axis.size=0.5){
+fst.plot<-function(fst.dat,ci.dat, sig.col=c("red","yellow"),
+	fst.name="Fst", chrom.name="Chrom", bp.name="BP",axis.size=0.5,
+	scaffold.order=NULL){
+	if(!is.null(scaffold.order)){
+		scaff.ord<-scaffold.order$component_id
+		lgs<-scaffold.order$object
+	} else{
+		scaff.ord<-factor(fst.dat[,chrom.name])
+		lgs<-scaff.ord
+	}
 	all.scaff<-split(fst.dat, factor(fst.dat[,chrom.name]))
 	last.max<-0
 	rect.xs<-NULL
 	addition.values<-0
-	for(i in 1:length(all.scaff)){
-		new.max<-last.max+round(max(all.scaff[[i]][,bp.name]), -2)
+	
+	for(i in 1:length(scaff.ord)){
+		new.max<-last.max+round(max(all.scaff[[scaff.ord[i]]][,bp.name]), -2)
+		#scaffold.order[i,"new_start"]<-last.max
+		#scaffold.order[i,"new_end"]<-new.max
 		rect.xs<-rbind(rect.xs,c(last.max, new.max))
 		addition.values<-c(addition.values, new.max)
 		last.max<-new.max
 	}
 	#change BP to plot
-	for(i in 1:length(all.scaff)){
-		all.scaff[[i]][,bp.name]<-
-			all.scaff[[i]][,bp.name]+addition.values[i]
+	for(i in 1:length(scaff.ord)){
+		all.scaff[[scaff.ord[i]]][,bp.name]<-
+			all.scaff[[scaff.ord[i]]][,bp.name]+addition.values[i]
 	}
 	x.max<-max(addition.values)
-	x.min<-min(all.scaff[[1]][,bp.name])
+	x.min<-min(all.scaff[[scaff.ord[1]]][,bp.name])
 	y.max<-max(fst.dat[,fst.name])+0.1*max(fst.dat[,fst.name])
 	y.min<-min(fst.dat[,fst.name])-0.1*min(fst.dat[,fst.name])
 	if(min(fst.dat[,fst.name]) < 0) {

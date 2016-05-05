@@ -123,10 +123,10 @@ int main()
 	vector<locus_data> locus_info;
 	bool first = true;
 
-	path = "../../../results/stacks/biallelic/";
-	dad_kid_name = "../../../results/biallelic/dad.kid.pairs.txt";
+	path = "../../../results/biallelic/";
+	dad_kid_name = "../../../results/dad.kid.pairs.fullnames.txt";
 	vcf_name = "../../../results/stacks/batch_1.vcf";
-	summary_name = path + "maternal.vcf";
+	summary_name = path + "biallelic_maternal.vcf";
 
 	
 	dad_kid_file.open(dad_kid_name);

@@ -1,0 +1,81 @@
+Parentage Analysis README
+
+This file contains information about each program used for parentage analysis with next-generation sequencing data.
+
+##############################GENOME-WIDE PARENTAGE ANALYSIS##########################
+
+
+######################################################################################
+****************************************PROGRAMS**************************************
+######################################################################################
+
+********************************convert_matches***************************************
+PURPOSE
+	 The purpose of convert_matches is to process the matches files output from stacks (**.matches.tsv) and reformat them to be tab-delimited files with the following columns: CatalogID, Allele1, Allele1 Count, Allele2, Allele2 Count.
+NOTES
+	This program was not used in the selection components analysis but is useful in relatedness studies.
+INPUT
+	A *matches.tsv file output from Stacks (Catchen et al 2011, Catchen et al 2013)
+OUTPUT
+	A tab-delimited file with columns CatalogID, Allele1, Allele1 Count, Allele2, Allele2 Count.
+HOW TO RUN
+	This file can be run interactively or can be run at the command line with flags. You must give it the input alleles filename with the path and the output filename with the path. An optional input is a whitelist file with a list of Catalog IDs (one ID per row).
+		-i:	input file (with path)
+		-o:	output file name (with path)
+		-w:	Optional whitelist name (with path)
+		no arguments:	interactive mode\n";
+*******************************gwsca_haplotypes***************************************
+PURPOSE
+	  
+NOTES
+	This program was not used in the selection components analysis but is useful in relatedness studies.
+INPUT
+
+OUTPUT
+
+HOW TO RUN
+
+*****************************haplotypes_to_cervus*************************************
+PURPOSE
+	This program converts RAD haplotype genotypes to CERVUS formats to conduct parentage analysis.
+NOTES
+	This program was not used in the selection components analysis but is useful in relatedness studies.
+INPUT
+
+OUTPUT
+
+HOW TO RUN
+
+
+**********************************band_sharing***************************************
+PURPOSE
+	This program estimates band sharing among fathers and offspring.  
+NOTES
+	This program was not used in the selection components analysis but is useful in relatedness studies.
+INPUT
+
+OUTPUT
+
+HOW TO RUN
+
+*******************************calculate_relatedness**********************************
+PURPOSE
+	 
+NOTES
+	This program was not used in the selection components analysis but is useful in relatedness studies.
+INPUT
+
+OUTPUT
+
+HOW TO RUN
+
+******************************cervus_to_kinship***************************************
+PURPOSE
+	 
+NOTES
+	This program was not used in the selection components analysis but is useful in relatedness studies. 
+INPUT
+
+OUTPUT
+
+HOW TO RUN

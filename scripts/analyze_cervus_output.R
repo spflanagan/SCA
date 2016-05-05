@@ -22,15 +22,27 @@ for(i in 1: length(stats.files)){
 	rownames(stats)[i]<-stats.files[i]
 }
 
-png("CervusStats.png",height=4,width=8,res=300, units="in")
-par(mfrow=c(1,2),oma=c(2,2,2,2),mar=c(3,4,1,1))
-boxplot(stats$Delta~stats$NumLoci,las=1,ylab="",xlab="")
+png("CervusStats.png",height=5,width=10,res=300, units="in")
+par(mfrow=c(1,2),oma=c(1,1,1,1),mar=c(3,3,1,0.2))
+boxplot(stats$Delta~stats$NumLoci,las=1,ylab="",xlab="",xaxt='n')
+axis(1,at=1:8,labels=c(50,100,150,200,300,400,800,1600),las=2)
+#text(seq(0.8,7.8,1), par("usr")[1]-0.65, 
+#	labels=c(50,100,150,200,300,400,800,1600), 
+#	srt=35, pos=1, xpd=TRUE,tck=0.1)
 mtext("Delta Cutoff",2,outer=F, line=2)
 plot(stats$NumLoci, stats$AssignmentRate, xaxt='n',las=1,
 	ylab="",xlab="", pch=19)
-axis(1, at=c(50,100,200,400,800,1600))
+axis(1, at=c(50,100,150,200,300,400,800,1600),las=2)
+lines(x=c(15,85),y=c(5.7,5.7),lwd=2)
+lines(x=c(65,135),y=c(15,15),lwd=2)
+lines(x=c(115,185),y=c(20.1,20.1),lwd=2)
+lines(x=c(165,235),y=c(19.3,19.3),lwd=2)
+lines(x=c(265,335),y=c(18.5,18.5),lwd=2)
+lines(x=c(365,435),y=c(18.5,18.5),lwd=2)
+lines(x=c(765,835),y=c(18.8,18.8),lwd=2)
+lines(x=c(1565,1635),y=c(19,19),lwd=2)
 mtext("Assignment Rate (%)",2,outer=F,line=2)
-mtext("Number of Loci", 1,outer=T, line=-1)
+mtext("Number of Loci", 1,outer=T)
 dev.off()
 
 maternity.dat<-data.frame()

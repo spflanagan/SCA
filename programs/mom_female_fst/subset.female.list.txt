@@ -1,8 +1,0 @@
-E://ubuntushare//SCA//sample_FEM001_align.matches.tsv
-E://ubuntushare//SCA//sample_FEM002_align.matches.tsv
-E://ubuntushare//SCA//sample_FEM004_align.matches.tsv
-E://ubuntushare//SCA//sample_FEM005_align.matches.tsv
-E://ubuntushare//SCA//sample_FEM006_align.matches.tsv
-E://ubuntushare//SCA//sample_FEM007_align.matches.tsv
-E://ubuntushare//SCA//sample_FEM008_align.matches.tsv
-E://ubuntushare//SCA//sample_FEM009_align.matches.tsv

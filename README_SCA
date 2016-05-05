@@ -1,0 +1,74 @@
+SCA Analysis README
+
+This file contains information about each program used in the selection components analysis paper.
+
+
+###################GENOME-WIDE SELECTION COMPONENTS ANALYSIS##########################
+
+######################################################################################
+****************************************PROGRAMS**************************************
+######################################################################################
+
+*************************************infer_mat_vcf***********************************
+PURPOSE
+	This program takes a list of fathers and their paired offspring to infer the maternal allele at compatible loci.
+NOTES
+	Variant Call Format usually has more entries per individual than just genotype (GT), but this program ignores those. Any pruning for allele depth etc. must occur before running this program.
+INPUT
+	The path for output files
+	A tab-delimited file with the fathers and their paired offspring. One line per pair, with the father in the first column and the offspring in the second column.
+	A vcf file with all of the fathers and their offspring in it, with the same name as the names found in the father-offspring pair file.
+	Output name
+OUTPUT
+	A vcf file with only the GT format. The INFO field is no longer relevant but is retained from the original vcf.
+HOW TO RUN
+	The program currently (5 May 2016) cannot be run interactively or on the command line. I plan to change this in the near future to make it more user-friendly.
+	You must go into the source file and edit the path (where things are), dad_kid_name (name of the father-offspring pairs list file), vcf_name (vcf file name), and summary_name (output vcf) settings.
+	
+********************************gwsca_biallelic***************************************
+PURPOSE
+	This program calculates all pairwise FST estimates between groups within a population.
+NOTES
+	You must provide the program with the assignment of each individual to the groups. This program does not do any filtering, although it does output summary files that will help with filterings steps.
+INPUT
+	a batch_X.sumstats.tsv file output from Stacks' population module (Catchen et al. 2013)
+	A file with each individual's assignment to groups. The file must be tab-delimited and contain five columns: individual ID in the sumstats file, an individual ID (can be the same as the first column), the sex of the individual, the age or other grouping factor, and a phenotype/status of that individual. Assignments should be string factors (e.g. "MALE" or "FEMALE") and non-assignment is a 0. Here are some examples:
+		sample_PRM001_align	PRM001	MAL	ADULT	PREGNANT
+		sample_NPM001_align	NPM001	MAL	ADULT	NONPREGNANT
+		sample_FEM001_align	FEM001	FEM	ADULT	0
+		MOM001_inferred	MOM001	0	0	MOM
+		sample_OFF001_align	OFF001	0	OFFSPRING	0
+OUTPUT
+	File with the Fsts, with a column describingthe locus and then columns for each pairwise Fst comparison
+	Summary file containing columns PopID, Locus Name, expected heterozygosity (Hs), observed heterozygosity (Ho), and the number of alleles (NumAlleles)
+	File with all of the alleles at each locus.
+HOW TO RUN
+	The program currently (5 May 2016) cannot be run interactively or on the command line. I plan to change this in the near future to make it more user-friendly.
+	You must go into the source file and edit the sumstats_name (batch_X.sumstats.tsv file name) and ind_info_name (file with individual assignments to groups) settings.
+	
+******************************extract_sequence_part***********************************
+PURPOSE
+	This program removes a portion of a fasta sequence based
+NOTES
+	The program assumes that there is only one sequence in the fasta file. This is what was used to extract the 5kb regions surrounding RAD loci.
+INPUT
+
+OUTPUT
+
+HOW TO RUN
+
+*******************************process_alleles_files**********************************
+PURPOSE
+	The purpose of process_alleles_files is to process the alleles files output from stacks (**.alleles.tsv) and reformat them to be tab-delimited with the columns IndID, LocusID, Haplotype1, Count1, Haplotype2. If an individual has more than two allele calls for that locus the Haplotype and Count will be added on as additional columns in that locus' row.
+NOTES
+	This program was not used in the selection components analysis but could be useful for other analyses so is included here.
+INPUT
+	an *.alleles.tsv file output from Stacks (Catchen et al. 2011, Catchen et al. 2013).
+OUTPUT
+	A tab-delimited file with columns IndID, LocusID, Haplotype1, Count1, Haplotype2.
+HOW TO RUN
+	This file can be run interactively or can be run at the command line with flags. You must give it the input alleles filename with the path and the output filename with the path. An optional input is a whitelist file with a list of Catalog IDs (one ID per row).
+		-i:	input file (with path)
+		-o:	output file name (with path)
+		-w:	Optional whitelist name (with path)
+		no arguments:	interactive mode

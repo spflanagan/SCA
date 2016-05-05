@@ -1,6 +1,0 @@
-E://ubuntushare//SCA//MOM001.txt
-E://ubuntushare//SCA//MOM005.txt
-E://ubuntushare//SCA//MOM006.txt
-E://ubuntushare//SCA//MOM007.txt
-E://ubuntushare//SCA//MOM009.txt
-E://ubuntushare//SCA//MOM010.txt

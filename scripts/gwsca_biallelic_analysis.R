@@ -1,5 +1,6 @@
 #Author: Sarah P. Flanagan
-#Date: 11 February 2016
+#Last Updated: 27 April 2016
+#Started Date: 11 February 2016
 #Purpose: Analyze the output from gwsca_biallelic.
 
 source("E:/ubuntushare/SCA/scripts/plotting_functions.R")
@@ -25,23 +26,18 @@ gw.sum$chi.result<-1-pchisq(gw.sum$chi,1) #biallelic, df=1
 gw.hwe<-gw.sum[gw.sum$chi.result > 0.05,]
 
 #prune to keep only those found in most pops
-sum.prune<-gw.hwe[gw.hwe$Pop=="ADULT" | gw.hwe$Pop=="JUVIE" | 
-	gw.hwe$Pop == "POP",]
+sum.prune<-gw.hwe[gw.hwe$Pop=="ADULT" | gw.hwe$Pop=="JUVIE",]
 sum.sum<-tapply(sum.prune$N,sum.prune$Locus,sum)
 sum.sum<-sum.sum[as.numeric(sum.sum) > 393]
 sum.prune<-gw.hwe[gw.hwe$Locus %in% names(sum.sum),]
 
-##prune based on representation in the groups
+##prune based on representation in the groups (in 50% of individuals)
 sum.list<-split(sum.prune, sum.prune$Pop)
 adt.n<-sum.list$ADULT[sum.list$ADULT$N > 216 & !is.na(sum.list$ADULT$Hs),]
 juv.n<-sum.list$JUVIE[sum.list$JUVIE$N > 157 & !is.na(sum.list$JUVIE$Hs),]
 fem.n<-sum.list$FEM[sum.list$FEM$N > 57& !is.na(sum.list$FEM$Hs),]
 mal.n<-sum.list$MAL[sum.list$MAL$N>159& !is.na(sum.list$MAL$Hs),]
 mom.n<-sum.list$MOM[sum.list$MOM$N>133& !is.na(sum.list$MOM$Hs),]
-brd.n<-sum.list$BREEDER[sum.list$BREEDER$N>290& !is.na(sum.list$BREEDER$Hs),]
-#pop.n<-sum.list$POP[sum.list$POP$N>57& !is.na(sum.list$POP$Hs),]
-prg.n<-sum.list$PREGGER[sum.list$PREGGER$N>159& !is.na(sum.list$PREGGER$Hs),]
-non.n<-sum.list$NONPREG[sum.list$NONPREG$N>14& !is.na(sum.list$NONPREG$Hs),]
 
 #Now prune based on allele frequencies
 adt.n<-adt.n[adt.n$Allele1Freq > 0.05 & adt.n$Allele1Freq < 0.95,]
@@ -49,10 +45,6 @@ juv.n<-juv.n[juv.n$Allele1Freq > 0.05 & juv.n$Allele1Freq < 0.95,]
 fem.n<-fem.n[fem.n$Allele1Freq > 0.05 & fem.n$Allele1Freq < 0.95,]
 mal.n<-mal.n[mal.n$Allele1Freq > 0.05 & mal.n$Allele1Freq < 0.95,]
 mom.n<-mom.n[mom.n$Allele1Freq > 0.05 & mom.n$Allele1Freq < 0.95,]
-brd.n<-brd.n[brd.n$Allele1Freq > 0.05 & brd.n$Allele1Freq < 0.95,]
-#pop.n<-pop.n[pop.n$Allele1Freq > 0.05 & pop.n$Allele1Freq < 0.95,]
-prg.n<-prg.n[prg.n$Allele1Freq > 0.05 & prg.n$Allele1Freq < 0.95,]
-non.n<-non.n[non.n$Allele1Freq > 0.05 & non.n$Allele1Freq < 0.95,]
 
 #write these out to read in for error analysis
 write.table(prg.n[,2:4],"LociInPregMales.txt",col.names=T,row.names=F,quote=F)

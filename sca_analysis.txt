@@ -8,15 +8,11 @@ Outline of the approach:
 	biallelic:
 		-> scripts/convert_snps.R 
 		-> infer_maternal_contribution/infer_mat_vcf/infer_mat_vcf 
-		-> vcftools (extract_gt_info.sh)
 		-> merge_vcfs.R 
 		-> gwsca_biallelic 
-		-> generate_empiricalAFS.R 
-		-> sca_simulation 
 		-> gwsca_biallelic_analysis.R
 		-> annotate top 5% outliers	
-			-> blastn RAD seqs
-			-> align to annotated genome with bowtie2
+			[-> blastn RAD seqs]
 			-> extract 5kb region surrounding RAD seq and blastn
 	haplotypes:
 		-> convert_matches 
@@ -30,7 +26,7 @@ Outline of the approach:
 			-> CERVUS 
 			-> calculate_relatedness 
 			-> band_sharing
-			-> mom_female_fst (?)
+
 	
 2. Run GATK pipeline, prune dataset, and follow Monnahan et al. approach to analyze selection components analysis.
 	Programs utilized:
@@ -43,6 +39,81 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Thursday, 5 May 2016
+Somehow I got these warnings again: Warning: Unable to find allele depths for datum
+I wonder what that means...I'm trying populations with  -p 3 filter also..but I also may just re-run the whole pipeline on this computer and see what happens.
+
+OK, I'm just re-running it on here. I don't know what's happening but I wonder if it had to do with matching the wrong files or something. Anyway, hopefully this fixes whatever the problem is/was.
+
+#####Wednesday, 4 May 2016
+NOTES TO SELF:
+	**Run convert_snps.R in 64-bit version of R. Otherwise it crashes
+	**Run infer_mat_vcf with the correct file listing--in this case, dad.kid.pairs.fullnames.txt
+	**Make sure all programs are writing to legitimate file names & locations
+	
+Today I:
+1. Re-ran convert_snps.R
+2. Ran infer_mat_vcf with dad.kid.pairs.fullnames.txt
+3. Ran merge_vcfs.R to merge batch_1.vcf and biallelic_maternal.vcf (from infer_mat_vcf)
+4. gwsca analysis in R
+
+Hmm...pruned snps:
+dim(adt.n)
+[1] 11782    18
+> dim(juv.n)
+[1] 12216    18
+> dim(fem.n)
+[1] 11092    18
+> dim(mal.n)
+[1] 12213    18
+> dim(mom.n)
+[1] 717  18
+
+maybe I should re-do populations without the filters.
+
+#####Tuesday, 3 May 2016
+Re-doing populations:
+populations -b 1 -P ./ -M ../../sca_popmap_ddrad.txt -t 3 --vcf -m 5 -a 0.05 
+
+requires stack depth of 5 to genotype individual. Now I don't have any cryptic error messages.
+
+infer_mat_vcf reports 304632 SNPs. That's too many. 
+populations -b 1 -P ./ -M ../../sca_popmap_ddrad.txt -a 0.05 -t 3 --vcf -m 5 -r 0.5 -p 30
+
+let's see what that does.
+
+According to infer_mat_vcf, this populations run yielded 15620 SNPs.
+
+#####Monday, 2 May 2016
+Running populations on work computer:
+populations -b 1 -P ./ -M ../../sca_popmap_ddrad.txt -a 0.05 -t 3
+
+(it was maxxing out the memory on my home computer)
+
+It finished, says it retained 214702 loci.
+
+Removed PRM077-OFF077 from the dad.kid.list file...but forgot the --vcf flag with populations so I have to re-run it.
+
+Hmm...lots of:
+"Warning: Unable to find allele depths for datum 95285
+Warning: Unable to find allele depths for datum 106385
+Warning: Unable to find allele depths for datum 105901
+Warning: Unable to find allele depths for datum 105916
+Warning: Unable to find allele depths for datum 91350
+Warning: Unable to find allele depths for datum 109831
+Warning: Unable to find allele depths for datum 95285
+Warning: Unable to find allele depths for datum 106385
+Warning: Unable to find allele depths for datum 105901
+Warning: Unable to find allele depths for datum 105916
+Warning: Unable to find allele depths for datum 91350
+Warning: Unable to find allele depths for datum 109831
+Warning: Unable to find allele depths for datum 95285
+Warning: Unable to find allele depths for datum 106385
+Warning: Unable to find allele depths for datum 105901
+Warning: Unable to find allele depths for datum 105916"
+
+^^has to do with making a vcf I think. infer_vcf worked just fie.
+
 #####Saturday, 30 April 2016
 Stacks finished and the vcf file is empty. I'm running populations again. I've run convert_snps, which hopefully worked, and now I'm gonna try infer_mat_vcf. Hopefully everything isn't ruined.
 
