@@ -73,14 +73,27 @@ public:
 	}
 };
 
+class subset_info
+{
+public:
+	string chrom_name;
+	int start, end;
+
+	subset_info()
+	{
+		chrom_name = string();
+		start = end = int();
+	}
+};
 
 int main(int argc, char* argv[])
 {
-	int end, start, count, i;
-	string fasta_name, line, fasta_subset_name;
-	ifstream fasta;
+	int end, start, count, i, ii, iii;
+	string fasta_name, line, fasta_subset_name, seq_name, input_name;
+	ifstream fasta, input;
 	ofstream fasta_subset;
-	fasta_record seq;
+	vector<fasta_record> seq;
+	vector<subset_info> subsetting;
 	string tempstring1, tempstring2, query;
 	bool interactivemode;
 
@@ -93,8 +106,8 @@ int main(int argc, char* argv[])
 			cout << "\nextract_sequence_part\n";
 			cout << "Extract from a fasta sequence a specific region in BP number\n";
 			cout << "-f:\tfasta file input\n";
-			cout << "-s:\tStart bp number.\n";
-			cout << "-c:\tEnd bp number.\n";
+			cout << "-i:\tInput file\n";
+			cout << "-o:\tOutput file name.\n";
 			cout << "-h:\tPrints this message\n";
 			cout << "no arguments:\tinteractive mode\n";
 			return 0;
@@ -111,8 +124,8 @@ int main(int argc, char* argv[])
 			cout << "\nextract_sequence_part\n";
 			cout << "Extract from a fasta sequence a specific region in BP number\n";
 			cout << "-f:\tfasta file input\n";
-			cout << "-s:\tStart bp number.\n";
-			cout << "-c:\tEnd bp number.\n";
+			cout << "-i:\tInput file\n";
+			cout << "-o:\tOutput file name.\n";
 			cout << "-h:\tPrints this message\n";
 			cout << "no arguments:\tinteractive mode\n";
 			return 0;
@@ -126,30 +139,30 @@ int main(int argc, char* argv[])
 		//tempstring2 = argv[i + 1];
 		if (tempstring1 == "-f")
 			fasta_name = argv[i + 1];
-		if (tempstring1 == "-s")
-			start = atoi(argv[i + 1]);
-		if (tempstring1 == "-e")
-			end = atoi(argv[i + 1]);
+		if(tempstring1 == "-i")
+			input_name = argv[i + 1];
+		if (tempstring1 == "-o")
+			fasta_subset_name = argv[i + 1];
 	}
 
 	if (interactivemode)
 	{
 		cout << "\nEnter file with a fasta seqence.\n";
 		cin >> fasta_name;
-		cout << "\nEnter start bp\n";
-		cin >> start;
-		cout << "\nEnter end bp\n";
-		cin >> end;
+		cout << "\nEnter input file name.\n";
+		cin >> input_name;
+		cout << "\nProvide output file name\n";
+		cin >> fasta_subset_name;
 	}
 
-	cout << "\nInput file:\t" << fasta_name;
-	cout << "\nStart BP:\t" << start;
-	cout << "\nEnd BP:\t" << end;
+	cout << "\nFasta file:\t" << fasta_name;
+	cout << "\nInput name:\t" << input_name;
+	cout << "\nOutput name:\t" << fasta_subset_name;
 	if (interactivemode)
 	{
 		cout << "\n\nProceed? (y to proceed)\n";
 		cin >> query;
-		if (query != "y" || query != "Y")
+		if (query != "y" && query != "Y")
 		{
 			cout << "\n\nEnter an integer to exit!!\n";
 			cin >> i;
@@ -159,6 +172,23 @@ int main(int argc, char* argv[])
 	else
 		cout << "\n\nProceeding...\n";
 	
+	input.open(input_name);
+	FileTest(input, input_name);
+	while (!input.eof())
+	{
+		while (universal_getline(input, line))
+		{
+			if (line != "")
+			{
+				subsetting.push_back(subset_info());
+				stringstream ss;
+				ss.str(line);
+				ss >> subsetting.back().chrom_name >> subsetting.back().start >> subsetting.back().end;
+			}
+		}
+	}
+	input.close();
+	cout << "\nFound " << subsetting.size() << " regions to extract.\n";
 
 	fasta.open(fasta_name);
 	FileTest(fasta, fasta_name);
@@ -172,26 +202,39 @@ int main(int argc, char* argv[])
 			{
 				//it's the name
 				count++;
-				seq.seq_id = line.substr(1, line.size());
+				seq.push_back(fasta_record());
+				seq.back().seq_id = line.substr(1, line.size());
 			}
 			else
 			{//it's the sequence
 				if (line.substr(0, 1) != "\n")
-					seq.sequence.append(line);
+					seq.back().sequence.append(line);
 			}
 		}
 	}
 	fasta.close();
 
-	fasta_subset_name = fasta_name.substr(0, fasta_name.length() - 6);
-	stringstream subset_name;
-	subset_name << fasta_subset_name << start << end << ".fasta";
-	fasta_subset.open(subset_name.str());
-	fasta_subset << ">" << seq.seq_id << "_" << start << "-" << end << '\n';
-	for (i = 0; i < seq.sequence.length(); i++)
+	
+	fasta_subset.open(fasta_subset_name);
+	count = 0;
+	for (iii = 0; iii < subsetting.size(); iii++)
 	{
-		if (i > start && i < end)
-			fasta_subset << seq.sequence[i];
+		for (ii = 0; ii < seq.size(); ii++)
+		{
+			if (seq[ii].seq_id == subsetting[iii].chrom_name)
+			{
+				if (count ==0)
+					fasta_subset << ">" << seq[ii].seq_id << "_" << subsetting[iii].start << "-" << subsetting[iii].end << '\n';
+				else
+					fasta_subset << "\n>" << seq[ii].seq_id << "_" << subsetting[iii].start << "-" << subsetting[iii].end << '\n';
+				for (i = 0; i < seq[ii].sequence.length(); i++)
+				{
+					if (i > subsetting[iii].start && i < subsetting[iii].end)
+						fasta_subset << seq[ii].sequence[i];
+				}
+				count++;
+			}
+		}
 	}
 	fasta_subset.close();
 

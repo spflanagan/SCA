@@ -89,8 +89,8 @@ ind.info$phen[ind.info$phen=="NPM" | ind.info$phen=="PRM" |
 	ind.info$phen=="FEM" | ind.info$phen=="OFF"]<-"0"
 #if we wanted to include pregnant/nonpregnant, this is where we would set that
 
-write.table(ind.info,"ind_info_vcf.txt",quote=F,row.names=F,col.names=F,
-	sep='\t')
+#write.table(ind.info,"ind_info_vcf.txt",quote=F,row.names=F,col.names=F,
+#	sep='\t')
 	
 
 }

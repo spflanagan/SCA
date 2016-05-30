@@ -1,3 +1,8 @@
+#Author: Sarah P. Flanagan
+#Last Updated: 11 May 2016
+#Purpose: Calculate the error rate based on consistency of genotyping the same
+#individuals.
+
 setwd("E:/ubuntushare/SCA/results/biallelic")
 vcf<-read.table("biallelic_merge.vcf",header=T)
 duped<-c("sample_OFF016.1_align","sample_OFF016_align",

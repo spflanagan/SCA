@@ -39,6 +39,138 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Thursday, 26 May 2016
+Running CERVUS. simulating:
+10000 offspring, 57 mothers, prop. sampled 0.05, prop. loci typed 1, prop. loci mistyped 0.01, min typed loci 0.5*number of loci, strick% 95, relaxed% 90.
+
+#####Thursday, 12 May 2016
+I'm trying to figure out the snpstats output. There doesn't seem to be any pattern in the p-values for the G analysis.
+
+I extracted the coverage info from the ref_map file using grep and got an average of 12.45638 +/- 3.054524
+
+Working on the LD analysis..I think I need to make a heatmap?
+
+#####Wednesday, 11 May 2016
+The LD program output says 203514388 pairwise LD calculations performed...but file didn't save (misspelled folder name), so I'm re-running.
+Ran gwsca_haplotypes.
+
+Meanwhile, I'm working on SNPstats1. Need a population ID file:
+	SNPstats1 and statistics1 require a text file identifying the individuals to be
+	included in each population. This file contains (either tab-separated or by line) the
+	number of populations, number of individuals in each population, and column number in
+	the call file for the individuals in each population. Individuals do not have to be in order
+	in the call file, and not all individuals in the call file need to be included. Comments are
+	allowed only at the end of this file. Example:
+	3
+	6
+	8
+	5
+	7 8 9 10 21 22
+	1 2 3 4 5 6 11 12
+	13 14 15 16 17
+and a genotype call file:
+	The first line of this file has the total number of nucleotide sites
+	and then the number of individuals in the file, separated by a tab or spaces. Each
+	subsequent line is a single nucleotide position, with the following tab-separated fields:
+	any number of ID fields (strings); chromosome/linkage group name (a string); position
+	(an integer); diploid genotype for each individual (integer from 0-10; see below).
+	genotype prints one ID field by default (position within each RAD tag), and the other
+	programs below expect one ID field by default; Stacks may output one or more ID fields.
+	The positions must be ordered such that linkage groups are together, positions are in
+	increasing order within each linkage group, and the linkage groups are ordered to match
+	the LGnames.txt file (required by the programs genotype or collate). Example:
+	24035 5
+	tag6 groupI 426 5 5 5 0 6
+	tag6 groupI 427 8 8 0 0 8
+	tag6 groupI 428 10 9 10 8 8
+			Nucleotide 1
+Nucleotide 2 A C G T
+			A 1 2 3 4
+			C 2 5 6 7
+			G 3 6 8 9
+			T 4 7 9 10
+
+I wrote a program (vcf_to_snpstats) to convert batch_1.vcf to the two snpstats1 files. Hopefully it works!
+
+
+gwsca_haplotypes had a lot of Fst > 1. Ran haplotypes_to_cervus.
+
+Running coverage_from_stacks on SCA dataset. Also re-calculating error rates.
+The coverage_from_stacks output is really different from before--went from almost 10X to 2X???
+
+./programs/RADpopgen/SNPstats1 ./results/sexlinked/genotype_calls.txt ./results/sexlinked/populationID.txt -o ./results/sexlinked/snpstats1_out.txt
+..hit a segmentation fault.
+The populationID file had an extra space and the genotype_calls file had the first alleles as -84920281 or whatever a pointer is..I replaced that with 0 and it ran.
+Ran on 67018 sites. It's really fast. Do I just plot the log10 of the p_val after G-geno? I guess so.
+
+I'll do this once I've finished pruning the Cervus genotypes with prune_cervus_genotypes.R
+
+#####Tuesday, 10 May 2016
+Troubleshooting both of these. Also running Blast2Go to re-make SCA figures.
+Not sure why the C++ code is breaking...because I was not deleting pointers properly, for one!
+
+Meanwhile, I'm going to work on the relatedness/parentage side of things. ..
+running run_convert_matches.sh
+Now I'm running infer_maternal_contribution..
+
+#####Monday, 9 May 2016
+Wrote R code to calculate LD but I'm not sure it's doing what I think it should do so I'm also writing a C++ program.
+#####Sunday, 8 May 2016
+> dim(aj.unique)
+[1] 547  25
+> dim(fm.unique)
+[1] 442  25
+> dim(mo.unique)
+[1] 263  25
+
+> dim(shared)
+[1]  1 25
+> length(levels(factor(c(as.character(aj.fm$Locus),as.character(aj.mo$Locus),
++ as.character(fm.mo$Locus)))))
+[1] 147
+> dim(aj.fm)
+[1] 40 25
+> dim(aj.mo)
+[1] 51 25
+> dim(fm.mo)
+[1] 58 25
+
+
+There aren't any chromosomes that seem to have extra male-female outliers.
+
+#####Saturday, 7 May 2016
+I ran gwsca_biallelic_vcf
+ 
+> dim(adt.n)
+[1] 63038    18
+> dim(juv.n)
+[1] 63639    18
+> dim(fem.n)
+[1] 55685    18
+> dim(mal.n)
+[1] 63906    18
+> dim(mom.n)
+[1] 43017    18
+
+dim(aj.prune)
+[1] 60451    25
+> dim(fm.prune)
+[1] 53956    25
+(mo.prune)
+[1] 38537    25
+
+If you only keep the loci on the LGs:
+> dim(mo.plot)
+[1] 36796    25
+> dim(fm.plot)
+[1] 50009    25
+> dim(aj.plot)
+[1] 56087    25
+
+
+#####Friday, 6 May 2016
+69109 loci.
+
 #####Thursday, 5 May 2016
 Somehow I got these warnings again: Warning: Unable to find allele depths for datum
 I wonder what that means...I'm trying populations with  -p 3 filter also..but I also may just re-run the whole pipeline on this computer and see what happens.

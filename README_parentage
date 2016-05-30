@@ -24,28 +24,78 @@ HOW TO RUN
 		-o:	output file name (with path)
 		-w:	Optional whitelist name (with path)
 		no arguments:	interactive mode\n";
+	I run it with ./scripts/run_convert_matches.sh
+******************************infer_maternal_contribution*****************************
+PURPOSE
+	This program (and the other program housed within it, infer_mat_vcf) take a list of fathers and their paired offspring to infer the maternal allele at compatible loci.
+NOTES
+	Run this with haplotype input.
+INPUT
+	batch_x.catalog.alleles.tsv file (and the input path)
+	a father-offsrping pairs file (and its path)
+	the output directory
+OUTPUT
+	A summary output file with the father-offspring pairs and the number of loci in the parent and the number of loci inferred for the second parent.
+	An output file containing the columns:
+		LocusID: The Locus ID
+		Par1Hap1: The father's first allele
+		Par1Cnt1: The coverage 
+		Par1Hap2: The father's second allele
+		Par1Cnt2: The coverage of the second allele
+		OffHap1: Offspring's first allele
+		OffCnt1: The coverage
+		OffHap2: Offspring's second allele
+		OffCnt2: the coverage
+		InferredPar2: The inferred allele.
+	One file per mother with the inferred alleles
+	A consensus file with all of the alleles at each locus.
+HOW TO RUN
+	The program currently (10 May 2016) cannot be run interactively or on the command line. I plan to change this in the near future to make it more user-friendly.
+	You must go into the source file and edit the cat_alleles_name (batch_X.catalog.alleles.tsv file name), paired_list_name (name of the father-offspring pairs file) and out_path (path to the directory where all of the output should be saved) settings.
+
 *******************************gwsca_haplotypes***************************************
 PURPOSE
-	  
+	This program calculates all pairwise FST estimates between groups within a population.
 NOTES
+	You must provide the program with the assignment of each individual to the groups. This program does not do any filtering, although it does output summary files that will help with filterings steps.	  
 	This program was not used in the selection components analysis but is useful in relatedness studies.
+	Requires gwsca_classes.h
 INPUT
-
+	A file with each individual's assignment to groups. The file must be tab-delimited and contain five columns: individual ID in the sumstats file, an individual ID (can be the same as the first column), the sex of the individual, the age or other grouping factor, and a phenotype/status of that individual. Assignments should be string factors (e.g. "MALE" or "FEMALE") and non-assignment is a 0. Here are some examples:
+		sample_PRM001_align	PRM001	MAL	ADULT	PREGNANT
+		sample_NPM001_align	NPM001	MAL	ADULT	NONPREGNANT
+		sample_FEM001_align	FEM001	FEM	ADULT	0
+		MOM001_inferred	MOM001	0	0	MOM
+		sample_OFF001_align	OFF001	0	OFFSPRING	0
 OUTPUT
-
+	A file containing the fsts between all of the possible combinations.
+	A file with a locus summary with the expected and observed heterozygosities and numbeer of alleles in each population
+	A summary file containing all of the alleles at each locus.
 HOW TO RUN
-
+	The program currently (10 May 2016) cannot be run interactively or on the command line. I plan to change this in the near future to make it more user-friendly.
+	You must go into the source file and edit the out_path (output directory) and ind_info_name (file containing the individual group assignments) settings.
+	
 *****************************haplotypes_to_cervus*************************************
 PURPOSE
 	This program converts RAD haplotype genotypes to CERVUS formats to conduct parentage analysis.
 NOTES
 	This program was not used in the selection components analysis but is useful in relatedness studies.
 INPUT
-
+	Tab-delimited text file that is the result of running infer_maternal_contribution (locus_file_name). It contains a header with the column names:
+		LocusID	NumAlleles	AllelesCSV	NumDadsWithLocus	NumMomsInferred
+		with the alleles column containing all of the alleles at the locus separated by a comma (and no space). Example:
+			LocusID	NumAlleles	AllelesCSV	NumDadsWithLocus	NumMomsInferred
+			3	135011	CCTC,CGTC,CATC,CG,TG,CG,CG,TGTC,CGCC	9	9
+	List of haplotype files, which were created with convert_matches.
+	A file containing the father-offspring pairs (same as in infer_maternal_contribution)
 OUTPUT
-
+	A genotypes file. A non-genotyped call is 0. Each locus has two columns, LocIDA and LocIDB.
+	A candidate parents file. This is simply a list of all of the mothers.
+	An offspring file with two columns, the offpsring ID and the known parent ID.
+	All of these are described by the CERVUS documentation.
 HOW TO RUN
-
+	The program currently (11 May 2016) cannot be run interactively or on the command line. I plan to change this in the near future to make it more user-friendly.
+	You must go into the source file and edit the locus_file_name, file_list_name, dad_kid_name, gen_name (genotypes output), par_name (candidate parents file), and off_name (offspring file) settings.
 
 **********************************band_sharing***************************************
 PURPOSE

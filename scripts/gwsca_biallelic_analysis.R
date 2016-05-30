@@ -38,6 +38,7 @@ juv.n<-sum.list$JUVIE[sum.list$JUVIE$N > 157 & !is.na(sum.list$JUVIE$Hs),]
 fem.n<-sum.list$FEM[sum.list$FEM$N > 57& !is.na(sum.list$FEM$Hs),]
 mal.n<-sum.list$MAL[sum.list$MAL$N>159& !is.na(sum.list$MAL$Hs),]
 mom.n<-sum.list$MOM[sum.list$MOM$N>133& !is.na(sum.list$MOM$Hs),]
+prg.n<-sum.list$PREGNANT[sum.list$PREGNANT$N>150& !is.na(sum.list$PREGNANT$Hs),]
 
 #Now prune based on allele frequencies
 adt.n<-adt.n[adt.n$Allele1Freq > 0.05 & adt.n$Allele1Freq < 0.95,]
@@ -45,6 +46,7 @@ juv.n<-juv.n[juv.n$Allele1Freq > 0.05 & juv.n$Allele1Freq < 0.95,]
 fem.n<-fem.n[fem.n$Allele1Freq > 0.05 & fem.n$Allele1Freq < 0.95,]
 mal.n<-mal.n[mal.n$Allele1Freq > 0.05 & mal.n$Allele1Freq < 0.95,]
 mom.n<-mom.n[mom.n$Allele1Freq > 0.05 & mom.n$Allele1Freq < 0.95,]
+prg.n<-prg.n[prg.n$Allele1Freq > 0.05 & prg.n$Allele1Freq < 0.95,]
 
 #write these out to read in for error analysis
 write.table(prg.n[,2:4],"LociInPregMales.txt",col.names=T,row.names=F,quote=F)
@@ -57,14 +59,14 @@ fm.prune<-gw.fst[gw.fst$Locus %in% mal.n$Locus&gw.fst$Locus %in% fem.n$Locus, ]
 fm.prune<-fm.prune[fm.prune$FEM.MAL>0,]
 #sexual
 mo.prune<-gw.fst[gw.fst$Locus %in% fem.n$Locus&gw.fst$Locus %in% mom.n$Locus, ]
-mo.prune<-mo.prune[mo.prune$FEM.MOM>0,]
+mo.prune<-mo.prune[mo.prune$MOM.FEM>0,]
 
 
-write.table(pj.prune, "pj.plot.txt",row.names=F,col.names=T,quote=F,sep='\t')
+#write.table(pj.prune, "pj.plot.txt",row.names=F,col.names=T,quote=F,sep='\t')
 write.table(fm.prune, "fm.plot.txt",row.names=F,col.names=T,quote=F,sep='\t')
 write.table(mo.prune, "mo.plot.txt",row.names=F,col.names=T,quote=F,sep='\t')
 write.table(aj.prune,"aj.plot.txt",row.names=F,col.names=T,quote=F,sep='\t')
-write.table(bj.prune,"bj.plot.txt",row.names=F,col.names=T,quote=F,sep='\t')
+#write.table(bj.prune,"bj.plot.txt",row.names=F,col.names=T,quote=F,sep='\t')
 
 aj.plot<-aj.prune[order(aj.prune$ADULT.JUVIE),] #ascending
 aj.top1<-aj.plot[round(nrow(aj.plot)*0.99),"ADULT.JUVIE"]
@@ -72,8 +74,8 @@ aj.out1<-aj.plot[aj.plot$ADULT.JUVIE >= aj.top1,]
 fm.plot<-fm.prune[order(fm.prune$FEM.MAL),]#ascending
 fm.top1<-fm.plot[round(nrow(fm.plot)*0.99),"FEM.MAL"]
 fm.out1<-fm.prune[fm.prune$FEM.MAL >= fm.top1,]
-mo.plot<-mo.prune[order(mo.prune$FEM.MOM),]#ascending
-mo.top1<-mo.plot[round(nrow(mo.plot)*0.99),"FEM.MOM"]
+mo.plot<-mo.prune[order(mo.prune$MOM.FEM),]#ascending
+mo.top1<-mo.plot[round(nrow(mo.plot)*0.99),"MOM.FEM"]
 mo.out1<-mo.prune[mo.prune$FEM.MOM >= mo.top1,]
 #pj.plot<-pj.prune[order(pj.prune$JUVIE.PREGGER),] #ascending
 #pj.top1<-pj.plot[round(nrow(pj.plot)*0.99),"JUVIE.PREGGER"]
@@ -82,23 +84,27 @@ mo.out1<-mo.prune[mo.prune$FEM.MOM >= mo.top1,]
 #bj.top1<-bj.plot[round(nrow(bj.plot)*0.99),"JUVIE.BREEDER"]
 #bj.out1<-bj.prune[bj.prune$JUVIE.BREEDER >= bj.top1,]
 
+lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
+	"LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
+	"LG22")
+lgn<-seq(1,22)
 #plot with the top1%
 #png("fst.top1.comp3_redo.png",height=300,width=300,units="mm",res=300)
 par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
 
-mo<-plot.fsts(mo.plot, ci.dat=c(mo.top1,0),fst.name="FEM.MOM", chrom.name="Chrom"
-	, axis.size=0.75,bp.name="Pos",sig.col=c("red","black"))
+mo<-fst.plot(mo.plot, ci.dat=c(mo.top1,0),fst.name="MOM.FEM", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos",sig.col=c("red","black"),groups=lgs)
 legend("top","Mothers-Females", cex=0.75,bty="n")
 mtext("Genomic Location", 1, outer=T, cex=1)
 mtext("Fst", 2, outer=T, cex=1)
 
-fm<-plot.fsts(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", chrom.name="Chrom"
+fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", chrom.name="Chrom"
 	, axis.size=0.75,bp.name="Pos",sig.col=c("red","black"))
 legend("top","Male-Female", cex=0.75,bty="n")
 mtext("Genomic Location", 1, outer=T, cex=1)
 mtext("Fst", 2, outer=T, cex=1)
 
-aj<-plot.fsts(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", 
+aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", 
 	chrom.name="Chrom", axis.size=0.75,bp.name="Pos",sig.col=c("red","black"))
 legend("top","Adult-Offspring", cex=0.75,bty="n")
 mtext("Genomic Location", 1, outer=T, cex=1)
@@ -107,14 +113,23 @@ mtext("Fst", 2, outer=T, cex=1)
 
 #dev.off()
 
+mo.plot<-mo.plot[mo.plot$Chrom %in% lgs,]
+mo.plot$Chrom<-factor(mo.plot$Chrom)
+fm.plot<-fm.plot[fm.plot$Chrom %in% lgs,]
+fm.plot$Chrom<-factor(fm.plot$Chrom)
+aj.plot<-aj.plot[aj.plot$Chrom %in% lgs,]
+aj.plot$Chrom<-factor(aj.plot$Chrom)
+
 
 
 ###COMPARISONS
-aj.out<-aj[aj$ADULT.JUVIE >= aj.top1[1],]
-fm.out<-fm[fm$FEM.MAL >= fm.top1[1],]
-mo.out<-mo[mo$FEM.MOM >= mo.top1[1],]
-#pj.out<-pj[pj$JUVIE.PREGGER >= pj.top1[1],]
-#bj.out<-bj[bj$JUVIE.BREEDER >= bj.top1[1],]
+aj.out<-aj.plot[aj.plot$ADULT.JUVIE >= aj.top1[1],]
+fm.out<-fm.plot[fm.plot$FEM.MAL >= fm.top1[1],]
+mo.out<-mo.plot[mo.plot$MOM.FEM >= mo.top1[1],]
+aj.out.plot<-aj[aj$ADULT.JUVIE >= aj.top1[1],]
+fm.out.plot<-fm[fm$FEM.MAL >= fm.top1[1],]
+mo.out.plot<-mo[mo$MOM.FEM >= mo.top1[1],]
+
 
 aj.unique<-aj.out[!(aj.out$Locus %in% fm.out$Locus) & 
 	!(aj.out$Locus %in% mo.out$Locus),]
@@ -124,9 +139,9 @@ mo.unique<-mo.out[!(mo.out$Locus %in% aj.out$Locus) &
 	!(mo.out$Locus %in% fm.out$Locus),]
 #pj.unique<-pj.out[#!(pj.out$Locus %in% aj.out$Locus) &
 #	!(pj.out$Locus %in% fm.out$Locus) & !(pj.out$Locus %in% mo.out$Locus),]
-bj.unique<-bj.out[!(bj.out$Locus %in% aj.out$Locus) &
-	!(bj.out$Locus %in% mo.out$Locus),]
-shared<-aj.out[(aj.out$LocID %in% mo.out$LocID) & 
+#bj.unique<-bj.out[!(bj.out$Locus %in% aj.out$Locus) &
+#	!(bj.out$Locus %in% mo.out$Locus),]
+shared.out<-aj.out[(aj.out$LocID %in% mo.out$LocID) & 
 	(aj.out$LocID %in% fm.out$LocID),]
 
 aj.fm<-aj.out[(aj.out$LocID %in% fm.out$LocID),]
@@ -135,40 +150,130 @@ fm.mo<-fm.out[fm.out$LocID %in% mo.out$LocID,]
 length(levels(factor(c(as.character(aj.fm$Locus),as.character(aj.mo$Locus),
 	as.character(fm.mo$Locus)))))
 
-png("fst.selection.episodes_redo.png",height=300,width=300,units="mm",res=300)
-par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
-mo<-plot.fsts(mo.plot, ci.dat=c(mo.top1,0),fst.name="FEM.MOM", chrom.name="Chrom"
-	, axis.size=0,bp.name="Pos",sig.col=c("purple3","black"))#ignore error
-points(mo$Pos[mo$LocID %in% shared$LocID & mo$FEM.MOM >= mo.top1],
-	mo$FEM.MOM[mo$LocID %in% shared$LocID& mo$FEM.MOM >= mo.top1],
+#Includes scaffolds
+#png("../fst.selection.episodes_redo_all.png",height=300,width=300,units="mm",res=300)
+pdf("../fst.selection.episodes_redo_all.pdf",height=11.5,width=11.5)
+par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
+mo<-fst.plot(mo.plot, ci.dat=c(mo.top1,0),fst.name="MOM.FEM", chrom.name="Chrom"
+	, axis.size=0,bp.name="Pos",sig.col=c("purple3","black"))
+points(mo$Pos[mo$LocID %in% shared.out$LocID & mo$MOM.FEM >= mo.top1],
+	mo$MOM.FEM[mo$LocID %in% shared.out$LocID & mo$MOM.FEM >= mo.top1],
 	col="red",pch=8)
-axis(2,at=seq(0,0.15,0.05),pos=0,las=1,cex.axis=0.75)
+axis(2,at=seq(0,0.2,0.05),pos=0,las=1,cex.axis=0.75)
 legend("top","Females-Inferred Mothers",bty='n',cex=0.75,text.font=2)
+last<-0
+for(i in 1:length(lgs)){
+	text(x=mean(mo[mo$Chrom ==lgs[i],"Pos"]),y=-0.004,
+		labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
+	last<-max(mo[mo$Chrom ==lgs[i],"Pos"])
+}
 
-fm<-plot.fsts(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", chrom.name="Chrom"
-	, axis.size=0.75,bp.name="Pos",sig.col=c("green4","black"))
-points(fm$Pos[fm$LocID %in% shared$LocID & fm$FEM.MAL >= fm.top1],
-	fm$FEM.MAL[fm$LocID %in% shared$LocID& fm$FEM.MAL >= fm.top1],
+fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", chrom.name="Chrom"
+	, axis.size=0,bp.name="Pos",sig.col=c("green4","black"))
+points(fm$Pos[fm$LocID %in% shared.out$LocID & fm$FEM.MAL >= fm.top1],
+	fm$FEM.MAL[fm$LocID %in% shared.out$LocID& fm$FEM.MAL >= fm.top1],
 	col="red",pch=8)
+axis(2,at=seq(0,0.2,0.1),pos=0,las=1,cex.axis=0.75)
 legend("top","Male-Female",bty='n',cex=0.75,text.font=2)
-#mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1.5)
 
-aj<-plot.fsts(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", chrom.name="Chrom"
+last<-0
+for(i in 1:length(lgs)){
+	text(x=mean(fm[fm$Chrom ==lgs[i],"Pos"]),y=-0.004,
+		labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
+	last<-max(fm[fm$Chrom ==lgs[i],"Pos"])
+}
+
+aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", chrom.name="Chrom"
 	, axis.size=0, bp.name="Pos",sig.col=c("dodgerblue","black"))#ignore error
 axis(2,at=c(0,0.025,0.05),pos=0,las=1,cex.axis=0.75)
-points(aj$Pos[aj$LocID %in% shared$LocID& aj$ADULT.JUVIE >= aj.top1],
-	aj$ADULT.JUVIE[aj$LocID %in% shared$LocID& aj$ADULT.JUVIE >= aj.top1],
+points(aj$Pos[aj$LocID %in% shared.out$LocID& aj$ADULT.JUVIE >= aj.top1],
+	aj$ADULT.JUVIE[aj$LocID %in% shared.out$LocID& aj$ADULT.JUVIE >= aj.top1],
 	col="red",pch=8)
 legend("top","Adult-Offspring",bty='n',cex=0.75,text.font=2)
-mtext("Genomic Location", 1, outer=T, cex=1)
+last<-0
+for(i in 1:length(lgs)){
+	text(x=mean(aj[aj$Chrom ==lgs[i],"Pos"]),y=-0.002,
+		labels=lgn[i],  adj=1, xpd=TRUE,srt=90,cex=0.75)
+	last<-max(aj[aj$Chrom ==lgs[i],"Pos"])
+}
+mtext("Linkage Group", 1, outer=T, cex=1)
 mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1,las=0)
-
 par(fig = c(0, 1, 0, 1), oma=c(2,1,0,1), mar = c(0, 0, 0, 0), new = TRUE,
 	cex=1)
 plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
 legend("top",col=c("green4","purple3","dodgerblue","red"),pch=c(19,19,19,8),
-	c("Viability Selection","Sexual Selection","Overall Selection","Shared in all"),
+	c("Viability Selection","Sexual Selection","Overall Selection","Shared Outlier"),
 	bg="white",ncol=4,box.lty=0)
+dev.off()
+
+#png("../fst.selection.episodes_redo_lgs.png",height=300,width=300,units="mm",res=300)
+pdf("../fst.selection.episodes_redo_lgs.pdf",height=11.5,width=11.5)
+par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
+mo<-fst.plot(mo.plot, ci.dat=c(mo.top1,0),fst.name="MOM.FEM", chrom.name="Chrom"
+	, axis.size=0,bp.name="Pos",sig.col=c("purple3","black"),groups=lgs)
+points(mo$Pos[mo$LocID %in% shared.out$LocID & mo$MOM.FEM >= mo.top1],
+	mo$MOM.FEM[mo$LocID %in% shared.out$LocID & mo$MOM.FEM >= mo.top1],
+	col="red",pch=8)
+axis(2,at=seq(0,0.2,0.05),pos=0,las=1,cex.axis=0.75)
+legend("top","Females-Inferred Mothers",bty='n',cex=0.75,text.font=2)
+last<-0
+for(i in 1:length(lgs)){
+	text(x=mean(mo[mo$Chrom ==lgs[i],"Pos"]),y=-0.004,
+		labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
+	last<-max(mo[mo$Chrom ==lgs[i],"Pos"])
+}
+
+fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", chrom.name="Chrom"
+	, axis.size=0,bp.name="Pos",sig.col=c("green4","black"),groups=lgs)
+points(fm$Pos[fm$LocID %in% shared.out$LocID & fm$FEM.MAL >= fm.top1],
+	fm$FEM.MAL[fm$LocID %in% shared.out$LocID& fm$FEM.MAL >= fm.top1],
+	col="red",pch=8)
+axis(2,at=seq(0,0.2,0.1),pos=0,las=1,cex.axis=0.75)
+legend("top","Male-Female",bty='n',cex=0.75,text.font=2)
+
+last<-0
+for(i in 1:length(lgs)){
+	text(x=mean(fm[fm$Chrom ==lgs[i],"Pos"]),y=-0.004,
+		labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
+	last<-max(fm[fm$Chrom ==lgs[i],"Pos"])
+}
+
+aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", chrom.name="Chrom"
+	, axis.size=0, bp.name="Pos",sig.col=c("dodgerblue","black"),groups=lgs)
+axis(2,at=c(0,0.025,0.05),pos=0,las=1,cex.axis=0.75)
+points(aj$Pos[aj$LocID %in% shared.out$LocID& aj$ADULT.JUVIE >= aj.top1],
+	aj$ADULT.JUVIE[aj$LocID %in% shared.out$LocID& aj$ADULT.JUVIE >= aj.top1],
+	col="red",pch=8)
+legend("top","Adult-Offspring",bty='n',cex=0.75,text.font=2)
+last<-0
+for(i in 1:length(lgs)){
+	text(x=mean(aj[aj$Chrom ==lgs[i],"Pos"]),y=-0.002,
+		labels=lgn[i],  adj=1, xpd=TRUE,srt=90,cex=0.75)
+	last<-max(aj[aj$Chrom ==lgs[i],"Pos"])
+}
+mtext("Linkage Group", 1, outer=T, cex=1)
+mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1,las=0)
+par(fig = c(0, 1, 0, 1), oma=c(2,1,0,1), mar = c(0, 0, 0, 0), new = TRUE,
+	cex=1)
+plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
+legend("top",col=c("green4","purple3","dodgerblue","red"),pch=c(19,19,19,8),
+	c("Viability Selection","Sexual Selection","Overall Selection","Shared Outlier"),
+	bg="white",ncol=4,box.lty=0)
+dev.off()
+
+
+png("../male-female.png",height=100,width=300,units="mm",res=300)
+par(oma=c(2,2,2,2),mar=c(4,0,0,0))
+fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", chrom.name="Chrom"
+	, axis.size=0,bp.name="Pos",sig.col=c("green4","black"))
+axis(2,at=c(0,0.1,0.2,0.3),pos=0,las=1)
+mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1,las=0,line=1)
+last<-0
+for(i in 1:length(lgs)){
+	text(x=mean(fm[fm$Chrom ==lgs[i],"Pos"]),y=-0.002,
+		labels=lgs[i], srt=45, adj=1, xpd=TRUE)
+	last<-max(fm[fm$Chrom ==lgs[i],"Pos"])
+}
 dev.off()
 
 ##WRITE TO FILE
@@ -200,47 +305,43 @@ write.table(levels(as.factor(fm.mo$LocID)),
 	"../biallelic_outliers/fmmo.shared.txt",quote=F,
 	col.names=F,row.names=F,sep='\t')
 
+###WRITE SCAFFOLD, START, and END to file 
 aj.unique<-aj.plot[aj.plot$Locus %in% aj.unique$Locus,]
 aj.rad.region<-data.frame(aj.unique$Chrom,as.numeric(aj.unique$Pos)-2500,
 	as.numeric(aj.unique$Pos)+2500)
-write.table(aj.rad.region,"../biallelic_outliers/rad_region/aj_extract.sh",
+write.table(aj.rad.region,"../biallelic_outliers/rad_region/aj_extract.txt",
 	quote=F,col.names=F,row.names=F,sep="\t")
 fm.unique<-fm.plot[fm.plot$Locus %in% fm.unique$Locus,]
 fm.rad.region<-data.frame(fm.unique$Chrom,as.numeric(fm.unique$Pos)-2500,
 	as.numeric(fm.unique$Pos)+2500)
-write.table(fm.rad.region,"../biallelic_outliers/rad_region/fm_1extract_redo.sh",
+write.table(fm.rad.region,"../biallelic_outliers/rad_region/fm_1extract_redo.txt",
 	quote=F,col.names=F,row.names=F,sep="\t")
 mo.unique<-mo.plot[mo.plot$Locus %in% mo.unique$Locus,]
 mo.rad.region<-data.frame(mo.unique$Chrom,as.numeric(mo.unique$Pos)-2500,
 	as.numeric(mo.unique$Pos)+2500)
-write.table(mo.rad.region,"../biallelic_outliers/rad_region/mo_1extract.sh",
+write.table(mo.rad.region,"../biallelic_outliers/rad_region/mo_1extract.txt",
 	quote=F,col.names=F,row.names=F,sep="\t")
-#bj.unique<-bj.plot[bj.plot$Locus %in% bj.unique$Locus,]
-#bj.rad.region<-data.frame(bj.unique$Chrom,as.numeric(bj.unique$Pos)-2500,
-#	as.numeric(bj.unique$Pos)+2500)
-#write.table(bj.rad.region,"../biallelic_outliers/rad_region/bj_1extract.sh",
-#	quote=F,col.names=F,row.names=F,sep="\t")
 
 aj.mo<-aj.plot[aj.plot$Locus %in% aj.mo$Locus,]
 aj.mo.region<-data.frame(aj.mo$Chrom, as.numeric(aj.mo$Pos)-2500,
 	as.numeric(aj.mo$Pos)+2500)
-write.table(aj.mo.region,"../biallelic_outliers/rad_region/ajmo_extract.sh",
+write.table(aj.mo.region,"../biallelic_outliers/rad_region/ajmo_extract.txt",
 	quote=F,col.names=F,row.names=F,sep='\t')
 fm.mo<-fm.plot[fm.plot$Locus %in% fm.mo$Locus,]
 fm.mo.region<-data.frame(fm.mo$Chrom, as.numeric(fm.mo$Pos)-2500,
 	as.numeric(fm.mo$Pos)+2500)
-write.table(fm.mo.region,"../biallelic_outliers/rad_region/fmmo_extract.sh",
+write.table(fm.mo.region,"../biallelic_outliers/rad_region/fmmo_extract.txt",
 	quote=F,col.names=F,row.names=F,sep='\t')
 aj.fm<-aj.plot[aj.plot$Locus %in% aj.fm$Locus,]
 aj.fm.region<-data.frame(aj.fm$Chrom, as.numeric(aj.fm$Pos)-2500,
 	as.numeric(aj.fm$Pos)+2500)
-write.table(aj.fm.region,"../biallelic_outliers/rad_region/ajfm_extract.sh",
+write.table(aj.fm.region,"../biallelic_outliers/rad_region/ajfm_extract.txt",
 	quote=F,col.names=F,row.names=F,sep='\t')
 
 sharedregion<-aj.plot[aj.plot$LocID %in% shared$LocID,]
 shared.region<-data.frame(sharedregion$Chrom,as.numeric(sharedregion$Pos-2500),
 	as.numeric(sharedregion$Pos)+2500)
-write.table(shared.region,"../biallelic_outliers/rad_region/shared_2extract.sh",
+write.table(shared.region,"../biallelic_outliers/rad_region/shared_2extract.txt",
 	quote=F,col.names=F,row.names=F,sep='\t')
 
 shared.chrom<-levels(as.factor(c(as.character(aj.out$Chrom),
@@ -478,19 +579,25 @@ hist(mo.out.dat$NumSNPsOut/mo.out.dat$NumSNPs)
 
 
 ################Blast2Go Annotations
-setwd("../biallelic_outliers/blastresults")
+setwd("../biallelic_outliers/blast")
 out.cnames<-c("LocID","NumSNPs","Chrom.x","Pos","Description","Length",
 	"X.Hits","e.Value","sim.mean","X.GO","GO.Names.list","Enzyme.Codes.list","Seq")
 out.names<-c("LocID","NumSNPs","Chrom","Pos","Description","Length",
 	"NumHits","e.Value","sim.mean","NumGO","GO.Names.list","Enzyme.Codes.list","Seq")
 blast2go.files<-list.files(pattern="blast2go")
-ajfm.b2g<-read.delim("ajbj_blast2go.txt",sep='\t',header=T)
-ajfm.b2g$Comparison<-"AO-BO"
+ajfm.b2g<-read.delim("ajfm_blast2go.txt",sep='\t',header=T)
+ajfm.b2g$Comparison<-"AO-FM"
 ajmo.b2g<-read.delim("ajmo_blast2go.txt",sep='\t',header=T)
-ajmo.b2g$Comparison<-"AO-FM"
-fmmo.b2g<-read.delim("bjmo_blast2go.txt",sep='\t',header=T)
-fmmo.b2g$Comparison<-"BO-FM"
-shared.b2g<-read.delim("shared_blast2go.txt",sep='\t',header=T)
+ajmo.b2g$Comparison<-"AO-MO"
+fmmo.b2g<-read.delim("fmmo_blast2go.txt",sep='\t',header=T)
+fmmo.b2g$Comparison<-"MO-FM"
+shared.b2g<-read.delim("sharedall_blast2go.txt",sep='\t',header=T,stringsAsFactors=F)
+shared1.b2g<-read.delim("shared_blast2go.txt",sep='\t',header=T,stringsAsFactors=F)
+shared.b2g<-rbind(shared.b2g,shared1.b2g)
+
+
+shared.out$SeqName<-"LG21_1363556-1368556"
+shared.out$Comparison<-"ALL"
 
 aj.fm$start<-aj.fm$Pos-2500
 aj.fm$end<-aj.fm$Pos+2500
@@ -520,13 +627,8 @@ fm.mo$start[fm.mo$start<0]<-0
 fm.mo$SeqName<-paste(fm.mo$Chrom,"_",fm.mo$start,"-",fm.mo$end,sep="")
 fm.mo$Comparison<-"FemMal-FemMom"
 fm.mo<-fm.mo[!duplicated(fm.mo$LocID),]
-#fmmo<-merge(fm.mo,bjmo.b2g,by="SeqName")
-#fmmo<-merge(fmmo,mo.out.dat,by.x="LocID",by.y="LocusID")
-#fmmo<-fmmo[,out.cnames]
-#colnames(fmmo)<-out.names
-#shared<-rbind(ajbj,ajmo,bjmo)
 
-shared<-rbind(aj.fm,aj.mo,fm.mo)
+shared<-rbind(aj.fm,aj.mo,fm.mo,shared.out)
 shared.blast<-merge(shared,shared.b2g,by="SeqName")
 all.out.dat<-rbind(mo.out.dat,aj.out.dat,fm.out.dat)
 all.out.dat<-all.out.dat[!duplicated(all.out.dat$LocusID),]
@@ -534,7 +636,7 @@ shared.blast<-merge(shared.blast,all.out.dat,by.x="LocID",by.y="LocusID")
 shared.blast<-cbind(shared.blast[,"Comparison"],shared.blast[,out.cnames])
 colnames(shared.blast)<-c("Comparison",out.names)
 
-write.table(shared.blast,"S1_SharedOutliersBlast.txt",sep='\t',col.names=T,
+write.table(shared.blast,"../../S1_SharedOutliersBlast.txt",sep='\t',col.names=T,
 	row.names=F,quote=F)
 
 aj.unique<-aj.plot[aj.plot$Locus %in% aj.unique$Locus,
@@ -546,7 +648,7 @@ aj.unique$SeqName<-paste(aj.unique$Chrom,"_",aj.unique$start,"-",
 	aj.unique$end,sep="")
 aj.unique<-aj.unique[!duplicated(aj.unique$LocID),]
 aj.b2g<-read.delim("aj_blast2go.txt",header=T,sep='\t')
-aj.blast<-merge(aj.unique,aj.b2g,by="SeqName",all=T)
+aj.blast<-merge(aj.unique,aj.b2g,by="SeqName")
 aj.blast<-merge(aj.blast,aj.out.dat,by.x="LocID",by.y="LocusID")
 aj.blast<-aj.blast[,out.cnames]
 colnames(aj.blast)<-out.names
@@ -561,7 +663,7 @@ fm.unique$SeqName<-paste(fm.unique$Chrom,"_",fm.unique$start,"-",
 	fm.unique$end,sep="")
 fm.unique<-fm.unique[!duplicated(fm.unique$LocID),]
 fm.b2g<-read.delim("fm_blast2go.txt",header=T,sep='\t')
-fm.blast<-merge(fm.unique,fm.b2g,by="SeqName",all=T)
+fm.blast<-merge(fm.unique,fm.b2g,by="SeqName")
 fm.blast<-merge(fm.blast,fm.out.dat,by.x="LocID",by.y="LocusID")
 fm.blast<-fm.blast[,out.cnames]
 colnames(fm.blast)<-out.names
@@ -576,14 +678,14 @@ mo.unique$SeqName<-paste(mo.unique$Chrom,"_",mo.unique$start,"-",
 	mo.unique$end,sep="")
 mo.unique<-mo.unique[!duplicated(mo.unique$LocID),]
 mob2g<-read.delim("mo_blast2go.txt",header=T,sep='\t')
-mo.b2g<-merge(mo.unique,mob2g,by="SeqName",all=T)
+mo.b2g<-merge(mo.unique,mob2g,by="SeqName")
 mo.blast<-merge(mo.b2g,mo.out.dat,by.x="LocID",by.y="LocusID")
 mo.blast<-mo.blast[,out.cnames]
 colnames(mo.blast)<-out.names
 mo.blast$Comparison<-"Mothers-Females"
 
 unique<-rbind(aj.blast,fm.blast,mo.blast)
-write.table(unique,"S2_UniqueOutliersBlast.txt",row.names=F,col.names=T,
+write.table(unique,"../../S2_UniqueOutliersBlast.txt",row.names=F,col.names=T,
 	sep='\t',quote=F)
 ###########COMPARE TO PSTFST SIGNIFICANT LOCI
 pstfst<-read.csv(row.names=1,

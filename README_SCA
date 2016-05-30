@@ -52,10 +52,18 @@ PURPOSE
 NOTES
 	The program assumes that there is only one sequence in the fasta file. This is what was used to extract the 5kb regions surrounding RAD loci.
 INPUT
-
+	A fasta file containing the sequences
+	A tab-delimited file containing the name of sequence and the start and end basepair of the sequence to extract.
+	Output file name
 OUTPUT
-
+	A fasta file containing all of the extracted sequences. Each sequence will be re-named as >seqname_start-end
 HOW TO RUN
+	This file can be run interactively or can be run at the command line with flags. 
+		-f:	fasta file input
+		-i:	Input file
+		-o:	Output file name.
+		-h:	Prints this message
+		no arguments:	interactive mode
 
 *******************************process_alleles_files**********************************
 PURPOSE
@@ -72,3 +80,7 @@ HOW TO RUN
 		-o:	output file name (with path)
 		-w:	Optional whitelist name (with path)
 		no arguments:	interactive mode
+		
+######################################################################################
+***************************************SCRIPTS****************************************
+######################################################################################

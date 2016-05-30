@@ -41,34 +41,41 @@ plot.genome.wide<-function(bp,var,y.max,x.max, rect.xs=NULL,y.min=0,x.min=0,
 
 fst.plot<-function(fst.dat,ci.dat, sig.col=c("red","yellow"),
 	fst.name="Fst", chrom.name="Chrom", bp.name="BP",axis.size=0.5,
-	scaffold.order=NULL){
+	scaffold.order=NULL,groups=NULL,print.names=FALSE){
 	if(!is.null(scaffold.order)){
 		scaff.ord<-scaffold.order$component_id
 		lgs<-scaffold.order$object
 	} else{
-		scaff.ord<-factor(fst.dat[,chrom.name])
+		scaff.ord<-levels(factor(fst.dat[,chrom.name]))
 		lgs<-scaff.ord
+	}
+	if(!is.null(groups)){
+		lgs<-groups
+		scaff.ord<-groups
 	}
 	all.scaff<-split(fst.dat, factor(fst.dat[,chrom.name]))
 	last.max<-0
 	rect.xs<-NULL
 	addition.values<-0
-	
+	xlist<-NULL
+	xs<-NULL
 	for(i in 1:length(scaff.ord)){
-		new.max<-last.max+round(max(all.scaff[[scaff.ord[i]]][,bp.name]), -2)
+		all.scaff[[scaff.ord[i]]]<-
+			all.scaff[[scaff.ord[i]]][order(all.scaff[[scaff.ord[i]]][,bp.name]),]	
+		all.scaff[[scaff.ord[i]]][,bp.name]<-
+			seq(last.max+1,last.max+nrow(all.scaff[[scaff.ord[i]]]),1)
+		xs<-c(xs, seq(last.max+1,last.max+nrow(all.scaff[[scaff.ord[i]]]),1))
+		new.max<-max(xs)
 		#scaffold.order[i,"new_start"]<-last.max
 		#scaffold.order[i,"new_end"]<-new.max
 		rect.xs<-rbind(rect.xs,c(last.max, new.max))
+		rownames(rect.xs)[i]<-scaff.ord[i]
 		addition.values<-c(addition.values, new.max)
 		last.max<-new.max
 	}
 	#change BP to plot
-	for(i in 1:length(scaff.ord)){
-		all.scaff[[scaff.ord[i]]][,bp.name]<-
-			all.scaff[[scaff.ord[i]]][,bp.name]+addition.values[i]
-	}
-	x.max<-max(addition.values)
-	x.min<-min(all.scaff[[scaff.ord[1]]][,bp.name])
+	x.max<-max(xs)
+	x.min<-min(xs)
 	y.max<-max(fst.dat[,fst.name])+0.1*max(fst.dat[,fst.name])
 	y.min<-min(fst.dat[,fst.name])-0.1*min(fst.dat[,fst.name])
 	if(min(fst.dat[,fst.name]) < 0) {
@@ -76,7 +83,7 @@ fst.plot<-function(fst.dat,ci.dat, sig.col=c("red","yellow"),
 	} else {
 		y.min<-0
 	}
-
+	displacement<-y.min-((y.max-y.min)/30)
 	plot(c(x.min,x.max),c(y.min,y.max),xlim=c(x.min,x.max), 
 		ylim=c(y.min, y.max), 
 		bty="n",type="n",	axes=F, xlab="", ylab="")
@@ -88,9 +95,17 @@ fst.plot<-function(fst.dat,ci.dat, sig.col=c("red","yellow"),
 		}
 		rect(rect.xs[i,1],y.min,rect.xs[i,2],y.max, 
 			col=rect.color, border=NA)
+		if(print.names==T){
+			text(x=mean(all.scaff[[scaff.ord[i]]][
+				all.scaff[[scaff.ord[i]]]$Chrom==rownames(rect.xs)[i],
+				bp.name]),
+				y=displacement,labels=rownames(rect.xs)[i],
+				adj=1,xpd=T,srt=45)
+		}
 	}
-	for(i in 1:length(all.scaff)){
-		points(all.scaff[[i]][,bp.name], all.scaff[[i]][,fst.name], 
+	for(i in 1:length(scaff.ord)){
+		points(all.scaff[[scaff.ord[i]]][,bp.name], 
+			all.scaff[[scaff.ord[i]]][,fst.name], 
 			pch=19, cex=0.5,col="grey7",
 			xlim=c(x.min,x.max),ylim=c(y.min, y.max))
 		#plot.genome.wide(all.scaff[[i]][,bp.name], 
@@ -98,19 +113,21 @@ fst.plot<-function(fst.dat,ci.dat, sig.col=c("red","yellow"),
 		#	y.max,x.max, y.min=y.min,x.min=x.min, 
 		#	pt.col="grey7",#rect.xs[i,],rect.color,
 		#	plot.new=TRUE, plot.axis=FALSE,  pt.cex=0.5)
-		temp.sig<-all.scaff[[i]][all.scaff[[i]][,fst.name] >= ci.dat[1],]
+		temp.sig<-all.scaff[[scaff.ord[i]]][all.scaff[[scaff.ord[i]]][,fst.name] >= ci.dat[1],]
 		points(temp.sig[,bp.name], temp.sig[,fst.name], 
 			col=sig.col[1], pch=19, cex=0.5)
-		temp.sig<-all.scaff[[i]][all.scaff[[i]][,fst.name] <= ci.dat[2],]
+		temp.sig<-all.scaff[[scaff.ord[i]]][all.scaff[[scaff.ord[i]]][,fst.name] <= ci.dat[2],]
 		points(temp.sig[,bp.name], temp.sig[,fst.name], 
 			col=sig.col[2], pch=19, cex=0.5)
 	}
-	axis(2, at = seq(round(y.min,2),round(y.max,2),
+	if(axis.size>0){
+		axis(2, at = seq(round(y.min,2),round(y.max,2),
 			round((y.max-y.min)/2, digits=2)),
-		ylim = c(y.min, y.max), pos=0,
-		labels=seq(round(y.min,2),round(y.max,2),
-			round((y.max-y.min)/2, digits=2)),
-		las=1,tck = -0.01, xlab="", ylab="", cex.axis=axis.size)
+			ylim = c(y.min, y.max), pos=0,
+			labels=seq(round(y.min,2),round(y.max,2),
+				round((y.max-y.min)/2, digits=2)),
+			las=1,tck = -0.01, xlab="", ylab="", cex.axis=axis.size)
+	}
 	xes<-do.call("rbind",all.scaff)
 	return(xes)
 }

@@ -1,4 +1,4 @@
-﻿Build started 3/9/2016 1:48:06 PM.
+﻿Build started 5/11/2016 12:50:41 PM.
      1>Project "E:\ubuntushare\SCA\programs\haplotypes_to_cervus\haplotypes_to_cervus.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt haplotypes_to_cervus.cpp
@@ -17,4 +17,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.20
+Time Elapsed 00:00:01.85
