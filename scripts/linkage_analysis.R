@@ -115,6 +115,7 @@ g<-fst.plot(snp.plots,ci.dat=c(0,0),sig.col=c("black","black"),
 dev.off()
 
 #ldc<-read.table("ld_info.txt",header=T)
+setwd("B:/ubuntushare/SCA/results/biallelic")
 ldc<-read.table("ld_matrix_lg1.txt",header=T,row.names=1)
 ldc[ldc==-1]<-NA
 
@@ -132,17 +133,21 @@ for(i in 1:nrow(ld.mat)){
 	}
 }
 starts<-c(seq(1,4581,20))
-ends<-c(seq(20,4580,50),4603)
+ends<-c(seq(20,4580,20),4603)
+library(RColorBrewer)
+heatcolors<-colorRampPalette(c("white","yellow","red"))(n=200)
 pdf("LDheatmap.LG1.pdf",height=10,width=10)
+png("LDheatmap.LG1.png",height=10,width=10,units="in",res=300)
 par(mfrow=c(length(starts),length(starts)),oma=c(0,0,0,0),mar=c(0,0,0,0))
 for(i in 1:length(starts)){
 	for(j in 1:length(ends)){
 		#heatmap.2(as.matrix(ldc[starts[i]:ends[i],starts[j]:ends[j]]),
 		#	dendrogram="none",tracecol="NA",labCol="",labRow="",key=F,
-		#	Colv=F,Rowv=F,lwid=c(0.5,4),lhei=c(0.5,4),new=F)
+		#	Colv=F,Rowv=F,lwid=c(0.5,4),lhei=c(0.5,4),new=F,
+		#	col=heatcolors)
 		image(as.matrix(ldc[starts[i]:ends[i],starts[j]:ends[j]]),
-			xaxt='n',yaxt='n')
-		print(paste(starts[i],":",ends[i],",",starts[j],":",ends[j],sep=""))
+			xaxt='n',yaxt='n',col=heatcolors)
+		if(i==j) print(paste(starts[i],":",ends[i],",",starts[j],":",ends[j],sep=""))
 }}
 dev.off()
 

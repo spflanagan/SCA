@@ -4,9 +4,9 @@
 #of loci
 
 rm(list=ls())
-setwd("E:/ubuntushare/SCA/results/parentage")
+setwd("B:/ubuntushare/SCA/results/parentage")
 maternity.files<-list.files(pattern="maternity.csv")
-stats.files<-list.files(pattern="maternity.txt")
+stats.files<-list.files(pattern="\\d+_maternity.txt")
 
 stats<-data.frame(NumLoci=numeric(),ConfidenceLevel=numeric(), Delta=numeric(),
 	NumAssignments=numeric(), AssignmentRate=numeric())
