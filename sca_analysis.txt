@@ -39,6 +39,91 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Tuesday, 31 May 2016
+I ran band_sharing.  Band-sharing is ~0.95 for all of them.
+...what about the relatedness analysis? I'll try running it, see what happens.
+The code was clearly not fixed. It was a little bit broken.
+
+Also made a lovely heatmap of LG1, but I'm working on getting data for all the LGs to get some for comparison.
+
+#####Monday, 30 May 2016
+Parentage analysis...matched same 27 females to offspring, using 1642 loci.
+Now to run Batemanator
+	Bootstrap Reps: 1000
+		In the box:
+			2	62
+			1	28
+			1	16
+			1	27
+			1	16
+			1	12
+			2	24
+			3	55
+			1	19
+			1	14
+			2	52
+			2	27
+			1	3
+			1	15
+			2	55
+			1	15
+			1	26
+			1	17
+			2	28
+		Output:	
+			Variable       	Estimate	LowerCI	UpperCI	(95.0%)	LowerCI	UpperCI	(90.0%)
+			MeanMS         	1.421	1.158	1.684		1.211	1.632
+			MeanRS         	26.895	19.789	34.316		20.737	33.211
+			StDevMS     	0.607	0.375	0.772		0.419	0.761
+			StDevRS     	16.822	10.055	20.681		11.027	20.108
+			OppSexSel(Is)  	0.182	0.105	0.256		0.113	0.250
+			OppSelec(I)    	0.391	0.216	0.558		0.238	0.525
+			BatemanGradient	21.540	13.846	34.452		15.284	32.079
+			StandardizedBG	1.138	0.792	1.713		0.859	1.622
+			S'max         	0.486	0.286	0.635		0.328	0.604
+	Part II.
+		Mean mating success of females (actually males) = 0.93596059
+		Mean reproductive success of females (acutally males) = 16.2967
+		Sex ratio: 87/(87+203) = 0.3
+		Estimated number of males (acutally females) = 100 (guess)
+		Bootstrap Replicates: 1000
+		Results:
+			Mean Male Mating Success: 	2.1839
+			Standard Deviation in MS: 	2.6422
+			Opp. for Sexual Selection:	1.4637
+			Std. Dev. for Simulation: 	6.9391
+	
+		Mean of the Top 10 Solutions:
+			Mean MS:    	2.179
+			Mean RS:    	38.029
+			StDev MS:   	2.626
+			StDev RS:   	49.448
+			BateGrad:   	17.941
+			BG,no 0s:   	18.474
+			BG':           	1.028
+			Is:              	1.463
+			I:               	1.702
+			S'max:         	1.239
+			RS incr./mate:	20.372
+			StDev RS param.	22.450
+		
+		Variable       	Estimate	LowerCI	UpperCI	(95.0%)	LowerCI	UpperCI	(90.0%)
+		MeanMS         	2.18	2.18	2.18		2.18	2.18
+		MeanRS         	38.03	38.03	38.03		38.03	38.03
+		Std.Dev.MS     	2.58	1.97	2.66		2.32	2.66
+		Std.Dev.RS     	47.71	35.34	50.24		39.03	50.06
+		OppSexSel(Is)  	1.41	0.81	1.49		1.13	1.48
+		OppSelec(I)    	1.60	0.87	1.76		1.06	1.74
+		BatemanGradient	17.69	15.08	18.24		16.27	18.17
+		BateGrad(no0s) 	17.99	12.61	19.04		15.00	18.93
+		Standardized BG	1.01	0.86	1.04		0.93	1.04
+		S'max            	1.20	0.89	1.25		0.97	1.25
+		SDmsForEstim.  	6.53	2.71	6.94		4.12	6.94
+		RS incr./mate 	19.47	10.76	20.69		13.69	20.58
+		StDev RS param	19.73	2.19	28.84		5.84	27.74
+	
+	
+	
 #####Thursday, 26 May 2016
 Running CERVUS. simulating:
 10000 offspring, 57 mothers, prop. sampled 0.05, prop. loci typed 1, prop. loci mistyped 0.01, min typed loci 0.5*number of loci, strick% 95, relaxed% 90.
@@ -248,6 +333,8 @@ Warning: Unable to find allele depths for datum 105916"
 
 #####Saturday, 30 April 2016
 Stacks finished and the vcf file is empty. I'm running populations again. I've run convert_snps, which hopefully worked, and now I'm gonna try infer_mat_vcf. Hopefully everything isn't ruined.
+
+#####################################NEW GENOME###########################################
 
 #####Monday, 25 April 2016
 I re-made the CERVUS figure. Also downloaded a bunch of papers and outlined the MS. I need to figure out how many haplotypes were identified by convert_matches.
