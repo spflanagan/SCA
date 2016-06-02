@@ -20,7 +20,7 @@ prune.blast<-function(blast.table){
 setwd("E:/ubuntushare/SCA/results/biallelic_outliers/rad_locus")
 locus.blast<-read.table("top1.out.radloc.blastn",sep='\t')
 colnames(locus.blast)<-c("qseqid","sseqid","pident","length","mismatch",
-	"gapopen","qstart","qend","sstart","send","evalue","bitscore","stite")
+	"gapopen","qstart","qend","sstart","send","evalue","bitscore","stitle")
 loc.bn<-prune.blast(locus.blast)
 write.table(loc.bn,"top1.radloc.keep.blastn",sep='\t',quote=F,row.names=F)
 

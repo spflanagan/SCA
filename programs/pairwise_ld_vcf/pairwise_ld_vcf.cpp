@@ -267,15 +267,16 @@ ld_info AdultPopLD(locus_info & locus1, locus_info &locus2)
 int main()
 {
 	int i, ii, iii, count;
-	string vcf_name, out_name,matrix_name, line, temp;
+	string vcf_name, out_name,matrix_name, any_matrix_name,line, temp, last_lg, this_lg;
 	ifstream vcf;
-	ofstream out, matrix;
+	ofstream out, matrix, any_matrix;
 	vector<locus_info> vcf_dat;
 //	vector<ld_info> ld;
 
 	vcf_name = "../../results/stacks/batch_1.vcf";
-	out_name = "../../results/biallelic/ld_info.txt";
-	matrix_name = "../../results/biallelic/ld_matrix_lg1.txt";
+	out_name = "../../results/ld/ld_info.txt";
+	matrix_name = "../../results/ld/ld_matrix_lg1.txt";
+	string any_matrix_base = "../../results/ld/ld_matrix_";
 
 	vcf.open(vcf_name);
 	FileTest(vcf, vcf_name);
@@ -315,16 +316,45 @@ int main()
 	out.open(out_name);
 	out << "Chrom\tLocIDA\tpA\tLocIDB\tpB\tpAB\tpAb\tpaB\tpab\tD\tD'";
 	matrix.open(matrix_name);
+	this_lg = last_lg = vcf_dat[0].chrom;
+	any_matrix_name = any_matrix_base + this_lg + ".txt";
+	any_matrix.open(any_matrix_name);
 	for (i = 0; i < vcf_dat.size(); i++)
 	{
 		if (vcf_dat[i].chrom == "LG1")
 			matrix << '\t' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID;
+		if (vcf_dat[i].chrom == this_lg)
+			any_matrix << '\t' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID;
+		else
+		{
+			any_matrix.close();
+				last_lg = this_lg;
+				this_lg = vcf_dat[i].chrom;
+				cout << this_lg << '\n';
+				any_matrix_name = any_matrix_base + this_lg + ".txt";
+				any_matrix.open(any_matrix_name, std::ios_base::app);
+				any_matrix << '\t' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID;
+		}
 	}
 	count = 0;
+	this_lg = last_lg = vcf_dat[0].chrom;
+	any_matrix_name = any_matrix_base + this_lg + ".txt";
+	any_matrix.open(any_matrix_name);
 	for (i = 0; i < vcf_dat.size(); i++)
 	{
 		if (vcf_dat[i].chrom == "LG1")
 			matrix << '\n' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID;
+		if (vcf_dat[i].chrom == this_lg)
+			any_matrix << '\n' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID;
+		else
+		{
+			any_matrix.close();
+				last_lg = this_lg;
+				this_lg = vcf_dat[i].chrom;
+				any_matrix_name = any_matrix_base + this_lg + ".txt";
+				any_matrix.open(any_matrix_name, std::ios_base::app);
+				any_matrix << '\n' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID;
+		}
 		for (ii = 0; ii < vcf_dat.size(); ii++)
 		{
 			
@@ -339,12 +369,18 @@ int main()
 				
 				if (vcf_dat[i].chrom == "LG1" && vcf_dat[ii].chrom == "LG1")
 					matrix << '\t' << ld.dprime;
+				if (vcf_dat[i].chrom == this_lg && vcf_dat[ii].chrom == this_lg)
+					any_matrix << '\t' << ld.dprime;
+				
 				count++;
 			}
 			else
 			{
 				if (vcf_dat[i].chrom == "LG1" && vcf_dat[ii].chrom == "LG1")
 					matrix << '\t' << -1;
+				if (vcf_dat[i].chrom == this_lg && vcf_dat[ii].chrom == this_lg)
+					any_matrix << '\t' << -1;
+				
 			}
 		}
 	}
