@@ -39,6 +39,47 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Wednesday, 1 June 2016
+I'm re-running Batemanater but saving a log so I can generate a figure like in Kenyon's paper with observed and estimated mating successes.
+Also going to re-run it with non-matched females as zeros.
+
+When calculating reproductive success average, do I include non-mated males? 
+
+OK, I calculated an estimate for the number of females using Pollock et al (1990):
+nhat=(n1+1)(n2+2)/(m2+1)-1
+
+Females sans zeros:
+	Variable       	Estimate	LowerCI	UpperCI	(95.0%)	LowerCI	UpperCI	(90.0%)
+	MeanMS         	1.421	1.158	1.684		1.211	1.632
+	MeanRS         	26.895	19.737	34.684		20.684	33.263
+	StDevMS     	0.607	0.375	0.772		0.419	0.761
+	StDevRS     	16.822	10.086	20.415		10.767	19.780
+	OppSexSel(Is)  	0.182	0.105	0.259		0.113	0.250
+	OppSelec(I)    	0.391	0.215	0.563		0.235	0.533
+	BatemanGradient	21.540	14.087	34.064		15.293	31.500
+	StandardizedBG	1.138	0.795	1.708		0.870	1.560
+	S'max         	0.486	0.291	0.642		0.330	0.612
+	
+Results:
+Mean Male Mating Success: 	2.1839
+Standard Deviation in MS: 	2.6244
+Opp. for Sexual Selection:	1.4441
+Std. Dev. for Simulation: 	6.9064
+
+Mean of the Top 10 Solutions:
+Mean MS:    	2.180
+Mean RS:    	38.030
+StDev MS:   	2.620
+StDev RS:   	49.424
+BateGrad:   	17.603
+BG,no 0s:   	17.771
+BG':           	1.009
+Is:              	1.447
+I:               	1.692
+S'max:         	1.213
+RS incr./mate:	19.536
+StDev RS param.	26.466
+
 #####Tuesday, 31 May 2016
 I ran band_sharing.  Band-sharing is ~0.95 for all of them.
 ...what about the relatedness analysis? I'll try running it, see what happens.

@@ -207,9 +207,9 @@ int main()
 	vector<locus_info> reference;
 	vector<individual> population;
 
-	ind_file_name = "../../results/relatedness/CERVUS_individuals.txt";
-	relatedness_name = "../../results/relatedness/PolymorphicIn90PercInds.rout.txt";
-	kinship_name = "../../results/parentage/PolymorphicIn90PercInds.txt";
+	ind_file_name = "../../results/parentage/list_of_individuals.txt";
+	relatedness_name = "../../results/relatedness/PolymorphicIn99PercIndsHWE.rout.txt";
+	kinship_name = "../../results/parentage/PolymorphicIn99PercIndsHWE.txt";
 	kinship_format = false; //if true it's kinship format, if false it's CERVUS format
 	loci_per_round = 5000;
 
@@ -256,7 +256,7 @@ int main()
 					}
 				}
 				num_loci = reference.size();
-				last_locus = 0;
+				last_locus = loci_per_round;
 				count++;
 			}//first line
 			else
@@ -264,7 +264,9 @@ int main()
 		}
 	}
 	kinship.close();
-	while (last_locus < num_loci)
+	if (last_locus > num_loci)
+		last_locus = num_loci;
+	while (last_locus <= num_loci)
 	{
 		kinship.open(kinship_name);
 		universal_getline(kinship, line);
@@ -308,18 +310,18 @@ int main()
 							continue;
 					}
 					last_locus = last_locus + locus_count;
-
+					locus_count = 0;
 				}
-				else
+				else //it's cervus
 				{
-					for (i = 0; i < last_locus; i++)
-						ss >> tmp >> tmp;
+					/*for (i = 0; i < last_locus; i++)
+						ss >> tmp >> tmp;*/
 					while (locus_count < loci_per_round & last_locus < num_loci)
 					{
 						if ((last_locus + locus_count) < num_loci)
 						{
 							ss >> allele1 >> allele2;
-							population[index].allele1.push_back(allele1);
+							population[index].allele1.push_back(allele1);//this isn't working or something
 							population[index].allele2.push_back(allele2);
 							if (allele1 != "0")
 							{
@@ -328,10 +330,12 @@ int main()
 							}
 							locus_count++;
 						}
-
 						else
 							continue;
+						
 					}
+					last_locus = last_locus + locus_count;
+					locus_count = 0;
 				}//not kinship format
 				
 			}//eof
@@ -404,58 +408,58 @@ int main()
 	
 	cout << "\nSuccessfully read in " << population.size() << " individuals, each with " << reference.size() << " loci.";
 
-	////calculate population allele frequencies
-	//for (i = 0; i < reference.size(); i++)
-	//	reference[i].caclualte_allele_freqs();
+	//calculate population allele frequencies
+	for (i = 0; i < reference.size(); i++)
+		reference[i].caclualte_allele_freqs();
 
-	////set up r_values
-	//vector<relatedness_scores> r_values;
-	//for (i = 0; i < population.size(); i++)
-	//{
-	//	r_values.push_back(relatedness_scores());
-	//	r_values[i].focal_ID = population[i].ID;
-	//	for (ii = 0; ii < population.size(); ii++)
-	//	{
-	//		if (i != ii)
-	//		{
-	//			r_values[i].r.push_back(0);
-	//			r_values[i].comparison_IDs.push_back(population[ii].ID);
-	//		}
-	//	}
-	//}
+	//set up r_values
+	vector<relatedness_scores> r_values;
+	for (i = 0; i < population.size(); i++)
+	{
+		r_values.push_back(relatedness_scores());
+		r_values[i].focal_ID = population[i].ID;
+		for (ii = 0; ii < population.size(); ii++)
+		{
+			if (i != ii)
+			{
+				r_values[i].r.push_back(0);
+				r_values[i].comparison_IDs.push_back(population[ii].ID);
+			}
+		}
+	}
 
-	////now compare each individual at each locus
-	//for (i = 0; i < population.size(); i++)
-	//{
-	//	index = 0;
-	//	for (ii = 0; ii < population.size(); ii++)
-	//	{
-	//		if (i != ii)
-	//		{
-	//			double W, r;
-	//			W = r = 0;
-	//			for (iii = 0; iii < reference.size(); iii++)
-	//			{
-	//				//calculate relatedness where population[i] is the proband
-	//				if (population[i].allele1[iii] != "0" && population[ii].allele1[iii] != "0" && reference[iii].alleles.size() > 1)
-	//				{
-	//					relatedness_locus rxy, ryx;
-	//					rxy = reference[iii].calc_relatedness(population[i].allele1[iii], population[i].allele2[iii], population[ii].allele1[iii], population[ii].allele2[iii]);
-	//					ryx = reference[iii].calc_relatedness(population[ii].allele1[iii], population[ii].allele2[iii], population[i].allele1[iii], population[i].allele2[iii]);
-	//					r = r + (((rxy.rxyl*rxy.wl) + (ryx.rxyl*ryx.wl)) / 2);
-	//					W = W + ((rxy.wl + ryx.wl) / 2);
-	//					//cout << "\n" << reference[iii].ID << '\t' << r;
-	//				}
-	//			}
-	//			if (W > 0)
-	//				r_values[i].r[index] = r / W;
-	//			else
-	//				r_values[i].r[index] = r;
-	//			relatedness << '\n' << population[i].ID << '\t' << population[ii].ID << '\t' << r << '\t' << W << '\t' << r_values[i].r[index];
-	//			index++;
-	//		}
-	//	}
-	//}
+	//now compare each individual at each locus
+	for (i = 0; i < population.size(); i++)
+	{
+		index = 0;
+		for (ii = 0; ii < population.size(); ii++)
+		{
+			if (i != ii)
+			{
+				double W, r;
+				W = r = 0;
+				for (iii = 0; iii < reference.size(); iii++)
+				{
+					//calculate relatedness where population[i] is the proband
+					if (population[i].allele1[iii] != "0" && population[ii].allele1[iii] != "0" && reference[iii].alleles.size() > 1)
+					{
+						relatedness_locus rxy, ryx;
+						rxy = reference[iii].calc_relatedness(population[i].allele1[iii], population[i].allele2[iii], population[ii].allele1[iii], population[ii].allele2[iii]);
+						ryx = reference[iii].calc_relatedness(population[ii].allele1[iii], population[ii].allele2[iii], population[i].allele1[iii], population[i].allele2[iii]);
+						r = r + (((rxy.rxyl*rxy.wl) + (ryx.rxyl*ryx.wl)) / 2);
+						W = W + ((rxy.wl + ryx.wl) / 2);
+						//cout << "\n" << reference[iii].ID << '\t' << r;
+					}
+				}
+				if (W > 0)
+					r_values[i].r[index] = r / W;
+				else
+					r_values[i].r[index] = r;
+				relatedness << '\n' << population[i].ID << '\t' << population[ii].ID << '\t' << r << '\t' << W << '\t' << r_values[i].r[index];
+				index++;
+			}
+		}
+	}
 	relatedness.close();
 	cout << "\nDone! Input Integer to Quit.\n";
 	cin >> i;
