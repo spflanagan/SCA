@@ -80,6 +80,47 @@ S'max:         	1.213
 RS incr./mate:	19.536
 StDev RS param.	26.466
 
+ 
+Variable       	Estimate	LowerCI	UpperCI	(95.0%)	LowerCI	UpperCI	(90.0%)
+MeanMS         	2.18	2.18	2.18		2.18	2.18
+MeanRS         	38.03	38.03	38.03		38.03	38.03
+Std.Dev.MS     	2.63	2.62	2.64		2.62	2.64
+Std.Dev.RS     	48.17	38.54	50.14		41.91	49.96
+OppSexSel(Is)  	1.45	1.44	1.46		1.44	1.46
+OppSelec(I)    	1.61	1.03	1.74		1.22	1.73
+BatemanGradient	17.35	14.16	17.96		15.37	17.91
+BateGrad(no0s) 	17.24	10.64	18.50		13.16	18.41
+Standardized BG	0.99	0.81	1.03		0.88	1.03
+S'max            	1.20	0.98	1.24		1.06	1.23
+SDmsForEstim.  	6.90	6.78	6.94		6.81	6.94
+RS incr./mate 	18.41	8.25	20.27		11.60	20.16
+StDev RS param	22.14	3.29	31.21		7.12	29.93
+
+Estimate with female data with zeros:
+ 
+Variable       	Estimate	LowerCI	UpperCI	(95.0%)	LowerCI	UpperCI	(90.0%)
+MeanMS         	0.474	0.298	0.684		0.333	0.649
+MeanRS         	8.965	5.175	13.579		5.737	12.702
+StDevMS     	0.758	0.567	0.925		0.590	0.901
+StDevRS     	15.955	10.588	20.200		11.441	19.390
+OppSexSel(Is)  	2.563	1.492	4.421		1.652	3.917
+OppSelec(I)    	3.167	1.881	5.347		2.005	4.857
+BatemanGradient	19.464	15.542	23.401		16.157	22.666
+StandardizedBG	1.028	0.954	1.113		0.968	1.092
+S'max         	1.647	1.259	2.160		1.302	2.051
+
+And estimate for the males:
+Variable       	Estimate	LowerCI	UpperCI	(95.0%)	LowerCI	UpperCI	(90.0%)
+MeanMS         	0.936	0.901	0.966		0.906	0.961
+MeanRS         	14.611	13.291	15.818		13.507	15.635
+StDevMS     	0.245	0.183	0.299		0.195	0.292
+StDevRS     	9.678	8.888	10.456		8.982	10.349
+OppSexSel(Is)  	0.069	0.036	0.110		0.041	0.104
+OppSelec(I)    	0.439	0.343	0.552		0.359	0.535
+BatemanGradient	15.611	14.307	16.757		14.513	16.593
+StandardizedBG	1.000	1.000	1.000		1.000	1.000
+S'max         	0.262	0.189	0.331		0.203	0.322
+
 #####Tuesday, 31 May 2016
 I ran band_sharing.  Band-sharing is ~0.95 for all of them.
 ...what about the relatedness analysis? I'll try running it, see what happens.
