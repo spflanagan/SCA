@@ -142,8 +142,8 @@ int main()
 	bool found,vcf;
 	string empty_char;
 	
-	pairs_name = "../../results/dad.kid.pairs.txt";
-	output_name = "../../results/relatedness/PolymorphicIn99PercIndsHWE.bandsharing.txt";
+	pairs_name = "../../results/parentage/pairwise.combinations.txt";
+	output_name = "../../results/relatedness/PolymorphicIn99PercIndsHWE.allcombos.bandsharing.txt";
 	kinship_name = "../../results/parentage/PolymorphicIn99PercIndsHWE.txt";
 	vcf = false;
 

@@ -39,6 +39,67 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Friday, 3 June 2016
+I have a few goals for the parentage analysis:
+1. How many alleles per locus? What is the distribution of minimum allele frequencies? What do the allele frequency distributions look like?
+2. Do the ones that are higher in CERVUS have different allele frequency distributions?
+	Higher SNP sets: gen100_7,gen_150_7, gen150_6,gen200_5,gen200_3,gen200_9,gen300_10,gen300_2,gen300_9
+	The average number of alleles per locus is 4.509 for all sets, with a min of 4.15 and a max of 4.945. 
+	Observed Het doesn't follow the same pattern either...although 1600 has the most median observed het with smallest variance
+	Observed Het:
+		$`50`
+		   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+		0.08640 0.09034 0.09495 0.09593 0.09961 0.10970 
+
+		$`100`
+		   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+		0.07406 0.07952 0.08983 0.08834 0.09424 0.10580 
+
+		$`150`
+		   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+		0.07237 0.08260 0.08636 0.08794 0.09170 0.10480 
+
+		$`200`
+		   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+		0.07562 0.08536 0.09141 0.08951 0.09352 0.09855 
+
+		$`300`
+		   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+		0.07868 0.08572 0.08932 0.08895 0.09180 0.10110 
+
+		$`400`
+		   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+		0.07593 0.08461 0.09310 0.08955 0.09422 0.09624 
+
+		$`800`
+		   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+		0.08361 0.08548 0.08752 0.08794 0.09074 0.09266 
+
+		$`1600`
+		   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+		0.08743 0.08776 0.08804 0.08813 0.08850 0.08904 
+	In 150 loci, set 7 is the one with the highest assignment rate and the highest observed het. 
+	
+	The most polymorphic loci are contained in the sets with more loci (simple sampling of loci)
+	
+	
+To run band sharing on all pairwise combinations I need to create a file with two columns, which I did in R.
+Now the question is: Is there a difference in the band sharing among unrelated individuals and fathers and offspring?
+
+	t.test(all.bs$Shared~all.bs$combo)
+
+			Welch Two Sample t-test
+
+	data:  all.bs$Shared by all.bs$combo
+	t = 17.664, df = 133.07, p-value < 2.2e-16
+	alternative hypothesis: true difference in means is not equal to 0
+	95 percent confidence interval:
+	 0.03107706 0.03891432
+	sample estimates:
+	mean in group father-offspring        mean in group unrelated 
+						 0.9451931                      0.9101974 
+
+
 #####Wednesday, 1 June 2016
 I'm re-running Batemanater but saving a log so I can generate a figure like in Kenyon's paper with observed and estimated mating successes.
 Also going to re-run it with non-matched females as zeros.

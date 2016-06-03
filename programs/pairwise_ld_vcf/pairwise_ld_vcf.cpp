@@ -316,36 +316,37 @@ int main()
 	out.open(out_name);
 	out << "Chrom\tLocIDA\tpA\tLocIDB\tpB\tpAB\tpAb\tpaB\tpab\tD\tD'";
 	matrix.open(matrix_name);
-	this_lg = last_lg = vcf_dat[0].chrom;
+	this_lg = vcf_dat[0].chrom;
+	cout << this_lg;
 	any_matrix_name = any_matrix_base + this_lg + ".txt";
 	any_matrix.open(any_matrix_name);
 	for (i = 0; i < vcf_dat.size(); i++)
 	{
 		if (vcf_dat[i].chrom == "LG1")
-			matrix << '\t' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID;
+			matrix << '\t' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID << "." << vcf_dat[i].bp;
 		if (vcf_dat[i].chrom == this_lg)
-			any_matrix << '\t' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID;
+			any_matrix << '\t' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID << "." << vcf_dat[i].bp;
 		else
 		{
 			any_matrix.close();
 				last_lg = this_lg;
 				this_lg = vcf_dat[i].chrom;
-				cout << this_lg << '\n';
+				//cout << this_lg << '\n';
 				any_matrix_name = any_matrix_base + this_lg + ".txt";
 				any_matrix.open(any_matrix_name, std::ios_base::app);
-				any_matrix << '\t' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID;
+				any_matrix << '\t' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID << "." << vcf_dat[i].bp;
 		}
 	}
 	count = 0;
-	this_lg = last_lg = vcf_dat[0].chrom;
+	this_lg = vcf_dat[0].chrom;
 	any_matrix_name = any_matrix_base + this_lg + ".txt";
 	any_matrix.open(any_matrix_name);
 	for (i = 0; i < vcf_dat.size(); i++)
 	{
 		if (vcf_dat[i].chrom == "LG1")
-			matrix << '\n' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID;
+			matrix << '\n' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID << "." << vcf_dat[i].bp;
 		if (vcf_dat[i].chrom == this_lg)
-			any_matrix << '\n' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID;
+			any_matrix << '\n' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID << "." << vcf_dat[i].bp;
 		else
 		{
 			any_matrix.close();
@@ -353,7 +354,7 @@ int main()
 				this_lg = vcf_dat[i].chrom;
 				any_matrix_name = any_matrix_base + this_lg + ".txt";
 				any_matrix.open(any_matrix_name, std::ios_base::app);
-				any_matrix << '\n' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID;
+				any_matrix << '\n' << vcf_dat[i].chrom << "." << vcf_dat[i].locusID << "." << vcf_dat[i].bp;
 		}
 		for (ii = 0; ii < vcf_dat.size(); ii++)
 		{

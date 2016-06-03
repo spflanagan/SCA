@@ -1,11 +1,15 @@
 #Author: Sarah P. Flanagan
+#Last Updated: 3 June 2016
 #Date: 15 February 2016
 #Purpose: Analyze the output from CERVUS when it was run with various numbers
 #of loci
 
 rm(list=ls())
-setwd("B:/ubuntushare/SCA/results/parentage")
-maternity.files<-list.files(pattern="maternity.csv")
+setwd("E:/ubuntushare/SCA/results/parentage")
+
+##############################################################################
+#####CERVUS ANALYSIS
+##############################################################################
 stats.files<-list.files(pattern="\\d+_maternity.txt")
 
 stats<-data.frame(NumLoci=numeric(),ConfidenceLevel=numeric(), Delta=numeric(),
@@ -22,6 +26,7 @@ for(i in 1: length(stats.files)){
 	rownames(stats)[i]<-stats.files[i]
 }
 
+#####PLOT CERVUS INFO
 png("CervusStats.png",height=5,width=10,res=300, units="in")
 par(mfrow=c(1,2),oma=c(1,1,1,1),mar=c(3,3,1,0.2))
 boxplot(stats$Delta~stats$NumLoci,las=1,ylab="",xlab="",xaxt='n')
@@ -45,6 +50,66 @@ mtext("Assignment Rate (%)",2,outer=F,line=2)
 mtext("Number of Loci", 1,outer=T)
 dev.off()
 
+#####CHECK ALLELE FREQS
+plot(stats$NumLoci, stats$AssignmentRate, xaxt='n',las=1,
+	ylab="",xlab="",type='n')
+stats$setID<-gsub("gen\\d+_(\\d+)_maternity.txt","\\1",rownames(stats))
+text(labels=stats$setID,x=stats$NumLoci,y=stats$AssignmentRate)
+
+af.files<-list.files(pattern="\\d+_allelefreqs.txt")
+af.dat<-list()
+for(i in 1:length(af.files)){
+	nloci<-as.numeric(gsub("gen(\\d+)_\\d+_allelefreqs.txt","\\1",af.files[i]))
+	af<-read.table(af.files[i],skip=10,header=T,nrows=nloci)
+	af.dat[[i]]<-as.data.frame(af)
+}
+afsum<-data.frame(do.call("rbind",
+	lapply(af.dat,function(x){ cbind(mean(x$k),mean(x$HObs)) })))
+colnames(afsum)<-c("MeanK","MeanObsHet")
+rownames(afsum)<-af.files
+afsum$NumLoci<-as.numeric(
+	gsub("gen(\\d+)_\\d+_allelefreqs.txt","\\1",rownames(afsum)))
+afsum$setID<-gsub("gen\\d+_(\\d+)_allelefreqs.txt","\\1",rownames(afsum))
+plot(afsum$NumLoci, afsum$MeanObsHet, xaxt='n',las=1,
+	ylab="",xlab="",type='n',ylim=c(0,0.26))
+text(labels=afsum$setID,x=afsum$NumLoci,y=afsum$MeanObsHet)
+text(labels=stats$setID,x=stats$NumLoci,y=stats$AssignmentRate/100,col="blue")
+axis(1, at=c(50,100,150,200,300,400,800,1600),las=2)
+
+nalleles<-data.frame(do.call("rbind",
+	lapply(af.dat,function(x){ summary(x$k) })))
+rownames(nalleles)<-af.files
+nalleles$NumLoci<-as.numeric(
+	gsub("gen(\\d+)_\\d+_allelefreqs.txt","\\1",rownames(nalleles)))
+nalleles$setID<-gsub("gen\\d+_(\\d+)_allelefreqs.txt","\\1",rownames(nalleles))
+tapply(nalleles$Mean,nalleles$NumLoci,summary)
+
+obshet<-data.frame(do.call("rbind",
+	lapply(af.dat,function(x){ summary(x$HObs) })))
+rownames(obshet)<-af.files
+obshet$NumLoci<-as.numeric(
+	gsub("gen(\\d+)_\\d+_allelefreqs.txt","\\1",rownames(obshet)))
+obshet$setID<-gsub("gen\\d+_(\\d+)_allelefreqs.txt","\\1",rownames(obshet))
+tapply(obshet$Mean,obshet$NumLoci,summary)
+
+#####FULL DATASET
+full.af<-read.table("PolymorhpicIn99PercIndsHWE_afreqs.txt",
+	skip=10,header=T,nrows=1642)
+
+full.dat<-read.table("PolymorphicIn99PercIndsHWE.txt",header=T)
+ids<-as.character(full.dat$ID)
+pairs<-data.frame(id1=character(),id2=character())
+for(i in 1:(length(ids)-1)){
+	ida<-rep(ids[i],(length(ids)-i))
+	idb<-ids[(i+1):length(ids)]
+	pairs<-rbind(pairs,cbind(ida,idb))
+}
+write.table(pairs,"pairwise.combinations.txt",col.names=F,row.names=F,
+	quote=F,sep='\t')
+##############################################################################
+####OTHER ANALYSES
+##############################################################################
+maternity.files<-list.files(pattern="maternity.csv")
 maternity.dat<-data.frame()
 for(i in 1:length(maternity.files)){
 	dat<-read.csv(maternity.files[i],skip=1,header=F)
@@ -123,6 +188,10 @@ hist(summary(mat.loc.sum$`1600`$MomID),breaks=c(0.5,1.5,2.5,3.5,4.5),
 axis(1,pos=0,at=c(1,2,3,4))
 axis(2,pos=0.5, las=1)
 dev.off()
+
+
+
+
 ###Old graph, don't use
 #png("CervusMaternitySummary.png",height=7,width=7,units="in",res=300)
 #par(mfrow=c(2,2),oma=c(2,2,2,2),mar=c(3,3,1,1))

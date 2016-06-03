@@ -4,7 +4,7 @@
 #Purpose: Conduct a linkage disequilibrium analysis
 
 rm(list=ls())
-setwd("B:/ubuntushare/SCA/results/biallelic")
+setwd("E:/ubuntushare/SCA/results/ld")
 library(RColorBrewer)
 library(gplots)
 
@@ -24,30 +24,56 @@ dev.off()
 ##############################################################################
 #####LD ANALYSIS
 ##############################################################################
+ld.heatmap<-function(ld.matrix, name="ld.heatmap",pdf=F,make.file=T){
+	if(nrow(ld.matrix)%%20 != 0){
+		nmax<-nrow(ld.matrix)-(nrow(ld.matrix)%%20)
+		starts<-c(seq(1,nmax+1,20))
+		ends<-c(seq(20,nmax,20),nrow(ld.matrix))
+	}
+	else {
+		starts<-starts<-c(seq(1,nrow(ld.matrix)-19,20))
+		ends<-c(seq(20,nrow(ld.matrix),20))
 
-ldc<-read.table("ld_matrix_lg1.txt",header=T,row.names=1)
-ldc<-read.table("ld_matrix_LG10.txt",header=T,row.names=1)
+	}
+	heatcolors<-colorRampPalette(c("white","yellow","red"))(n=200)
 
-starts<-c(seq(1,4581,20))
-ends<-c(seq(20,4580,20),4603)
-heatcolors<-colorRampPalette(c("white","yellow","red"))(n=200)
+	if(make.file==T){
+		if(pdf==T) { pdf(paste(name,"pdf",sep="."),height=10,width=10) } 
+		else {
+			png(paste(name,"png",sep="."),height=10,width=10,units="in",
+				res=300) }
+	}
+	par(mfrow=c(length(starts),length(starts)),oma=c(0,0,0,0),mar=c(0,0,0,0))
+	for(i in 1:length(starts)){
+		for(j in 1:length(ends)){
+			#heatmap.2(as.matrix(ld.matrix[
+			#	starts[i]:ends[i],starts[j]:ends[j]]),
+			#	dendrogram="none",tracecol="NA",labCol="",labRow="",key=F,
+			#	Colv=F,Rowv=F,lwid=c(0.5,4),lhei=c(0.5,4),new=F,
+			#	col=heatcolors)
+			image(as.matrix(ld.dat[
+					starts[i]:ends[i],starts[j]:ends[j]]),
+				xaxt='n',yaxt='n',col=heatcolors,bty='n')
+			#if(i==j) print(paste(starts[i],":",ends[i],",",starts[j],":",
+			#	ends[j],sep=""))
+	}}
+	if(make.file==T) dev.off()
+}
+ld.files<-list.files(pattern="LG\\d+.txt")
+ld.files<-c(ld.files,"ld_matrix_lg1.txt")
+ld.order<-c("lg1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10",
+	"LG11","LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20",
+	"LG21","LG22")
+for(i in 1:length(ld.order)){
+	filename<-ld.files[gsub("ld_matrix_([A-z]+\\d+).txt","\\1",
+		ld.files) %in% ld.order[i]]
+	ld.dat<-read.table(filename,header=T,row.names=1)
+	ld.heatmap(ld.dat,
+		name=gsub("(ld_matrix_[A-z]+\\d+).txt","\\1.png",filename))
+}
 
-pdf("LDheatmap.LG1.pdf",height=10,width=10)
-png("LDheatmap.LG1.png",height=10,width=10,units="in",res=300)
-par(mfrow=c(length(starts),length(starts)),oma=c(0,0,0,0),mar=c(0,0,0,0))
-for(i in 1:length(starts)){
-	for(j in 1:length(ends)){
-		#heatmap.2(as.matrix(ldc[starts[i]:ends[i],starts[j]:ends[j]]),
-		#	dendrogram="none",tracecol="NA",labCol="",labRow="",key=F,
-		#	Colv=F,Rowv=F,lwid=c(0.5,4),lhei=c(0.5,4),new=F,
-		#	col=heatcolors)
-		image(as.matrix(ldc[starts[i]:ends[i],starts[j]:ends[j]]),
-			xaxt='n',yaxt='n',col=heatcolors)
-		if(i==j) print(paste(starts[i],":",ends[i],",",starts[j],":",ends[j],sep=""))
-}}
-dev.off()
 
-
+#############################################################################
 #vcf<-read.delim("../stacks/batch_1.vcf",comment.char="#",sep='\t')
 #header<-scan("../stacks/batch_1.vcf",what="character")[header.start:
 #	(header.start+ncol(vcf)-1)]
