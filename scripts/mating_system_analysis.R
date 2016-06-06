@@ -4,7 +4,7 @@
 #Purpose: Analyze mating system data from single population of scovelli
 
 rm(list=ls())
-setwd("../results/parentage")
+setwd("E:/ubuntushare/SCA/results/parentage")
 dat<-read.delim("batemanator_input.rerun.txt")
 fem.dat<-dat[substr(dat$Fish.ID,1,3)=="FEM",]
 mal.dat<-dat[substr(dat$Fish.ID,1,3)!="FEM",]
@@ -71,31 +71,52 @@ dev.off()
 #############################################################################
 #########BAND SHARING
 #############################################################################
-setwd("../relatedness/")
 all.bs<-read.delim("PolymorphicIn99PercIndsHWE.allcombos.bandsharing.txt")
 fo.bs<-read.delim("PolymorphicIn99PercIndsHWE.bandsharing.txt")
 all.bs$combo<-paste(all.bs$Father,all.bs$Offspring,sep=".")
 all.bs$combo2<-paste(all.bs$Offspring,all.bs$Father,sep=".")
 
+#father-offspring combos
 fo.bs$combo<-paste(fo.bs$Father,fo.bs$Offspring,sep=".")
 
+#keep unrelated ones
 unr.bs<-all.bs[!(all.bs$combo %in% fo.bs$combo) & 
 	!(all.bs$combo2 %in% fo.bs$combo),]
-unr.bs$combo<-rep("unrelated",nrow(unr.bs))
-fo.bs$combo<-rep("father-offspring",nrow(fo.bs))
+unr.bs$set<-rep("unrelated",nrow(unr.bs))
+fo.bs$set<-rep("father-offspring",nrow(fo.bs))
+
+#get combos from maternity analysis
+mothers<-read.csv("../parentage/parentage_summary.csv",
+	header=T,row.names=NULL)
+mothers$combo<-paste(mothers$Offspring.ID,mothers$Candidate.mother.ID,sep=".")
+mothers$combo2<-paste(mothers$Candidate.mother.ID,mothers$Offspring.ID,sep=".")
+
+#merge
 all.bs<-rbind(unr.bs[,colnames(unr.bs)[colnames(unr.bs)!="combo2"]],fo.bs)
-all.bs[all.bs$combo=="father-offspring" & all.bs$Shared < 0.2,
-	"combo"]<-"unrelated"
+all.bs[all.bs$set=="father-offspring" & all.bs$Shared < 0.2,
+	"set"]<-"unrelated"
+all.bs[all.bs$combo %in% mothers$combo | all.bs$combo %in% mothers$combo2,
+	"set"]<-"mother-offspring"
 
-boxplot(all.bs$Shared~all.bs$combo)
-boxplot(all.bs$Incompatible~all.bs$combo)
-
-shared.dat<-data.frame(prop=all.bs$Shared,relationship=all.bs$combo,
+shared.dat<-data.frame(prop=all.bs$Shared,relationship=all.bs$set,
 	type="shared")
-incomp.dat<-data.frame(prop=all.bs$Incompatible,relationship=all.bs$combo,
+incomp.dat<-data.frame(prop=all.bs$Incompatible,relationship=all.bs$set,
 	type="incompatible")
 all.dat<-rbind(shared.dat,incomp.dat)
-boxplot(all.dat$prop)
-require(ggplot2)
-ggplot(data = all.dat, aes(x=relationship, y=prop)) + 
-	geom_boxplot(aes(fill=type))
+
+#####PLOT
+png("band_sharing.png",height=7,width=7,units="in",res=300)
+boxplot(all.dat$prop~all.dat$relationship*all.dat$type,axes=F,ylim=c(-0.01,1),
+	border=c("dark green","darkorchid4","dodgerblue3"),pch=c(15,17,1))
+axis(1,at=c(0,2,5,7),c("","Shared","Incompatible",""),pos=0)
+axis(2,pos=0.35,las=1,ylim=c(-0.01,1))
+mtext("Proportion of Loci",2,line=2)
+legend(x=0.35,y=0.18,
+	c("Father-Offspring","Mother-Offspring","Putatively Unrelated"),
+	col=c("dark green","darkorchid4","dodgerblue3"),pch=c(15,17,1),bty='n')
+dev.off()
+#require(ggplot2)
+#ggplot(data = all.dat, aes(x=relationship, y=prop)) + 
+#	geom_boxplot(aes(fill=type))
+
+

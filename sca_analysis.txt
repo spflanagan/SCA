@@ -39,6 +39,14 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Monday, 6 June 2016
+I fixed up the Fst and SNPstats figures and wrote up methods and (very brief) results & sent them to Clay.
+There may be more analyses to explore but I didn't do them.
+
+Is there a way to calculate expected band sharing? Not easily.
+
+Plotting band sharing results: boxplots of father-offspring and putatively unrelated, but what about assigned mothers?
+
 #####Friday, 3 June 2016
 I have a few goals for the parentage analysis:
 1. How many alleles per locus? What is the distribution of minimum allele frequencies? What do the allele frequency distributions look like?

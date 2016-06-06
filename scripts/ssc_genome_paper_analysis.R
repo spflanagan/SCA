@@ -4,21 +4,94 @@
 #Purpose: Conduct a linkage disequilibrium analysis
 
 rm(list=ls())
-setwd("E:/ubuntushare/SCA/results/ld")
+setwd("E:/ubuntushare/SCA/results/genome_paper")
 library(RColorBrewer)
 library(gplots)
+library(qvalue)
+source("E:/ubuntushare/SCA/scripts/plotting_functions.R")
+
+lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
+	"LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
+	"LG22")
+##############################################################################
+#####Fsts
+##############################################################################
+fm.plot<-read.delim("../biallelic/fm.plot.txt")
+fm.plot<-fm.plot[,c("Chrom","Pos","LocID","FEM.MAL","Locus")]
+fm.plot<-fm.plot[order(fm.plot$FEM.MAL),]#ascending
+fm.top1<-fm.plot[round(nrow(fm.plot)*0.99),"FEM.MAL"]
+fm.out1<-fm.plot[fm.plot$FEM.MAL >= fm.top1,]
+
+
+png("male-female.png",height=100,width=300,units="mm",res=300)
+par(oma=c(2,2,2,2),mar=c(4,0,0,0))
+fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", chrom.name="Chrom"
+	, axis.size=0,bp.name="Pos",sig.col=c("green4","black"))
+axis(2,at=c(0,0.1,0.2,0.3),pos=0,las=1)
+mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1,las=0,line=1)
+last<-0
+for(i in 1:length(lgs)){
+	text(x=mean(fm[fm$Chrom ==lgs[i],"Pos"]),y=-0.002,
+		labels=lgs[i], srt=45, adj=1, xpd=TRUE)
+	last<-max(fm[fm$Chrom ==lgs[i],"Pos"])
+}
+dev.off()
+
+#####STACKS FSTS
+stacks<-read.delim("../stacks/batch_1.fst_FEM-PRM.tsv",header=T)
+outpoints<-stacks[order(stacks$Fst),]
+stacks.top1<-outpoints[round(nrow(outpoints)*0.99),"Fst"]
+#outpoints<-stacks[order(stacks$Corrected.Fst),]
+#corr.top1<-outpoints[round(nrow(outpoints)*0.99),"Fst"]
+#different Fst versions don't make a difference
+
+png("male-female_stacks.png",height=100,width=300,units="mm",res=300)
+par(oma=c(2,2,2,2),mar=c(4,0,0,0))
+sp<-fst.plot(stacks, ci.dat=c(stacks.top1,0),fst.name="Fst", 
+	chrom.name="Chr", axis.size=0,bp.name="BP",sig.col=c("green4","grey7"))
+axis(2,at=seq(-0.2,0.8,0.2),pos=0,las=1)
+mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1,las=0,line=1)
+last<-0
+for(i in 1:length(lgs)){
+	text(x=mean(sp[sp$Chr ==lgs[i],"BP"]),y=-0.202,
+		labels=lgs[i], srt=45, adj=1, xpd=TRUE)
+	last<-max(sp[sp$Chr ==lgs[i],"BP"])
+}
+dev.off()
+
 
 ##############################################################################
 #####SNPSTATS
 ##############################################################################
-snpstats<-read.table("../sexlinked/snpstats1_out.txt",header=T)
+snpstats<-read.table("snpstats1_out.txt",header=T)
 snp.plots<-snpstats[,c("LG","pos","p_val.3")]
-snp.plots$plotp<--log10(snp.plots$p_val.3)
+snp.plots$plotp<-(log10(snp.plots$p_val.3))*-1
 snp.plots<-snp.plots[snp.plots$plotp != "Inf" &snp.plots$plotp != "-Inf",]
-png("logP_G.png", width=10,height=7,units="in",res=300)
+lfdr(snp.plots$p_val.3)#doesn't work, p-values out of range.
+
+png("genome_rad_fig1.png", width=10,height=7,units="in",res=300)
+par(mfrow=c(2,1),oma=c(2,2,2,2),mar=c(1,0,1,0))
+fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", chrom.name="Chrom"
+	, axis.size=0,bp.name="Pos",sig.col=c("green4","black"))
+axis(2,at=c(0,0.1,0.2,0.3),pos=0,las=1)
+mtext(expression(italic(F)[italic(ST)]), 2, outer=F, cex=1,las=0,line=1)
+text(x=1900,y=0.205,"A")
+
+par(mar=c(3,0,0,0))
 g<-fst.plot(snp.plots,ci.dat=c(0,0),sig.col=c("black","black"),
-	fst.name="plotp",chrom.name="LG",bp.name="pos")
+	fst.name="plotp",chrom.name="LG",bp.name="pos",axis.size=0)
+axis(2,at=seq(-1.6,4.6,0.4),pos=0,las=1)
+mtext(expression(-log[10]*P), 2, outer=F, cex=1,las=0,line=1)
+text(x=2200,y=4.2,"B")
+
+last<-0
+for(i in 1:length(lgs)){
+	text(x=mean(g[g$LG ==lgs[i],"pos"]),y=-1.8,
+		labels=lgs[i], srt=45, adj=1, xpd=TRUE)
+	last<-max(g[g$LG ==lgs[i],"pos"])
+}
 dev.off()
+
 
 
 ##############################################################################
@@ -72,6 +145,7 @@ for(i in 1:length(ld.order)){
 		name=gsub("(ld_matrix_[A-z]+\\d+).txt","\\1.png",filename))
 }
 
+###FINAL FIGURE PLOTTED USING GIMP2
 
 #############################################################################
 #vcf<-read.delim("../stacks/batch_1.vcf",comment.char="#",sep='\t')
