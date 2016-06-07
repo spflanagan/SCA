@@ -34,7 +34,7 @@ axis(1,at=1:8,labels=c(50,100,150,200,300,400,800,1600),las=2)
 #text(seq(0.8,7.8,1), par("usr")[1]-0.65, 
 #	labels=c(50,100,150,200,300,400,800,1600), 
 #	srt=35, pos=1, xpd=TRUE,tck=0.1)
-mtext("Delta Cutoff",2,outer=F, line=2)
+mtext("LOD Cutoff",2,outer=F, line=2)
 plot(stats$NumLoci, stats$AssignmentRate, xaxt='n',las=1,
 	ylab="",xlab="", pch=19)
 axis(1, at=c(50,100,150,200,300,400,800,1600),las=2)

@@ -39,6 +39,14 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Tuesday, 7 June 2016
+I need to do statistics to compare the band sharing results. ANOVA, probably.
+
+Which Bateman gradient info do I present? Do I present the final table for females or the estimate from the actual data? The actual data aren't within the confidence intervals, so I think I probably want the estimates.
+
+Question re: plotting: can I plot the estimated bateman gradient instead of the lm()??
+
+
 #####Monday, 6 June 2016
 I fixed up the Fst and SNPstats figures and wrote up methods and (very brief) results & sent them to Clay.
 There may be more analyses to explore but I didn't do them.
