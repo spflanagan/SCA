@@ -39,6 +39,74 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Monday, 13 June 2016
+Populations is finished running, but it gave the "Warning: Unable to find allele depths for datum" message again.
+
+Don't care, doing:
+vcftools --keep adults_list.txt --vcf batch_1.vcf --out batch_1.adults_MAF1 --recode
+48351 loci.
+
+Ran the LD script.
+
+I'm trying to find out info about the regions taht have high LD across the linkage groups but the sumstats file doesn't seem to match up with the locus IDs in ld file. 
+Oh! LD file had Chr.BP.Locus not Chr.Locus.BP. My bad.
+
+
+
+#####Thursday, 9 June 2016
+It appears that the dataset with maf 0.1 cutoff will have 27730 loci.
+
+#####Wednesday, 8 June 2016
+I discovered that my offspring file for CERVUS contained mismatch errors between offspring and their putative parents, so I fixed that and need to re-run CERVUS. GAHHHH nothing can ever be done only 3 times.
+
+For the LD analysis for Clay:
+	vcftools --keep adults_list.txt --vcf batch_1.vcf --out batch_1.adults.vcf --recode
+to keep only the adults and re-run the LD analysis.
+
+Now I've done that but should probably re-run populations with the maf 0.1 also...I'll do the LD figs for this set too though.
+	populations -b 1 -P ./ -M ../../sca_popmap_ddrad.txt -a 0.1 -t 3 -r 0.5 -p 3 --vcf --fstats --plink
+
+Re-running Batemanater:
+		Mean mating success of females (actually males) = 0.93596059
+		Mean reproductive success of females (acutally males) = 16.2967
+		Sex ratio: 87/(87+203) = 0.3
+		Estimated number of males (acutally females) = 379
+		Bootstrap Replicates: 1000
+	Alarm Clock Results:
+		Mean Male Mating Success: 	2.1839
+		Standard Deviation in MS: 	2.6336
+		Opp. for Sexual Selection:	1.4542
+		Std. Dev. for Simulation: 	6.9064
+	Earth Results:
+		Mean of the Top 10 Solutions:
+		Mean MS:    	2.179
+		Mean RS:    	38.030
+		StDev MS:   	2.624
+		StDev RS:   	49.813
+		BateGrad:   	17.663
+		BG,no 0s:   	17.890
+		BG':           	1.012
+		Is:              	1.452
+		I:               	1.719
+		S'max:         	1.219
+		RS incr./mate:	19.954
+		StDev RS param.	27.561
+	Left-Pointing Hand:
+		Variable       	Estimate	LowerCI	UpperCI	(95.0%)	LowerCI	UpperCI	(90.0%)
+		MeanMS         	2.18	2.18	2.18		2.18	2.18
+		MeanRS         	38.03	38.03	38.03		38.03	38.03
+		Std.Dev.MS     	2.63	2.62	2.64		2.62	2.64
+		Std.Dev.RS     	48.29	39.17	50.22		42.08	49.97
+		OppSexSel(Is)  	1.45	1.44	1.46		1.44	1.46
+		OppSelec(I)    	1.62	1.06	1.75		1.23	1.73
+		BatemanGradient	17.41	14.41	17.96		15.39	17.93
+		BateGrad(no0s) 	17.36	11.16	18.51		13.20	18.44
+		Standardized BG	1.00	0.83	1.03		0.88	1.03
+		S'max            	1.20	0.99	1.24		1.06	1.24
+		SDmsForEstim.  	6.89	6.78	6.94		6.81	6.94
+		RS incr./mate 	18.61	8.88	20.37		11.39	20.27
+		StDev RS param	22.22	4.38	31.76		8.94	29.93
+		
 #####Tuesday, 7 June 2016
 I need to do statistics to compare the band sharing results. ANOVA, probably.
 

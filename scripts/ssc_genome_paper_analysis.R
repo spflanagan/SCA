@@ -132,20 +132,119 @@ ld.heatmap<-function(ld.matrix, name="ld.heatmap",pdf=F,make.file=T){
 	}}
 	if(make.file==T) dev.off()
 }
-ld.files<-list.files(pattern="LG\\d+.txt")
-ld.files<-c(ld.files,"ld_matrix_lg1.txt")
+ld.files<-list.files(pattern="adults_maf1_LG\\d+.txt")
+ld.files<-c(ld.files,"ld_matrix_adults_maf1_lg1.txt")
 ld.order<-c("lg1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10",
 	"LG11","LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20",
 	"LG21","LG22")
 for(i in 1:length(ld.order)){
-	filename<-ld.files[gsub("ld_matrix_([A-z]+\\d+).txt","\\1",
+	filename<-ld.files[gsub("ld_matrix_adults_maf1_([A-z]+\\d+).txt","\\1",
 		ld.files) %in% ld.order[i]]
 	ld.dat<-read.table(filename,header=T,row.names=1)
 	ld.heatmap(ld.dat,
-		name=gsub("(ld_matrix_[A-z]+\\d+).txt","\\1.png",filename))
+		name=gsub("(ld_matrix_adults_maf1_[A-z]+\\d+).txt","\\1.png",filename))
 }
 
 ###FINAL FIGURE PLOTTED USING GIMP2
+ld.dat<-read.table("ld_matrix_adults_maf1_LG12.txt",header=T,row.names=1)
+sumstats<-read.delim("../stacks/batch_1.sumstats.tsv",sep='\t',header=T,skip=4)
+sumstats$locus<-paste(sumstats$Chr,sumstats$BP,sumstats$Locus.ID,sep=".")
+lg12.sum<-sumstats[sumstats$Chr %in% "LG12",]
+lg12.ld<-sumstats[sumstats$locus %in% rownames(ld.dat),]
+lg12.prm<-lg12.ld[lg12.ld$Pop.ID == "PRM",]
+lg12.fem<-lg12.ld[lg12.ld$Pop.ID == "FEM",]
+large.ld<-rownames(ld.dat)[rowSums(ld.dat) > 1000]
+
+large.prm.sum<-lg12.prm[lg12.prm$locus %in% large.ld,]
+others.prm.sum<-lg12.prm[!(lg12.prm$locus %in% large.ld),]
+large.fem.sum<-lg12.fem[lg12.fem$locus %in% large.ld,]
+others.fem.sum<-lg12.fem[!(lg12.fem$locus %in% large.ld),]
+
+png("elevatedLD_sumstats.png",height=10,width=7,units="in",res=300)
+par(mfrow=c(4,2),oma=c(2,2,2,2),mar=c(2,2,2,2))
+hist(others.prm.sum$P,col=alpha("grey",0.5),breaks=seq(0,1,0.1),
+	main="Non-Elevated Loci",xaxt='n',yaxt='n',xlab="",ylab="")
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+hist(others.fem.sum$P,col=alpha("dodgerblue",0.5),add=T,breaks=seq(0,1,0.1),
+	main="",xaxt='n',yaxt='n',xlab="",ylab="")
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+mtext("Major Allele Frequency",1,line=1.5,cex=0.75)
+legend("topleft",c("Males","Females"),pch=15,bty='n',
+	col=c(alpha("grey",0.5),alpha("dodgerblue",0.5)))
+hist(large.prm.sum$P,col=alpha("grey",0.5),breaks=seq(0,1,0.1),
+	main="Elevated LD Loci",xaxt='n',yaxt='n',xlab="",ylab="")
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+hist(large.fem.sum$P,col=alpha("dodgerblue",0.5),add=T,breaks=seq(0,1,0.1),
+	main="",xaxt='n',yaxt='n',xlab="",ylab="")
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+mtext("Major Allele Frequency",1,line=1.5,cex=0.75)
+
+hist(others.prm.sum$Pi,col=alpha("grey",0.5),breaks=seq(0,1,0.1),
+	main="",xaxt='n',yaxt='n',xlab="",ylab="")
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+hist(others.fem.sum$Pi,col=alpha("dodgerblue",0.5),add=T,breaks=seq(0,1,0.1),
+	main="",xaxt='n',yaxt='n',xlab="",ylab="")
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+mtext("Nucleotide Diversity",1,line=1.5,cex=0.75)
+hist(large.prm.sum$Pi,col=alpha("grey",0.5),breaks=seq(0,1,0.1),ylim=c(0,60),
+	main="",xaxt='n',yaxt='n',xlab="",ylab="")
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+hist(large.fem.sum$Pi,col=alpha("dodgerblue",0.5),add=T,breaks=seq(0,1,0.1),
+	main="",xaxt='n',yaxt='n',xlab="",ylab="")
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+mtext("Nucleotide Diversity",1,line=1.5,cex=0.75)
+
+hist(others.prm.sum$Fis,col=alpha("grey",0.5),breaks=seq(-1,1,0.2),
+	main="",xaxt='n',yaxt='n',xlab="",ylab="")
+axis(1,pos=0)
+axis(2,pos=-1,las=1)
+hist(others.fem.sum$Fis,col=alpha("dodgerblue",0.5),add=T,breaks=seq(-1,1,0.2),
+	main="",xaxt='n',yaxt='n',xlab="",ylab="")
+axis(1,pos=0)
+axis(2,pos=-1,las=1)
+mtext(expression(italic(F)[IS]),1,line=1.5,cex=0.75)
+hist(large.prm.sum$Fis,col=alpha("grey",0.5),breaks=seq(-1,1,0.2),
+	main="",xaxt='n',yaxt='n',xlab="",ylab="")
+axis(1,pos=0)
+axis(2,pos=-1,las=1)
+hist(large.fem.sum$Fis,col=alpha("dodgerblue",0.5),add=T,breaks=seq(-1,1,0.2),
+	main="",xaxt='n',yaxt='n',xlab="",ylab="")
+axis(1,pos=0)
+axis(2,pos=-1,las=1)
+mtext(expression(italic(F)[IS]),1,line=1.5,cex=0.75)
+
+hist(others.prm.sum$Obs.Het,col=alpha("grey",0.5),breaks=seq(0,1,0.2),
+	main="",xaxt='n',yaxt='n',xlab="",ylab="")
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+hist(others.fem.sum$Obs.Het,col=alpha("dodgerblue",0.5),add=T,breaks=seq(0,1,0.2),
+	main="",xaxt='n',yaxt='n',xlab="",ylab="")
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+mtext("Observed Heterozygosity",1,line=1.5,cex=0.75)
+hist(large.prm.sum$Obs.Het,col=alpha("grey",0.5),breaks=seq(0,1,0.2),
+	main="",xaxt='n',yaxt='n',xlab="",ylab="")
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+hist(large.fem.sum$Obs.Het,col=alpha("dodgerblue",0.5),add=T,breaks=seq(0,1,0.2),
+	main="",xaxt='n',yaxt='n',xlab="",ylab="")
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+mtext("Observed Heterozygosity",1,line=1.5,cex=0.75)
+
+dev.off()
+
+ld.heatmap(ld.dat,make.file=F)
+ld.large<-ld.dat[rownames(ld.dat) %in% large.ld,colnames(ld.dat) %in% large.ld]
+ld.heatmap(ld.large,make.file=F)
 
 #############################################################################
 #vcf<-read.delim("../stacks/batch_1.vcf",comment.char="#",sep='\t')
