@@ -6,12 +6,17 @@
 rm(list=ls())
 #install.packages(“multcomp”, dependencies=TRUE)
 library(multcomp)
+library(scales)
 setwd("E:/ubuntushare/SCA/results/parentage")
 dat<-read.delim("batemanator_input.rerun.txt")
 fem.dat<-dat[substr(dat$Fish.ID,1,3)=="FEM",]
 mal.dat<-dat[substr(dat$Fish.ID,1,3)!="FEM",]
 zdat<-read.delim("batemanator_input.rerun_with0s.txt")
 femz.dat<-zdat[substr(zdat$Fish.ID,1,3)=="FEM",]
+
+#calc the intercept
+bss<-1 #use the standardized Bateman gradient slope
+intercept<-mean(fem.dat$No.Offspring)-(mean(fem.dat$NumMates)*bss)
 
 #############################################################################
 #########PLOT 
@@ -34,15 +39,15 @@ layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
 
 #plot females with no zeros
 plot(fem.dat$NumMates,fem.dat$No.Offspring,xlim=c(0,3),ylim=c(-1,70),pch=19,
-	xlab="",ylab="",xaxt='n',yaxt='n',axes=F)
+	xlab="",ylab="",xaxt='n',yaxt='n',axes=F,col="darkorchid4")
 axis(1,at=c(0,1,2,3),c(0,1,2,3),las=1,pos=0)
 axis(2,las=1,pos=0)
 #text(x=0.25,y=65,"Females")
-clip(1,3,0,70)
-#abline(a=0,b=17.69) #use the Bateman gradient slope? 
-abline(lm(No.Offspring~NumMates,dat=fem.dat),col="darkorchid4")
 clip(0,3,0,70)
-abline(lm(No.Offspring~NumMates,dat=femz.dat),lty=2,col="darkorchid4")
+abline(a=intercept,b=17.41,col="darkorchid4") #use the Bateman gradient slope
+#abline(lm(No.Offspring~NumMates,dat=fem.dat),col="darkorchid4")
+clip(0,3,0,70)
+#abline(lm(No.Offspring~NumMates,dat=femz.dat),lty=2,col="darkorchid4")
 
 mtext("Number of Mates",1,outer=F,line=1,cex=0.85)
 mtext("Number of Offspring",2,outer=F,line=1.5,cex=0.85)
@@ -172,3 +177,57 @@ summary(incomp.tukey)
 #unrelated - father-offspring == 0         0.014920   0.006278   2.377   0.0408
 #unrelated - mother-offspring == 0         0.019097   0.013766   1.387   0.3270
                                  
+#############################################################################
+#########SELECTION DIFFERENTIALS
+#############################################################################
+morph.dat<-read.delim("selection_differential_data.txt")
+morph.dat$Mated<-morph.dat$NumMates
+morph.dat$Mated[is.na(morph.dat$Mated)]<-"Unmated"
+morph.dat$Mated[!is.na(morph.dat$Mated)]<-"Mated"
+mated.dat<-morph.dat[morph.dat$Mated=="Mated",]
+morph.dat$Fish.ID<-gsub("F(\\d+)","FEM\\1",morph.dat$Fish.ID)
+femz.dat$Fish.ID<-gsub("(FEM\\d+).*","\\1",femz.dat$Fish.ID)
+rad.morph<-morph.dat[morph.dat$Fish.ID %in% femz.dat$Fish.ID,]
+
+#t-tests
+tsvl<-t.test(SVL~Mated,rad.morph)
+tnum<-t.test(BandNum~Mated,rad.morph)
+tarea<-t.test(BandArea~Mated,rad.morph)
+#selection differentials
+snum<-mean(mated.dat$BandNum)-mean(rad.morph$BandNum)
+sarea<-mean(mated.dat$BandArea)-mean(rad.morph$BandArea)
+ssvl<-mean(mated.dat$SVL)-mean(rad.morph$SVL,na.rm=T)
+
+sem<-function(x){ 
+	x1<-x[!is.na(x)]
+	sd(x1)/sqrt(length(x1)) }
+
+table<-data.frame(MatedMean=c(mean(mated.dat$SVL),mean(mated.dat$BandNum),
+	mean(mated.dat$BandArea)),MatedSE=c(sem(mated.dat$SVL),
+	sem(mated.dat$BandNum),sem(mated.dat$BandArea)),
+	AllMean=c(mean(rad.morph$SVL,na.rm=T),mean(rad.morph$BandNum,na.rm=T),
+	mean(rad.morph$BandArea,na.rm=T)),AllSE=c(sem(rad.morph$SVL),
+	sem(rad.morph$BandNum),sem(rad.morph$BandArea)),
+	s=c(ssvl,snum,sarea),t.test=c(tsvl$p.value,tnum$p.value,tarea$p.value),
+	row.names=c("SVL","BandNum","BandArea"))
+
+write.csv(table,"SelectionDifferentials.csv")
+
+#What if I standardize the traits?
+rad.std<-rad.morph[,c("SVL","BandNum","BandArea")]
+mated.std<-mated.dat[,c("SVL","BandNum","BandArea")]
+std.by.var<-function(x){
+	x1<-x[!is.na(x)]
+	x2<-(x1-mean(x1))/sd(x1)
+	return(x2)
+}
+rad.std<-data.frame(SVL.std=c(NA,NA,std.by.var(rad.std$SVL)),
+	BandNum.std=std.by.var(rad.std$BandNum),
+	BandArea.std=std.by.var(rad.std$BandArea),row.names=rad.morph$Fish.ID)
+mated.std<-data.frame(SVL.std=std.by.var(mated.std$SVL),
+	BandNum.std=std.by.var(mated.std$BandNum),
+	BandArea.std=std.by.var(mated.std$BandArea),row.names=mated.dat$Fish.ID)
+
+snum<-mean(mated.std$BandNum)-mean(rad.std$BandNum)
+sarea<-mean(mated.std$BandArea)-mean(rad.std$BandArea)
+ssvl<-mean(mated.std$SVL)-mean(rad.std$SVL,na.rm=T)
