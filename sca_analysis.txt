@@ -39,6 +39,94 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Thursday, 29 June 2016
+For some reason the stack depth associated with individuals in the SCA dataset are 0 for many loci....there was a bug in Stacks v. 1.39.
+
+Calculated selection differentials using raw means (matedu-allu). There are no significant differences between mated and unmated using t-test. But what if I restrict it to those used in RADseq?
+
+Running Batemanater on Adam's dataset from the 2001 paper.
+	Mean Mating Success of Females (males)=1
+	Mean Reproductive Success Females (males) = 16.40
+	Sex Ratio = 0.442623
+	Estimated Number Males in Population = 55
+	Bootstrap Replicates=1000
+	Data:
+		1	23
+		1	14
+		1	16
+		2	34
+		4	54
+		3	47
+		2	38
+	
+	Results Estimate Mating Success Distribution:
+		Mean Male Mating Success: 	1.2593
+		Standard Deviation in MS: 	1.5592
+		Opp. for Sexual Selection:	1.5331
+		Std. Dev. for Simulation: 	4.0838
+	Results Estimate St. Dev. RS and Bateman Grad.
+		Mean MS:    	1.253
+		Mean RS:    	20.652
+		StDev MS:   	1.548
+		StDev RS:   	24.143
+		BateGrad:   	15.355
+		BG,no 0s:   	13.662
+		BG':           	0.931
+		Is:              	1.547
+		I:               	1.386
+		S'max:         	1.151
+		RS incr./mate:	12.005
+		StDev RS param.	3.767
+	Results Estimate and Bootstrap St Dev MS, RS and BG
+		Variable       	Estimate	LowerCI	UpperCI	(95.0%)	LowerCI	UpperCI	(90.0%)
+		MeanMS         	1.26	1.26	1.26		1.26	1.26
+		MeanRS         	20.65	20.65	20.65		20.65	20.65
+		Std.Dev.MS     	1.56	1.55	1.58		1.55	1.58
+		Std.Dev.RS     	24.46	22.15	26.45		22.48	26.32
+		OppSexSel(Is)  	1.54	1.51	1.57		1.52	1.56
+		OppSelec(I)    	1.43	1.17	1.66		1.20	1.64
+		BatemanGradient	15.55	13.78	16.93		14.19	16.89
+		BateGrad(no0s) 	14.21	9.74	17.56		10.73	17.45
+		Standardized BG	0.94	0.83	1.03		0.86	1.02
+		S'max            	1.17	1.03	1.27		1.06	1.27
+		SDmsForEstim.  	4.13	3.93	4.22		3.99	4.22
+		RS incr./mate 	13.07	7.18	18.50		8.27	18.30
+		StDev RS param	3.27	0.69	7.24		0.89	6.84
+
+		
+		
+#####Wednesday, 28 June 2016
+The vcf_to_cervus program wasn't writing the data out correctly, which is why I ran into issues. I think I've fixed it--I'm re-running it, so we'll see. 
+
+#####Thursday, 23 June 2016
+After the Evolution meeting, I've got some new ideas:
+	1. Odd LD patterns might be due to a segregating inversion (thanks Molly!)
+		-look into papers re: segregating inversions
+		-do the inversions match regions of differentiation between males and females?
+	2. I might need to use the likelihood approach for the SCA because both SCA talks at Evolution used likelihood-based approaches.
+	3. I should do an in-silico digestion of the genome to get estimates of allelic dropout etc. for the ddRAD/sdRAD paper.
+	
+#####Thursday, 16 June 2016
+Sent raw data to Cresko lab via OneDrive
+
+Thinking about how to analyze allele dropout:
+	stack depth in matches files. For each locus, count the depth and then for each locus get the distribution of depths.
+	
+	I'd consider using the vcf files because they're easier to parse, but they look like this:
+		GT:DP:AD:GL    0/0:0:0,0:.,4.16,.       0/1:8:5,3:.,11.09,.     ./.:0:.,.:.,.,. 0
+		where some individuals get genotyped but have an allele depth of 0?? doesn't make any sense. So I think the matches file will be better.
+
+Parentage analysis after talking with Adam:
+	Calculate selection differentials as mated vs non-mated females and their traits
+	Calculate bivariate mean to get intercept (meanxbeta+intercept=meany) to plot bateman gradient
+	Run CERVUS on SNPs.
+		-> Need to convert SNPs to CERVUS format. Adapting haplotypes_to_cervus to deal with vcf.
+		It says there are 48351 loci in 384 individuals..these are the MAF > 0.1 loci. I need to use the other vcf.
+	
+	
+
+
+
 #####Monday, 13 June 2016
 Populations is finished running, but it gave the "Warning: Unable to find allele depths for datum" message again.
 

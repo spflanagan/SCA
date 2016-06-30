@@ -9,7 +9,7 @@ rm(list=ls())
 prune.loci<-function(df, prop){
 	num<-apply(df,2,function(x){ length(which(x=='0')) })
 	keep<-num[num <= round(prop*nrow(df))]
-	new.df<-df[,colnames(df) %in% names(keep)]
+	new.df<-data.frame(df[,colnames(df) %in% names(keep)])
 	return(new.df)
 }
 
@@ -55,9 +55,9 @@ hwe.test<-function(df){#must be a df with two columns
 }#end hwe.test function
 
 #############################THE ACTUAL WORK################################
-setwd("E://ubuntushare//SCA//results//parentage")
+setwd("E://ubuntushare//SCA//results//parentage_biallelic")
 #large file
-genotypes<-read.delim("genotypes.txt")
+genotypes<-read.delim("snp_genotypes.txt")
 #genotypes<-read.delim("genotypes99_10loci.txt")
 
 #prune to remove non-polymorphic loci
@@ -66,11 +66,11 @@ all.poly<-consensus.num[consensus.num==0]
 poly<-genotypes[,colnames(genotypes) %in% names(all.poly)]
 
 #remove any found in less than 90% of individuals
-gen90<-prune.loci(poly,0.1)
+gen90<-prune.loci(genotypes,0.1)
 write.table(gen90,"PolymorphicIn90PercInds.txt", quote=F,sep="\t",row.names=F)
 #remove those loci not in hardy weinberg equilibrium
 hwe<-data.frame()
-for(x in seq(2,ncol(gen90),2)){
+for(x in seq(2,(ncol(gen90)-1),2)){
 	hwe<-rbind(hwe,hwe.test(gen90[,c(x,(x+1))]))
 }
 keep.loci<-hwe[as.numeric(as.character(hwe$chi.result))>0.05,]
@@ -82,12 +82,13 @@ write.table(gen.keep,"PolymorphicIn90PercIndsHWE.txt", quote=F,sep="\t",row.name
 
 #prune for higher coverage
 pruned<-prune.loci(gen.keep, 0.01)
+
 write.table(pruned,"PolymorphicIn99PercIndsHWE.txt", quote=F,sep="\t",row.names=F)
 pruned<-read.table("PolymorphicIn99PercIndsHWE.txt")
 #sample
 nloci<-c(50,100,150,300,200,400,800,1600)
 for(i in 1:10){ #do ten replicates of each set
-	for(j in 1:length(nloci)){
+	for(j in 1:length(nloci)){#used pruned for haplotypes, gen.keep for SNPs
 		cols<-sample(seq(2,ncol(pruned),2),nloci[j],replace=F)
 		cols<-c(cols,cols+1)
 		write.table(pruned[,c(1,sort(cols))],
