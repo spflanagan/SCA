@@ -61,9 +61,9 @@ genotypes<-read.delim("snp_genotypes.txt")
 #genotypes<-read.delim("genotypes99_10loci.txt")
 
 #prune to remove non-polymorphic loci
-consensus.num<-apply(genotypes,2,function(x){ length(which(x=="consensus")) })
+consensus.num<-apply(hapgen,2,function(x){ length(which(x=="consensus")) })
 all.poly<-consensus.num[consensus.num==0]
-poly<-genotypes[,colnames(genotypes) %in% names(all.poly)]
+poly<-hapgen[,colnames(hapgen) %in% names(all.poly)]
 
 #remove any found in less than 90% of individuals
 gen90<-prune.loci(genotypes,0.1)

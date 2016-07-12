@@ -146,6 +146,51 @@ for(i in 1:length(ld.order)){
 }
 
 ###FINAL FIGURE PLOTTED USING GIMP2
+
+##Look into LG12 and weird large values
+find.high.ld<-function(filename,names=T){
+	ld.dat<-read.table(filename,header=T,row.names=1)
+	groups<-c(seq(1,nrow(ld.dat),50),nrow(ld.dat))
+	high.ld<-NULL
+	last.m<-0
+	for(i in 1:(length(groups)-1)){
+		grp.m<-mean(rowMeans(ld.dat[groups[i]:groups[i+1],]))
+		if(grp.m > 0.4){
+			if(names==T){
+				high.ld<-c(high.ld,
+					row.names(ld.dat)[groups[i]:groups[(i+1)]]) 
+			}else {
+				high.ld<-c(high.ld,groups[i:(i+1)]) 
+			}
+		}
+		last.m<-grp.m
+	}
+	return(high.ld)
+}
+large.ld<-lapply(ld.files,find.high.ld,names=T)
+lg.index<-lapply(ld.files,find.high.ld,names=F)
+names(large.ld)<-ld.files
+names(lg.index)<-ld.files
+
+ld.out<-data.frame(LG=gsub("(\\w+\\d+)\\.(\\d+)\\.(\\d+)","\\1",
+	unlist(large.ld)),Pos=gsub("(\\w+\\d+)\\.(\\d+)\\.(\\d+)","\\2",
+	unlist(large.ld)),ID=gsub("(\\w+\\d+)\\.(\\d+)\\.(\\d+)","\\3",
+	unlist(large.ld)))
+ld.out$Locus<-paste(ld.out$LG,ld.out$ID,ld.out$Pos,sep=".")
+par(oma=c(2,2,2,2),mar=c(4,0,0,0))
+fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", chrom.name="Chrom"
+	, axis.size=0,bp.name="Pos",sig.col=c("green4","black"))
+axis(2,at=c(0,0.1,0.2,0.3),pos=0,las=1)
+mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1,las=0,line=1)
+last<-0
+for(i in 1:length(lgs)){
+	
+	text(x=mean(fm[fm$Chrom ==lgs[i],"Pos"]),y=-0.002,
+		labels=lgs[i], srt=45, adj=1, xpd=TRUE)
+	last<-max(fm[fm$Chrom ==lgs[i],"Pos"])
+}
+
+
 ld.dat<-read.table("ld_matrix_adults_maf1_LG12.txt",header=T,row.names=1)
 sumstats<-read.delim("../stacks/batch_1.sumstats.tsv",sep='\t',header=T,skip=4)
 sumstats$locus<-paste(sumstats$Chr,sumstats$BP,sumstats$Locus.ID,sep=".")
@@ -153,6 +198,7 @@ lg12.sum<-sumstats[sumstats$Chr %in% "LG12",]
 lg12.ld<-sumstats[sumstats$locus %in% rownames(ld.dat),]
 lg12.prm<-lg12.ld[lg12.ld$Pop.ID == "PRM",]
 lg12.fem<-lg12.ld[lg12.ld$Pop.ID == "FEM",]
+
 large.ld<-rownames(ld.dat)[rowSums(ld.dat) > 1000]
 
 large.prm.sum<-lg12.prm[lg12.prm$locus %in% large.ld,]

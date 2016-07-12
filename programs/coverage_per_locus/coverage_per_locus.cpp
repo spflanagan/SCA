@@ -76,87 +76,139 @@ public:
 	}
 };
 
+class locus_info
+{
+public:
+	string chrom, locusID;
+	int bp;
+	vector<char> maternal;
+	vector<char> paternal;
+	vector<int> depth1;
+	vector<int> depth2;
+
+	locus_info()
+	{
+		chrom = locusID = string();
+		bp = int();
+		maternal = paternal = vector<char>();
+		depth1 = depth2 = vector<int>();
+	}
+};
+
 int main()
 {
-	int end, temp1, temp2, temp3, temp4, temp5;
-	int ID, count1, loc_index, loc, allele_index;
-	size_t t, tt;
-	double temp;
-	string hap;
-	string matches_in_name, matches_out_name, line, whitelist_name;
-	ifstream matches_in, whitelist_file;
-	ofstream matches_out;
-	vector<locus> individual;
-	vector <int> whitelisted_loci;
-	bool whitelist = false;
-	bool found = false;
+	int i, ii, iii, count,het_count;
+	char alleles[2];
+	string vcf_name, line, temp,t2,tt2, out_name;
+	ifstream vcf, popmap;
+	ofstream output;
+	vector<locus_info> vcf_dat;
+	vector<string> vcf_ind_ids;
+	vector<string> pops;
+	vector<int> locus_depth;
+	vector<double> prop_het;
+	vector<double> het_depth_ratio;
 
-	matches_in.open(matches_in_name);
-	FileTest(matches_in, matches_in_name);
+	vcf_name = "../../results/stacks/batch_1.vcf";
+	out_name = "../../results/coverage_info.txt";
 
-	while (getline(matches_in, line))
+	vcf.open(vcf_name);
+	FileTest(vcf, vcf_name);
+	count = 0;
+	while (!vcf.eof())
 	{
-		if (!matches_in.eof())
+		while (universal_getline(vcf, line))
 		{
-			stringstream ss;
-			ss.str(line);
-			ss >> temp1 >> temp2 >> loc >> temp3 >> temp4 >> hap >> count1 >> temp5;
-			if (whitelist)
+			if (line.substr(0, 1) != "#" && line != "")
 			{
-				found = false;
-				for (int i = 0; i < whitelisted_loci.size(); i++)
+				vcf_dat.push_back(locus_info());
+				stringstream ss;
+				ss.str(line);
+				ss >> vcf_dat[count].chrom >> vcf_dat[count].bp >> vcf_dat[count].locusID >> alleles[0] >> alleles[1] >> temp >> temp >> temp >> temp;
+				while (ss >> temp)
 				{
-					if (whitelisted_loci[i] == loc)
-						found = true;
-				}
-			}
-			if (!whitelist || found)
-			{
-				if (individual.size() > 0)
-				{
-					loc_index = -5;
-					for (t = 0; t < individual.size(); t++)
+					if (temp.substr(0, 3) != "./.")
 					{
-						if (individual[t].cat_id == loc)
-							loc_index = t;
-					}
-					if (loc_index >= 0)
-					{
-						individual[loc_index].count++;
-						allele_index = -5;
-						for (tt = 0; tt < individual[loc_index].alleles.size(); tt++)
-						{
-							if (individual[loc_index].alleles[tt] == hap)
-								allele_index = tt;
-						}
-						if (allele_index < 0)
-						{
-							individual[loc_index].alleles.push_back(hap);
-							individual[loc_index].allele_count.push_back(count1);
-						}
-						else
-							individual[loc_index].allele_count[allele_index] = count1;
+						string allele1 = temp.substr(0, 1);
+						string allele2 = temp.substr(2, 1);
+						stringstream t;
+						t.str(temp);
+						for(i = 0; i < 3;i++)//the third one is the AD
+							getline(t, t2,':');
+						stringstream tt;
+						tt.str(t2);
+						getline(tt, tt2, ',');
+						int d1 = stoi(tt2);
+						getline(tt, tt2, ',');
+						int d2 = stoi(tt2);
+						char al1 = alleles[atoi(allele1.c_str())];
+						char al2 = alleles[atoi(allele2.c_str())];
+						vcf_dat[count].maternal.push_back(al1);
+						vcf_dat[count].paternal.push_back(al2);
+						vcf_dat[count].depth1.push_back(d1);
+						vcf_dat[count].depth2.push_back(d2);
 					}
 					else
 					{
-						individual.push_back(locus());
-						individual.back().cat_id = loc;
-						individual.back().count = 1;
-						individual.back().alleles.push_back(hap);
-						individual.back().allele_count.push_back(count1);
+						vcf_dat[count].maternal.push_back(0);
+						vcf_dat[count].paternal.push_back(0);
+						vcf_dat[count].depth1.push_back(0);
+						vcf_dat[count].depth2.push_back(0);
 					}
-				}//individual
-				else
-				{//it's the first one
-					individual.push_back(locus());
-					individual.back().cat_id = loc;
-					individual.back().count = 1;
-					individual.back().alleles.push_back(hap);
-					individual.back().allele_count.push_back(count1);
 				}
-			}//whitelist/found
-		}
-	}
-	matches_in.close();
+				count++;
+			}//if it's a data-filled line
+			if (line.substr(0, 2) == "#C")
+			{
+				stringstream ss;
+				ss.str(line);
+				ss >> temp >> temp >> temp >> temp >> temp >> temp >> temp >> temp >> temp;
+				while (ss >> temp)
+					vcf_ind_ids.push_back(temp);
+			}
+		}//while vcf line
+	}//while vcf
+	vcf.close();
+	cout << "Found " << count << " locus records.\n";
 
+	//now get coverage per locus
+	output.open(out_name);
+	cout << "\nWriting to " << out_name;
+	output << "Chrom\tBP\tLocus\tTotalDepth\tAvgDepthPerInd\tPropHet\tHetDepthRatio\tNumHet\tTotalN";
+	for (i = 0; i < vcf_dat.size(); i++)
+	{
+		locus_depth.push_back(0);
+		prop_het.push_back(0);
+		het_depth_ratio.push_back(0);
+		count = het_count= 0;
+		for (ii = 0; ii < vcf_dat[i].depth1.size(); ii++)
+		{
+			locus_depth[i] = locus_depth[i] + vcf_dat[i].depth1[ii] + vcf_dat[i].depth2[ii];
+			if (vcf_dat[i].maternal[ii] != vcf_dat[i].paternal[ii]) //they're heterozygotes
+			{
+				//prop_het[i]++;
+				double d1 = vcf_dat[i].depth1[ii];
+				double d2 = vcf_dat[i].depth2[ii];
+				het_depth_ratio[i] = het_depth_ratio[i] + (d1 /d2);
+				het_count++;
+			}
+			if (vcf_dat[i].maternal[ii] != '\0')
+				count++;
+		}
+		prop_het[i] = double(het_count) / double(count);
+		if (het_count >0)
+			het_depth_ratio[i] = double(het_depth_ratio[i]) / double(het_count);
+		else
+			het_depth_ratio[i] = 0;
+		output << '\n' << vcf_dat[i].chrom << '\t' << vcf_dat[i].bp << '\t' << vcf_dat[i].locusID << '\t' <<
+			locus_depth[i] << '\t' << locus_depth[i] / double(count) << '\t' << prop_het[i] << '\t' << het_depth_ratio[i] <<
+			'\t' << het_count << '\t' << count;
+	}
+	output.close();
+
+	
+
+	cout << "\nDone!";
+	cin >> i;
+	return 0;
 }

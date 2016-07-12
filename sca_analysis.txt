@@ -39,6 +39,61 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Tuesday, 12 July 2016
+Forgot that there were two PRM035 in PstI dataset, so I'm re-aligning those (and renamed them PRM351 and PRM352). Then I can run refmap.
+
+	bowtie2 --sensitive -x ../../scovelli_genome/ssc_chromonome -S orad_PRM351.sam -t -U orad_PRM351.fq -p 4
+	Time loading reference: 00:00:00
+	Time loading forward index: 00:00:02
+	Time loading mirror index: 00:00:01
+	Multiseed full-index search: 00:02:38
+	3714166 reads; of these:
+	  3714166 (100.00%) were unpaired; of these:
+		236508 (6.37%) aligned 0 times
+		2678649 (72.12%) aligned exactly 1 time
+		799009 (21.51%) aligned >1 times
+	93.63% overall alignment rate
+	Time searching: 00:02:41
+	Overall time: 00:02:42
+	
+	bowtie2 --sensitive -x ../../scovelli_genome/ssc_chromonome -S orad_PRM352.sam -t -U orad_PRM352.fq -p 4
+	Time loading reference: 00:00:01
+	Time loading forward index: 00:00:01
+	Time loading mirror index: 00:00:00
+	Multiseed full-index search: 00:01:56
+	2706820 reads; of these:
+	  2706820 (100.00%) were unpaired; of these:
+		142579 (5.27%) aligned 0 times
+		2030999 (75.03%) aligned exactly 1 time
+		533242 (19.70%) aligned >1 times
+	94.73% overall alignment rate
+	Time searching: 00:01:58
+	Overall time: 00:01:58
+
+
+
+
+Mapped high LD regions on the Fst plot
+
+#####Monday, 11 July 2016
+Selection differentials: standardize entire population, then calculate means for each group.
+
+Linkage disequilibrium: finding the groups of 50 loci that have a mean pairwise LD > 0.4.
+
+Meanwhile, aligning PstI to new genome
+#sarah@sarah-vb:~/sf_ubuntushare/SCA/scripts$ ./run_bowtie_orad.sh 2>&1 ../align_psti.log
+
+#####Thursday, 7 July 2016
+I've been working the past few days on characterizing the weirdness in the dataset. There is something weird going on.
+Many SNPs have oddly high heterozygosities and those SNPs are not those with the lowest likelihood ratios, nor with the lowest coverage. But they go away if I prune for HWE using PLINK, so that's something.
+
+I've also been writing code to adapt my vcf file to work with John Kelly's newest program. It is fairly straightforward but there are a few small things that took some finagling. Including renaming the individuals (which I had to do with Notepad++)...and it's only using data from the 131 pregnant males & their offspring and the 57 females. I could alter this further to include all of the males and non pregnant males but I want to get this working first. I think it will use all of the adults vs. the offspring to infer viability selection. 
+
+#####Tuesday, 5 July 2016
+The coverage analysis shows that I have a bunch of loci doing weird things (high coverage, all hets)..why would this be? I'm looking at the likelihood ratios to try to figure it out, and I'll do some pruning.
+
+Also need to look at some randomly chosen loci to look at the distribution of each allele (is it binomial?).
+
 #####Thursday, 29 June 2016
 For some reason the stack depth associated with individuals in the SCA dataset are 0 for many loci....there was a bug in Stacks v. 1.39.
 
