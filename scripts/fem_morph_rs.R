@@ -1,4 +1,5 @@
 #Author: Sarah P. Flanagan
+#Last Updated: 10 June 2016
 #Date: 14 February 2016
 #Purpose: Analyze relationships between female mating and reproductive 
 #success and female morhpometrics.
@@ -22,44 +23,49 @@ ci95<-function(vec){
 ####################################ANALYSIS##################################
 
 setwd("B:/ubuntushare/SCA/results/morphometrics/")
-morph.dat<-read.csv("scovelli11_morph.csv")
-morph.dat$Fish.ID<-gsub("S11F(\\d+)","FEM\\1",morph.dat$Fish.ID)
-mat.dat<-read.csv("../parentage/gen1600_8.maternity.sig.csv")
-mrs.dat<-read.csv("maleRS.csv")
-mrs.dat$Fish.ID<-gsub("S11PM(\\d+)","PRM\\1",mrs.dat$Fish.ID)
+fem.morph.dat<-read.csv("scovelli11_morph.csv")
+fem.morph.dat$Fish.ID<-gsub("S11F(\\d+)","FEM\\1",fem.morph.dat$Fish.ID)
+mal.morph.dat<-read.csv("MaleScovelliPhenotype.csv")
+mal.morph.dat$Fish.ID<-gsub("S11PM(\\d+)","PRM\\1",mal.morph.dat$Fish.ID)
+mal.morph.dat$Fish.ID<-gsub("S11(NPM\\d+)","\\1",mal.morph.dat$Fish.ID)
+mat.dat<-read.delim("../parentage/batemanator_input.rerun.txt")
+mat.dat$Fish.ID<-gsub("S11PM(\\d+)","PRM\\1",mat.dat$Fish.ID)
+mat.dat$Fish.ID<-gsub("S11(NPM\\d+)","\\1",mat.dat$Fish.ID)
 
-frs.dat<-merge(mrs.dat, mat.dat, by.x="Fish.ID",by.y="Father.ID",all.y=T)
-frs.dat[frs.dat$Fish.ID=="PRM035-1",c("SurvivingOff","Reduced")]<-
-	mrs.dat[mrs.dat$Fish.ID=="PRM035",2:3]
-frs.dat[frs.dat$Fish.ID=="PRM177-1",c("SurvivingOff","Reduced")]<-
-	mrs.dat[mrs.dat$Fish.ID=="PRM177",2:3]
 
-frs.dat<-frs.dat[,c("Fish.ID","SurvivingOff","Reduced", "Candidate.mother.ID")]
-fem.dat<-data.frame(NumMates=summary(frs.dat$Candidate.mother.ID),
-	SurvivingOff=tapply(frs.dat$SurvivingOff,frs.dat$Candidate.mother.ID,sum),
-	ReducedEmbryos=tapply(frs.dat$Reduced, frs.dat$Candidate.mother.ID,sum))
-fem.dat$FemID<-rownames(fem.dat)
-fem.dat<-merge(fem.dat, morph.dat,by.x="FemID",by.y="Fish.ID",all.x=T)
-fem.dat[fem.dat$FemID=="FEM001",5:11]<-
-	morph.dat[morph.dat$Fish.ID=="FEM001D",2:8]
-fem.dat[fem.dat$FemID=="FEM054-1",5:11]<-
-	morph.dat[morph.dat$Fish.ID=="FEM054",2:8]
-write.csv(fem.dat,"FemaleRSandMorph.csv")
 
-fem.dat$TailLength<-fem.dat$StdLength-fem.dat$SVL
-fem.dat$HeadLength<-fem.dat$HeadLength-fem.dat$SnoutLength
-fem.dat$TotalOff<-fem.dat$SurvivingOff+fem.dat$ReducedEmbryos
-std.fem<-data.frame(fem.dat$FemID,apply(
-	fem.dat[,c("NumMates","SurvivingOff","TotalOff")],2,relative.fit),
-	apply(fem.dat[,c("SVL","SnoutLength","SnoutDepth","TailLength",
-		"BandNum","MeanBandArea")],2,standardize.trait))
+frs.dat<-merge(fem.morph.dat, mat.dat, by="Fish.ID",all.x=T)
+frs.dat$TailLength<-frs.dat$StdLength-frs.dat$SVL
+frs.dat$HeadLength<-frs.dat$HeadLength-frs.dat$SnoutLength
+write.csv(frs.dat,"FemaleRSandMorph.csv")
+
+fem.dat<-frs.dat
+fem.dat$NumMates[is.na(fem.dat$NumMates)]<-0
+fem.dat$No.Offspring[is.na(fem.dat$No.Offspring)]<-0
+
+ms.num.aov<-lm(NumMates~BandNum,dat=fem.dat)
+anova(ms.num.aov)
+ms.area.aov<-lm(NumMates~MeanBandArea,dat=fem.dat)
+anova(ms.area.aov)
+rs.num.aov<-lm(No.Offspring~BandNum,dat=fem.dat)
+anova(rs.num.aov)
+ms.area.aov<-lm(No.Offspring~MeanBandArea,dat=fem.dat)
+anova(rs.area.aov)
+#none of these are significant.
+
+#################SELECTION DIFFERENTIALS#############################
+frs.dat<-frs.dat[!is.na(frs.dat$NumMates),]
+std.fem<-data.frame(frs.dat$Fish.ID,apply(
+	frs.dat[,c("NumMates","No.Offspring")],2,relative.fit),
+	apply(frs.dat[,c("SVL","SnoutLength","SnoutDepth","TailLength",
+		"HeadLength","BandNum","MeanBandArea")],2,standardize.trait))
 
 mprime<-apply(std.fem[,c("SVL","SnoutLength","SnoutDepth","TailLength",
-		"BandNum","MeanBandArea")],2,cov, std.fem$NumMates)
+		"HeadLength","BandNum","MeanBandArea")],2,cov, std.fem$NumMates)
 sprime<-apply(std.fem[,c("SVL","SnoutLength","SnoutDepth","TailLength",
-		"BandNum","MeanBandArea")],2,cov, std.fem$TotalOff)
-sprime2<-apply(std.fem[,c("SVL","SnoutLength","SnoutDepth","TailLength",
-		"BandNum","MeanBandArea")],2,cov, std.fem$SurvivingOff)
-sel.diff<-rbind(mprime,sprime,sprime2)
-rownames(sel.diff)<-c("Mating Success", "Total Num Embryos", "Surviving Embryos")
+		"HeadLength","BandNum","MeanBandArea")],2,cov, std.fem$No.Offspring)
+#sprime2<-apply(std.fem[,c("SVL","SnoutLength","SnoutDepth","TailLength",
+#		"HeadLength","BandNum","MeanBandArea")],2,cov, std.fem$SurvivingOff)
+sel.diff<-rbind(mprime,sprime)
+rownames(sel.diff)<-c("Mating Success", "Reproductive Success")
 write.csv(sel.diff, "SelectionDifferentials.csv")
