@@ -39,7 +39,14 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Wednesday, 13 July 2016
+ summary(cov$VarianceInDepthPerInd)
+     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+      1.4       7.6      15.3     216.3      29.9 2886000.0 
+
 #####Tuesday, 12 July 2016
+Mapped high LD regions on the Fst plot
+
 Forgot that there were two PRM035 in PstI dataset, so I'm re-aligning those (and renamed them PRM351 and PRM352). Then I can run refmap.
 
 	bowtie2 --sensitive -x ../../scovelli_genome/ssc_chromonome -S orad_PRM351.sam -t -U orad_PRM351.fq -p 4
@@ -70,10 +77,7 @@ Forgot that there were two PRM035 in PstI dataset, so I'm re-aligning those (and
 	Time searching: 00:01:58
 	Overall time: 00:01:58
 
-
-
-
-Mapped high LD regions on the Fst plot
+And ran Stacks on orad and both datasets.
 
 #####Monday, 11 July 2016
 Selection differentials: standardize entire population, then calculate means for each group.

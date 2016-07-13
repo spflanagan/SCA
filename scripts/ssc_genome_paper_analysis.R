@@ -23,7 +23,7 @@ fm.top1<-fm.plot[round(nrow(fm.plot)*0.99),"FEM.MAL"]
 fm.out1<-fm.plot[fm.plot$FEM.MAL >= fm.top1,]
 
 
-png("male-female.png",height=100,width=300,units="mm",res=300)
+png("male-female_withLD.png",height=100,width=300,units="mm",res=300)
 par(oma=c(2,2,2,2),mar=c(4,0,0,0))
 fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", chrom.name="Chrom"
 	, axis.size=0,bp.name="Pos",sig.col=c("green4","black"))
@@ -35,6 +35,8 @@ for(i in 1:length(lgs)){
 		labels=lgs[i], srt=45, adj=1, xpd=TRUE)
 	last<-max(fm[fm$Chrom ==lgs[i],"Pos"])
 }
+points(fm[fm$Locus %in% ld.out$Locus,"Pos"],
+	fm[fm$Locus %in% ld.out$Locus,"FEM.MAL"],pch=1,cex=1.2,col="dodgerblue")
 dev.off()
 
 #####STACKS FSTS
@@ -141,8 +143,11 @@ for(i in 1:length(ld.order)){
 	filename<-ld.files[gsub("ld_matrix_adults_maf1_([A-z]+\\d+).txt","\\1",
 		ld.files) %in% ld.order[i]]
 	ld.dat<-read.table(filename,header=T,row.names=1)
+	hwe.keep<-rownames(ld.dat)[gsub("(\\w+).(\\d+).(\\d+)","\\1.\\3.\\2",
+		rownames(ld.dat)) %in% hwe$LocusID]
+	ld.dat<-ld.dat[hwe.keep,hwe.keep]
 	ld.heatmap(ld.dat,
-		name=gsub("(ld_matrix_adults_maf1_[A-z]+\\d+).txt","\\1.png",filename))
+		name=gsub("(ld_matrix_adults_maf1_[A-z]+\\d+).txt","\\1.HWE.png",filename))
 }
 
 ###FINAL FIGURE PLOTTED USING GIMP2

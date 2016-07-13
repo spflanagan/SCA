@@ -110,7 +110,7 @@ int main()
 	vector<double> het_depth_ratio;
 
 	vcf_name = "../../results/stacks/batch_1.vcf";
-	out_name = "../../results/coverage_info.txt";
+	out_name = "../../results/quality_control/coverage_info.txt";
 
 	vcf.open(vcf_name);
 	FileTest(vcf, vcf_name);
@@ -174,12 +174,14 @@ int main()
 	//now get coverage per locus
 	output.open(out_name);
 	cout << "\nWriting to " << out_name;
-	output << "Chrom\tBP\tLocus\tTotalDepth\tAvgDepthPerInd\tPropHet\tHetDepthRatio\tNumHet\tTotalN";
+	output << "Chrom\tBP\tLocus\tTotalDepth\tAvgDepthPerInd\tVarianceInDepthPerInd\tPropHet\tHetDepthRatio\tNumHet\tTotalN";
 	for (i = 0; i < vcf_dat.size(); i++)
 	{
 		locus_depth.push_back(0);
 		prop_het.push_back(0);
 		het_depth_ratio.push_back(0);
+		double depth_variance = 0;
+		double depth_mean = 0;
 		count = het_count= 0;
 		for (ii = 0; ii < vcf_dat[i].depth1.size(); ii++)
 		{
@@ -200,8 +202,20 @@ int main()
 			het_depth_ratio[i] = double(het_depth_ratio[i]) / double(het_count);
 		else
 			het_depth_ratio[i] = 0;
+		//calculate variance in depth
+		depth_mean = locus_depth[i] / double(count);
+		for (ii = 0; ii < vcf_dat[i].depth1.size(); ii++)
+		{
+			if (vcf_dat[i].maternal[ii] != '\0')
+			{
+				int depth = vcf_dat[i].depth1[ii] + vcf_dat[i].depth2[ii];
+				depth_variance = depth_variance + (depth - depth_mean)*(depth - depth_mean);
+				count++;
+			}
+		}
+		depth_variance = depth_variance / double(count);
 		output << '\n' << vcf_dat[i].chrom << '\t' << vcf_dat[i].bp << '\t' << vcf_dat[i].locusID << '\t' <<
-			locus_depth[i] << '\t' << locus_depth[i] / double(count) << '\t' << prop_het[i] << '\t' << het_depth_ratio[i] <<
+			locus_depth[i] << '\t' << depth_mean << '\t' << depth_variance << '\t' << prop_het[i] << '\t' << het_depth_ratio[i] <<
 			'\t' << het_count << '\t' << count;
 	}
 	output.close();
