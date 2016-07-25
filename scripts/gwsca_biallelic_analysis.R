@@ -266,9 +266,9 @@ mo.both.out<-mo.out1[mo.out1$CompLoc %in% hd[hd$bh_3<=0.05,"Locus"],"CompLoc"]#5
 
 ####################################PLOT#####################################
 #Includes scaffolds
-#png("../fst.selection.episodes_redo_all.png",height=300,width=300,
-#	units="mm",res=300)
-pdf("../fst.selection.episodes_redo_all.pdf",height=11.5,width=11.5)
+png("../fst.selection.episodes_redo_all.png",height=300,width=300,
+	units="mm",res=300)
+#pdf("../fst.selection.episodes_redo_all.pdf",height=11.5,width=11.5)
 par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
 mo<-fst.plot(mo.plot, ci.dat=c(mo.top1,0),fst.name="MOM.FEM", 
 	chrom.name="Chrom", axis.size=0,bp.name="Pos",
@@ -333,9 +333,9 @@ legend("top",col=c("green4","purple3","dodgerblue","red"),pch=c(19,19,19,8),
 	bg="white",ncol=4,box.lty=0)
 dev.off()
 
-#png("../fst.selection.episodes_redo_lgs.png",height=300,width=300,units="mm",
-	#res=300)
-pdf("../fst.selection.episodes_redo_lgs.pdf",height=11.5,width=11.5)
+png("../fst.selection.episodes_redo_lgs.png",height=300,width=300,units="mm",
+	res=300)
+#pdf("../fst.selection.episodes_redo_lgs.pdf",height=11.5,width=11.5)
 par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
 mo<-fst.plot(mo.plot, ci.dat=c(mo.top1,0),fst.name="MOM.FEM", 
 	chrom.name="Chrom", axis.size=0,bp.name="Pos",
@@ -417,7 +417,8 @@ for(i in 1:length(lgs)){
 dev.off()
 
 ##########KELLY/MONNAHAN
-pdf("../kelly_analysis_lgs.pdf",height=7.66666,width=11.5)
+png("../kelly_analysis_lgs.png",height=200,width=300,units="mm",res=300)
+#pdf("../kelly_analysis_lgs.pdf",height=7.66666,width=11.5)
 par(mfrow=c(2,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
 hd3<-fst.plot(hd, ci.dat=c(100,-100),fst.name="lnp3", chrom.name="chrom"
 	, axis.size=0,bp.name="pos",sig.col=c("green4","black"),groups=lgs)
@@ -466,7 +467,8 @@ legend("top",col=c("green4","purple3","black"),pch=c(19,19,5),
 	bg="white",ncol=3,box.lty=0)
 dev.off()
 
-pdf("../kelly_analysis_scaffolds.pdf",height=7.66666,width=11.5)
+png("../kelly_analysis_scaffolds.png",height=200,width=300,units="mm",res=300)
+#pdf("../kelly_analysis_scaffolds.pdf",height=7.66666,width=11.5)
 par(mfrow=c(2,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
 hd3<-fst.plot(hd, ci.dat=c(100,-100),fst.name="lnp3", chrom.name="chrom"
 	, axis.size=0,bp.name="pos",sig.col=c("green4","black"))
