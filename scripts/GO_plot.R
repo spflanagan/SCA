@@ -4,7 +4,7 @@
 
 rm(list=ls())
 library(ggplot2)
-setwd("E:/ubuntushare/SCA/results/biallelic_outliers/blast")
+setwd("E:/ubuntushare/SCA/results/biallelic_outliers/rad_region/blast2go")
 
 go.plot<-function(file.list, file.name,analysis.list=NULL,pdf=FALSE){
 	dat<-read.table(file.list[1],skip=1,sep='\t')
@@ -54,9 +54,9 @@ go.plot<-function(file.list, file.name,analysis.list=NULL,pdf=FALSE){
 	dev.off()
 	return(dat)
 }	
-unique<-c("aj_","fm_","mo_")
-bio.files<-list.files(pattern="bio.txt")
-bio2.files<-list.files(pattern="bio2.txt")
+unique<-c("aj_","fm_","mo_","lrt_mo","lrt_fm")
+bio.files<-list.files(pattern="biol.txt")
+bio2.files<-list.files(pattern="biol2.txt")
 cell.files<-list.files(pattern="cell.txt")
 cell2.files<-list.files(pattern="cell2.txt")
 mol.files<-list.files(pattern="mol.txt")
@@ -69,7 +69,7 @@ cell2.unique<-cell2.files[sub("(\\w{2}_)\\w+.*","\\1",cell2.files) %in% unique]
 mol.unique<-mol.files[sub("(\\w{2}_)\\w+.*","\\1",mol.files) %in% unique]
 mol2.unique<-mol2.files[sub("(\\w{2}_)\\w+.*","\\1",mol2.files) %in% unique]
 
-comparisons<-c("aj_","fm_","mo_","sharedall_")
+comparisons<-c("ajfm_","fmmo_","shared_")
 bio.comp<-bio.files[sub("(\\w{2}_)\\w+.*","\\1",bio.files) %in% comparisons]
 bio2.comp<-bio2.files[sub("(\\w{2}_)\\w+.*","\\1",bio2.files) %in% comparisons]
 cell.comp<-cell.files[sub("(\\w{2}_)\\w+.*","\\1",cell.files) %in% comparisons]

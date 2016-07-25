@@ -143,7 +143,7 @@ int main()
 	vector<locus_statistics> pop_stats;
 
 	sumstats_name = "../../results/stacks/batch_1.sumstats.tsv";
-	ind_info_name = "E://ubuntushare//SCA//programs//gwsca_biallelic//ind_info.bi.txt";
+	ind_info_name = "../../results/biallelic/ind_info_gwsca.txt";
 	ind_info.open(ind_info_name);
 	FileTest(ind_info, ind_info_name);
 	while (universal_getline(ind_info, line))

@@ -1,16 +1,195 @@
 #Author: Sarah P. Flanagan
+#Last Updated: 19 July 2016
 #Date: 10 August 2015
 #Purpose: Analyze SCA data from Stacks
+###THESE WERE NOT USED IN THE ANALYSIS FOR THE PAPER!
 
 rm(list=ls())
 library(gplots)
-setwd("E://Docs//SCA")
+setwd("E://ubuntushare//SCA//")
+
+#############################################################################
+#***************************************************************************#
+############UNUSED ANALYSES FROM BIALLELIC GWSCA FILE########################
+#***************************************************************************#
+#############################################################################
+
+aj.ci<-c(mean(aj.prune$ADULT.JUVIE)+2.57583*sd(aj.prune$ADULT.JUVIE),
+	mean(aj.prune$ADULT.JUVIE)-2.57583*sd(aj.prune$ADULT.JUVIE))
+fm.ci<-c(mean(fm.prune$FEM.MAL)+2.57583*sd(fm.prune$FEM.MAL),
+	mean(fm.prune$FEM.MAL)-(2.57583*sd(fm.prune$FEM.MAL)))
+mo.ci<-c(mean(mo.prune$FEM.MOM)+(2.57583*sd(mo.prune$FEM.MOM)),
+	mean(mo.prune$FEM.MOM)-(2.57583*sd(mo.prune$FEM.MOM)))
+
+#top 5%
+aj.plot<-aj.prune[order(aj.prune$ADULT.JUVIE),] #ascending
+aj.top5<-c(aj.plot[round(nrow(aj.plot)*0.975),"ADULT.JUVIE"],
+	aj.plot[round(nrow(aj.plot)*0.025),"ADULT.JUVIE"])
+fm.plot<-fm.prune[order(fm.prune$FEM.MAL),]#ascending
+fm.top5<-c(fm.plot[round(nrow(fm.plot)*0.975),"FEM.MAL"],
+	fm.plot[round(nrow(fm.plot)*0.025),"FEM.MAL"])
+mo.plot<-mo.prune[order(mo.prune$FEM.MOM),]#ascending
+mo.top5<-c(mo.plot[round(nrow(mo.plot)*0.975),"FEM.MOM"],
+	mo.plot[round(nrow(mo.plot)*0.025),"FEM.MOM"])
+pj.plot<-pj.prune[order(pj.prune$JUVIE.PREGGER),]#ascending
+pj.top5<-c(pj.plot[round(nrow(pj.plot)*0.975),"JUVIE.PREGGER"],
+	pj.plot[round(nrow(pj.plot)*0.025),"JUVIE.PREGGER"])
+
+
+#get model data
+model<-read.delim("../sca_simulation_output/ddraddist.ss0.2alleles.error1.fst_out.txt")
+model.pj<-model[model$POFst>0 & model$MaleAF < 0.95 & model$MaleAF > 0.05,]
+pj.null<-c(mean(model.pj$POFst)+2.57583*sd(model.pj$POFst),
+	mean(model.pj$POFst)-2.57583*sd(model.pj$POFst))
+
+model.mo<-model[model$MFFst>0 & model$FemAF < 0.95 & model$FemAF > 0.05,]
+mo.null<-c(mean(model.mo$MFFst)+2.57583*sd(model.mo$MFFst),
+	mean(model.mo$MFFst)-(2.57583*sd(model.mo$MFFst)))
+
+model.mf<-model[model$MFFst>0 & model$MaleAF < 0.95 & model$MaleAF > 0.05,]
+mf.null<-c(mean(model.mf$MFFst)+(2.57583*sd(model.mf$MFFst)),
+	mean(model.mf$MFFst)-(2.57583*sd(model.mf$MFFst)))
+
+#plot
+png("fst.biallelic.png",height=300,width=300,units="mm",res=300)
+par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
+plot.fsts(aj.prune, ci.dat=aj.ci,fst.name="ADULT.JUVIE", chrom.name="Chrom"
+	, axis.size=0.75, bp.name="Pos")
+legend("top","Adult-Juvenile", cex=0.75,bty="n")
+plot.fsts(fm.prune, ci.dat=fm.ci,fst.name="FEM.MAL", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos")
+legend("top","Male-Female", cex=0.75,bty="n")
+plot.fsts(mo.prune, ci.dat=mo.ci,fst.name="FEM.MOM", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos")
+legend("top","Mothers-Females", cex=0.75,bty="n")
+mtext("Genomic Location", 1, outer=T, cex=1)
+mtext("Fst", 2, outer=T, cex=1)
+dev.off()
+
+#plot with the model CIs
+png("fst.biallelic.pruned.model.png",height=300,width=300,units="mm",res=300)
+par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
+plot.fsts(pj.prune, ci.dat=pj.null,fst.name="ADULT.JUVIE", chrom.name="Chrom"
+	, axis.size=0.75, bp.name="Pos")
+legend("top","Adult-Juvenile", cex=0.75,bty="n")
+plot.fsts(fm.prune, ci.dat=mf.null,fst.name="FEM.MAL", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos")
+legend("top","Male-Female", cex=0.75,bty="n")
+plot.fsts(mo.prune, ci.dat=mo.null,fst.name="FEM.MOM", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos")
+legend("top","Mothers-Females", cex=0.75,bty="n")
+mtext("Genomic Location", 1, outer=T, cex=1)
+mtext("Fst", 2, outer=T, cex=1)
+dev.off()
+
+
+
+plot.fsts($Pos, aj$ADULT.JUVIE,pch=19,col="light grey")
+points(aj.out$Pos,aj.out$ADULT.JUVIE,pch=19,col="dark grey")
+points(aj.unique$Pos,aj.unique$ADULT.JUVIE,pch=19,col="dark green")
+
+plot(fm$Pos, fm$FEM.MAL,pch=19,col="light grey")
+points(fm.out$Pos,fm.out$FEM.MAL,pch=19,col="dark grey")
+points(fm.unique$Pos,fm.unique$FEM.MAL,pch=19,col="dark green")
+
+plot(mo$Pos, mo$FEM.MOM,pch=19,col="light grey")
+points(mo.out$Pos,mo.out$FEM.MOM,pch=19,col="dark grey")
+points(mo.unique$Pos,mo.unique$FEM.MOM,pch=19,col="dark green")
+
+###top 1%
+png("fst.biallelic.pruned.top1.png",height=300,width=300,units="mm",res=300)
+par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(0,1,1,0),mgp=c(3,0.5,0), cex=1.5)
+aj<-plot.fsts(aj.prune, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", 
+	chrom.name="Chrom", axis.size=0.75, bp.name="Pos")
+legend("top","Adult-Juvenile", cex=0.75,bty="n")
+fm<-plot.fsts(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", 
+	chrom.name="Chrom", axis.size=0.75,bp.name="Pos")
+legend("top","Male-Female", cex=0.75,bty="n")
+mo<-plot.fsts(mo.plot, ci.dat=c(mo.top1,0),fst.name="FEM.MOM", 
+	chrom.name="Chrom", axis.size=0.75,bp.name="Pos")
+legend("top","Mothers-Females", cex=0.75,bty="n")
+mtext("Genomic Location", 1, outer=T, cex=1)
+mtext("Fst", 2, outer=T, cex=1)
+dev.off()
+
+aj.plot<-aj[order(aj$ADULT.JUVIE),] #ascending
+aj.top1<-aj.plot[round(nrow(aj.plot)*0.99),"ADULT.JUVIE"]
+aj.out1<-aj[aj$ADULT.JUVIE >= aj.top1,]
+fm.plot<-fm[order(fm$FEM.MAL),]#ascending
+fm.top1<-fm.plot[round(nrow(fm.plot)*0.99),"FEM.MAL"]
+fm.out1<-fm[fm$FEM.MAL >= fm.top1,]
+mo.plot<-mo[order(mo$FEM.MOM),]#ascending
+mo.top1<-mo.plot[round(nrow(mo.plot)*0.99),"FEM.MOM"]
+mo.out1<-mo[mo$FEM.MOM >= mo.top1,]
+
+aj.un1<-aj.out1[!(aj.out1$Locus %in% fm.out1$Locus) &
+	 !(aj.out1$Locus %in% mo.out1$Locus),]
+fm.un1<-fm.out1[!(fm.out1$Locus %in% aj.out1$Locus) &
+	!(fm.out1$Locus %in% mo.out1$Locus),]
+mo.un1<-mo.out1[!(mo.out1$Locus %in% aj.out1$Locus) &
+	!(mo.out1$Locus %in% fm.out1$Locus),]
+
+
+png("biallelic.top1.png",width=7.5,height=10,units="in",res=300)
+par(mfrow=c(3,1),lwd=1.3,las=1)
+plot(aj$Pos, aj$ADULT.JUVIE,pch=19,col="light grey",axes=F,xlab="",
+	ylab="")
+points(aj.out1$Pos,aj.out1$ADULT.JUVIE,pch=19,col="dark blue")
+points(aj.un1$Pos,aj.un1$ADULT.JUVIE,pch=19,col="dark green")
+axis(2,pos=0)
+mtext("Adults-Juveniles",3)
+legend("topright",c("Shared","Unique"),col=c("dark blue","dark green"),
+	pch=19,bty='n')
+plot(fm$Pos, fm$FEM.MAL,pch=19,col="light grey",axes=F,xlab="",
+	ylab="")
+points(fm.out1$Pos,fm.out1$FEM.MAL,pch=19,col="dark blue")
+points(fm.un1$Pos,fm.un1$FEM.MAL,pch=19,col="dark green")
+axis(2,pos=0)
+mtext("Females-Males",3)
+mtext("Fst",2,las=0,outer=T)
+plot(mo$Pos, mo$FEM.MOM,pch=19,col="light grey",axes=F,xlab="",
+	ylab="")
+points(mo.out1$Pos,mo.out1$FEM.MOM,pch=19,col="dark blue")
+points(mo.un1$Pos,mo.un1$FEM.MOM,pch=19,col="dark green")
+axis(2,pos=0)
+mtext("Females-Mothers",3)
+mtext("Location on genome",1,outer=T)
+dev.off()
+
+write.table(rownames(aj.un1),"unique.top1.aj.txt",quote=F,row.names=F,col.names=F)
+write.table(rownames(fm.un1),"unique.top1.fm.txt",quote=F,row.names=F,col.names=F)
+write.table(rownames(mo.un1),"unique.top1.mo.txt",quote=F,row.names=F,col.names=F)
+
+loci<-c(aj.out1$Locus,fm.out1$Locus,mo.out1$Locus)
+locus.info<-strsplit(loci,split="\\.")
+locus.info<-do.call("rbind",locus.info)
+locus.info<-data.frame(cbind(loci,locus.info))
+colnames(locus.info)<-c("Locus","Chrom","BP")
+map<-read.table("../stacks/batch_1.plink.map")
+map$Locus<-paste(map$V1,map$V4,sep=".")
+stats<-read.table("../stacks/batch_1.sumstats.tsv")
+stats$Locus<-paste(stats$V3,stats$V4,sep=".")
+
+cat.loc<-stats[stats$Locus %in% locus.info$Locus,c("V2","Locus")]
+cat.loc<-cat.loc[!duplicated(cat.loc$Locus),]
+cat.loc<-merge(cat.loc,locus.info,by="Locus")
+rad.loc<-cat.loc[!duplicated(cat.loc$V2),"V2"]
+write.table(rad.loc,"top1.out.radloc.txt",quote=F,col.names=F,row.names=F)
+write.table(levels(cat.loc$Chrom),"top1.scaffolds.txt",quote=F,col.names=F,row.names=F)
+cat.loc$start<-as.numeric(as.character(cat.loc$BP))-2500
+cat.loc$stop<-as.numeric(as.character(cat.loc$BP))+2500
+cat.loc[cat.loc$start<0,"start"]<-0
+write.table(cat.loc[,c("Chrom","start","stop")],"top1.2500bp.txt",
+	quote=F,col.names=F,row.names=F)
+
+
+
 #############################################################################
 #***************************************************************************#
 ###################################FILES#####################################
 #***************************************************************************#
 #############################################################################
-sca.map<-read.table("E://ubuntushare//SCA//sca_popmap.txt")
+sca.map<-read.table("sca_popmap.txt")
 sex<-as.character(sca.map[,2])
 sex[sex=="FEM"]<-2
 sex[sex == "NPM"]<-1
@@ -21,7 +200,7 @@ sca.ind.info<-data.frame(
 	year=rep(2011),locality=rep(1),
 	population=sca.map[,2],sex=sex,age=rep(-9),stay=rep(-9),
 	recruits=rep(-9),survival=rep(-9))
-write.table(sca.ind.info, "E://ubuntushare//SCA//sca.ind.info.txt", 
+write.table(sca.ind.info, "sca.ind.info.txt", 
 	col.names=T,row.names=T,eol='\n',sep='\t', quote=F)
 popgen.sex.fst.outliers<-read.table("E://Docs//PopGen//sex.outliers.txt", 
 	sep='\t',header=T)
@@ -915,36 +1094,6 @@ sca.ref<-merge(sca.tag[,3:5], sca.snp[,3:4],by="V3")
 colnames(sca.ref)<-c("LocusID","Chr","BP","Col")
 sca.vcf.white<-merge(sca.ref,vcf.loc,by.x=c("Chr","BP"),by.y=c("Chr","Pos"))
 
-
-###########################################################################
-#*************************************************************************#
-#############################MONNAHAN ANALYSIS#############################
-#*************************************************************************#
-###########################################################################
-#plotting het_v_depth output
-hd<-read.table("E://ubuntushare//SCA//monnahan//het_v_depth.txt", sep="\t", header=T)
-
-hd$prop.het<-hd$called.het/(hd$called.het+hd$called.homo)
-hd$prop.hom<-hd$called.homo/(hd$called.het+hd$called.homo)
-plot(hd$read.depth, hd$prop.het)
-points(hd$read.depth, hd$prop.hom, col="blue")
-
-#compare loci from gatk to those in sca
-setwd("E://ubuntushare//SCA//results//")
-
-sumstats<-read.table("stacks/batch_1.sumstats.tsv")
-inform.snps<-sumstats[,2:5]
-colnames(inform.snps)<-c("LocID","Chr","BP","Col")
-inform.snps$SNPinfo<-paste(inform.snps$Chr,"_",inform.snps$BP,sep="")
-rm(sumstats)
-
-gvcf<-read.table("monnahan/out.vcf")
-gvcf.info<-data.frame(Chr=gvcf$V1, BP=gvcf$V2)
-gvcf.info$SNPinfo<-paste(gvcf.info$Chr,"_",gvcf.info$BP,sep="")
-
-shared<-merge(gvcf.info, inform.snps, by="SNPinfo")
-write.table(shared,"stacks.gatk.shared.txt",quote=F,
-	row.names=F,col.names=F,sep="\t")
 
 
 ###########################################################################

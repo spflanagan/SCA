@@ -9,11 +9,15 @@ Outline of the approach:
 		-> scripts/convert_snps.R 
 		-> infer_maternal_contribution/infer_mat_vcf/infer_mat_vcf 
 		-> merge_vcfs.R 
-		-> gwsca_biallelic 
+		-> gwsca_biallelic/gwsca_biallelic_vcf
 		-> gwsca_biallelic_analysis.R
 		-> annotate top 5% outliers	
 			[-> blastn RAD seqs]
 			-> extract 5kb region surrounding RAD seq and blastn
+		-> Monnahan/Kelly analysis
+			-> vcf_to_sca_monnahan
+			-> ML.2016.pipefish.py
+			-> gwsca_biallelic_analysis.R
 	haplotypes:
 		-> convert_matches 
 		-> infer_maternal_contribution 
@@ -27,18 +31,96 @@ Outline of the approach:
 			-> calculate_relatedness 
 			-> band_sharing
 
-	
-2. Run GATK pipeline, prune dataset, and follow Monnahan et al. approach to analyze selection components analysis.
-	Programs utilized:
-	-> scripts/pre_gatk.sh
-	-> scripts/run_gatk.sh
-	-> use gatk to filter
-	-> het_v_depth.py
-	-> Monnahan analysis
 
 
 
 #############################################LAB BOOK###########################################
+#####Monday, 25 July 2016
+It seems that perhaps the mapping results weren't the ones I'd output before. 
+And I need to put all the shared ones together in one output.
+Another idea: include "NAs" in plot.
+I need to fix this at home, so I'll just work on writing for now.
+
+#####Sunday, 24 July 2016
+I ran Blast2Go on all of the outlier blast results. Output the 'mapping' results. 
+
+#####Friday, 22 July 2016
+THE REASON IS THAT THERE ARE MULTIPLE SNPS PER LOCUS! Duh.
+
+#####Thursday, 21 July 2016
+Ran gwsca_biallelic_vcf.
+
+Now re-doing the analysis.
+gwsca:
+	> dim(aj.out)
+	[1] 563  26
+	> dim(fm.out)
+	[1] 458  26
+	> dim(mo.out)
+	[1] 346  26
+	> aj.top1[1]
+	[1] 0.0104507
+	> fm.top1[1]
+	[1] 0.0382764
+	> mo.top1[1]
+	[1] 0.0388301
+	length(levels(factor(c(as.character(aj.fm$Locus),as.character(aj.mo$Locus),
+	+ as.character(fm.mo$Locus)))))
+	[1] 147
+	> dim(aj.unique)
+	[1] 508  26
+	> dim(fm.unique)
+	[1] 399  26
+	> dim(mo.unique)
+	[1] 263  26
+	> dim(shared.out)
+	[1]  1 26
+	> dim(aj.fm)
+	[1] 40 26
+	> dim(aj.mo)
+	[1] 51 26
+	> dim(fm.mo)
+	[1] 58 26
+
+Monnahan:
+	> dim(hd[hd$bh_0<=0.05,])#87
+	[1] 87 35
+	> dim(hd[hd$bh_2<=0.05,])#0
+	[1]  0 35
+	> dim(hd[hd$bh_3<=0.05,])#19
+	[1] 19 35
+	
+> length(fm.both.out)
+[1] 22
+> length(mo.both.out)
+[1] 5
+
+It doesn't seem to have changed anything..	So re-running it all didn't actually change the fact that the Monnahan analysis hs loci that seemingly aren't in the other dataset despite them originating from the same thing. 
+
+#####Wednesday, 20 July 2016
+Pulling out 5kb regions around the outliers from both model 0 (viability selection btwn males and females) and model 3 (sexual selection) from the LRT. 
+Need to also ID the number of SNPs per locus for the ones that aren't in gw.sum. So I'm going to re-run both of the analyses.........funnnnn
+Ran convert_snps, infer_mat_vcf, and merge_vcfs.
+Also re-ran the Monnahan analysis without the PRM077-OFF077 father-offspring pair.
+
+#####Tuesday, 19 July 2016
+Successfully identified outliers! And there are some that overlap the viability and sexual selection analyses.
+
+#####Monday, 18 July 2016
+The Kelly approach isn't working right now...getting this error:
+	Traceback (most recent call last):
+	  File "ML.2016.pipefish.py", line 265, in <module>
+		snpX=cols[1]
+	IndexError: list index out of range
+Due to the empty line at the beginning of the file. Now it's running.
+
+Re-running populations on the 'both' dataset:
+	populations -b 3 -P ./results/stacks_both/ -t 3 -M ./sca_popmap_both.txt -s -r 0.5 -p 3 -a 0.05 --fstats --vcf --genomic --plink
+
+
+#####Thursday, 14 July 2016
+Ubuntu had frozen yesterday, so today I quit and re-started ./run_refmap_both.sh
+
 #####Wednesday, 13 July 2016
  summary(cov$VarianceInDepthPerInd)
      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 

@@ -109,8 +109,8 @@ int main()
 	vector<double> prop_het;
 	vector<double> het_depth_ratio;
 
-	vcf_name = "../../results/stacks/batch_1.vcf";
-	out_name = "../../results/quality_control/coverage_info.txt";
+	vcf_name = "../../results/stacks_both/batch_3.vcf";
+	out_name = "../../results/quality_control/both_coverage_info.txt";
 
 	vcf.open(vcf_name);
 	FileTest(vcf, vcf_name);
