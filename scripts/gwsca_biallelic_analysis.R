@@ -706,10 +706,11 @@ spr.lm<-lm(as.numeric(NumSNPs)~Comparison+SNPType,data=snps.per.rad)
 #Analysis of Variance Table
 #
 #Response: as.numeric(NumSNPs)
-#              Df   Sum Sq Mean Sq F value  Pr(>F)    
-#Comparison     3     1891   630.4   3.211 0.02197 *  
-#SNPType        2    15494  7746.9  39.456 < 2e-16 ***
-#Residuals  57949 11377719   196.3   
+#              Df   Sum Sq Mean Sq F value    Pr(>F)    
+#Comparison     3     1584   527.8  2.4807   0.05907 .  
+#SNPType        2    10700  5350.1 25.1434 1.213e-11 ***
+#Residuals  76887 16360319   212.8                      
+
 
 #Do they have more Ns?
 Ns<-data.frame(rbind(do.call(cbind,lapply(
@@ -796,7 +797,7 @@ write.table(mo.lrt.dat,"../biallelic_outliers/mo_lrt_dat.txt",col.names=T,
 #############################################################################
 
 #############################BLAST2GO ANNOTATIONS############################
-setwd("../biallelic_outliers/blast")
+setwd("../biallelic_outliers/rad_region/blast2go")
 out.cnames<-c("LocID","NumSNPs","Chrom.x","Pos","Description","Length",
 	"X.Hits","e.Value","sim.mean","X.GO","GO.Names.list","Enzyme.Codes.list","Seq")
 out.names<-c("LocID","NumSNPs","Chrom","Pos","Description","Length",
@@ -901,8 +902,36 @@ mo.blast<-mo.blast[,out.cnames]
 colnames(mo.blast)<-out.names
 mo.blast$Comparison<-"Mothers-Females"
 
-unique<-rbind(aj.blast,fm.blast,mo.blast)
-write.table(unique,"../../S2_UniqueOutliersBlast.txt",row.names=F,col.names=T,
+mo.lrt.dat$start<-mo.lrt.dat$Pos-2500
+mo.lrt.dat$end<-mo.lrt.dat$Pos+2500
+mo.lrt.dat$start[mo.lrt.dat$start < 0]<-"0"
+mo.lrt.dat$SeqName<-paste(mo.lrt.dat$Chrom,"_",mo.lrt.dat$start,"-",
+	mo.lrt.dat$end,sep="")
+molrtb2g<-read.delim("lrt_mo_blast2go.txt",header=T,sep='\t')
+molrt.b2g<-merge(mo.lrt.dat,molrtb2g,by="SeqName")
+molrt.blast<-molrt.b2g
+molrt.blast$LocID<-gsub("\\w+.(\\d+).\\d+","\\1",molrt.blast$LocusID)
+colnames(molrt.blast)[colnames(molrt.blast)=="Chrom"]<-"Chrom.x"
+molrt.blast<-molrt.blast[,out.cnames]
+colnames(molrt.blast)<-out.names
+mo.blast$Comparison<-"LRT.Mothers-Females"
+
+fm.lrt.dat$start<-fm.lrt.dat$Pos-2500
+fm.lrt.dat$end<-fm.lrt.dat$Pos+2500
+fm.lrt.dat$start[fm.lrt.dat$start < 0]<-"0"
+fm.lrt.dat$SeqName<-paste(fm.lrt.dat$Chrom,"_",fm.lrt.dat$start,"-",
+	fm.lrt.dat$end,sep="")
+fmlrtb2g<-read.delim("lrt_fm_blast2go.txt",header=T,sep='\t')
+fmlrt.b2g<-merge(fm.lrt.dat,fmlrtb2g,by="SeqName")
+fmlrt.blast<-fmlrt.b2g
+fmlrt.blast$LocID<-gsub("\\w+.(\\d+).\\d+","\\1",fmlrt.blast$LocusID)
+colnames(fmlrt.blast)[colnames(fmlrt.blast)=="Chrom"]<-"Chrom.x"
+fmlrt.blast<-fmlrt.blast[,out.cnames]
+colnames(fmlrt.blast)<-out.names
+fm.blast$Comparison<-"LRT.Males-Females"
+
+unique<-rbind(aj.blast,fm.blast,mo.blast,fm.blast,mo.blast)
+write.table(unique,"../../../S2_UniqueOutliersBlast.txt",row.names=F,col.names=T,
 	sep='\t',quote=F)
 #############################################################################
 

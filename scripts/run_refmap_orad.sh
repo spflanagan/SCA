@@ -1,0 +1,70 @@
+#!/bin/bash
+
+ref_map.pl -T 4 -m 3 \
+	-X "cstacks:-n 2" \
+	-b 2 -D "SCA with oRAD only" -S \
+	-X "populations:-r 0.5"\
+	-X "populations:-a 0.05" -X "populations:--fstats" \
+	-X "populations:--vcf" -X "populations:--plink" \
+	-X "populations:-p 3" \
+	-O ./sca_popmap_orad.txt -o ./results/stacks_orad/ \
+	-s ./samples/orad_FEM007.sam \
+	-s ./samples/orad_FEM054.sam \
+	-s ./samples/orad_FEM071.sam \
+	-s ./samples/orad_PRM033.sam \
+	-s ./samples/orad_PRM095.sam \
+	-s ./samples/orad_FEM012.sam \
+	-s ./samples/orad_FEM055.sam \
+	-s ./samples/orad_FEM073.sam \
+	-s ./samples/orad_PRM034.sam \
+	-s ./samples/orad_PRM116.sam \
+	-s ./samples/orad_FEM038.sam \
+	-s ./samples/orad_FEM057.sam \
+	-s ./samples/orad_FEM075.sam \
+	-s ./samples/orad_PRM351.sam \
+	-s ./samples/orad_PRM352.sam \
+	-s ./samples/orad_PRM123.sam \
+	-s ./samples/orad_FEM040.sam \
+	-s ./samples/orad_FEM059.sam \
+	-s ./samples/orad_FEM079.sam \
+	-s ./samples/orad_PRM036.sam \
+	-s ./samples/orad_PRM135.sam \
+	-s ./samples/orad_FEM042.sam \
+	-s ./samples/orad_FEM060.sam \
+	-s ./samples/orad_FEM085.sam \
+	-s ./samples/orad_PRM037.sam \
+	-s ./samples/orad_PRM138.sam \
+	-s ./samples/orad_FEM043.sam \
+	-s ./samples/orad_FEM061.sam \
+	-s ./samples/orad_FEM086.sam \
+	-s ./samples/orad_PRM038.sam \
+	-s ./samples/orad_PRM141.sam \
+	-s ./samples/orad_FEM044.sam \
+	-s ./samples/orad_FEM062.sam \
+	-s ./samples/orad_PRM024.sam \
+	-s ./samples/orad_PRM039.sam \
+	-s ./samples/orad_PRM142.sam \
+	-s ./samples/orad_FEM045.sam \
+	-s ./samples/orad_FEM063.sam \
+	-s ./samples/orad_PRM027.sam \
+	-s ./samples/orad_PRM040.sam \
+	-s ./samples/orad_PRM157.sam \
+	-s ./samples/orad_FEM048.sam \
+	-s ./samples/orad_FEM065.sam \
+	-s ./samples/orad_PRM029.sam \
+	-s ./samples/orad_PRM052.sam \
+	-s ./samples/orad_PRM158.sam \
+	-s ./samples/orad_FEM049.sam \
+	-s ./samples/orad_FEM068.sam \
+	-s ./samples/orad_PRM030.sam \
+	-s ./samples/orad_PRM063.sam \
+	-s ./samples/orad_PRM170.sam \
+	-s ./samples/orad_FEM050.sam \
+	-s ./samples/orad_FEM069.sam \
+	-s ./samples/orad_PRM031.sam \
+	-s ./samples/orad_PRM075.sam \
+	-s ./samples/orad_PRM180.sam \
+	-s ./samples/orad_FEM053.sam \
+	-s ./samples/orad_FEM070.sam \
+	-s ./samples/orad_PRM032.sam \
+	-s ./samples/orad_PRM094.sam
