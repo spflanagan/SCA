@@ -35,6 +35,14 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Wednesday, 31 August 2016
+Reacquainting myself with the status of the SCA manuscript...
+I've delved into Kelly's python script to understand how the test of successful mothers vs adults is done:
+	it's simply a test of differing allele frequencies using measured population af as input, but assuming successful moms have a different freq than the rest of the population
+Looking into the GO analyses: although the LRT and Fst analyses have overlapping SNPs in the FM comparisons, they don't have overlapping bar graphs in the bio	bar graph
+but they do in bio2. 
+The blast results seem to be the same, though, for the same genes--so why are they so different? I'm going to have to re-do the blast2go analysis I think.
+I need to update the supplement.
 #####Monday, 25 July 2016
 It seems that perhaps the mapping results weren't the ones I'd output before. 
 And I need to put all the shared ones together in one output.

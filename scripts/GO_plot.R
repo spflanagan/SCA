@@ -4,7 +4,7 @@
 
 rm(list=ls())
 library(ggplot2)
-setwd("E:/ubuntushare/SCA/results/biallelic_outliers/rad_region/blast2go")
+setwd("../results/biallelic_outliers/rad_region/blast2go")
 
 go.plot<-function(file.list, file.name,analysis.list=NULL,pdf=FALSE){
 	dat<-read.table(file.list[1],skip=1,sep='\t')
@@ -80,11 +80,11 @@ mol2.comp<-mol2.files[sub("(\\w+)_mol2.txt","\\1",mol2.files) %in% comparisons]
 
 analysis.names<-c(expression(italic(F)[ST]~Adult-Offspring),
 	expression(italic(F)[ST]~Males-Females),"LRT Males-Females",
-	"LRT Mothers-Females",expression(italic(F)[ST]~Mothers-Females),
+	"LRT Mothers-Adults",expression(italic(F)[ST]~Mothers-Females),
 	expression(italic(F)[ST]~Shared))
 
 analysis.names<-c("Fst Adult-Offspring","Fst Males-Females",
-	"LRT Males-Females","LRT Mothers-Females","Fst Mothers-Females",
+	"LRT Males-Females","LRT Mothers-Adults","Fst Mothers-Females",
 	"Fst Shared")
 bio.dat<-go.plot(bio.comp,"Biology",analysis.names)
 bio2.dat<-go.plot(bio2.comp,"Biology2",analysis.names)
