@@ -35,6 +35,11 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Friday, 2 September 2016
+I've figured out the issue--it wasn't standardized. So I exported everything with Level 3 Biological Process. 
+
+I can't check the error rate because the files are on the external at work, but I can update the figure legends.
+
 #####Wednesday, 31 August 2016
 Reacquainting myself with the status of the SCA manuscript...
 I've delved into Kelly's python script to understand how the test of successful mothers vs adults is done:

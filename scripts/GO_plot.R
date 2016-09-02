@@ -2,9 +2,10 @@
 #Date: 9 April 2016
 #Purpose: to analyze the outlier blast2go results.
 
+getSrcDirectory(function(x) {x})
 rm(list=ls())
 library(ggplot2)
-setwd("./results/biallelic_outliers/rad_region/blast2go")
+setwd("B:/ubuntushare/SCA/results/biallelic_outliers/rad_region/blast2go")
 
 go.plot<-function(file.list, file.name,analysis.list=NULL,pdf=FALSE){
 	dat<-read.table(file.list[1],skip=1,sep='\t')
@@ -16,11 +17,13 @@ go.plot<-function(file.list, file.name,analysis.list=NULL,pdf=FALSE){
 	}
 	colnames(dat)<-c("GO","Number")
 	dat$Analysis<-analysis.names[1]
+	dat$Number<-dat$Number/sum(dat$Number)
 	for(i in 2:length(file.list)){
 		d<-read.table(file.list[i],skip=1,sep='\t')
 		d<-d[,1:2]
 		colnames(d)<-c("GO","Number")
 		d$Analysis<-analysis.names[i]
+		d$Number<-d$Number/sum(d$Number)
 		dat<-rbind(dat,d)
 	}
 
@@ -35,6 +38,7 @@ go.plot<-function(file.list, file.name,analysis.list=NULL,pdf=FALSE){
 		}
 	}
 	dat<-dat[order(dat$GO),]
+
 	library(ggplot2)
 	if(pdf==T){ 
 		file.name<-paste(file.name,'.pdf',sep="") 
@@ -49,18 +53,23 @@ go.plot<-function(file.list, file.name,analysis.list=NULL,pdf=FALSE){
 		scale_fill_brewer(palette="Set1",name="Analysis") +
 		theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
 		coord_flip() +
-		xlab("Gene Ontology") + ylab("Number")
+		xlab("Gene Ontology") + ylab("Proportion")
 	print(p)
 	dev.off()
 	return(dat)
 }	
-unique<-c("aj_","fm_","mo_","lrt_mo","lrt_fm","sharedall")
+
+
 bio.files<-list.files(pattern="biol.txt")
 bio2.files<-list.files(pattern="biol2.txt")
+bio3.files<-list.files(pattern="biol3.txt")
 cell.files<-list.files(pattern="cell.txt")
 cell2.files<-list.files(pattern="cell2.txt")
 mol.files<-list.files(pattern="mol.txt")
 mol2.files<-list.files(pattern="mol2.txt")
+
+unique<-c("aj_","fm_","mo_","lrt_mo","lrt_fm","sharedall")
+comparisons<-c("aj","fm","mo","lrt_mo","lrt_fm","sharedall")
 
 bio.unique<-bio.files[sub("(\\w{2}_)\\w+.*","\\1",bio.files) %in% unique]
 bio2.unique<-bio2.files[sub("(\\w{2}_)\\w+.*","\\1",bio2.files) %in% unique]
@@ -68,26 +77,21 @@ cell.unique<-cell.files[sub("(\\w{2}_)\\w+.*","\\1",cell.files) %in% unique]
 cell2.unique<-cell2.files[sub("(\\w{2}_)\\w+.*","\\1",cell2.files) %in% unique]
 mol.unique<-mol.files[sub("(\\w{2}_)\\w+.*","\\1",mol.files) %in% unique]
 mol2.unique<-mol2.files[sub("(\\w{2}_)\\w+.*","\\1",mol2.files) %in% unique]
-
-comparisons<-c("aj","fm","mo","lrt_mo","lrt_fm","sharedall")
 bio.comp<-bio.files[sub("(\\w+)_biol.txt","\\1",bio.files) %in% comparisons]
 bio2.comp<-bio2.files[sub("(\\w+)_biol2.txt","\\1",bio2.files) %in% comparisons]
+bio3.comp<-bio3.files[sub("(\\w+)_biol3.txt","\\1",bio3.files) %in% comparisons]
 cell.comp<-cell.files[sub("(\\w+)_cell.txt","\\1",cell.files) %in% comparisons]
 cell2.comp<-cell2.files[sub("(\\w+)_cell2.txt","\\1",cell2.files)%in% comparisons]
 mol.comp<-mol.files[sub("(\\w+)_mol.txt","\\1",mol.files) %in% comparisons]
 mol2.comp<-mol2.files[sub("(\\w+)_mol2.txt","\\1",mol2.files) %in% comparisons]
 
-
-analysis.names<-c(expression(italic(F)[ST]~Adult-Offspring),
-	expression(italic(F)[ST]~Males-Females),"LRT Males-Females",
-	"LRT Mothers-Adults",expression(italic(F)[ST]~Mothers-Females),
-	expression(italic(F)[ST]~Shared))
-
 analysis.names<-c("Fst Adult-Offspring","Fst Males-Females",
 	"LRT Males-Females","LRT Mothers-Adults","Fst Mothers-Females",
 	"Fst Shared")
+
 bio.dat<-go.plot(bio.comp,"Biology",analysis.names)
 bio2.dat<-go.plot(bio2.comp,"Biology2",analysis.names)
+bio3.dat<-go.plot(bio3.comp,"Biology3",analysis.names)
 cell.dat<-go.plot(cell.comp,"Cell",analysis.names)
 cell2.dat<-go.plot(cell2.comp,"Cell2",analysis.names)
 mol.dat<-go.plot(mol.comp,"Molecular",analysis.names)
