@@ -4,7 +4,7 @@
 
 rm(list=ls())
 library(ggplot2)
-setwd("../results/biallelic_outliers/rad_region/blast2go")
+setwd("./results/biallelic_outliers/rad_region/blast2go")
 
 go.plot<-function(file.list, file.name,analysis.list=NULL,pdf=FALSE){
 	dat<-read.table(file.list[1],skip=1,sep='\t')
@@ -101,3 +101,74 @@ bio.analysis<-data.frame(Status=unlist(lapply(bio.split,function(x){
 			out<-x$Analysis[x$Number>0]
 		}
 		return(out) })))
+
+#Get the blast2go tables
+table.files<-list.files(pattern="blast2go")
+table.files<-table.files[sub("(\\w+)_blast2go.txt","\\1",table.files) %in% comparisons]
+tables<-lapply(table.files,read.delim)
+names(tables)<-table.files
+info<-data.frame(Comparison=character(),PropShared=numeric(),PropUnique=numeric(),
+                 PropNA=numeric(), NumGenes=numeric(),stringsAsFactors=F)
+for(i in 1:length(tables)){
+  gene1<-tables[[(i)]]$Description
+  na<-length(gene1[gene1=="---NA---"])
+  gene1<-gene1[gene1!="---NA---"]
+  num.genes<-as.numeric(length(gene1[!duplicated(gene1)]))
+  shared.genes<-NULL
+  for(j in i:length(tables)){
+    if(i!=j)
+    {
+      gene2<-tables[[j]]$Description
+      gene2<-gene2[gene2!="---NA---"]
+      shared.genes<-gene1[gene1 %in% gene2]
+      shared.genes<-shared.genes[!duplicated(shared.genes)]
+    }
+  }
+  info[i,]<-c(names(tables)[i],as.numeric(length(shared.genes))/num.genes,
+              (num.genes-as.numeric(length(shared.genes)))/num.genes,na/num.genes,num.genes)
+}
+
+dat<-data.frame(Description=character(),Number=numeric(),Analysis=character(),stringsAsFactors = F)
+x<-1
+for(i in 1:nrow(info)){
+  dat[x+0,]<-c(colnames(info)[2],info[i,2],info[i,1])
+  dat[x+1,]<-c(colnames(info)[3],info[i,3],info[i,1])
+  dat[x+2,]<-c(colnames(info)[4],info[i,4],info[i,1])
+  x<-x+3
+}
+jpeg("SharedUniqueGenes",height=10,width=9,units="in",res=300)
+par(mar=c(2,2,2,2),oma=c(2,2,2,2),cex=2,lwd=1.3)
+p<-ggplot(dat,aes(factor(Description),Number,fill = factor(Analysis))) + 
+  geom_bar(stat="identity",position="dodge") + 
+  scale_fill_brewer(palette="Set1",name="Analysis") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  coord_flip() +
+  xlab("") + ylab("Proportion")
+print(p)
+dev.off()
+
+
+table<-read.delim(table.files[1])
+find.bio.desc<-function(x){
+  if(x!=""){
+    t<-unlist(strsplit(as.character(x),";"))
+    t<-unlist(lapply(t,gsub,pattern=" (\\w:)",replacement="\\1"))
+    #find and keep only those with P
+    k<-lapply(t,grep,pattern="P:")
+    tk<-t[k==1]
+    tk<-tk[!is.na(tk)]
+    p<-unlist(lapply(tk, gsub,pattern="P:(\\w+)",replacement="\\1"))
+  } else{
+    p<-0
+  }
+  return(p)
+}
+all.ps<-unlist(lapply(table$GO.Names.list, find.bio.desc))
+freq.all.ps<-table(all.ps)
+ps<-lapply(table$GO.Names.list, find.bio.desc)
+write.table("SeqName\tGOterms","BiolGOTerms.txt",col.names=F,quote=F)
+for(i in 1:length(ps)){
+  write.table(cbind(table$SeqName,"BiolGOTerms.txt",ps[i]),"BiolGOTerms.txt",append=T,col.names=F,quote=F,row.names=F,sep='\t')
+  
+}
+
