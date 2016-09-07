@@ -1,11 +1,12 @@
 #Author: Sarah P. Flanagan
-#Date: 9 April 2016
+#Date: 7 September 2016
 #Purpose: to analyze the outlier blast2go results.
 
 getSrcDirectory(function(x) {x})
 rm(list=ls())
 library(ggplot2)
-setwd("B:/ubuntushare/SCA/results/biallelic_outliers/rad_region/blast2go")
+#setwd("B:/ubuntushare/SCA/")
+setwd("../results/biallelic_outliers/rad_region/blast2go")
 
 go.plot<-function(file.list, file.name,analysis.list=NULL,pdf=FALSE){
 	dat<-read.table(file.list[1],skip=1,sep='\t')
@@ -85,13 +86,24 @@ cell2.comp<-cell2.files[sub("(\\w+)_cell2.txt","\\1",cell2.files)%in% comparison
 mol.comp<-mol.files[sub("(\\w+)_mol.txt","\\1",mol.files) %in% comparisons]
 mol2.comp<-mol2.files[sub("(\\w+)_mol2.txt","\\1",mol2.files) %in% comparisons]
 
-analysis.names<-c("Fst Adult-Offspring","Fst Males-Females",
-	"LRT Males-Females","LRT Mothers-Adults","Fst Mothers-Females",
-	"Fst Shared")
+#get the total number of hits to add to the analysis names
+n.bio3<-NULL
+for(i in 1:length(bio3.comp))
+{
+  dat<-read.table(bio3.comp[i],skip=1,sep='\t')
+  n.bio3[i]<-sum(dat$V2)
+  names(n.bio3)[i]<-bio3.comp[i]
+}
+#aj_biol3.txt        fm_biol3.txt    lrt_fm_biol3.txt    lrt_mo_biol3.txt        mo_biol3.txt sharedall_biol3.txt 
+#891                 665                 104                  19                 464                 205 
+analysis.names<-c("Fst Adult-Offspring (891)","Fst Males-Females (665)",
+	"LRT Males-Females (104)","LRT Mothers-Adults (19)","Fst Mothers-Females (464)",
+	"Fst Shared (205)")
 
 bio.dat<-go.plot(bio.comp,"Biology",analysis.names)
 bio2.dat<-go.plot(bio2.comp,"Biology2",analysis.names)
 bio3.dat<-go.plot(bio3.comp,"Biology3",analysis.names)
+bio3.dat<-go.plot(bio3.comp,"Biology3",analysis.names,pdf=T)
 cell.dat<-go.plot(cell.comp,"Cell",analysis.names)
 cell2.dat<-go.plot(cell2.comp,"Cell2",analysis.names)
 mol.dat<-go.plot(mol.comp,"Molecular",analysis.names)
