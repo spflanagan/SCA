@@ -6,7 +6,7 @@ getSrcDirectory(function(x) {x})
 rm(list=ls())
 library(ggplot2)
 #setwd("B:/ubuntushare/SCA/")
-setwd("../results/biallelic_outliers/rad_region/blast2go")
+setwd("~/Projects/SCA/results/biallelic_outliers/rad_region/blast2go")
 
 go.plot<-function(file.list, file.name,analysis.list=NULL,pdf=FALSE){
 	dat<-read.table(file.list[1],skip=1,sep='\t')
@@ -87,18 +87,21 @@ mol.comp<-mol.files[sub("(\\w+)_mol.txt","\\1",mol.files) %in% comparisons]
 mol2.comp<-mol2.files[sub("(\\w+)_mol2.txt","\\1",mol2.files) %in% comparisons]
 
 #get the total number of hits to add to the analysis names
-n.bio3<-NULL
-for(i in 1:length(bio3.comp))
+n.bio2<-NULL
+for(i in 1:length(bio2.comp))
 {
-  dat<-read.table(bio3.comp[i],skip=1,sep='\t')
-  n.bio3[i]<-sum(dat$V2)
-  names(n.bio3)[i]<-bio3.comp[i]
+  dat<-read.table(bio2.comp[i],skip=1,sep='\t')
+  n.bio2[i]<-sum(dat$V2)
+  names(n.bio2)[i]<-bio2.comp[i]
 }
 #aj_biol3.txt        fm_biol3.txt    lrt_fm_biol3.txt    lrt_mo_biol3.txt        mo_biol3.txt sharedall_biol3.txt 
 #891                 665                 104                  19                 464                 205 
-analysis.names<-c("Fst Adult-Offspring (891)","Fst Males-Females (665)",
-	"LRT Males-Females (104)","LRT Mothers-Adults (19)","Fst Mothers-Females (464)",
-	"Fst Shared (205)")
+#aj_biol2.txt        fm_biol2.txt    lrt_fm_biol2.txt    lrt_mo_biol2.txt        mo_biol2.txt sharedall_biol2.txt 
+#746                 527                  76                  13                 376                 175 
+> 
+analysis.names<-c("Fst Adult-Offspring (746)","Fst Males-Females (527)",
+	"LRT Males-Females (76)","LRT Mothers-Adults (13)","Fst Mothers-Females (376)",
+	"Fst Shared (175)")
 
 bio.dat<-go.plot(bio.comp,"Biology",analysis.names)
 bio2.dat<-go.plot(bio2.comp,"Biology2",analysis.names)
