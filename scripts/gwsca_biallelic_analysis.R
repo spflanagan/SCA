@@ -1,10 +1,10 @@
 #Author: Sarah P. Flanagan
-#Last Updated: 27 April 2016
+#Last Updated: 9 September 2016
 #Started Date: 11 February 2016
 #Purpose: Analyze the output from gwsca_biallelic.
 
-source("E:/ubuntushare/SCA/scripts/plotting_functions.R")
-setwd("E:/ubuntushare/SCA/results/biallelic")
+source("~/Projects/SCA/scripts/plotting_functions.R")
+setwd("~/Projects/SCA/results/biallelic")
 lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
 	"LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
 	"LG22")
@@ -36,6 +36,8 @@ vcf<-read.delim("../stacks/batch_1.vcf",comment.char="#",sep='\t',header=F)
 	header<-scan("../stacks/batch_1.vcf",what="character")[header.start:
 	(header.start+ncol(vcf)-1)]
 	colnames(vcf)<-header
+scaffs<-levels(as.factor(vcf[,1]))
+  scaffs[1:22]<-lgs
 #############################################################################
 
 #################################FUNCTIONS###################################
@@ -201,12 +203,12 @@ aj.plot$CompLoc<-paste(aj.plot$Chrom,aj.plot$Pos,sep=".")
 aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", 
 	chrom.name="Chrom", axis.size=0.75,bp.name="Pos",sig.col=c("red","black"))
 
-mo.plot<-mo.plot[mo.plot$Chrom %in% lgs,]
-mo.plot$Chrom<-factor(mo.plot$Chrom)
-fm.plot<-fm.plot[fm.plot$Chrom %in% lgs,]
-fm.plot$Chrom<-factor(fm.plot$Chrom)
-aj.plot<-aj.plot[aj.plot$Chrom %in% lgs,]
-aj.plot$Chrom<-factor(aj.plot$Chrom)
+#mo.plot<-mo.plot[mo.plot$Chrom %in% lgs,]
+#mo.plot$Chrom<-factor(mo.plot$Chrom)
+#fm.plot<-fm.plot[fm.plot$Chrom %in% lgs,]
+#fm.plot$Chrom<-factor(fm.plot$Chrom)
+#aj.plot<-aj.plot[aj.plot$Chrom %in% lgs,]
+#aj.plot$Chrom<-factor(aj.plot$Chrom)
 
 ###COMPARISONS
 aj.out<-aj.plot[aj.plot$ADULT.JUVIE >= aj.top1[1],]
@@ -254,9 +256,9 @@ aj.out1$CompLoc<-paste(aj.out1$Chrom,aj.out1$Pos,sep=".")
 fm.out1$CompLoc<-paste(fm.out1$Chrom,fm.out1$Pos,sep=".")
 mo.out1$CompLoc<-paste(mo.out1$Chrom,mo.out1$Pos,sep=".")
 
-aj.prune$CompLoc<-paste(aj.prune$Chrom,aj.prune$Pos,sep=".")
-fm.prune$CompLoc<-paste(fm.prune$Chrom,fm.prune$Pos,sep=".")
-mo.prune$CompLoc<-paste(mo.prune$Chrom,mo.prune$Pos,sep=".")
+aj.plot$CompLoc<-paste(aj.plot$Chrom,aj.plot$Pos,sep=".")
+fm.plot$CompLoc<-paste(fm.plot$Chrom,fm.plot$Pos,sep=".")
+mo.plot$CompLoc<-paste(mo.plot$Chrom,mo.plot$Pos,sep=".")
 gw.sum$CompLoc<-paste(gw.sum$Chrom,gw.sum$Pos,sep=".")
 
 fm.both.out<-fm.out1[fm.out1$CompLoc %in% hd[hd$bh_0<=0.05,"Locus"],"CompLoc"]#22
@@ -271,67 +273,68 @@ png("../fst.selection.episodes_redo_all.png",height=300,width=300,
 #pdf("../fst.selection.episodes_redo_all.pdf",height=11.5,width=11.5)
 par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
 mo<-fst.plot(mo.plot, ci.dat=c(mo.top1,0),fst.name="MOM.FEM", 
-	chrom.name="Chrom", axis.size=0,bp.name="Pos",
-	sig.col=c("purple3","black"))
+             chrom.name="Chrom", axis.size=0,bp.name="Pos",
+             sig.col=c("purple3","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(mo.plot$Chrom))]))
 points(mo$Pos[mo$LocID %in% shared.out$LocID & mo$MOM.FEM >= mo.top1],
-	mo$MOM.FEM[mo$LocID %in% shared.out$LocID & mo$MOM.FEM >= mo.top1],
-	col="red",pch=8)
-points(mo$Pos[mo$CompLoc %in% mo.both.out],
-	mo$MOM.FEM[mo$CompLoc %in% mo.both.out],
-	col="purple3",pch=5,cex=1)
+       mo$MOM.FEM[mo$LocID %in% shared.out$LocID & mo$MOM.FEM >= mo.top1],
+       col="red",pch=8)
+points(mo$Pos[mo$CompLoc %in% mo.both.out[substr(mo.both.out,1,2)=="LG"]],
+       mo$MOM.FEM[mo$CompLoc %in% mo.both.out[substr(mo.both.out,1,2)=="LG"]],
+       col="purple3",pch=5,cex=1)
 axis(2,at=seq(0,0.2,0.05),pos=0,las=1,cex.axis=0.75)
 legend("top","Females-Inferred Mothers",bty='n',cex=0.75,text.font=2)
 last<-0
 for(i in 1:length(lgs)){
-	text(x=mean(mo[mo$Chrom ==lgs[i],"Pos"]),y=-0.004,
-		labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
-	last<-max(mo[mo$Chrom ==lgs[i],"Pos"])
+  text(x=mean(mo[mo$Chrom ==lgs[i],"Pos"]),y=-0.004,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
+  last<-max(mo[mo$Chrom ==lgs[i],"Pos"])
 }
 
-fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL",
-	 chrom.name="Chrom", axis.size=0,bp.name="Pos",
-	sig.col=c("green4","black"))
+fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", 
+             chrom.name="Chrom", axis.size=0,bp.name="Pos",
+             sig.col=c("green4","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(fm.plot$Chrom))]))
 points(fm$Pos[fm$LocID %in% shared.out$LocID & fm$FEM.MAL >= fm.top1],
-	fm$FEM.MAL[fm$LocID %in% shared.out$LocID& fm$FEM.MAL >= fm.top1],
-	col="red",pch=8)
-points(fm$Pos[fm$CompLoc %in% fm.both.out],
-	fm$FEM.MAL[fm$CompLoc %in% fm.both.out],
-	col="green4",pch=5,cex=1)
+       fm$FEM.MAL[fm$LocID %in% shared.out$LocID& fm$FEM.MAL >= fm.top1],
+       col="red",pch=8)
+points(fm$Pos[fm$CompLoc %in% fm.both.out[substr(fm.both.out,1,2)=="LG"]],
+       fm$FEM.MAL[fm$CompLoc %in% fm.both.out[substr(fm.both.out,1,2)=="LG"]],
+       col="green4",pch=5,cex=1)
 axis(2,at=seq(0,0.2,0.1),pos=0,las=1,cex.axis=0.75)
 legend("top","Male-Female",bty='n',cex=0.75,text.font=2)
 
 last<-0
 for(i in 1:length(lgs)){
-	text(x=mean(fm[fm$Chrom ==lgs[i],"Pos"]),y=-0.004,
-		labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
-	last<-max(fm[fm$Chrom ==lgs[i],"Pos"])
+  text(x=mean(fm[fm$Chrom ==lgs[i],"Pos"]),y=-0.004,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
+  last<-max(fm[fm$Chrom ==lgs[i],"Pos"])
 }
 
 aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", 
-	chrom.name="Chrom", axis.size=0, bp.name="Pos",
-	sig.col=c("dodgerblue","black"))
+             chrom.name="Chrom", axis.size=0, bp.name="Pos",
+             sig.col=c("dodgerblue","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(aj.plot$Chrom))]))
 axis(2,at=c(0,0.025,0.05),pos=0,las=1,cex.axis=0.75)
 points(aj$Pos[aj$LocID %in% shared.out$LocID& aj$ADULT.JUVIE >= aj.top1],
-	aj$ADULT.JUVIE[aj$LocID %in% shared.out$LocID & 
-	aj$ADULT.JUVIE >= aj.top1],
-	col="red",pch=8)
+       aj$ADULT.JUVIE[aj$LocID %in% shared.out$LocID& aj$ADULT.JUVIE >= aj.top1],
+       col="red",pch=8)
 legend("top","Adult-Offspring",bty='n',cex=0.75,text.font=2)
 last<-0
 for(i in 1:length(lgs)){
-	text(x=mean(aj[aj$Chrom ==lgs[i],"Pos"]),y=-0.002,
-		labels=lgn[i],  adj=1, xpd=TRUE,srt=90,cex=0.75)
-	last<-max(aj[aj$Chrom ==lgs[i],"Pos"])
+  text(x=mean(aj[aj$Chrom ==lgs[i],"Pos"]),y=-0.002,
+       labels=lgn[i],  adj=1, xpd=TRUE,srt=90,cex=0.75)
+  last<-max(aj[aj$Chrom ==lgs[i],"Pos"])
 }
 mtext("Linkage Group", 1, outer=T, cex=1)
 mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1,las=0)
 par(fig = c(0, 1, 0, 1), oma=c(2,1,0,1), mar = c(0, 0, 0, 0), new = TRUE,
-	cex=1)
+    cex=1)
 plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
-legend("top",col=c("green4","purple3","dodgerblue","red"),pch=c(19,19,19,8),
-	c("Viability Selection","Sexual Selection","Overall Selection",
-		"Shared Outlier"),
-	bg="white",ncol=4,box.lty=0)
+legend("top",col=c("green4","purple3","dodgerblue","red","black"),
+       pch=c(19,19,19,8,5),
+       c("Viability Selection","Sexual Selection","Overall Selection",
+         "Shared Outlier","Shared with LRT"),
+       bg="white",ncol=5,box.lty=0)
 dev.off()
+
 
 png("../fst.selection.episodes_redo_lgs.png",height=300,width=300,units="mm",
 	res=300)
@@ -421,15 +424,15 @@ png("../kelly_analysis_lgs.png",height=200,width=300,units="mm",res=300)
 #pdf("../kelly_analysis_lgs.pdf",height=7.66666,width=11.5)
 par(mfrow=c(2,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
 hd3<-fst.plot(hd, ci.dat=c(100,-100),fst.name="lnp3", chrom.name="chrom"
-	, axis.size=0,bp.name="pos",sig.col=c("green4","black"),groups=lgs)
+	, axis.size=0,bp.name="pos",sig.col=c("purple3","black"),groups=lgs)
 points(hd3[hd3$bh_3<=0.05 & hd3$chrom %in% lgs,"pos"],
 	hd3[hd3$bh_3<=0.05 & hd3$chrom %in% lgs,"lnp3"],
-	col="green4",pch=19,cex=0.75)
+	col="purple3",pch=19,cex=0.75)
 points(hd3[hd3$bh_3<=0.05 & hd3$Locus %in% mo.out1$CompLoc & 
 		hd3$chrom %in% lgs,"pos"],
 	hd3[hd3$bh_3<=0.05 & hd3$Locus %in% mo.out1$CompLoc & 
 		hd3$chrom %in% lgs,"lnp3"],
-	col="green4",pch=5,cex=1)
+	col="purple3",pch=5,cex=1)
 axis(2,at=seq(0,15,5),pos=0,las=1,cex.axis=0.75)
 legend("top","Successful Females-Adults",bty='n',cex=0.75,text.font=2)
 last<-0
@@ -439,15 +442,15 @@ for(i in 1:length(lgs)){
 	last<-max(hd3[hd3$chrom ==lgs[i],"pos"])
 }
 hd0<-fst.plot(hd, ci.dat=c(100,-100),fst.name="lnp0", chrom.name="chrom"
-	, axis.size=0,bp.name="pos",sig.col=c("purple3","black"),groups=lgs)
+	, axis.size=0,bp.name="pos",sig.col=c("green4","black"),groups=lgs)
 points(hd0[hd0$bh_0<=0.05 & hd0$chrom %in% lgs,"pos"],
 	hd0[hd0$bh_0<=0.05 & hd0$chrom %in% lgs,"lnp0"],
-	col="purple3",pch=19,cex=0.75)
+	col="green4",pch=19,cex=0.75)
 points(hd0[hd0$bh_0<=0.05 & hd0$Locus %in% fm.out1$CompLoc & 
 		hd0$chrom %in% lgs,"pos"],
 	hd0[hd0$bh_0<=0.05 & hd0$Locus %in% fm.out1$CompLoc & 
 		hd0$chrom %in% lgs,"lnp0"],
-	col="purple3",pch=5,cex=1)
+	col="green4",pch=5,cex=1)
 axis(2,at=seq(0,15,5),pos=0,las=1,cex.axis=0.75)
 legend("top","Males-Females",bty='n',cex=0.75,text.font=2)
 last<-0
@@ -471,13 +474,14 @@ png("../kelly_analysis_scaffolds.png",height=200,width=300,units="mm",res=300)
 #pdf("../kelly_analysis_scaffolds.pdf",height=7.66666,width=11.5)
 par(mfrow=c(2,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
 hd3<-fst.plot(hd, ci.dat=c(100,-100),fst.name="lnp3", chrom.name="chrom"
-	, axis.size=0,bp.name="pos",sig.col=c("green4","black"))
+	, axis.size=0,bp.name="pos",sig.col=c("purple3","black"),
+	groups=as.factor(scaffs[scaffs %in% levels(factor(hd$chrom))]))
 points(hd3[hd3$bh_3<=0.05,"pos"],
 	hd3[hd3$bh_3<=0.05,"lnp3"],
-	col="green4",pch=19,cex=0.75)
+	col="purple3",pch=19,cex=0.75)
 points(hd3[hd3$bh_3<=0.05 & hd3$Locus %in% mo.out1$CompLoc,"pos"],
 	hd3[hd3$bh_3<=0.05 & hd3$Locus %in% mo.out1$CompLoc,"lnp3"],
-	col="green4",pch=5,cex=1)
+	col="purple3",pch=5,cex=1)
 axis(2,at=seq(0,15,5),pos=0,las=1,cex.axis=0.75)
 legend("top","Successful Females-Adults",bty='n',cex=0.75,text.font=2)
 last<-0
@@ -487,13 +491,14 @@ for(i in 1:length(lgs)){
 	last<-max(hd3[hd3$chrom ==lgs[i],"pos"])
 }
 hd0<-fst.plot(hd, ci.dat=c(100,-100),fst.name="lnp0", chrom.name="chrom"
-	, axis.size=0,bp.name="pos",sig.col=c("purple3","black"))
+	, axis.size=0,bp.name="pos",sig.col=c("green4","black"),
+	groups=as.factor(scaffs[scaffs %in% levels(factor(hd$chrom))]))
 points(hd0[hd0$bh_0<=0.05,"pos"],
 	hd0[hd0$bh_0<=0.05,"lnp0"],
-	col="purple3",pch=19,cex=0.75)
+	col="green4",pch=19,cex=0.75)
 points(hd0[hd0$bh_0<=0.05 & hd0$Locus %in% fm.out1$CompLoc,"pos"],
 	hd0[hd0$bh_0<=0.05 & hd0$Locus %in% fm.out1$CompLoc,"lnp0"],
-	col="purple3",pch=5,cex=1)
+	col="green4",pch=5,cex=1)
 axis(2,at=seq(0,15,5),pos=0,las=1,cex.axis=0.75)
 legend("top","Males-Females",bty='n',cex=0.75,text.font=2)
 last<-0
