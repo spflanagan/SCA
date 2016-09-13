@@ -1,0 +1,5 @@
+﻿  insilico_radseq.cpp
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(138): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(94): warning C4101: 'ii': unreferenced local variable
+  insilico_radseq.vcxproj -> \\VBOXSVR\Home\Projects\SCA\programs\insilico_radseq\Debug\insilico_radseq.exe
+  insilico_radseq.vcxproj -> \\VBOXSVR\Home\Projects\SCA\programs\insilico_radseq\Debug\insilico_radseq.pdb (Full PDB)

@@ -1,0 +1,168 @@
+Comparing ddRAD-seq and sdRAD-seq
+Notes started: 13 September 2016
+
+So, sdRAD and ddRAD have significant allele frequency differences. What to do about it?
+Outline of the approach:
+1. Analyze the two datasets together in one stacks run
+	-Variance in coverage across individuals in combined analysis
+	-Private alleles in the two datasets
+	-#reads/individual for loci
+2. Analyze each dataset separately in separate stacks runs
+	-#reads/individual
+	-overall levels of heterozygosity
+	-levels of polymorphism
+	-are the loci the same?
+3. in silico digestion of the genome, assuming different types of error.
+
+Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias, if possible
+
+
+
+
+#############################################LAB BOOK###########################################
+#####Tuesday, 13 September 2016
+Starting with the dataset when it was assembled together:
+for each locus, calculate average coverage per individual for the two datasets.
+Wrote a function to calculate coverage statistics for subsets of individuals (e.g. orad and drad).
+It also reports # of heterozygotes
+
+This way I can compare the two. I can do a paired t-test maybe?
+
+	> t.test(loc.cov$oRAD.AvgCovRatio,loc.cov$dRAD.AvgCovRatio,paired=T)
+
+		Paired t-test
+
+	data:  loc.cov$oRAD.AvgCovRatio and loc.cov$dRAD.AvgCovRatio
+	t = -28.323, df = 301960, p-value < 2.2e-16
+	alternative hypothesis: true difference in means is not equal to 0
+	95 percent confidence interval:
+	 -102.99975  -89.66692
+	sample estimates:
+	mean of the differences 
+		      -96.33334 
+
+	> summary(loc.cov$oRAD.AvgCovRatio)
+	    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.     NA's 
+	   0.000    1.060    3.035    8.521    7.641 3348.000        5 
+	> summary(loc.cov$dRAD.AvgCovRatio)
+	     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+	     0.01      2.38      5.85    104.90     13.78 221300.00 
+     
+     
+Unsure why there are some with such huge numbers--ref is 576 and alt is 0.0026 (so it makes sense)
+	> t.test(loc.cov$oRAD.AvgCovRatio,loc.cov$dRAD.AvgCovRatio,paired=T,alternative="less")
+
+		Paired t-test
+
+	data:  loc.cov$oRAD.AvgCovRatio and loc.cov$dRAD.AvgCovRatio
+	t = -28.323, df = 301960, p-value < 2.2e-16
+	alternative hypothesis: true difference in means is less than 0
+	95 percent confidence interval:
+	      -Inf -90.73871
+	sample estimates:
+	mean of the differences 
+		      -96.33334 
+		    
+How about heterozygosity?
+	> summary(loc.cov$oRAD.PropHet)
+	   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+	0.00000 0.02222 0.13560 0.18190 0.26000 1.00000       5 
+	> summary(loc.cov$dRAD.PropHet)
+	   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+	0.00000 0.08857 0.17670 0.22440 0.31690 1.00000 
+	> t.test(loc.cov$oRAD.PropHet,loc.cov$dRAD.PropHet,paired=T)
+
+		Paired t-test
+
+	data:  loc.cov$oRAD.PropHet and loc.cov$dRAD.PropHet
+	t = -108.21, df = 301960, p-value < 2.2e-16
+	alternative hypothesis: true difference in means is not equal to 0
+	95 percent confidence interval:
+	 -0.04323838 -0.04169985
+	sample estimates:
+	mean of the differences 
+		    -0.04246912 
+
+Total coverage per locus?
+	> summary(loc.cov$AvgCovTotal.y)
+	    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+	   3.523    7.750   10.850   13.480   15.240 2732.000 
+	> summary(loc.cov$AvgCovTotal.x)
+	    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.     NA's 
+	    2.75     7.46     9.27    14.44    12.04 33000.00        5 
+	> t.test(loc.cov$AvgCovTotal.x,loc.cov$AvgCovTotal.y,paired=T)
+
+		Paired t-test
+
+	data:  loc.cov$AvgCovTotal.x and loc.cov$AvgCovTotal.y
+	t = 6.1149, df = 301960, p-value = 9.675e-10
+	alternative hypothesis: true difference in means is not equal to 0
+	95 percent confidence interval:
+	 0.6491353 1.2615620
+	sample estimates:
+	mean of the differences 
+		      0.9553486 
+		      
+
+Proportion missing?
+	> t.test(loc.cov$oRAD.PropMiss,loc.cov$dRAD.PropMiss,paired=T)
+
+		Paired t-test
+
+	data:  loc.cov$oRAD.PropMiss and loc.cov$dRAD.PropMiss
+	t = 98.967, df = 301970, p-value < 2.2e-16
+	alternative hypothesis: true difference in means is not equal to 0
+	95 percent confidence interval:
+	 0.03499156 0.03640553
+	sample estimates:
+	mean of the differences 
+		     0.03569854 
+
+	> summary(loc.cov$oRAD.PropMiss)
+	   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+	 0.0000  0.1333  0.2167  0.2449  0.3333  1.0000 
+	> summary(loc.cov$dRAD.PropMiss)
+	   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+	0.00000 0.08333 0.17970 0.20920 0.30990 0.77860 
+
+Private alleles/heterozygosity
+	> dim(loc.cov[(loc.cov$AvgCovRef.x == 0 & loc.cov$AvgCovAlt.y == 0) | (loc.cov$AvgCovAlt.x == 0 & loc.cov$AvgCovRef.y == 0),])
+	[1] 2042   19
+	> dim(loc.cov[loc.cov$NumHet.x==0,])
+	[1] 72307    19
+	> dim(loc.cov[loc.cov$NumHet.y==0,])
+	[1] 14436    19
+	> dim(loc.cov[loc.cov$NumHet.x==0 & loc.cov$NumHet.y==0,])
+	[1] 10031    19
+	> dim(loc.cov[loc.cov$NumPresent.x == 0,])
+	[1]  5 19
+	
+Coverage per individual (rather than per locus):
+	> tapply(as.numeric(ind.cov$AvgCovTot), as.factor(ind.cov$Method),summary)
+	$dRAD
+	   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+	  4.537  11.410  13.520  13.630  15.570  40.290 
+
+	$oRAD
+	   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+	  8.584  11.940  14.150  15.180  17.250  34.520 
+
+	> t.test(as.numeric(ind.cov$AvgCovTot)~as.factor(ind.cov$Method))
+
+	Welch Two Sample t-test
+
+	data:  as.numeric(ind.cov$AvgCovTot) by as.factor(ind.cov$Method)
+	t = -2.1119, df = 69.224, p-value = 0.03831
+	alternative hypothesis: true difference in means is not equal to 0
+	95 percent confidence interval:
+	 -3.0138505 -0.0858908
+	sample estimates:
+	mean in group dRAD mean in group oRAD 
+			  13.62667           15.17654 
+
+Starting to work on the in silico digest as well
+->beginning with just digesting it with the restriction sites.
+Q: they are palindromic, so do I not need to use the reverse complement? Should I do the 3'->5' sequence?
+	Note: this is eating up the entire CPU on the virtual machine.
+
+
