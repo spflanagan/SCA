@@ -91,7 +91,7 @@ public:
 
 int main()
 {
-	int i,ii,count, start, end;
+	int i, ii, count, start, end;
 	string genome_name, digest_name, line, overhang;
 	restriction_enzyme enz1, enz2;
 	ifstream genome_file;
@@ -105,7 +105,7 @@ int main()
 	enz1.overhang = "G";
 	enz2.rec_seq = "GATC"; //MboI
 	enz2.overhang = "";
-	
+
 	//read in the fasta file
 	genome_file.open(genome_name);
 	FileTest(genome_file, genome_name);
@@ -165,7 +165,7 @@ int main()
 		cout << "\nFound " << count << " fragments on " << genome[i].seq_id;
 	}
 	digest_file.close();
-	
+
 	cout << "Done! Input integer to quit.\n";
 	cin >> i;
 	return 0;

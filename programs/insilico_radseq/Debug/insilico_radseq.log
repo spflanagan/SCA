@@ -1,5 +1,15 @@
-﻿  insilico_radseq.cpp
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(138): warning C4018: '<': signed/unsigned mismatch
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(94): warning C4101: 'ii': unreferenced local variable
-  insilico_radseq.vcxproj -> \\VBOXSVR\Home\Projects\SCA\programs\insilico_radseq\Debug\insilico_radseq.exe
-  insilico_radseq.vcxproj -> \\VBOXSVR\Home\Projects\SCA\programs\insilico_radseq\Debug\insilico_radseq.pdb (Full PDB)
+﻿Build started 9/13/2016 9:09:43 PM.
+     1>Project "B:\ubuntushare\SCA\programs\insilico_radseq\insilico_radseq.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt insilico_radseq.cpp
+         insilico_radseq.cpp
+     1>b:\ubuntushare\sca\programs\insilico_radseq\insilico_radseq.cpp(138): warning C4018: '<' : signed/unsigned mismatch
+     1>b:\ubuntushare\sca\programs\insilico_radseq\insilico_radseq.cpp(94): warning C4101: 'ii' : unreferenced local variable
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"B:\ubuntushare\SCA\programs\insilico_radseq\Debug\insilico_radseq.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"B:\ubuntushare\SCA\programs\insilico_radseq\Debug\insilico_radseq.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"B:\ubuntushare\SCA\programs\insilico_radseq\Debug\insilico_radseq.lib" /MACHINE:X86 Debug\insilico_radseq.obj
+         insilico_radseq.vcxproj -> B:\ubuntushare\SCA\programs\insilico_radseq\Debug\insilico_radseq.exe
+     1>Done Building Project "B:\ubuntushare\SCA\programs\insilico_radseq\insilico_radseq.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.87
