@@ -137,6 +137,7 @@ int main()
 	digest_file.open(digest_name);
 	for (i = 0; i < genome.size(); i++)
 	{
+		cout << "\n\tDigesting " << genome[i].seq_id;
 		start = 0;
 		count = 0;
 		while (start != genome[i].sequence.length())
@@ -153,12 +154,12 @@ int main()
 				end = first_enz2;
 				overhang = enz2.overhang;
 			}
-			digest.push_back(fasta_record());
-			digest.back().sequence = genome[i].sequence.substr(start, end) + overhang;
+			//digest.push_back(fasta_record());
+			//digest.back().sequence = genome[i].sequence.substr(start, end) + overhang;
 			stringstream new_name;
 			new_name << genome[i].seq_id << "_frag" << count;
-			digest.back().seq_id = new_name.str();
-			digest_file << "\n>" << digest.back().seq_id << '\n' << digest.back().sequence;
+			//digest.back().seq_id = new_name.str();
+			digest_file << "\n>" << new_name.str() << '\n' << end - start + 1;// genome[i].sequence.substr(start, end) + overhang;
 			count++;
 			start = start + 1;
 		}

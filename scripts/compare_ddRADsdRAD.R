@@ -7,6 +7,7 @@ rm(list=ls())
 library(ggplot2)
 setwd("~/Projects/SCA/results")
 
+###############FUNCTIONS####################
 parse.vcf<-function(filename){
   vcf<-read.delim(filename,comment.char="#",sep='\t',header=F,stringsAsFactors = F)
   header.start<-grep("#CHROM",scan(filename,what="character"))
@@ -35,12 +36,18 @@ vcf.cov.loc<-function(vcf.row,subset){
       as.numeric(strsplit(as.character(x),",")[[1]][1]) + 
       as.numeric(strsplit(as.character(x),",")[[1]][2])
     }))))/pres
+  var.cov<-var(as.numeric(unlist(lapply(cov[cov!=".,."],
+                                    function(x){
+                                      as.numeric(strsplit(as.character(x),",")[[1]][1]) + 
+                                        as.numeric(strsplit(as.character(x),",")[[1]][2])
+                                    }))))
   het<-unlist(lapply(vcf.row[subset],function(x){ 
     strsplit(as.character(x),split=":")[[1]][1]
   }))
   het<-length(het[het=="0/1" | het=="1/0"])
-  return(data.frame(Locus=vcf.row["ID"],NumMissing=miss, NumPresent=pres,AvgCovRef=ref,
-    AvgCovAlt=alt, AvgCovTotal=tot, NumHet=het,stringsAsFactors = F))
+  return(data.frame(Locus=vcf.row["ID"],NumMissing=miss, NumPresent=pres,PropMissing=miss/(miss+pres),
+    AvgCovRef=ref,AvgCovAlt=alt, AvgCovRatio=ref/alt,AvgCovTotal=tot, CovVariance=var.cov,
+    NumHet=het,PropHet=het/pres,stringsAsFactors = F))
 }
 
 vcf.cov.ind<-function(vcf.col){
@@ -76,27 +83,61 @@ orad<-parse.vcf("orad.vcf")
 both<-parse.vcf("both.vcf")
 
 #########ANALYSIS##########
-#coverage per locus
+###coverage per locus
+#assembled together
 o.ind<-grep("orad",colnames(both),value=T)
 d.ind<-grep("sample",colnames(both),value=T)
 
-o.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=o.ind))
-d.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=d.ind))
+bo.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=o.ind))
+bd.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=d.ind))
 loc.cov<-merge(o.cov,d.cov,by="Locus")
-loc.cov$oRAD.AvgCovRatio<-loc.cov$AvgCovRef.x/loc.cov$AvgCovAlt.x
-loc.cov$dRAD.AvgCovRatio<-loc.cov$AvgCovRef.y/loc.cov$AvgCovAlt.y
 #because some of them have no alt
 loc.cov$oRAD.AvgCovRatio[loc.cov$oRAD.AvgCovRatio=="Inf"]<-loc.cov[loc.cov$oRAD.AvgCovRatio=="Inf","AvgCovRef.x"]
 loc.cov$dRAD.AvgCovRatio[loc.cov$dRAD.AvgCovRatio=="Inf"]<-loc.cov[loc.cov$dRAD.AvgCovRatio=="Inf","AvgCovRef.y"]
-loc.cov$oRAD.PropMiss<-loc.cov$NumMissing.x/(loc.cov$NumMissing.x+loc.cov$NumPresent.x)
-loc.cov$dRAD.PropMiss<-loc.cov$NumMissing.y/(loc.cov$NumMissing.y+loc.cov$NumPresent.y)
-loc.cov$oRAD.PropHet<-loc.cov$NumHet.x/loc.cov$NumPresent.x
-loc.cov$dRAD.PropHet<-loc.cov$NumHet.y/loc.cov$NumPresent.y
+
 t.test(loc.cov$oRAD.AvgCovRatio,loc.cov$dRAD.AvgCovRatio,paired=T,alternative="less")
 #private alleles
 dim(loc.cov[(loc.cov$AvgCovRef.x == 0 & loc.cov$AvgCovAlt.y == 0) | (loc.cov$AvgCovAlt.x == 0 & loc.cov$AvgCovRef.y == 0),])#2042
 dim(loc.cov[loc.cov$NumHet.x==0,])#72307
 dim(loc.cov[loc.cov$NumHet.y==0,])#14436
+
+#assembled separately
+o.cov<-do.call("rbind",apply(orad,1,vcf.cov.loc,subset=o.ind))
+d.cov<-do.call("rbind",apply(drad,1,vcf.cov.loc,subset=d.ind))
+#compare assembly methods
+wilcox.test(loc.cov$oRAD.AvgCovRatio,o.cov$AvgCovRatio,"greater")
+wilcox.test(loc.cov$dRAD.AvgCovRatio,d.cov$AvgCovRatio,"less")
+wilcox.test(loc.cov$AvgCovTotal.x,o.cov$AvgCovTotal,"less")
+wilcox.test(loc.cov$AvgCovTotal.y,d.cov$AvgCovTotal,"greater")
+#compare sd vs dd
+lc.comp<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(o.cov)),rep("ddRAD",nrow(d.cov)),
+    rep("sdRAD",nrow(loc.cov)),rep("ddRAD",nrow(loc.cov))), 
+  Assembly=c(rep("Alone",nrow(o.cov)),rep("Alone",nrow(d.cov)),
+             rep("Together",nrow(loc.cov)),rep("Together",nrow(loc.cov))),
+  AvgCovRatio=c(o.cov$AvgCovRatio,d.cov$AvgCovRatio,loc.cov$oRAD.AvgCovRatio,loc.cov$dRAD.AvgCovRatio),
+  AvgCovTotal=c(o.cov$AvgCovTotal,d.cov$AvgCovTotal,loc.cov$AvgCovTotal.x,loc.cov$AvgCovTotal.y))
+#NumReadsPerInd=c(oc$NumReadsAlone,dc$NumReadsAlone,oc$NumReadsTogether,dc$NumReadsTogether)
+#using separate assemblies
+wilcox.test(o.cov$AvgCovRatio,d.cov$AvgCovRatio,"less")
+wilcox.test(o.cov$AvgCovTotal,d.cov$AvgCovTotal)
+#using same assembly
+wilcox.test(loc.cov$oRAD.AvgCovRatio,loc.cov$dRAD.AvgCovRatio,paired=T,"less")
+wilcox.test(loc.cov$AvgCovTotal.x,loc.cov$AvgCovTotal.y,paired=T,"less")
+summary(aov(lc.comp$AvgCovRatio~lc.comp$LibraryPrep*lc.comp$Assembly))
+
+jpeg("CoverageComparisonBoxplot.jpeg",height=7,width=7,units="in",res=300)
+par(mfrow=c(2,1),oma=c(1,2,1,1),mar=c(2,2,2,2))
+boxplot(log(lc.comp$AvgCovRatio+1)~lc.comp$LibraryPrep*lc.comp$Assembly,names=F,
+        xaxt='n',col=c("cadetblue","coral1"))
+axis(1,at=c(1.5,3.5),labels=c("Alone","Together"))
+mtext("log(Avg Ratio Num Reads\nRef/Alt)",2,outer=F,line=2)
+legend("topleft",c("sdRAD","ddRAD"),col=c("cadetblue","coral1"),pch=15,bty='n')
+boxplot(log(lc.comp$AvgCovTotal+1)~lc.comp$LibraryPrep*lc.comp$Assembly,names=F,
+        xaxt='n',col=c("cadetblue","coral1"))
+mtext("log(Avg Num Reads\nPer Individual Per Locus)",2,outer=F,line=2)
+axis(1,at=c(1.5,3.5),labels=c("Alone","Together"))
+dev.off()
+
 #Coverage by individual--assembled in one
 o.icov<-as.data.frame(do.call("rbind",apply(both[,o.ind],2,vcf.cov.ind)))
 o.icov$Method<-rep("oRAD",nrow(o.icov))
@@ -119,6 +160,121 @@ rownames(dic)<-rownames(drad.icov)
 write.table(oic,"orad_coverage.csv",quote=T,row.names=T,col.names=T,sep='\t')
 write.table(dic,"drad_coverage.csv",quote=T,row.names=T,col.names=T,sep='\t')
 write.table(ic,"both_coverage.csv",quote=T,row.names=T,col.name=T,sep='\t')
+
+oic<-read.delim("orad_coverage.csv")
+dic<-read.delim("drad_coverage.csv")
+ic<-read.delim("both_coverage.csv")
+
+ic.o<-ic[rownames(ic) %in% rownames(oic),]
+ic.d<-ic[rownames(ic) %in% rownames(dic),]
+
+mo<-merge(ic.o,oic,by=0)
+md<-merge(ic.d,dic,by=0)
+oc<-data.frame(NumReadsTogether=mo$NumReads.x,NumReadsAlone=mo$NumReads.y,row.names=mo$Row.names)
+dc<-data.frame(NumReadsTogether=md$NumReads.x,NumReadsAlone=md$NumReads.y,row.names=md$Row.names)
+t.test(oc$NumReadsTogether,oc$NumReadsAlone,paired=T,alternative="less")
+t.test(dc$NumReadsTogether,dc$NumReadsAlone,paired=T,alternative="greater")
+
+#plot
+jpeg("CoverageAssemblyMethodComp.jpeg",height=10.5,width=7,units="in",res=300)
+par(mfrow=c(3,2),oma=c(1,1,1,1),mar=c(2,2,2,2))
+hist(log(loc.cov$AvgCovTotal.x),col=rgb(0,0,1,0.5),main="sdRAD-seq",axes=F,xlab="",ylab="",
+     xlim=c(0,10.5),ylim=c(0,200000),breaks=seq(0,10.5,0.5))
+hist(log(o.cov$AvgCovTotal), col=rgb(1,0,0,0.5), add=T,breaks=seq(0,10.5,0.5))
+axis(1,pos=0)
+axis(2,pos=0)
+mtext("Number of Loci",2,outer=F,line=1,cex=0.75)
+hist(log(loc.cov$AvgCovTotal.y), col=rgb(0,0,1,0.5),main="ddRAD-seq",axes=F,ylab="",xlab="",
+     xlim=c(0,8),ylim=c(0,150000),breaks=seq(0,8,0.5))
+hist(log(d.cov$AvgCovTotal), col=rgb(1,0,0,0.5), add=T,breaks=seq(0,8,0.5))
+axis(1,pos=0)
+axis(2,pos=0)
+mtext("ln(Average Number of Reads Per Individual)",1,outer=T,line=-52,cex=0.75)
+
+
+hist(log(loc.cov$oRAD.AvgCovRatio),col=rgb(0,0,1,0.5),main="",axes=F,xlab="",ylab="",breaks=seq(-10,10,1),ylim=c(0,150000))
+hist(log(o.cov$AvgCovRatio), col=rgb(1,0,0,0.5), add=T,breaks=seq(-10,10,1))
+axis(1,pos=0)
+axis(2,pos=-10)
+mtext("Number of Loci",2,outer=F,line=1,cex=0.75)
+hist(log(loc.cov$dRAD.AvgCovRatio), col=rgb(0,0,1,0.5),main="",axes=F,ylab="",xlab="",breaks=seq(-5,14,1),ylim=c(0,150000))
+hist(log(d.cov$AvgCovRatio), col=rgb(1,0,0,0.5), add=T,breaks=seq(-5,14,1))
+axis(1,pos=0)
+axis(2,pos=-5)
+mtext("ln(Average Number of Reads in Ref/Avg Number of Reads in Alt)",1,outer=T,line=-27,cex=0.75)
+
+
+hist(oc$NumReadsTogether, col=rgb(0,0,1,0.5), ylim=c(0,30), breaks=seq(200000,8000000,400000),
+     main="",axes=F,xlim=c(0,8000000))
+hist(oc$NumReadsAlone,col=rgb(1,0,0,0.5), add=T,breaks=seq(200000,8000000,400000))
+axis(1,pos=0)
+axis(2,pos=0)
+mtext("Number of Individuals",2,outer=F,line=1,cex=0.75)
+hist(dc$NumReadsTogether, col=rgb(0,0,1,0.5), ylim=c(0,150), breaks=seq(2000,4000000,200000),
+     main="",axes=F)
+hist(dc$NumReadsAlone,col=rgb(1,0,0,0.5), add=T,breaks=seq(2000,4000000,200000))
+axis(1,pos=0)
+axis(2,pos=0)
+legend("topright",c("Assembled Together", "Assembled Separately"),pch=15,col=c(rgb(1,0,0,0.5),rgb(0,0,1,0.5)),bty='n')
+mtext("Total Number of Reads",1,outer=T,cex=0.75)
+dev.off()
+
+wilcox.test(oc$NumReadsTogether,oc$NumReadsAlone,paired=T,alternative="less")
+wilcox.test(dc$NumReadsTogether,dc$NumReadsAlone,paired=T,alternative="greater")
+
+
+###Variance in coverage
+#assembled separately
+hist(log(o.cov$CovVariance),col=alpha("cadetblue",0.5))
+hist(log(d.cov$CovVariance),col=alpha("coral1",0.5),add=T)
+boxplot(log(o.cov$CovVariance+1),log(d.cov$CovVariance+1),col=c("cadetblue","coral1"),
+        names=c("sdRAD","ddRAD"),ylab="Variance in Coverage",ylim=c(0,22))
+text(x=c(1,2),y=c(21,21),c("250425","69109"))
+wilcox.test(log(o.cov$CovVariance+1),log(d.cov$CovVariance+1),"greater")
+
+d.sub<-d.cov[sample(nrow(d.cov),30000,replace=F),]
+o.sub<-o.cov[sample(nrow(o.cov),30000,replace=F),]
+wilcox.test(log(o.sub$CovVariance+1),log(d.sub$CovVariance+1),"greater")
+boxplot(log(o.sub$CovVariance+1),log(d.sub$CovVariance+1),col=c("cadetblue","coral1"),
+        names=c("sdRAD","ddRAD"),ylab="Variance in Coverage")
+
+#assembled together
+wilcox.test(bo.cov$CovVariance,bd.cov$CovVariance,paired=T,"less")
+
+
+###Heterozygosity
+#assembled separately
+hist(o.cov$PropHet,col=alpha("cadetblue",0.5))
+hist(d.cov$PropHet,col=alpha("coral1",0.5),add=T)
+boxplot(o.cov$PropHet,d.cov$PropHet,col=c("cadetblue","coral1"),
+        names=c("sdRAD","ddRAD"),ylab="Proportion Heterozygous")
+text(x=c(1,2),y=c(21,21),c("250425","69109"))
+wilcox.test(o.cov$PropHet,d.cov$PropHet,"greater")
+
+#assembled together
+wilcox.test(bo.cov$PropHet,bd.cov$PropHet,paired=T,"less")
+
+
+lc.comp<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(o.cov)),rep("ddRAD",nrow(d.cov)),
+                                  rep("sdRAD",nrow(bo.cov)),rep("ddRAD",nrow(bd.cov))), 
+                    Assembly=c(rep("Alone",nrow(o.cov)),rep("Alone",nrow(d.cov)),
+                               rep("Together",nrow(bo.cov)),rep("Together",nrow(bd.cov))),
+                    CovVariance=c(o.cov$CovVariance,d.cov$CovVariance,bo.cov$CovVariance,bd.cov$CovVariance),
+                    PropHet=c(o.cov$PropHet,d.cov$PropHet,bo.cov$PropHet,bd.cov$PropHet))
+
+summary(aov(log(lc.comp$CovVariance+1)~lc.comp$LibraryPrep*lc.comp$Assembly))
+summary(aov(lc.comp$PropHet~lc.comp$LibraryPrep*lc.comp$Assembly))
+
+par(mfrow=c(2,1),oma=c(1,2,1,1),mar=c(2,2,2,2))
+boxplot(log(lc.comp$CovVariance+1)~lc.comp$LibraryPrep*lc.comp$Assembly,col=c("cadetblue","coral1"),
+        names=F,xaxt='n')
+axis(1,at=c(1.5,3.5),c("Alone","Together"))
+mtext("log(Variance in Coverage)",2,outer=F,line=2)
+legend("topleft",ncol=2,c("sdRAD","ddRAD"),pch=15,col=c("cadetblue","coral1"),bty='n')
+boxplot(lc.comp$PropHet~lc.comp$LibraryPrep*lc.comp$Assembly,col=c("cadetblue","coral1"),
+        names=F,xaxt='n')
+mtext("Proportion Heterozygotes",2,outer=F,line=2)
+axis(1,at=c(1.5,3.5),c("Alone","Together"))
 ############################ORIGINAL INVESTIGATION###################################
 setwd("E:/ubuntushare/SCA/results/biallelic/both_datasets/")
 summary<-read.delim("gwsca_summary_datasets.txt")

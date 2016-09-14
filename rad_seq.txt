@@ -20,6 +20,183 @@ Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias
 
 
 #############################################LAB BOOK###########################################
+#####Wednesday, 14 September 2016
+Is the total number of reads per individual different when assembled together vs separately?
+	> wilcox.test(oc$NumReadsTogether,oc$NumReadsAlone,paired=T,alternative="less")
+
+		Wilcoxon signed rank test with continuity correction
+
+	data:  oc$NumReadsTogether and oc$NumReadsAlone
+	V = 0, p-value = 8.357e-12
+	alternative hypothesis: true location shift is less than 0
+
+	> wilcox.test(dc$NumReadsTogether,dc$NumReadsAlone,paired=T,alternative="greater")
+
+		Wilcoxon signed rank test with continuity correction
+
+	data:  dc$NumReadsTogether and dc$NumReadsAlone
+	V = 73920, p-value < 2.2e-16
+	alternative hypothesis: true location shift is greater than 0
+
+I should plot the by-locus coverage too.
+OK--maybe put all of them together so it's a comparison of the two tests.
+For the by-locus coverage, they all seem pretty similar whether assembled together or separately.
+	> wilcox.test(loc.cov$oRAD.AvgCovRatio,o.cov$AvgCovRatio)#less
+
+		Wilcoxon rank sum test with continuity correction
+
+	data:  loc.cov$oRAD.AvgCovRatio and o.cov$AvgCovRatio
+	W = 3.0348e+10, p-value < 2.2e-16
+	alternative hypothesis: true location shift is not equal to 0
+
+	> wilcox.test(loc.cov$dRAD.AvgCovRatio,d.cov$AvgCovRatio)#greater
+
+		Wilcoxon rank sum test with continuity correction
+
+	data:  loc.cov$dRAD.AvgCovRatio and d.cov$AvgCovRatio
+	W = 1.1963e+10, p-value < 2.2e-16
+	alternative hypothesis: true location shift is not equal to 0
+
+	> wilcox.test(loc.cov$AvgCovTotal.x,o.cov$AvgCovTotal)#less
+
+		Wilcoxon rank sum test with continuity correction
+
+	data:  loc.cov$AvgCovTotal.x and o.cov$AvgCovTotal
+	W = 3.7692e+10, p-value = 0.04538
+	alternative hypothesis: true location shift is not equal to 0
+
+	> wilcox.test(loc.cov$AvgCovTotal.y,d.cov$AvgCovTotal)#greater
+
+		Wilcoxon rank sum test with continuity correction
+
+	data:  loc.cov$AvgCovTotal.y and d.cov$AvgCovTotal
+	W = 1.0705e+10, p-value < 2.2e-16
+	alternative hypothesis: true location shift is not equal to 0
+
+	BUT statistically, sdRAD has lower coverage when assembled together and ddRAD has lower coverage when assembled separately.
+	
+sdRAD has lower coverage than ddRAD
+	> wilcox.test(o.cov$AvgCovTotal,d.cov$AvgCovTotal,"less")
+
+		Wilcoxon rank sum test with continuity correction
+
+	data:  o.cov$AvgCovTotal and d.cov$AvgCovTotal
+	W = 7379800000, p-value < 2.2e-16
+	alternative hypothesis: true location shift is less than 0
+but sdRAD is less skewed toward reference allele than ddRAD
+	> wilcox.test(o.cov$AvgCovRatio,d.cov$AvgCovRatio,"less")
+
+		Wilcoxon rank sum test with continuity correction
+
+	data:  o.cov$AvgCovRatio and d.cov$AvgCovRatio
+	W = 8592100000, p-value = 0.002174
+	alternative hypothesis: true location shift is less than 0
+..regardless of whether they're assembled together or separately. (can I do this analysis somehow more elegantly?)
+	> summary(aov(lc.comp$AvgCovRatio~lc.comp$LibraryPrep*lc.comp$Assembly))
+											 Df    Sum Sq   Mean Sq F value Pr(>F)    
+	lc.comp$LibraryPrep                       1 1.385e+09 1.385e+09  1213.1 <2e-16 ***
+	lc.comp$Assembly                          1 1.760e+08 1.760e+08   154.1 <2e-16 ***
+	lc.comp$LibraryPrep:lc.comp$Assembly      1 3.688e+08 3.688e+08   322.9 <2e-16 ***
+	Residuals                            923467 1.055e+12 1.142e+06                   
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+	5 observations deleted due to missingness
+	> summary(aov(lc.comp$AvgCovTotal~lc.comp$LibraryPrep*lc.comp$Assembly))
+											 Df    Sum Sq Mean Sq F value   Pr(>F)    
+	lc.comp$LibraryPrep                       1 3.464e+04   34637   7.837  0.00512 ** 
+	lc.comp$Assembly                          1 1.111e+06 1110605 251.273  < 2e-16 ***
+	lc.comp$LibraryPrep:lc.comp$Assembly      1 2.880e+05  287958  65.150 6.95e-16 ***
+	Residuals                            923467 4.082e+09    4420                     
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+	5 observations deleted due to missingness
+	
+Variance in coverage:
+	oRAD has higher variance in coverage..
+	> wilcox.test(log(o.cov$CovVariance+1),log(d.cov$CovVariance+1),"greater")
+
+		Wilcoxon rank sum test with continuity correction
+
+	data:  log(o.cov$CovVariance + 1) and log(d.cov$CovVariance + 1)
+	W = 8914700000, p-value < 2.2e-16
+	alternative hypothesis: true location shift is greater than 0
+
+	->due to more loci? subsample both of them-->still sig, but not as much (probably real??)
+	->could be due to PCR duplicates rather than allele dropout--what does heterozygosity do?
+	
+ddRAD has higher proportion of heterozygotes at loci.
+	> wilcox.test(o.cov$PropHet,d.cov$PropHet,"less")
+
+		Wilcoxon rank sum test with continuity correction
+
+	data:  o.cov$PropHet and d.cov$PropHet
+	W = 7296700000, p-value < 2.2e-16
+	alternative hypothesis: true location shift is less than 0
+
+Assembled together:
+	> wilcox.test(bo.cov$CovVariance,bd.cov$CovVariance,paired=T,"less")
+
+		Wilcoxon signed rank test with continuity correction
+
+	data:  bo.cov$CovVariance and bd.cov$CovVariance
+	V = 1727900000, p-value < 2.2e-16
+	alternative hypothesis: true location shift is less than 0
+	
+	> wilcox.test(bo.cov$PropHet,bd.cov$PropHet,paired=T,"less")
+
+		Wilcoxon signed rank test with continuity correction
+
+	data:  bo.cov$PropHet and bd.cov$PropHet
+	V = 908260000, p-value < 2.2e-16
+	alternative hypothesis: true location shift is less than 0
+	
+Assembled together, sdRAD has lower variance in coverage but still has fewer heterozygotes.
+
+Suggesting that if they are assembled together, the PCR duplicates issue in sdRAD is ameliorated?? 
+	> summary(aov(lc.comp$PropHet~lc.comp$LibraryPrep*lc.comp$Assembly))
+											 Df Sum Sq Mean Sq  F value Pr(>F)    
+	lc.comp$LibraryPrep                       1     98   98.04 3577.429 <2e-16 ***
+	lc.comp$Assembly                          1    141  141.39 5159.532 <2e-16 ***
+	lc.comp$LibraryPrep:lc.comp$Assembly      1      0    0.17    6.377 0.0116 *  
+	Residuals                            489229  13407    0.03                    
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+	3 observations deleted due to missingness
+	> summary(aov(log(lc.comp$CovVariance+1)~lc.comp$LibraryPrep*lc.comp$Assembly))
+											 Df Sum Sq Mean Sq F value   Pr(>F)    
+	lc.comp$LibraryPrep                       1    130  129.50  163.37  < 2e-16 ***
+	lc.comp$Assembly                          1    263  263.15  331.98  < 2e-16 ***
+	lc.comp$LibraryPrep:lc.comp$Assembly      1     19   18.94   23.89 1.02e-06 ***
+	Residuals                            489215 387782    0.79                     
+	---
+	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+	17 observations deleted due to missingness
+
+
+In-silico digestion: segmentation fault recorded overnight
+->could this be due to maxing out memory by storing too many seqs? 
+	->probably not, but checking it out by writing directly to the file.
+		->maxed out the storage space, need to find another solution.
+	Process each sequence as I read it in from fasta file--don't need to store the fasta
+	print out the length of each fragment
+	*I didn't want to deal with processing each sequence right now, for now I'm just printing out the length of each fragment into the output file.
+	**Rather than dealing with sequences, what if i deal with fragment sizes and identity of enzyme on either side?
+
+	Output:
+		23407086 fragments on LG1
+		9912669 fragments on LG10
+		11493655 fragments on LG11
+		13251395 fragments on LG12
+		8483744 fragments on LG13
+		13101037 fragments on LG14
+		10552769 fragments on LG15
+		9810463 fragmentson LG16
+		9684039 fragments on LG17
+		7908134 fragments on LG18
+		7424705 fragments on LG19
+		21572244 fragments on LG2
+		
+	
 #####Tuesday, 13 September 2016
 Starting with the dataset when it was assembled together:
 for each locus, calculate average coverage per individual for the two datasets.
