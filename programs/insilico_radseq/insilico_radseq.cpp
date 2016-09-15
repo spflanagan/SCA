@@ -88,16 +88,30 @@ public:
 
 };
 
+class fragment
+{
+public:
+	string name, enz5,enz3;
+	int start, end;
+
+	fragment()
+	{
+		name = enz5 = enz3 = string();
+		start = end = int();
+	}
+};
+
 
 int main()
 {
-	int i, ii, count, start, end;
+	int i, ii, frag_count,count, start, end,last_enz;
 	string genome_name, digest_name, line, overhang;
 	restriction_enzyme enz1, enz2;
 	ifstream genome_file;
 	ofstream digest_file;
 	vector<fasta_record> genome;
-	vector<fasta_record> digest;
+	vector<fragment> digest;
+	string sequence, seq_name;
 
 	genome_name = "../../SSC_integrated.fa";
 	digest_name = "SSC_digested.fasta";
@@ -110,6 +124,8 @@ int main()
 	genome_file.open(genome_name);
 	FileTest(genome_file, genome_name);
 	count = 0;
+	digest_file.open(digest_name);
+	digest_file << "FragmentID\tFragmentStart\tFragmentEnd\tFragmentLength\t5'Enzyme\t3'Enzyme";
 	while (!genome_file.eof())
 	{
 		if (!genome_file.eof())
@@ -117,55 +133,105 @@ int main()
 			universal_getline(genome_file, line);
 			if (line.substr(0, 1) == ">")
 			{
-				//it's the name
+				if (count > 0)
+				{
+					//it's the name of the next sequence
+					//process previous sequence first
+					cout << "\nDigesting " << seq_name;
+					start = 0;
+					frag_count = 0;
+					last_enz = 0;
+					while (start < sequence.length())
+					{
+						int first_enz1 = sequence.find(enz1.rec_seq, start);
+						int first_enz2 = sequence.find(enz2.rec_seq, start);
+						if (first_enz1 < first_enz2)
+						{
+							end = first_enz1;
+							overhang = enz1.overhang;
+						}
+						else
+						{
+							end = first_enz2;
+							overhang = enz2.overhang;
+						}
+						//digest.push_back(fasta_record());
+						//digest.back().sequence = genome[i].sequence.substr(start, end) + overhang;
+						stringstream new_name;
+						new_name << seq_name << "_frag" << frag_count;
+						//digest.back().seq_id = new_name.str();
+						digest_file << '\n' << new_name.str() << '\t' << start << '\t' << end << '\t' << end - start << '\t' << last_enz;
+						if (first_enz1 < first_enz2)
+						{
+							if (first_enz1 != sequence.npos)
+								last_enz = 1;
+							else
+								last_enz = 3;
+						}
+						else
+						{
+							if (first_enz2 != sequence.npos)
+								last_enz = 2;
+							else
+								last_enz = 3;
+						}
+						digest_file << '\t' << last_enz;
+						frag_count++;
+						start = end + 1;
+					}
+					cout << "\n\tFound " << frag_count << " fragments on " << seq_name;
+				}
+				
+				//move onto the next one
 				count++;
-				genome.push_back(fasta_record());
-				genome.back().seq_id = line.substr(1, line.size());
+				seq_name = line.substr(1, line.size());
+				sequence.resize(0);
 			}
 			else
 			{//it's the sequence
 				if (line.substr(0, 1) != "\n")
-					genome.back().sequence.append(line);
+					sequence.append(line);
 			}
 		}
 	}
 	genome_file.close();
+	digest_file.close();
 	cout << "\nSuccessfully read in " << genome.size() << " fasta records.\n";
 
-	//search through each chrom/scaffold to find restriction sites
-	cout << "\nProceeding with in silico digestion, with restriction sites " << enz1.rec_seq << " and " << enz2.rec_seq << '\n';
-	digest_file.open(digest_name);
-	for (i = 0; i < genome.size(); i++)
-	{
-		cout << "\n\tDigesting " << genome[i].seq_id;
-		start = 0;
-		count = 0;
-		while (start != genome[i].sequence.length())
-		{
-			int first_enz1 = genome[i].sequence.find(enz1.rec_seq, start);
-			int first_enz2 = genome[i].sequence.find(enz2.rec_seq, start);
-			if (first_enz1 < first_enz2)
-			{
-				end = first_enz1;
-				overhang = enz1.overhang;
-			}
-			else
-			{
-				end = first_enz2;
-				overhang = enz2.overhang;
-			}
-			//digest.push_back(fasta_record());
-			//digest.back().sequence = genome[i].sequence.substr(start, end) + overhang;
-			stringstream new_name;
-			new_name << genome[i].seq_id << "_frag" << count;
-			//digest.back().seq_id = new_name.str();
-			digest_file << "\n>" << new_name.str() << '\n' << end - start + 1;// genome[i].sequence.substr(start, end) + overhang;
-			count++;
-			start = start + 1;
-		}
-		cout << "\nFound " << count << " fragments on " << genome[i].seq_id;
-	}
-	digest_file.close();
+	////search through each chrom/scaffold to find restriction sites
+	//cout << "\nProceeding with in silico digestion, with restriction sites " << enz1.rec_seq << " and " << enz2.rec_seq << '\n';
+	//digest_file.open(digest_name);
+	//for (i = 0; i < genome.size(); i++)
+	//{
+	//	cout << "\n\tDigesting " << genome[i].seq_id;
+	//	start = 0;
+	//	count = 0;
+	//	while (start != genome[i].sequence.length())
+	//	{
+	//		int first_enz1 = genome[i].sequence.find(enz1.rec_seq, start);
+	//		int first_enz2 = genome[i].sequence.find(enz2.rec_seq, start);
+	//		if (first_enz1 < first_enz2)
+	//		{
+	//			end = first_enz1;
+	//			overhang = enz1.overhang;
+	//		}
+	//		else
+	//		{
+	//			end = first_enz2;
+	//			overhang = enz2.overhang;
+	//		}
+	//		//digest.push_back(fasta_record());
+	//		//digest.back().sequence = genome[i].sequence.substr(start, end) + overhang;
+	//		stringstream new_name;
+	//		new_name << genome[i].seq_id << "_frag" << count;
+	//		//digest.back().seq_id = new_name.str();
+	//		digest_file << "\n>" << new_name.str() << '\n' << end - start + 1;// genome[i].sequence.substr(start, end) + overhang;
+	//		count++;
+	//		start = start + 1;
+	//	}
+	//	cout << "\nFound " << count << " fragments on " << genome[i].seq_id;
+	//}
+	//digest_file.close();
 
 	cout << "Done! Input integer to quit.\n";
 	cin >> i;

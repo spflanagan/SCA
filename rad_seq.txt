@@ -26,6 +26,16 @@ sca_popmap_sdvsdd.txt
 
 populations -b 3 -P ./results/stacks_both/ -M ./sca_popmap_sdvsdd.txt -r 0.5 -a 0.05 --fstats --vcf --plink -m 3
 
+Meanwhile...
+in-silico digestion: while reading fasta file, I'm digesting each sequence as it comes (rather than storing them)
+Outputting: Fragment	StartBP	EndBP	FragmentLength	StartEnz	EndEnz
+Enzyme codes: 0 = start of sequence, 1 = PstI, 2 = MboI, 3 = end of sequence
+Only searching for 5'-3' enzyme recognition sequence
+
+Analysis of allele dropout vs. PCR bias: sdRAD has lower heterozygosity and lower ratios than ddRAD and higher variance when compared to a subsample of ddRAD (males and females only)
+
+49893 SNPs are the same in ddRAD and sdRAD analyses (assembled separately)...
+weird issue: some SNPs are found in multiple RAD loci in ddRAD?
 #####Wednesday, 14 September 2016
 Is the total number of reads per individual different when assembled together vs separately?
 	> wilcox.test(oc$NumReadsTogether,oc$NumReadsAlone,paired=T,alternative="less")

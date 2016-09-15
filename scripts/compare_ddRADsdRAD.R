@@ -45,7 +45,8 @@ vcf.cov.loc<-function(vcf.row,subset){
     strsplit(as.character(x),split=":")[[1]][1]
   }))
   het<-length(het[het=="0/1" | het=="1/0"])
-  return(data.frame(Locus=vcf.row["ID"],NumMissing=miss, NumPresent=pres,PropMissing=miss/(miss+pres),
+  return(data.frame(Chrom=vcf.row[1],Pos=vcf.row["POS"],Locus=vcf.row["ID"],
+    NumMissing=miss, NumPresent=pres,PropMissing=miss/(miss+pres),
     AvgCovRef=ref,AvgCovAlt=alt, AvgCovRatio=ref/alt,AvgCovTotal=tot, CovVariance=var.cov,
     NumHet=het,PropHet=het/pres,stringsAsFactors = F))
 }
@@ -77,6 +78,68 @@ vcf.cov.ind<-function(vcf.col){
   return(list(NumMissing=miss,NumPresent=pres,AvgCovRef=ref,AvgCovAlt=alt,AvgCovTot=tot,PropHet=het/pres, NumReads=tot*pres))
 }
   
+fst.two.vcf<-function(vcf1.row,vcf2,match.index){
+  #match.index is the column used to match the two
+  #use in conjunction with apply
+    #e.g. apply(vcf,1,fst.two.vcf,vcf2=vcf.2,match.index="SNP")
+  hs1<-hs2<-hs<-ht<-0
+  vcf2.row<-vcf2[vcf2[,match.index]%in%vcf1.row[match.index],]
+  if(nrow(vcf2.row)>1)#first make sure we have one reading per locus
+  {
+    print("Multiple instances in vcf2.")
+    fst<-NA
+  }
+  else{
+    if(nrow(vcf2.row)==0)
+    {
+      print("No instances in vcf2.")
+      fst<-NA
+    }else #we're good to go
+    {
+      gt1<-unlist(lapply(vcf1.row,function(x){ 
+        c<-strsplit(as.character(x),split=":")[[1]][1]
+        return(c)
+      }))
+      gt1<-gt1[gt1 %in% c("0/0","1/0","0/1","1/1")]
+      gt1[gt1=="1/0"]<-"0/1"
+      gt1<-gsub(pattern = "0",replacement = vcf1.row["REF"],gt1)
+      gt1<-gsub(pattern = "1",replacement = vcf1.row["ALT"],gt1)
+      al1<-unlist(strsplit(as.character(gt1),split = "/"))
+      gt2<-unlist(lapply(vcf2.row,function(x){ 
+        c<-strsplit(as.character(x),split=":")[[1]][1]
+        return(c)
+      }))
+      gt2<-gt2[gt2 %in% c("0/0","1/0","0/1","1/1")]
+      gt2[gt2=="1/0"]<-"0/1"
+      gt2<-gsub(pattern = "0",replacement = vcf2.row["REF"],gt2)
+      gt2<-gsub(pattern = "1",replacement = vcf2.row["ALT"],gt2)
+      al2<-unlist(strsplit(as.character(gt2),split="/"))
+       #calculate frequencies
+      freq1<-summary(factor(al1))/sum(summary(factor(al1)))	
+      freq2<-summary(factor(al2))/sum(summary(factor(al2)))	
+      freqall<-summary(as.factor(c(al1,al2)))/
+        sum(summary(as.factor(c(al1,al2))))
+      hets<-c(names(freq1)[2],names(freq2)[2])
+      if(length(freq1)>1){ hs1<-1-sum(freq1^2) 
+      } else {
+        hs1<-0
+      }
+      if(length(freq2)>1){ hs2<-1-sum(freq2^2)
+      } else {
+        hs2<-0
+      }
+      if(length(freqall)>1){
+        hs<-mean(c(hs1,hs2))
+        ht<-1-sum(freqall^2)
+        fst<-(ht-hs)/ht
+      }
+      if(length(freqall)<=1){ fst<-1 }
+    }#end else good to go
+  }#end else vcf2
+
+  return(data.frame(Chrom=vcf1.row["#CHROM"],Pos=vcf1.row["POS"],Hs1=hs1,Hs2=hs2,Hs=hs,Ht=ht,Fst=fst))
+}#end function
+
 ######FILES#####
 drad<-parse.vcf("drad.vcf")
 orad<-parse.vcf("orad.vcf")
@@ -90,6 +153,7 @@ d.ind<-grep("sample",colnames(both),value=T)
 
 bo.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=o.ind))
 bd.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=d.ind))
+b.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=c(o.ind,d.ind)))
 loc.cov<-merge(o.cov,d.cov,by="Locus")
 #because some of them have no alt
 loc.cov$oRAD.AvgCovRatio[loc.cov$oRAD.AvgCovRatio=="Inf"]<-loc.cov[loc.cov$oRAD.AvgCovRatio=="Inf","AvgCovRef.x"]
@@ -249,7 +313,19 @@ hist(d.cov$PropHet,col=alpha("coral1",0.5),add=T)
 boxplot(o.cov$PropHet,d.cov$PropHet,col=c("cadetblue","coral1"),
         names=c("sdRAD","ddRAD"),ylab="Proportion Heterozygous")
 text(x=c(1,2),y=c(21,21),c("250425","69109"))
-wilcox.test(o.cov$PropHet,d.cov$PropHet,"greater")
+wilcox.test(o.cov$PropHet,d.cov$PropHet,"less")
+
+#what about in 30 males 30 females from ddRAD and the sdRAD?
+d.mal<-colnames(drad)[grep("PRM",colnames(drad))]
+d.fem<-colnames(drad)[grep("FEM",colnames(drad))]
+dm.sub<-sample(d.mal,30)
+df.sub<-sample(d.fem,30)
+d.sub<-cbind(drad[,1:9],drad[,dm.sub],drad[,df.sub])
+ds.cov<-do.call("rbind",apply(d.sub,1,vcf.cov.loc,subset=c(dm.sub,df.sub)))
+
+wilcox.test(o.cov$PropHet,ds.cov$PropHet,"less")
+wilcox.test(o.cov$AvgCovRatio,ds.cov$AvgCovRatio,"less")
+wilcox.test(o.cov$CovVariance,ds.cov$CovVariance,"greater")
 
 #assembled together
 wilcox.test(bo.cov$PropHet,bd.cov$PropHet,paired=T,"less")
@@ -265,6 +341,7 @@ lc.comp<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(o.cov)),rep("ddRAD",nrow(d.co
 summary(aov(log(lc.comp$CovVariance+1)~lc.comp$LibraryPrep*lc.comp$Assembly))
 summary(aov(lc.comp$PropHet~lc.comp$LibraryPrep*lc.comp$Assembly))
 
+jpeg("VarianceInCov.jpeg",height=8.5,width=7,units="in",res=300)
 par(mfrow=c(2,1),oma=c(1,2,1,1),mar=c(2,2,2,2))
 boxplot(log(lc.comp$CovVariance+1)~lc.comp$LibraryPrep*lc.comp$Assembly,col=c("cadetblue","coral1"),
         names=F,xaxt='n')
@@ -275,6 +352,76 @@ boxplot(lc.comp$PropHet~lc.comp$LibraryPrep*lc.comp$Assembly,col=c("cadetblue","
         names=F,xaxt='n')
 mtext("Proportion Heterozygotes",2,outer=F,line=2)
 axis(1,at=c(1.5,3.5),c("Alone","Together"))
+dev.off()
+
+###########################LOOKING FOR THE SAME LOCI#################################
+#drad,orad,both
+drad$SNP<-paste(drad$`#CHROM`,drad$POS,sep=".")
+orad$SNP<-paste(orad$`#CHROM`,orad$POS,sep=".")
+both$SNP<-paste(both$`#CHROM`,both$POS,sep=".")
+locus.info<-c("#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT","SNP")
+d.cov$SNP<-paste(d.cov$Chrom,d.cov$Pos,sep=".")
+o.cov$SNP<-paste(o.cov$Chrom,o.cov$Pos,sep=".")
+b.cov$SNP<-paste(b.cov$Chrom,b.cov$Pos,sep=".")
+#sdRAD-ddRAD
+od.loci<-merge(orad[,locus.info],drad[,locus.info],"SNP")
+dim(od.loci[(od.loci$REF.x != od.loci$REF.y & od.loci$REF.x != od.loci$ALT.y) |
+               (od.loci$REF.x != od.loci$REF.y & od.loci$REF.y != od.loci$ALT.x),])
+    
+               dim(od.loci[(od.loci$REF.x != od.loci$REF.y & od.loci$ALT.x != od.loci$ALT.y &
+                  od.loci$REF.x != od.loci$ALT.y & od.loci$REF.y != od.loci$ALT.x) ,])
+od.cov<-merge(o.cov,d.cov,"SNP")
+
+wilcox.test(od.cov$PropHet.x,od.cov$PropHet.y,paired=T,"less")
+wilcox.test(od.cov$CovVariance.x,od.cov$CovVariance.y,paired=T,"greater")
+wilcox.test(od.cov$AvgCovRatio.x,od.cov$AvgCovRatio.y,paired=T,"greater")
+
+#sdRAD-both
+ob.loci<-merge(orad[,locus.info],both[,locus.info],"SNP")
+dim(ob.loci[(ob.loci$REF.x != ob.loci$REF.y & ob.loci$REF.x != ob.loci$ALT.y) |
+              (ob.loci$REF.x != ob.loci$REF.y & ob.loci$REF.y != ob.loci$ALT.x),])
+dim(ob.loci[(ob.loci$REF.x != ob.loci$REF.y & ob.loci$ALT.x != ob.loci$ALT.y &
+               ob.loci$REF.x != ob.loci$ALT.y & ob.loci$REF.y != ob.loci$ALT.x) ,])
+ob.cov<-merge(o.cov,b.cov,"SNP")
+wilcox.test(ob.cov$PropHet.x,ob.cov$PropHet.y,paired=T,"less")
+wilcox.test(ob.cov$CovVariance.x,ob.cov$CovVariance.y,paired=T,"greater")
+wilcox.test(ob.cov$AvgCovRatio.x,ob.cov$AvgCovRatio.y,paired=T,"less")
+
+#ddRAD-both
+db.loci<-merge(drad[,locus.info],both[,locus.info],"SNP")
+dim(db.loci[(db.loci$REF.x != db.loci$REF.y & db.loci$REF.x != db.loci$ALT.y) |
+              (db.loci$REF.x != db.loci$REF.y & db.loci$REF.y != db.loci$ALT.x),])
+dim(db.loci[(db.loci$REF.x != db.loci$REF.y & db.loci$ALT.x != db.loci$ALT.y &
+               db.loci$REF.x != db.loci$ALT.y & db.loci$REF.y != db.loci$ALT.x) ,])
+db.cov<-merge(d.cov,b.cov,"SNP")
+wilcox.test(db.cov$PropHet.x,db.cov$PropHet.y,paired=T,"greater")
+wilcox.test(db.cov$CovVariance.x,db.cov$CovVariance.y,paired=T,"less")
+wilcox.test(db.cov$AvgCovRatio.x,db.cov$AvgCovRatio.y,paired=T,"less")
+
+#sd/dd-both
+sdb.loci<-merge(od.loci,both[,locus.info],"SNP")
+dim(sdb.loci[(sdb.loci$REF.x != sdb.loci$REF.y & sdb.loci$REF.x != sdb.loci$REF
+              & sdb.loci$REF.x != sdb.loci$ALT.y & sdb.loci$REF.x != sdb.loci$ALT) |
+               (sdb.loci$ALT.x != sdb.loci$REF.y & sdb.loci$ALT.x != sdb.loci$REF
+                & sdb.loci$ALT.x != sdb.loci$ALT.y & sdb.loci$ALT.x != sdb.loci$ALT) |
+               (sdb.loci$REF.y != sdb.loci$REF.x & sdb.loci$REF.y != sdb.loci$REF
+                & sdb.loci$REF.y != sdb.loci$ALT.x & sdb.loci$REF.y != sdb.loci$ALT) |
+               (sdb.loci$ALT.y != sdb.loci$REF.x & sdb.loci$ALT.y != sdb.loci$REF
+                & sdb.loci$ALT.y != sdb.loci$ALT.y & sdb.loci$ALT.y != sdb.loci$ALT) |
+               (sdb.loci$REF != sdb.loci$REF.x & sdb.loci$REF != sdb.loci$REF.x
+                & sdb.loci$REF != sdb.loci$ALT.y & sdb.loci$REF != sdb.loci$ALT.x) |
+               (sdb.loci$ALT != sdb.loci$REF.y & sdb.loci$ALT != sdb.loci$REF.x
+                & sdb.loci$ALT != sdb.loci$ALT.y & sdb.loci$ALT.x != sdb.loci$ALT) ,])
+
+#########################FSTS FROM INDEPENDENT ANALYSES##############################
+pop1<-colnames(orad)[10:ncol(orad)]
+pop2<-colnames(drad)[10:ncol(drad)]
+o.share<-orad[orad$SNP %in% od.loci$SNP,]
+d.share<-drad[drad$SNP %in% od.loci$SNP,]
+od.vcf<-merge(orad,drad,"SNP")
+
+od.fst<-do.call("rbind",apply(o.share,1,fst.two.vcf,vcf2=d.share,match.index="SNP"))
+write.table(od.fst,"orad-drad.fst.txt",col.names=T,row.names=F,quote=F,sep='\t')
 ############################ORIGINAL INVESTIGATION###################################
 setwd("E:/ubuntushare/SCA/results/biallelic/both_datasets/")
 summary<-read.delim("gwsca_summary_datasets.txt")
