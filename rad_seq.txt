@@ -20,6 +20,12 @@ Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias
 
 
 #############################################LAB BOOK###########################################
+#####Thursday, 15 September 2016
+Running populations on 'both'
+sca_popmap_sdvsdd.txt
+
+populations -b 3 -P ./results/stacks_both/ -M ./sca_popmap_sdvsdd.txt -r 0.5 -a 0.05 --fstats --vcf --plink -m 3
+
 #####Wednesday, 14 September 2016
 Is the total number of reads per individual different when assembled together vs separately?
 	> wilcox.test(oc$NumReadsTogether,oc$NumReadsAlone,paired=T,alternative="less")
