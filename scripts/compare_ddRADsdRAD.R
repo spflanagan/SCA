@@ -6,6 +6,7 @@
 rm(list=ls())
 library(ggplot2)
 setwd("~/Projects/SCA/results")
+source("../scripts/plotting_functions.R")
 
 ###############FUNCTIONS####################
 parse.vcf<-function(filename){
@@ -83,6 +84,7 @@ fst.two.vcf<-function(vcf1.row,vcf2,match.index){
   #use in conjunction with apply
     #e.g. apply(vcf,1,fst.two.vcf,vcf2=vcf.2,match.index="SNP")
   hs1<-hs2<-hs<-ht<-0
+  freqall<-gt1<-gt2<-NULL
   vcf2.row<-vcf2[vcf2[,match.index]%in%vcf1.row[match.index],]
   if(nrow(vcf2.row)>1)#first make sure we have one reading per locus
   {
@@ -137,7 +139,9 @@ fst.two.vcf<-function(vcf1.row,vcf2,match.index){
     }#end else good to go
   }#end else vcf2
 
-  return(data.frame(Chrom=vcf1.row["#CHROM"],Pos=vcf1.row["POS"],Hs1=hs1,Hs2=hs2,Hs=hs,Ht=ht,Fst=fst))
+  return(data.frame(Chrom=vcf1.row["#CHROM"],Pos=vcf1.row["POS"],
+    Hs1=hs1,Hs2=hs2,Hs=hs,Ht=ht,Fst=fst,NumAlleles=length(factor(freqall)),
+    Num1=length(gt1),Num2=(length(gt2))))
 }#end function
 
 ######FILES#####
@@ -145,11 +149,11 @@ drad<-parse.vcf("drad.vcf")
 orad<-parse.vcf("orad.vcf")
 both<-parse.vcf("both.vcf")
 
+o.ind<-grep("orad",colnames(both),value=T)
+d.ind<-grep("sample",colnames(both),value=T)
 #########ANALYSIS##########
 ###coverage per locus
 #assembled together
-o.ind<-grep("orad",colnames(both),value=T)
-d.ind<-grep("sample",colnames(both),value=T)
 
 bo.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=o.ind))
 bd.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=d.ind))
@@ -422,6 +426,59 @@ od.vcf<-merge(orad,drad,"SNP")
 
 od.fst<-do.call("rbind",apply(o.share,1,fst.two.vcf,vcf2=d.share,match.index="SNP"))
 write.table(od.fst,"orad-drad.fst.txt",col.names=T,row.names=F,quote=F,sep='\t')
+
+both.o<-cbind(both[,locus.info],both[,o.ind])
+both.d<-cbind(both[,locus.info],both[,d.ind])
+od.both.fst<-do.call("rbind",apply(both.o,1,fst.two.vcf,vcf2=both.d,match.index="SNP"))
+lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
+       "LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
+       "LG22")
+lgn<-seq(1,22)
+scaffs<-levels(as.factor(both[,1]))
+scaffs[1:22]<-lgs
+
+jpeg("sd-dd_Fst.jpeg",height=10,width=7.5,units="in",res=300)
+par(mfrow=c(3,1),mar=c(2,2,2,2),oma=c(1,2,1,1))
+od<-fst.plot(od.fst[!is.na(od.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
+  fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,
+  groups=as.factor(scaffs[scaffs %in% levels(factor(od.fst$Chrom))]))
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(od[od$Chrom ==lgs[i],"Pos"]),y=-1,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(od[od$Chrom ==lgs[i],"Pos"])
+}
+mtext("sdRAD-ddRAD Analyzed Separately",3,cex=0.75)
+odb<-fst.plot(od.both.fst[od.both.fst$Num1>30 & od.both.fst$Num2 > 192,],ci.dat=c(-10,10),sig.col=c("black","black"), 
+              fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,
+              groups=as.factor(scaffs[scaffs %in% levels(factor(od.both.fst[od.both.fst$Num1>30 & od.both.fst$Num2 > 192,"Chrom"]))]))
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(odb[odb$Chrom ==lgs[i],"Pos"]),y=-1.7,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(odb[odb$Chrom ==lgs[i],"Pos"])
+}
+mtext("sdRAD-ddRAD Analyzed Together",3,cex=0.75)
+odbs<-fst.plot(od.both.fst[od.both.fst$SNP %in% od.loci$SNP & od.both.fst$Num1>30 & od.both.fst$Num2 > 192,],
+  ci.dat=c(-10,10),sig.col=c("black","black"), 
+  fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,
+  groups=as.factor(scaffs[scaffs %in% 
+    levels(factor(od.both.fst[od.both.fst$SNP %in% od.loci$SNP & od.both.fst$Num1>30 & od.both.fst$Num2 > 192,"Chrom"]))]))
+last<-0
+for(i in 1:length(lgs)){
+  if(lgs[i] %in% levels(factor(odbs$Chrom))){
+  text(x=mean(odbs[odbs$Chrom ==lgs[i],"Pos"]),y=-0.66,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(odbs[odbs$Chrom ==lgs[i],"Pos"])
+  }
+}
+mtext("sdRAD-ddRAD Analyzed Together, Only Loci In Separate Analyses",3,cex=0.75)
+mtext(expression(italic(F)[ST]),2,outer=T,cex=0.75)
+dev.off()
+
+fst.aov.dat<-data.frame(Fst=c(od$Fst,odb$Fst,odbs$Fst),
+  Type=c(rep("Alone",nrow(od)),rep("Together",nrow(odb)),rep("Together,Alone Loci",nrow(odbs))))
+fst.aov<-aov(Fst~Type,dat=fst.aov.dat)
 ############################ORIGINAL INVESTIGATION###################################
 setwd("E:/ubuntushare/SCA/results/biallelic/both_datasets/")
 summary<-read.delim("gwsca_summary_datasets.txt")

@@ -21,8 +21,19 @@ Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias
 
 #############################################LAB BOOK###########################################
 #####Friday, 16 September 2016
-populations was killed...
+Summary so far:
+-Assembling them together gets weird results, including elevated Fsts, lower coverage for sdRAD
+-sdRAD has lower Alt/Ref ratios than ddRAD
+-sdRAD has higher variance in coverage and fewer heterozygotes
+-generally, loci shared among separate analyses have same ref/alt.
+
+RE: Fst..if they're assembled separately, FST is centered arond 0 and a lot are negative. 
+This is also true if you take the ones that were analyzed together but only keep the loci shared between the two separate assemblies.
+If you just prune for coverage (50%  in each pop) you get a WEIRD distribution with lots of Fst=1.
+
+populations was killed...trying:
 populations -b 3 -P ./results/stacks_both/ -M ./sca_popmap_sdvsdd.txt -r 0.5 -a 0.05 --vcf --plink -m 3 -t 4
+
 #####Thursday, 15 September 2016
 Running populations on 'both'
 sca_popmap_sdvsdd.txt
