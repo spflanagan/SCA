@@ -20,6 +20,9 @@ Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias
 
 
 #############################################LAB BOOK###########################################
+#####Friday, 16 September 2016
+populations was killed...
+populations -b 3 -P ./results/stacks_both/ -M ./sca_popmap_sdvsdd.txt -r 0.5 -a 0.05 --vcf --plink -m 3 -t 4
 #####Thursday, 15 September 2016
 Running populations on 'both'
 sca_popmap_sdvsdd.txt
