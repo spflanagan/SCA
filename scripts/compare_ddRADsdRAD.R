@@ -479,6 +479,58 @@ dev.off()
 fst.aov.dat<-data.frame(Fst=c(od$Fst,odb$Fst,odbs$Fst),
   Type=c(rep("Alone",nrow(od)),rep("Together",nrow(odb)),rep("Together,Alone Loci",nrow(odbs))))
 fst.aov<-aov(Fst~Type,dat=fst.aov.dat)
+
+##############################DRAD DIFFERENT PLATES##################################
+
+drad$SNP<-paste(drad$`#CHROM`,drad$ID,drad$POS,sep=".")
+
+d.cov<-do.call("rbind",apply(drad,1,vcf.cov.loc,subset=d.ind))
+d.cov$SNP<-paste(d.cov$Chrom,d.cov$Locus,d.cov$Pos,sep=".")
+d.cov$AvgCovRatio[d.cov$AvgCovRatio=="Inf"]<-0
+d.keep<-d.cov[d.cov$PropMissing>0.5,]
+plate1<-unlist(as.list(read.delim("../plate1.txt",stringsAsFactors = F)))
+plate2<-unlist(as.list(read.delim("../plate2.txt",stringsAsFactors = F)))
+plate3<-unlist(as.list(read.delim("../plate3.txt",stringsAsFactors = F)))
+plate4<-unlist(as.list(read.delim("../plate4.txt",stringsAsFactors = F)))
+
+d1<-cbind(drad[drad$SNP %in% d.keep$SNP,1:9],drad$SNP[drad$SNP %in% d.keep$SNP],drad[drad$SNP %in% d.keep$SNP,colnames(drad) %in% plate1])
+d2<-cbind(drad[drad$SNP %in% d.keep$SNP,1:9],drad$SNP[drad$SNP %in% d.keep$SNP],drad[drad$SNP %in% d.keep$SNP,colnames(drad) %in% plate2])
+d3<-cbind(drad[drad$SNP %in% d.keep$SNP,1:9],drad$SNP[drad$SNP %in% d.keep$SNP],drad[drad$SNP %in% d.keep$SNP,colnames(drad) %in% plate3])
+d4<-cbind(drad[drad$SNP %in% d.keep$SNP,1:9],drad$SNP[drad$SNP %in% d.keep$SNP],drad[drad$SNP %in% d.keep$SNP,colnames(drad) %in% plate4])
+p1<-grep("sample",colnames(d1))
+p2<-grep("sample",colnames(d2))
+p3<-grep("sample",colnames(d3))
+p4<-grep("sample",colnames(d4))
+d1.cov<-do.call("rbind",apply(d1,1,vcf.cov.loc,subset=p1))
+d2.cov<-do.call("rbind",apply(d2,1,vcf.cov.loc,subset=p2))
+d3.cov<-do.call("rbind",apply(d3,1,vcf.cov.loc,subset=p3))
+d4.cov<-do.call("rbind",apply(d4,1,vcf.cov.loc,subset=p4))
+d1.cov$Plate<-"plate1"
+d2.cov$Plate<-"plate2"
+d3.cov$Plate<-"plate3"
+d4.cov$Plate<-"plate4"
+dcomp<-rbind(d1.cov,d2.cov,d3.cov,d4.cov)
+dcomp$AvgCovRatio[dcomp$AvgCovRatio=="Inf"]<-0
+summary(aov(dcomp$PropHet~dcomp$Plate))
+TukeyHSD(aov(dcomp$PropHet~dcomp$Plate))
+
+summary(aov(dcomp$AvgCovTotal~dcomp$Plate))
+TukeyHSD(aov(dcomp$AvgCovTotal~dcomp$Plate))
+
+summary(aov(dcomp$AvgCovRatio~dcomp$Plate))
+TukeyHSD(aov(dcomp$AvgCovRatio~dcomp$Plate))
+drl<-lm(dcomp$AvgCovRatio~dcomp$Locus*dcomp$Plate)
+plot(dcomp$AvgCovRatio~dcomp$Locus,col=alpha(as.numeric(as.factor(dcomp$Plate)),0.5),pch=19)
+legend("top",ncol=2,levels(factor(dcomp$Plate)),col=alpha(as.numeric(as.factor(levels(as.factor(dcomp$Plate)))),0.5),pch=19,bty='n')
+summary(aov(dcomp$CovVariance~dcomp$Plate))
+TukeyHSD(aov(dcomp$CovVariance~dcomp$Plate))
+dvl<-lm(dcomp$CovVariance~dcomp$Locus*dcomp$Plate)
+plot(dcomp$CovVariance~dcomp$Locus,col=alpha(as.numeric(as.factor(dcomp$Plate)),0.5),pch=19)
+legend("top",ncol=2,levels(factor(dcomp$Plate)),col=alpha(as.numeric(as.factor(levels(as.factor(dcomp$Plate)))),0.5),pch=19,bty='n')
+
+summary(aov(dcomp$PropMissing~dcomp$Plate))
+TukeyHSD(aov(dcomp$PropMissing~dcomp$Plate))
+
 ############################ORIGINAL INVESTIGATION###################################
 setwd("E:/ubuntushare/SCA/results/biallelic/both_datasets/")
 summary<-read.delim("gwsca_summary_datasets.txt")

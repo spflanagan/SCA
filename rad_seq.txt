@@ -20,6 +20,27 @@ Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias
 
 
 #############################################LAB BOOK###########################################
+#####Tuesday, 21 September 2016
+I narrowed down my focus to only loci with missingness > 0.5, which reduced the number of loci 
+Now able to do the analysis, and the Ref/Alt and variance in coverage are significantly different among plates
+->suggests PCR duplicates are the culprit
+
+in silico digest: after trying to figure out why it's been infinite-looping, I finally figured out that .find() returns -1 if it doesn't find a match
+Now, I need to keep fragments only in the 250-700 range (keep it broad for now)
+What do I want to do with it? 
+	-Add allelic dropout
+	-Add PCR duplicates
+	-Add genotyping errors?
+	
+So, I need to implement sampling. First, I'm going to test it on the whole genome, make sure it will run through the entire fasta file correctly.
+^That worked! Success. Now, do I want to keep the sequences? Or just continue as-is and when I sample arbitrarily give individuals a value of 0 or 1 to represent SNPs?
+I think for now I'll sample arbitrarily.
+I also need to do both the double and single digest to compare them.
+
+#####Monday, 20 September 2016
+Looking at the different ddRAD plates, and it is not clear what is going on.
+I need to use locus as a random effect, but this takes over the computer (too many loci)
+
 #####Friday, 16 September 2016
 Summary so far:
 -Assembling them together gets weird results, including elevated Fsts, lower coverage for sdRAD
