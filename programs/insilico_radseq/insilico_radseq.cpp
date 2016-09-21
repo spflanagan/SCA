@@ -113,8 +113,8 @@ int main()
 	vector<fragment> digest;
 	string sequence, seq_name;
 
-	genome_name = "../../SSC_integrated.fa";
-	digest_name = "SSC_digested.fasta";
+	genome_name = "../../SSC_LG1_subset.fasta";
+	digest_name = "SSC_LG1sub_digested.fasta";
 	enz1.rec_seq = "CTGCAG"; //PstI
 	enz1.overhang = "G";
 	enz2.rec_seq = "GATC"; //MboI
@@ -128,16 +128,15 @@ int main()
 	digest_file << "FragmentID\tFragmentStart\tFragmentEnd\tFragmentLength\t5'Enzyme\t3'Enzyme";
 	while (!genome_file.eof())
 	{
-		if (!genome_file.eof())
-		{
+		
 			universal_getline(genome_file, line);
-			if (line.substr(0, 1) == ">")
+			if (line.substr(0, 1) == ">" || genome_file.eof())
 			{
-				if (count > 0)
+				if(count > 0)
 				{
 					//it's the name of the next sequence
 					//process previous sequence first
-					cout << "\nDigesting " << seq_name;
+					cout << "\nDigesting " << seq_name << ", which has " << sequence.length() << " characters.";
 					start = 0;
 					frag_count = 0;
 					last_enz = 0;
@@ -192,7 +191,7 @@ int main()
 				if (line.substr(0, 1) != "\n")
 					sequence.append(line);
 			}
-		}
+		
 	}
 	genome_file.close();
 	digest_file.close();
