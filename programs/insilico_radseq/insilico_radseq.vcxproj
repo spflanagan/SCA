@@ -80,6 +80,9 @@
   <ItemGroup>
     <ClCompile Include="insilico_radseq.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="random_numbers.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

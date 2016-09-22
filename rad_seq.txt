@@ -20,7 +20,20 @@ Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias
 
 
 #############################################LAB BOOK###########################################
-#####Tuesday, 21 September 2016
+#####Thursday, 22 September 2016
+Added single-digest to the in-silico digest
+That included simulating shearing, so I'm trying out a process where:
+	(1) if the mean fragment size > 500 with the new fragment, then If
+	(2) randomly break up the fragment into x pieces, where x=fragment length/500
+	(3) if there are multiple shears, I do subsequent shears on the longest fragments.
+I'm going to see if this gives me a somewhat normal distribution of fragment sizes centered around 500.
+I think this incorporates shearing bias without having to give it an explicit rate, but I'm not 100% sure.
+I need to think about that.
+
+Something about the output isn't right but I need to take a break.
+
+ 
+#####Wednesday, 21 September 2016
 I narrowed down my focus to only loci with missingness > 0.5, which reduced the number of loci 
 Now able to do the analysis, and the Ref/Alt and variance in coverage are significantly different among plates
 ->suggests PCR duplicates are the culprit
@@ -37,7 +50,7 @@ So, I need to implement sampling. First, I'm going to test it on the whole genom
 I think for now I'll sample arbitrarily.
 I also need to do both the double and single digest to compare them.
 
-#####Monday, 20 September 2016
+#####Tuesday, 20 September 2016
 Looking at the different ddRAD plates, and it is not clear what is going on.
 I need to use locus as a random effect, but this takes over the computer (too many loci)
 

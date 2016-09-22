@@ -9,6 +9,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include "random_numbers.h"
 
 
 using namespace std;
@@ -105,15 +106,18 @@ public:
 int main()
 {
 	int i, ii, frag_count,count, start, end,last_enz, this_enz;
-	double allelic_dropout_rate, pcr_duplicate_rate, shearing_bias_rate;
+	int s_start, s_end, s_frag_count, s_cutsite, s_length;
+	double allelic_dropout_rate, pcr_duplicate_rate, shearing_bias_rate, mean_sheared_length;
 	string genome_name, sdigest_name,ddigest_name, line, overhang;
 	restriction_enzyme enz1, enz2;
 	ifstream genome_file;
 	ofstream ddigest_file,sdigest_file;
 	vector<fasta_record> genome;
-	vector<fragment> digest;
+	vector<fragment> ddigest, sdigest;
 	string sequence, seq_name;
+	sgenrand(time_t());
 
+	
 	genome_name = "../../SSC_integrated.fa";
 	ddigest_name = "SSC_ddigested.fasta";
 	sdigest_name = "SSC_sdigested.fasta";
@@ -139,7 +143,143 @@ int main()
 			{
 				//it's the name of the next sequence
 				//process previous sequence first
-				cout << "\nDigesting " << seq_name << ", which has " << sequence.length() << " characters.";
+				cout << "\nsingle-digesting " << seq_name << ", which has " << sequence.length() << " characters.";
+				//single digest
+				s_start = s_frag_count = 0;
+				mean_sheared_length = 0;
+				while (s_start < sequence.length())
+				{
+					s_cutsite = sequence.find(enz1.rec_seq, s_start);
+					if (s_cutsite == -1)
+					{
+						s_start = s_end = s_cutsite = sequence.length();
+					}
+					else
+					{
+						s_length = s_cutsite - s_start;
+						if ((mean_sheared_length + s_length)/(s_frag_count+1) > 500)//then it gets sheared
+						{
+							int new_length = s_length;
+							int new_end = 0;
+							int new_start = s_start;
+							int num_shears = s_length / 500.0;
+							string new_seq1, new_seq,new_seq2;
+							new_seq = sequence.substr(s_start,s_cutsite-s_start);
+							for (i = 0; i < num_shears; i++)
+							{
+								new_end = randnum(new_length);
+								//split the sequence 
+								new_seq1 = new_seq.substr(0, new_end);
+								new_seq2 = new_seq.substr(new_end, new_length - new_end+1);
+								if (i == num_shears - 1)//if it's the last one, add both
+								{
+									//add seq2
+									sdigest.push_back(fragment());
+									stringstream new_name;
+									new_name << seq_name << "_sd_frag" << s_frag_count;
+									sdigest.back().name = new_name.str();
+									sdigest.back().start = new_start + new_end;
+									sdigest.back().end = new_start + new_length;
+									s_frag_count++;
+									mean_sheared_length = mean_sheared_length + new_seq2.length();
+									if (s_start == sdigest.back().start)
+										sdigest.back().enz5 = 1;//it's the last cutsite
+									else
+										sdigest.back().enz5 = 2; //it's a sheared end
+									if (sdigest.back().end == s_cutsite)
+										sdigest.back().enz3 = 1;//it's this cutsite
+									else
+										sdigest.back().enz3 = 2;//it's sheared
+									sdigest_file << '\n' << sdigest.back().name << '\t' << sdigest.back().start << '\t' << sdigest.back().end << '\t'
+										<< sdigest.back().start - sdigest.back().end << '\t' << sdigest.back().enz5 << '\t' << sdigest.back().enz5;
+									//add seq1
+									sdigest.push_back(fragment());
+									new_name.str("");
+									new_name << seq_name << "_sd_frag" << s_frag_count;
+									sdigest.back().name = new_name.str();
+									sdigest.back().start = new_start;
+									sdigest.back().end = new_start + new_end;
+									s_frag_count++;
+									mean_sheared_length = mean_sheared_length + new_seq1.length();
+									if (s_start == sdigest.back().start)
+										sdigest.back().enz5 = 1;//it's the last cutsite
+									else
+										sdigest.back().enz5 = 2; //it's a sheared end
+									if (sdigest.back().end == s_cutsite)
+										sdigest.back().enz3 = 1;//it's this cutsite
+									else
+										sdigest.back().enz3 = 2;//it's sheared
+									sdigest_file << '\n' << sdigest.back().name << '\t' << sdigest.back().start << '\t' << sdigest.back().end << '\t'
+										<< sdigest.back().start - sdigest.back().end << '\t' << sdigest.back().enz5 << '\t' << sdigest.back().enz5;
+								}
+								else
+								{
+									if (new_seq1.length() > new_seq2.length())
+									{
+										new_seq = new_seq1;//new_seq1 will be further sheared
+										sdigest.push_back(fragment());
+										stringstream new_name;
+										new_name << seq_name << "_sd_frag" << s_frag_count;
+										sdigest.back().name = new_name.str();
+										sdigest.back().start = new_start + new_end;
+										sdigest.back().end = new_start + new_length;
+										s_frag_count++;
+										new_start = new_start;//it doesn't change
+										mean_sheared_length = mean_sheared_length + new_seq2.length();
+									}
+									else
+									{
+										new_seq = new_seq2;//new_seq2 will be further sheared
+										sdigest.push_back(fragment());
+										stringstream new_name;
+										new_name << seq_name << "_sd_frag" << s_frag_count;
+										sdigest.back().name = new_name.str();
+										sdigest.back().start = new_start;
+										sdigest.back().end = new_start + new_end;
+										s_frag_count++;
+										new_start = new_start + new_end + 1;
+										mean_sheared_length = mean_sheared_length + new_seq1.length();
+									}
+									if (s_start == sdigest.back().start)
+										sdigest.back().enz5 = 1;//it's the last cutsite
+									else
+										sdigest.back().enz5 = 2; //it's a sheared end
+									if (sdigest.back().end == s_cutsite)
+										sdigest.back().enz3 = 1;//it's this cutsite
+									else
+										sdigest.back().enz3 = 2;//it's sheared
+									sdigest_file << '\n' << sdigest.back().name << '\t' << sdigest.back().start << '\t' << sdigest.back().end << '\t'
+										<< sdigest.back().start - sdigest.back().end << '\t' << sdigest.back().enz5 << '\t' << sdigest.back().enz5;
+								}
+								new_length = new_seq.length();
+							}
+						}
+						else
+						{
+							stringstream new_name;
+							new_name << seq_name << "_sd_frag" << s_frag_count;
+							//record the info in the set of fragments
+							sdigest.push_back(fragment());
+							sdigest.back().name = new_name.str();
+							sdigest.back().start = s_start;
+							sdigest.back().end = s_cutsite;
+							sdigest.back().enz5 = 1;
+							sdigest.back().enz3 = 1;
+							//and output it to file
+							sdigest_file << '\n' << sdigest.back().name << '\t' << sdigest.back().start << '\t' << sdigest.back().end << '\t' 
+								<< sdigest.back().start - sdigest.back().end << '\t' << sdigest.back().enz5 << '\t' << sdigest.back().enz5;
+							//set up for the next time around
+							s_frag_count++;
+							mean_sheared_length = mean_sheared_length + s_length;
+							if (s_frag_count % 100000 == 0)
+								cout << "\n\tProcessing fragment starting at pos " << s_start;
+						}
+						s_start = s_cutsite + 1;
+					}
+				}
+				cout << "\n\tFound " << s_frag_count << " single-digest fragments on " << seq_name << " with mean fragment size " << mean_sheared_length/s_frag_count;
+				//double digest
+				cout << "\ndouble-digesting " << seq_name << ", which has " << sequence.length() << " characters.";
 				start = 0;
 				frag_count = 0;
 				this_enz = last_enz = 0;
@@ -169,12 +309,12 @@ int main()
 							stringstream new_name;
 							new_name << seq_name << "_frag" << frag_count;
 							//record the info in the set of fragments
-							digest.push_back(fragment());
-							digest.back().name = new_name.str();
-							digest.back().start = start;
-							digest.back().end = end;
-							digest.back().enz5 = last_enz;
-							digest.back().enz3 = this_enz;
+							ddigest.push_back(fragment());
+							ddigest.back().name = new_name.str();
+							ddigest.back().start = start;
+							ddigest.back().end = end;
+							ddigest.back().enz5 = last_enz;
+							ddigest.back().enz3 = this_enz;
 							//and output it to file
 							ddigest_file << '\n' << new_name.str() << '\t' << start << '\t' << end << '\t' << end - start << '\t' << last_enz << '\t' << this_enz;
 							//set up for the next time around
@@ -187,7 +327,7 @@ int main()
 					}
 						
 				}
-				cout << "\n\tFound " << frag_count << " fragments on " << seq_name;
+				cout << "\n\tFound " << frag_count << " double-digest fragments on " << seq_name;
 			}
 				
 			//move onto the next one
@@ -210,6 +350,7 @@ int main()
 	}
 	genome_file.close();
 	ddigest_file.close();
+	sdigest_file.close();
 	cout << "\n\nSuccessfully read in " << count << " fasta records.\n";
 
 	//Sample
