@@ -20,6 +20,17 @@ Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias
 
 
 #############################################LAB BOOK###########################################
+#####Friday, 23 September 2016
+The output was funky because I'd done start-end instead of end-start to calculate the length.
+The mean fragment length for the single digest is 498.5, but the distribution is skewed and still contains large fragments. (max = 19920). I think that's probably OK, but I should check my lab notebook.
+Now I need to only keep the loci with the restriction site at one end.
+
+The double digest provides a lovely distribution of fragments 250-700 bp, since that's what I selected for.
+
+Use a poisson distribution for PCR duplicates, with mean number of copies in reads as mean (http://www.cureffi.org/2012/12/11/how-pcr-duplicates-arise-in-next-generation-sequencing/)
+^^this is small! 0.000625
+
+
 #####Thursday, 22 September 2016
 Added single-digest to the in-silico digest
 That included simulating shearing, so I'm trying out a process where:

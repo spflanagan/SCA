@@ -1,5 +1,5 @@
 #Author: Sarah P. Flanagan
-#Last updated: 13 September 2016
+#Last updated: 23 September 2016
 #Date Started: 24 February 2016
 #Purpose: compare RAD libraries prepared by two different methods
 

@@ -1,11 +1,11 @@
 ﻿  insilico_radseq.cpp
 \\vboxsvr\home\projects\sca\programs\insilico_radseq\random_numbers.h(225): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(150): warning C4018: '<': signed/unsigned mismatch
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(165): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(286): warning C4018: '<': signed/unsigned mismatch
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(110): warning C4101: 'allelic_dropout_rate': unreferenced local variable
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(110): warning C4101: 'pcr_duplicate_rate': unreferenced local variable
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(110): warning C4101: 'shearing_bias_rate': unreferenced local variable
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(108): warning C4101: 'ii': unreferenced local variable
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(152): warning C4244: 'argument': conversion from 'time_t' to 'unsigned long', possible loss of data
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(188): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(203): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(418): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(505): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(141): warning C4101: 'mutation_shape_param': unreferenced local variable
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(141): warning C4101: 'shearing_bias_rate': unreferenced local variable
   insilico_radseq.vcxproj -> \\VBOXSVR\Home\Projects\SCA\programs\insilico_radseq\Debug\insilico_radseq.exe
   insilico_radseq.vcxproj -> \\VBOXSVR\Home\Projects\SCA\programs\insilico_radseq\Debug\insilico_radseq.pdb (Full PDB)
