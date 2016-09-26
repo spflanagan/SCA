@@ -20,6 +20,27 @@ Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias
 
 
 #############################################LAB BOOK###########################################
+#####Monday, 26 September 2016
+Today I'm adding the polymorphic restriction sites and the pcr duplication. 
+For each individual at each locus:
+1. which alleles does the individual have? 
+	if genrand() < pop_af, al1 = 1 else al1 = 2.
+	pop_af assigned to the locus using genrand()
+2. Does the individual have a polymorphic restriction site?
+	10% of loci are not polymorphic restriction sites
+	mutation rate = 4*ne*uniform_distribution(0.00000001,0.00000001)
+	mutation rate is unique to each locus *****IS THIS CORRECT?
+	poissonrand(mutation rate*6) to determine # sites
+		if(poissonrand(mut*6)==1) genrand() to choose which one is ommitted
+		if(poissonrand(mut*6)>1) both are ommitted
+3. PCR duplicates, assuming 2% of reads per PCR cycle are wrong (based on literature).
+	Assuming reads are on average evenly distributed among the loci, the duplication rate * number of genotype calls will be affected
+	pull a number from a poisson distribution with the pcr duplication rate per cycle as the mean..if it returns number > 0, then there's a duplication event
+	if the allele is missing, the other one is taken. If both are missing, the locus is missing.
+4. Output genotypes in vcf format.
+
+Right now it's really not object-oriented, but I would like to change that. 
+
 #####Friday, 23 September 2016
 The output was funky because I'd done start-end instead of end-start to calculate the length.
 The mean fragment length for the single digest is 498.5, but the distribution is skewed and still contains large fragments. (max = 19920). I think that's probably OK, but I should check my lab notebook.

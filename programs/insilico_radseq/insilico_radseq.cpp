@@ -1,8 +1,10 @@
 //Author: Sarah P. Flanagan
-//Last Updated: 13 September 2016
+//Last Updated: 26 September 2016
 //Date Started: 13 September 2016
 //Purpose: Use restriction enzyme recognition sites to digest a genome file to compare sdRAD and ddRAD
 //also impose allelic dropout, PCR bias, shearing bias, etc.
+
+//NOTE TO SELF: MAKE MORE OBJECT-ORIENTED.
 
 #include <string>
 #include <sstream>
@@ -113,18 +115,18 @@ class fragment
 {
 public:
 	string name;
-	int start, end, enz5, enz3, pos;
+	int start, end, enz5, enz3, pos,shared;
 	string chrom;
-	bool polymorphic, shared;
-	double mutation_rate;
+	bool polymorphic;
+	double mutation_rate, pop_af;
 
 	fragment()
 	{
 		name = string();
-		pos = start = end = enz5 = enz3 = int();
+		pos = start = end = shared = enz5 = enz3 = int();
 		chrom = string();
-		polymorphic =shared= bool();
-		mutation_rate = double();
+		polymorphic = bool();
+		mutation_rate = pop_af = double();
 	}
 };
 
@@ -141,14 +143,14 @@ public:
 
 int main()
 {
-	int i, ii, frag_count,count, start, end,last_enz, this_enz,Ne;
+	int i, ii, frag_count,count, start, end,last_enz, this_enz,Ne, reads_per_ind, C_sd, C_dd;
 	int s_start, s_end, s_frag_count, s_cutsite, s_length, sd_ind, dd_ind;
 	double mutation_shape_param, pcr_duplicate_rate, shearing_bias_rate, mean_sheared_length;
-	double mutation_rate;
-	string genome_name, sdigest_name,ddigest_name, line, overhang;
+	double mutation_rate, poly_rs_rate;
+	string genome_name, sdigest_name,ddigest_name, line, overhang, vcf_name, summ_stats_name;
 	restriction_enzyme enz1, enz2;
 	ifstream genome_file;
-	ofstream ddigest_file,sdigest_file;
+	ofstream ddigest_file,sdigest_file, vcf, summ_stats;
 	vector<fasta_record> genome;
 	vector<fragment> ddigest, sdigest;
 	vector<individual> sd_population, dd_population;
@@ -160,13 +162,16 @@ int main()
 	genome_name = "../../SSC_integrated.fa";
 	ddigest_name = "../../results/insilico/SSC_ddigested.txt";
 	sdigest_name = "../../results/insilico/SSC_sdigested.txt";
+	vcf_name = "../../results/insilico/ssc_insilico.vcf";
+	summ_stats_name = "../../results/insilico/ssc_insilico_summstats.txt";
 	enz1.rec_seq = "CTGCAG"; //PstI
 	enz1.overhang = "G";
 	enz2.rec_seq = "GATC"; //MboI
 	enz2.overhang = "";
 	sd_ind = dd_ind = 50;
-	pcr_duplicate_rate = 0.05;
+	pcr_duplicate_rate = 0.02;//2% of reads per cycle
 	Ne = 10000;
+	reads_per_ind = 1114632;
 
 	//read in the fasta file
 	genome_file.open(genome_name);
@@ -389,7 +394,7 @@ int main()
 								sdigest.back().chrom = seq_name;
 								sdigest.back().enz3 = 4;//it's sheared
 								sdigest.back().polymorphic = false;
-								sdigest.back().shared = false;
+								sdigest.back().shared = -1;
 								sdigest.back().mutation_rate = 0;
 								sdigest_file << '\n' << sdigest.back().name << '\t' << sdigest.back().start << '\t' << sdigest.back().end << '\t'
 									<< sdigest.back().end - sdigest.back().start << '\t' << sdigest.back().enz5 << '\t' << sdigest.back().enz5
@@ -410,7 +415,7 @@ int main()
 								sdigest.back().chrom = seq_name;
 								sdigest.back().enz3 = 1;//it's sheared
 								sdigest.back().polymorphic = false;
-								sdigest.back().shared = false;
+								sdigest.back().shared = -1;
 								sdigest.back().mutation_rate = 0;
 								sdigest_file << '\n' << sdigest.back().name << '\t' << sdigest.back().start << '\t' << sdigest.back().end << '\t'
 									<< sdigest.back().end - sdigest.back().start << '\t' << sdigest.back().enz5 << '\t' << sdigest.back().enz5
@@ -458,7 +463,7 @@ int main()
 							ddigest.back().end = end;
 							ddigest.back().enz5 = last_enz;
 							ddigest.back().enz3 = this_enz;
-							ddigest.back().shared = false;
+							ddigest.back().shared = -1;
 							if (this_enz == 1)
 								ddigest.back().pos = end;
 							else
@@ -504,6 +509,7 @@ int main()
 	cout << "\n\nSuccessfully read in " << count << " fasta records.\n";
 
 	//set up population counters
+	cout << "\nPreparing to sample the population.\n";
 	for (i = 0; i < sd_ind; i++)
 	{
 		sd_population.push_back(individual());		
@@ -522,21 +528,23 @@ int main()
 		default_random_engine generator;
 		uniform_real_distribution<double> distribution(0.000000001, 0.00000001);
 		ddigest[i].mutation_rate = 4*Ne*distribution(generator);
+		ddigest[i].pop_af = genrand();
 		for (ii = 0; ii < sdigest.size(); ii++)
 		{
 			if (ddigest[i].chrom == sdigest[ii].chrom && ddigest[i].pos == sdigest[ii].pos)
 			{
 				sdigest[ii].polymorphic = ddigest[i].polymorphic;
 				sdigest[ii].mutation_rate = ddigest[i].mutation_rate;
-				sdigest[ii].shared = true;
-				ddigest[i].shared = true;
+				sdigest[ii].pop_af = ddigest[i].pop_af;
+				sdigest[ii].shared = i;
+				ddigest[i].shared = ii;
 			}
 		}
 	}
 	//now fill in the blanks in the sdigest
 	for (i = 0; i < sdigest.size(); i++)
 	{
-		if (sdigest[i].shared == false)
+		if (sdigest[i].shared < 0)
 		{
 			if (genrand() > 0.1)//if not constant, could be null
 				sdigest[i].polymorphic = true;
@@ -545,9 +553,268 @@ int main()
 			default_random_engine generator;
 			uniform_real_distribution<double> distribution(0.000000001, 0.00000001);
 			sdigest[i].mutation_rate = 4 * Ne*distribution(generator);
+			sdigest[i].pop_af = genrand();
 		}
 	}
-	//now time to sample (include pcr bias?)
+	//now time to sample
+	cout << "\nSampling!\n";
+	vcf.open(vcf_name);
+	vcf << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT";
+	for (i = 0; i < sd_ind; i++)
+		vcf << "\tsd" << i;
+	for (i = 0; i < dd_ind; ii++)
+		vcf << "\tdd" << ii;
+	summ_stats.open(summ_stats_name);
+	summ_stats << "Chrom\tPos\tSDLoc\tDDLoc\tPoly\tPopAF\tsdNum\tsdAF\tsdObsHet\tsdExpHet\tddNum\tddAF\tddObsHet\tddExpHet\tFst";
+	int sd_pcr_dup_count, dd_pcr_dup_count, sd_count;
+	double sd_het, dd_het, ht, fst, sd_act_het, dd_act_het, p, q;
+	sd_het = dd_het = ht = fst = sd_act_het = dd_act_het = p = q = 0;
+	sd_pcr_dup_count = dd_pcr_dup_count = sd_count = 0;
+	poly_rs_rate = 0;
+	for (i = 0; i < sdigest.size(); i++)
+	{
+		vcf << '\n' << sdigest[i].chrom << '\t' << sdigest[i].pos;
+		summ_stats << '\n' << sdigest[i].chrom << '\t' << sdigest[i].pos;
+		if (sdigest[i].shared >= 0) {
+			vcf << '\t' << sdigest[i].name << "/" << ddigest[sdigest[i].shared].name;
+			summ_stats << '\t' << sdigest[i].name << '\t' << ddigest[sdigest[i].shared].name;
+		}
+		else {
+			vcf << '\t' << sdigest[i].name;
+			summ_stats << '\t' << sdigest[i].name << "\t-";
+		}
+		vcf << "\t0\t1\t-\tPASS\t";
+		if (sdigest[i].polymorphic) {
+			vcf << "POLY_RS";
+			summ_stats << "\tPOLY";
+		}
+		else {
+			vcf << "CONSTANT_RS";
+			summ_stats << "\tCONSTANT";
+		}
+		vcf << "\tGT";
+		summ_stats << '\t' << sdigest[i].pop_af;
+		for (ii = 0; ii < sd_ind; ii++)
+		{
+			int al1, al2;
+			if (genrand() <= sdigest[i].pop_af)
+				al1 = 0;
+			else
+				al1 = 1;
+			if (genrand() <= sdigest[i].pop_af)
+				al2 = 0;
+			else
+				al2 = 1;
+			if (sdigest[i].polymorphic)
+			{
+				int number = poissonrand(sdigest[i].mutation_rate*6);
+				if (number > 0)
+				{
+					if (number > 1)
+					{
+						al1 = al2 = -1; //neither of them makes it into the dataset
+						poly_rs_rate = poly_rs_rate + 2;
+					}
+					else
+					{
+						poly_rs_rate++;
+						if (genrand() < 0.5)//randomly choose which one makes it
+							al1 = -1;
+						else
+							al2 = -1;
+					}
+				}
+
+			}//else nothing happens to al1 or al2
+			 //pcr duplicates
+			C_sd = ceil(pcr_duplicate_rate*20*sdigest.size()*sd_ind);
+			if (sd_pcr_dup_count < C_sd)//then there could still be a duplication
+			{
+				int number = poissonrand(pcr_duplicate_rate);
+				if (number > 0)
+				{
+					if (genrand() > 0.5)
+					{
+						if (al1 != -1)
+						{
+							al2 = al1;
+							sd_pcr_dup_count++;
+						}
+						else
+						{
+							if (al2 != -1)
+							{
+								al1 = al2;
+								sd_pcr_dup_count++;
+							}
+						}
+					}
+					else
+					{
+						if (al2 != -1)
+						{
+							al1 = al2;
+							sd_pcr_dup_count++;
+						}
+						else
+						{
+							if (al1 != -1)
+							{
+								al2 = al1;
+								sd_pcr_dup_count++;
+							}
+						}
+					}
+				}
+			}//end pcr dulication
+			if (al1 == 0)
+				p++;
+			if (al1 == 1)
+				q++;
+			if (al2 == 0)
+				p++;
+			if (al2 == 1)
+				q++;
+			if (al1 == -1 && al2 == 0)
+				p++;
+			if (al1 == -1 && al2 == 1)
+				q++;
+			if (al1 == 0 && al2 == -1)
+				p++;
+			if (al1 == 1 && al2 == -1)
+				q++;
+			if (al1 != -1 && al2 != -1 && al1 != al2)
+				sd_act_het++;
+			if (al1 != -1 && al2 != -1)
+				sd_count++;
+			vcf << '\t' << al1 << "/" << al2;
+		}//end of sd_individual[ii]
+		p = p / 2*sd_count;
+		q = q / 2*sd_count;
+		sd_act_het = sd_act_het / sd_count;
+		sd_het = 2 * p * q;
+		ht = p*p + q*q;
+		summ_stats << '\t' << sd_count << '\t' << p << '\t' << sd_act_het << '\t' << sd_het;
+
+		p = q = 0;
+		int dd_count = 0;
+		//double digest
+		if (sdigest[i].shared >= 0)
+		{
+			for (ii = 0; ii < dd_ind; ii++)
+			{
+				int al1, al2;
+				if (genrand() <= ddigest[sdigest[i].shared].pop_af)
+					al1 = 0;
+				else
+					al1 = 1;
+				if (genrand() <= ddigest[sdigest[i].shared].pop_af)
+					al2 = 0;
+				else
+					al2 = 1;
+				if (ddigest[sdigest[i].shared].polymorphic)
+				{
+					int number = poissonrand(ddigest[sdigest[i].shared].mutation_rate * 6);
+					if (number > 0)
+					{
+						if (number > 1)
+						{
+							al1 = al2 = -1; //neither of them makes it into the dataset
+							poly_rs_rate = poly_rs_rate + 2;
+						}
+						else
+						{
+							poly_rs_rate++;
+							if (genrand() < 0.5)//randomly choose which one makes it
+								al1 = -1;
+							else
+								al2 = -1;
+						}
+					}
+
+				}//else nothing happens to al1 or al2
+				 //pcr duplicates
+				C_dd = ceil(pcr_duplicate_rate * 20 * ddigest.size()*dd_ind);
+				if (dd_pcr_dup_count < C_dd)//then there could still be a duplication
+				{
+					int number = poissonrand(pcr_duplicate_rate);
+					if (number > 0)
+					{
+						if (genrand() > 0.5)
+						{
+							if (al1 != -1)
+							{
+								al2 = al1;
+								dd_pcr_dup_count++;
+							}
+							else
+							{
+								if (al2 != -1)
+								{
+									al1 = al2;
+									dd_pcr_dup_count++;
+								}
+							}
+						}
+						else
+						{
+							if (al2 != -1)
+							{
+								al1 = al2;
+								dd_pcr_dup_count++;
+							}
+							else
+							{
+								if (al1 != -1)
+								{
+									al2 = al1;
+									dd_pcr_dup_count++;
+								}
+							}
+						}
+					}
+				}//end pcr duplication
+				if (al1 == 0)
+					p++;
+				if (al1 == 1)
+					q++;
+				if (al2 == 0)
+					p++;
+				if (al2 == 1)
+					q++;
+				if (al1 == -1 && al2 == 0)
+					p++;
+				if (al1 == -1 && al2 == 1)
+					q++;
+				if (al1 == 0 && al2 == -1)
+					p++;
+				if (al1 == 1 && al2 == -1)
+					q++;
+				if (al1 != -1 && al2 != -1 && al1 != al2)
+					dd_act_het++;
+				if (al1 != -1 && al2 != -1)
+					dd_count++;
+				vcf << '\t' << al1 << "/" << al2;
+			}//end of sd_individual[ii]
+			p = p / 2 * dd_count;
+			q = q / 2 * dd_count;
+			sd_act_het = dd_act_het / dd_count;
+			sd_het = 2 * p * q;
+			ht = 1 - (ht + ((p*p) + (q*q)));//check this!! seems wrong.
+			fst = (ht - ((sd_het + dd_het) / 2)) / ht;
+			summ_stats << '\t' << dd_count << '\t' << p << '\t' << dd_act_het << '\t' << dd_het << '\t' << ht << '\t' <<fst;
+		}
+		else
+		{
+			for (ii = 0; ii < dd_ind; ii++)
+				vcf << '\t' << "./.";
+		}
+
+	}//end of sdigest[i]
+	//go through the non-shared double digest ones
+	//***add this!!
+	cout << "\nSingle-digest polymorphic restriction site rate:" << poly_rs_rate / (2*sd_ind*sdigest.size());
+	cout << "\nThere were " << sd_pcr_dup_count << " PCR duplication events.";
 
 	cout << "\nDone! Input integer to quit.\n";
 	cin >> i;
