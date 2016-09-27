@@ -20,6 +20,18 @@ Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias
 
 
 #############################################LAB BOOK###########################################
+#####Tuesday, 27 September 2016
+I made the insilico digestion more object-oriented and it feels so much better! Now it's running, but it's sort of slow.
+We'll see if it works the way I think it should.
+
+In the meantime, I'm looking at the data again. 
+->The ones with Fst=1 between the two datasets do actually have different alleles fixed 
+->if I only keep loci with coverage between 3 and 50 (or 10 and 50 or 3 and 20), there are still a bunch fixed for different alleles
+summary(od.both.fst[od.both.fst$SNP %in% cov.pass,"Fst"])
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.     NA's 
+-3.44800 -0.02332  0.02860  0.16000  0.20130  1.00000       72 
+^Common suggestion for eliminating PCR duplicates is not effective.
+
 #####Monday, 26 September 2016
 Today I'm adding the polymorphic restriction sites and the pcr duplication. 
 For each individual at each locus:

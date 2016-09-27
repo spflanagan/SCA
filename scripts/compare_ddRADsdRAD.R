@@ -36,7 +36,7 @@ vcf.cov.loc<-function(vcf.row,subset){
     function(x){
       as.numeric(strsplit(as.character(x),",")[[1]][1]) + 
       as.numeric(strsplit(as.character(x),",")[[1]][2])
-    }))))/pres
+    }))))
   var.cov<-var(as.numeric(unlist(lapply(cov[cov!=".,."],
                                     function(x){
                                       as.numeric(strsplit(as.character(x),",")[[1]][1]) + 
@@ -48,8 +48,8 @@ vcf.cov.loc<-function(vcf.row,subset){
   het<-length(het[het=="0/1" | het=="1/0"])
   return(data.frame(Chrom=vcf.row[1],Pos=vcf.row["POS"],Locus=vcf.row["ID"],
     NumMissing=miss, NumPresent=pres,PropMissing=miss/(miss+pres),
-    AvgCovRef=ref,AvgCovAlt=alt, AvgCovRatio=ref/alt,AvgCovTotal=tot, CovVariance=var.cov,
-    NumHet=het,PropHet=het/pres,stringsAsFactors = F))
+    AvgCovRef=ref,AvgCovAlt=alt, AvgCovRatio=ref/alt,AvgCovTotal=tot/pres, CovVariance=var.cov,
+    NumHet=het,PropHet=het/pres,TotalNumReads = tot,stringsAsFactors = F))
 }
 
 vcf.cov.ind<-function(vcf.col){
@@ -424,12 +424,25 @@ o.share<-orad[orad$SNP %in% od.loci$SNP,]
 d.share<-drad[drad$SNP %in% od.loci$SNP,]
 od.vcf<-merge(orad,drad,"SNP")
 
+
 od.fst<-do.call("rbind",apply(o.share,1,fst.two.vcf,vcf2=d.share,match.index="SNP"))
 write.table(od.fst,"orad-drad.fst.txt",col.names=T,row.names=F,quote=F,sep='\t')
 
+#FROM SAME ANALYSIS
+both$SNP<-paste(both$`#CHROM`,both$POS,sep=".")
 both.o<-cbind(both[,locus.info],both[,o.ind])
 both.d<-cbind(both[,locus.info],both[,d.ind])
 od.both.fst<-do.call("rbind",apply(both.o,1,fst.two.vcf,vcf2=both.d,match.index="SNP"))
+od.both.fst$SNP<-paste(od.both.fst$Chrom,od.both.fst$Pos,sep=".")
+od.fst.1<-od.both.fst[od.both.fst$Fst ==1,]
+bd.cov$SNP<-paste(bd.cov$Chrom,bd.cov$Pos,sep=".")
+bo.cov$SNP<-paste(bo.cov$Chrom,bo.cov$Pos,sep=".")
+bd.cov.pass<-bd.cov[bd.cov$AvgCovTotal > 3 & bd.cov$AvgCovTotal <=50,"SNP"]
+bo.cov.pass<-bo.cov[bo.cov$AvgCovTotal > 3 & bo.cov$AvgCovTotal <=50,"SNP"]
+cov.pass<-bd.cov.pass[bd.cov.pass %in% bo.cov.pass]
+plot(od.both.fst[od.both.fst$SNP %in% cov.pass,"Fst"])
+
+#PLOTTING
 lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
        "LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
        "LG22")

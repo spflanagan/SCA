@@ -93,22 +93,69 @@ public:
 
 };
 
-class restriction_site
+class individual
 {
 public:
-	bool polymorphic;
-	double mutation_rate;
-	int position;
-	string enzyme;
-	bool sd_tag, dd_tag;
+	int allele1, allele2;
+	int counter;
 
-	restriction_site()
+	individual()
 	{
-		polymorphic = sd_tag = dd_tag = bool();
-		mutation_rate = double();
-		position = int();
-		enzyme = string();
+		counter = allele1 = allele2 = int();
 	}
+
+	void assign_alleles(double pop_af)
+	{
+		if (genrand() <= pop_af)
+			allele1 = 0;
+		else
+			allele2 = 1;
+		if (genrand() <= pop_af)
+			allele1 = 0;
+		else
+			allele2 = 1;
+	}
+
+	void pcr_duplication(double rate)
+	{
+		counter = 0;
+		int number = poissonrand(rate);
+		if (number > 0)
+		{
+			if (genrand() > 0.5)
+			{
+				if (allele1 != -1)
+				{
+					allele2 = allele1;
+					counter++;
+				}
+				else
+				{
+					if (allele2 != -1)
+					{
+						allele1 = allele2;
+						counter++;
+					}
+				}
+			}
+			else
+			{
+				if (allele2 != -1)
+				{
+					allele1 = allele2;
+					counter++;
+				}
+				else
+				{
+					if (allele1 != -1)
+					{
+						allele2 = allele1;
+						counter++;
+					}
+				}
+			}
+		}
+	}//end pcr_duplicate
 };
 
 class fragment
@@ -128,16 +175,78 @@ public:
 		polymorphic = bool();
 		mutation_rate = pop_af = double();
 	}
+
+	individual poly_rs_ado(individual a, int rs_length)
+	{
+		a.counter = 0;
+		if (polymorphic)
+		{
+			int number = poissonrand(mutation_rate * rs_length);
+			if (number > 0)
+			{
+				if (number > 1)
+				{
+					a.allele1 = a.allele2 = -1; //neither of them makes it into the dataset
+					a.counter = a.counter + 2;
+				}
+				else
+				{
+					a.counter++;
+					if (genrand() < 0.5)//randomly choose which one makes it
+						a.allele1 = -1;
+					else
+						a.allele2 = -1;
+				}
+			}
+		}
+		return(a);
+	}//end assign_alleles
+
+	
 };
 
-class individual
+class frequency_counters
 {
 public:
-	vector<int> allele1, allele2;
+	double p, q, exp_het, obs_het;
+	int counter;
 
-	individual()
+	frequency_counters()
 	{
-		allele1 = allele2 = vector<int>();
+		p = q = exp_het = obs_het = double();
+		counter = int();
+	}
+
+	void zero()
+	{
+		p = 0;
+		q = 0;
+		exp_het = 0;
+		obs_het = 0;
+		counter = 0;
+	}
+	void update_counters(individual a)
+	{
+		if (a.allele1 == 0)
+			p++;
+		if (a.allele1 == 1)
+			q++;
+		if (a.allele2 == 0)
+			p++;
+		if (a.allele2 == 1)
+			q++;
+		if (a.allele1 == -1 && a.allele2== 0)
+			p++;
+		if (a.allele1== -1 && a.allele2== 1)
+			q++;
+		if (a.allele1== 0 && a.allele2== -1)
+			p++;
+		if (a.allele1== 1 && a.allele2== -1)
+			q++;
+		if (a.allele1 != -1 && a.allele2!= -1 && a.allele1!= a.allele2)
+			obs_het++;
+		if (a.allele1!= -1 && a.allele2!= -1)
+			counter++;
 	}
 };
 
@@ -145,16 +254,14 @@ int main()
 {
 	int i, ii, frag_count,count, start, end,last_enz, this_enz,Ne, reads_per_ind, C_sd, C_dd;
 	int s_start, s_end, s_frag_count, s_cutsite, s_length, sd_ind, dd_ind;
+	int sd_pcr_cycles, dd_pcr_cycles;
 	double mutation_shape_param, pcr_duplicate_rate, shearing_bias_rate, mean_sheared_length;
-	double mutation_rate, poly_rs_rate;
+	double mutation_rate, sd_poly_rs_rate, dd_poly_rs_rate;
 	string genome_name, sdigest_name,ddigest_name, line, overhang, vcf_name, summ_stats_name;
 	restriction_enzyme enz1, enz2;
 	ifstream genome_file;
 	ofstream ddigest_file,sdigest_file, vcf, summ_stats;
-	vector<fasta_record> genome;
 	vector<fragment> ddigest, sdigest;
-	vector<individual> sd_population, dd_population;
-	vector<restriction_site> digestion;
 	string sequence, seq_name;
 	sgenrand(time(0));
 
@@ -172,6 +279,8 @@ int main()
 	pcr_duplicate_rate = 0.02;//2% of reads per cycle
 	Ne = 10000;
 	reads_per_ind = 1114632;
+	dd_pcr_cycles = 12;
+	sd_pcr_cycles = 20;
 
 	//read in the fasta file
 	genome_file.open(genome_name);
@@ -510,23 +619,16 @@ int main()
 
 	//set up population counters
 	cout << "\nPreparing to sample the population.\n";
-	for (i = 0; i < sd_ind; i++)
-	{
-		sd_population.push_back(individual());		
-	}
-	for (i = 0; i < dd_ind; i++)
-	{
-		dd_population.push_back(individual());
-	}
 	//set up the mutational structure of restriction sites
+
+	default_random_engine generator;
+	uniform_real_distribution<double> distribution(0.000000001, 0.00000001);
 	for (i = 0; i < ddigest.size(); i++)
 	{
 		if (genrand() > 0.1)//if not constant, could be null
 			ddigest[i].polymorphic = true;
 		else
 			ddigest[i].polymorphic = false;
-		default_random_engine generator;
-		uniform_real_distribution<double> distribution(0.000000001, 0.00000001);
 		ddigest[i].mutation_rate = 4*Ne*distribution(generator);
 		ddigest[i].pop_af = genrand();
 		for (ii = 0; ii < sdigest.size(); ii++)
@@ -550,8 +652,6 @@ int main()
 				sdigest[i].polymorphic = true;
 			else
 				sdigest[i].polymorphic = false;
-			default_random_engine generator;
-			uniform_real_distribution<double> distribution(0.000000001, 0.00000001);
 			sdigest[i].mutation_rate = 4 * Ne*distribution(generator);
 			sdigest[i].pop_af = genrand();
 		}
@@ -562,15 +662,15 @@ int main()
 	vcf << "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT";
 	for (i = 0; i < sd_ind; i++)
 		vcf << "\tsd" << i;
-	for (i = 0; i < dd_ind; ii++)
-		vcf << "\tdd" << ii;
+	for (i = 0; i < dd_ind; i++)
+		vcf << "\tdd" << i;
 	summ_stats.open(summ_stats_name);
 	summ_stats << "Chrom\tPos\tSDLoc\tDDLoc\tPoly\tPopAF\tsdNum\tsdAF\tsdObsHet\tsdExpHet\tddNum\tddAF\tddObsHet\tddExpHet\tFst";
 	int sd_pcr_dup_count, dd_pcr_dup_count, sd_count;
 	double sd_het, dd_het, ht, fst, sd_act_het, dd_act_het, p, q;
 	sd_het = dd_het = ht = fst = sd_act_het = dd_act_het = p = q = 0;
 	sd_pcr_dup_count = dd_pcr_dup_count = sd_count = 0;
-	poly_rs_rate = 0;
+	sd_poly_rs_rate = dd_poly_rs_rate = 0;
 	for (i = 0; i < sdigest.size(); i++)
 	{
 		vcf << '\n' << sdigest[i].chrom << '\t' << sdigest[i].pos;
@@ -594,106 +694,32 @@ int main()
 		}
 		vcf << "\tGT";
 		summ_stats << '\t' << sdigest[i].pop_af;
+		frequency_counters sd_tracker, dd_tracker, overall_tracker;
+		sd_tracker.zero();
+		dd_tracker.zero();
+		overall_tracker.zero();
 		for (ii = 0; ii < sd_ind; ii++)
 		{
-			int al1, al2;
-			if (genrand() <= sdigest[i].pop_af)
-				al1 = 0;
-			else
-				al1 = 1;
-			if (genrand() <= sdigest[i].pop_af)
-				al2 = 0;
-			else
-				al2 = 1;
-			if (sdigest[i].polymorphic)
-			{
-				int number = poissonrand(sdigest[i].mutation_rate*6);
-				if (number > 0)
-				{
-					if (number > 1)
-					{
-						al1 = al2 = -1; //neither of them makes it into the dataset
-						poly_rs_rate = poly_rs_rate + 2;
-					}
-					else
-					{
-						poly_rs_rate++;
-						if (genrand() < 0.5)//randomly choose which one makes it
-							al1 = -1;
-						else
-							al2 = -1;
-					}
-				}
-
-			}//else nothing happens to al1 or al2
-			 //pcr duplicates
-			C_sd = ceil(pcr_duplicate_rate*20*sdigest.size()*sd_ind);
+			individual sind;
+			sind.assign_alleles(sdigest[i].pop_af);
+			//polymorphic restriction site adjustment
+			sdigest[i].poly_rs_ado(sind, 6);
+			sd_poly_rs_rate = sd_poly_rs_rate + sind.counter;
+			//pcr duplicates
+			C_sd = ceil(pcr_duplicate_rate*sd_pcr_cycles*sdigest.size()*sd_ind);
 			if (sd_pcr_dup_count < C_sd)//then there could still be a duplication
 			{
-				int number = poissonrand(pcr_duplicate_rate);
-				if (number > 0)
-				{
-					if (genrand() > 0.5)
-					{
-						if (al1 != -1)
-						{
-							al2 = al1;
-							sd_pcr_dup_count++;
-						}
-						else
-						{
-							if (al2 != -1)
-							{
-								al1 = al2;
-								sd_pcr_dup_count++;
-							}
-						}
-					}
-					else
-					{
-						if (al2 != -1)
-						{
-							al1 = al2;
-							sd_pcr_dup_count++;
-						}
-						else
-						{
-							if (al1 != -1)
-							{
-								al2 = al1;
-								sd_pcr_dup_count++;
-							}
-						}
-					}
-				}
+				sind.pcr_duplication(pcr_duplicate_rate);
+				sd_pcr_dup_count = sd_pcr_dup_count + sind.counter;
 			}//end pcr dulication
-			if (al1 == 0)
-				p++;
-			if (al1 == 1)
-				q++;
-			if (al2 == 0)
-				p++;
-			if (al2 == 1)
-				q++;
-			if (al1 == -1 && al2 == 0)
-				p++;
-			if (al1 == -1 && al2 == 1)
-				q++;
-			if (al1 == 0 && al2 == -1)
-				p++;
-			if (al1 == 1 && al2 == -1)
-				q++;
-			if (al1 != -1 && al2 != -1 && al1 != al2)
-				sd_act_het++;
-			if (al1 != -1 && al2 != -1)
-				sd_count++;
-			vcf << '\t' << al1 << "/" << al2;
-		}//end of sd_individual[ii]
-		p = p / 2*sd_count;
-		q = q / 2*sd_count;
-		sd_act_het = sd_act_het / sd_count;
+			sd_tracker.update_counters(sind);
+			overall_tracker.update_counters(sind);
+			vcf << '\t' << sind.allele1 << "/" << sind.allele2;
+		}//end of sd_ind
+		p = sd_tracker.p / (2*sd_tracker.counter);
+		q = sd_tracker.q / (2*sd_tracker.counter);
+		sd_act_het = sd_tracker.obs_het/sd_tracker.counter;
 		sd_het = 2 * p * q;
-		ht = p*p + q*q;
 		summ_stats << '\t' << sd_count << '\t' << p << '\t' << sd_act_het << '\t' << sd_het;
 
 		p = q = 0;
@@ -703,118 +729,103 @@ int main()
 		{
 			for (ii = 0; ii < dd_ind; ii++)
 			{
-				int al1, al2;
-				if (genrand() <= ddigest[sdigest[i].shared].pop_af)
-					al1 = 0;
-				else
-					al1 = 1;
-				if (genrand() <= ddigest[sdigest[i].shared].pop_af)
-					al2 = 0;
-				else
-					al2 = 1;
-				if (ddigest[sdigest[i].shared].polymorphic)
-				{
-					int number = poissonrand(ddigest[sdigest[i].shared].mutation_rate * 6);
-					if (number > 0)
-					{
-						if (number > 1)
-						{
-							al1 = al2 = -1; //neither of them makes it into the dataset
-							poly_rs_rate = poly_rs_rate + 2;
-						}
-						else
-						{
-							poly_rs_rate++;
-							if (genrand() < 0.5)//randomly choose which one makes it
-								al1 = -1;
-							else
-								al2 = -1;
-						}
-					}
-
-				}//else nothing happens to al1 or al2
-				 //pcr duplicates
-				C_dd = ceil(pcr_duplicate_rate * 20 * ddigest.size()*dd_ind);
+				individual dind;
+				dind.assign_alleles(ddigest[sdigest[i].shared].pop_af);
+				
+				//polymorphic restriction site adjustment
+				ddigest[sdigest[i].shared].poly_rs_ado(dind, 6);
+				dd_poly_rs_rate = dd_poly_rs_rate + dind.counter;
+				ddigest[sdigest[i].shared].poly_rs_ado(dind, 4);
+				dd_poly_rs_rate = dd_poly_rs_rate + dind.counter;
+				//pcr duplicates
+				C_dd = ceil(pcr_duplicate_rate * dd_pcr_cycles * ddigest.size()*dd_ind);
 				if (dd_pcr_dup_count < C_dd)//then there could still be a duplication
 				{
-					int number = poissonrand(pcr_duplicate_rate);
-					if (number > 0)
-					{
-						if (genrand() > 0.5)
-						{
-							if (al1 != -1)
-							{
-								al2 = al1;
-								dd_pcr_dup_count++;
-							}
-							else
-							{
-								if (al2 != -1)
-								{
-									al1 = al2;
-									dd_pcr_dup_count++;
-								}
-							}
-						}
-						else
-						{
-							if (al2 != -1)
-							{
-								al1 = al2;
-								dd_pcr_dup_count++;
-							}
-							else
-							{
-								if (al1 != -1)
-								{
-									al2 = al1;
-									dd_pcr_dup_count++;
-								}
-							}
-						}
-					}
-				}//end pcr duplication
-				if (al1 == 0)
-					p++;
-				if (al1 == 1)
-					q++;
-				if (al2 == 0)
-					p++;
-				if (al2 == 1)
-					q++;
-				if (al1 == -1 && al2 == 0)
-					p++;
-				if (al1 == -1 && al2 == 1)
-					q++;
-				if (al1 == 0 && al2 == -1)
-					p++;
-				if (al1 == 1 && al2 == -1)
-					q++;
-				if (al1 != -1 && al2 != -1 && al1 != al2)
-					dd_act_het++;
-				if (al1 != -1 && al2 != -1)
-					dd_count++;
-				vcf << '\t' << al1 << "/" << al2;
-			}//end of sd_individual[ii]
-			p = p / 2 * dd_count;
-			q = q / 2 * dd_count;
-			sd_act_het = dd_act_het / dd_count;
-			sd_het = 2 * p * q;
-			ht = 1 - (ht + ((p*p) + (q*q)));//check this!! seems wrong.
+					dind.pcr_duplication(pcr_duplicate_rate);
+					dd_pcr_dup_count = dd_pcr_dup_count + dind.counter;
+				}//end pcr dulication
+				dd_tracker.update_counters(dind);
+				overall_tracker.update_counters(dind);
+				if (dind.allele1 != -1 && dind.allele1 != -1)
+					vcf << '\t' << dind.allele1 << "/" << dind.allele2;
+				else
+					vcf << "\t./.";
+			}//end of dd_ind
+			p = dd_tracker.p / (2 * dd_tracker.counter);
+			q = dd_tracker.q / (2 * dd_tracker.counter);
+			dd_act_het = dd_tracker.obs_het/ dd_tracker.counter;
+			dd_het = 2 * p * q;
+			overall_tracker.p = overall_tracker.p / (2 * overall_tracker.counter);
+			overall_tracker.q = overall_tracker.q / (2 * overall_tracker.counter);
+			overall_tracker.exp_het = 2 * overall_tracker.p*overall_tracker.q;
+			ht = overall_tracker.exp_het;
 			fst = (ht - ((sd_het + dd_het) / 2)) / ht;
 			summ_stats << '\t' << dd_count << '\t' << p << '\t' << dd_act_het << '\t' << dd_het << '\t' << ht << '\t' <<fst;
-		}
+		}//if it's a shared locus
 		else
 		{
 			for (ii = 0; ii < dd_ind; ii++)
 				vcf << '\t' << "./.";
+			summ_stats << "\t0\t0\t0\t0\t" << sd_het << "\t-1";
 		}
 
 	}//end of sdigest[i]
 	//go through the non-shared double digest ones
-	//***add this!!
-	cout << "\nSingle-digest polymorphic restriction site rate:" << poly_rs_rate / (2*sd_ind*sdigest.size());
-	cout << "\nThere were " << sd_pcr_dup_count << " PCR duplication events.";
+	for (i = 0; i < ddigest.size(); i++)
+	{
+		if (ddigest[i].shared == -1)
+		{
+			vcf << '\n' << ddigest[i].chrom << '\t' << ddigest[i].pos;
+			summ_stats << '\n' << ddigest[i].chrom << '\t' << ddigest[i].pos;
+			vcf << '\t' << ddigest[i].name;
+			summ_stats << '\t' << ddigest[i].name << "\t-";
+			vcf << "\t0\t1\t-\tPASS\t";
+			if (ddigest[i].polymorphic) {
+				vcf << "POLY_RS";
+				summ_stats << "\tPOLY";
+			}
+			else {
+				vcf << "CONSTANT_RS";
+				summ_stats << "\tCONSTANT";
+			}
+			vcf << "\tGT";
+			summ_stats << '\t' << ddigest[i].pop_af;
+			frequency_counters dd_tracker;
+			dd_tracker.zero();
+			for (ii = 0; ii < dd_ind; ii++)
+			{
+				individual dind;
+				dind.assign_alleles(ddigest[i].pop_af);
+				//polymorphic restriction site adjustment
+				ddigest[i].poly_rs_ado(dind, 6);
+				dd_poly_rs_rate = dd_poly_rs_rate + dind.counter;
+				ddigest[i].poly_rs_ado(dind, 4);
+				dd_poly_rs_rate = dd_poly_rs_rate + dind.counter;
+				//pcr duplicates
+				C_dd = ceil(pcr_duplicate_rate * dd_pcr_cycles * ddigest.size()*dd_ind);
+				if (dd_pcr_dup_count < C_dd)//then there could still be a duplication
+				{
+					dind.pcr_duplication(pcr_duplicate_rate);
+					dd_pcr_dup_count = dd_pcr_dup_count + dind.counter;
+				}//end pcr dulication
+				dd_tracker.update_counters(dind);
+				if (dind.allele1 != -1 && dind.allele1 != -1)
+					vcf << '\t' << dind.allele1 << "/" << dind.allele2;
+				else
+					vcf << "\t./.";
+			}//end of dd_individual[i]
+			p = dd_tracker.p / (2 * dd_tracker.counter);
+			q = dd_tracker.q / (2 * dd_tracker.counter);
+			dd_act_het = dd_tracker.obs_het / dd_tracker.counter;
+			dd_het = 2 * p * q;
+			summ_stats << "\t0\t0\t0\t0" << '\t' << dd_tracker.counter << '\t' << p << '\t' << dd_act_het << '\t' << dd_het << '\t' << dd_het << "\t-1";
+
+		}
+	}
+	cout << "\nSingle-digest polymorphic restriction site rate: " << sd_poly_rs_rate / (2*sd_ind*sdigest.size());
+	cout << "\nSingle-digest PCR duplication events: " << sd_pcr_dup_count;
+	cout << "\n\nDouble-digest polymorphic restriction site rate: " << dd_poly_rs_rate / (2 * dd_ind*ddigest.size());
+	cout << "\nDouble-digest PCR duplication events: " << dd_pcr_dup_count;
 
 	cout << "\nDone! Input integer to quit.\n";
 	cin >> i;

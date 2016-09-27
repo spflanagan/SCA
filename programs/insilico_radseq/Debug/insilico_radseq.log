@@ -1,17 +1,19 @@
 ﻿  insilico_radseq.cpp
 \\vboxsvr\home\projects\sca\programs\insilico_radseq\random_numbers.h(225): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(157): warning C4244: 'argument': conversion from 'time_t' to 'unsigned long', possible loss of data
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(194): warning C4018: '<': signed/unsigned mismatch
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(209): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(430): warning C4018: '<': signed/unsigned mismatch
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(518): warning C4018: '<': signed/unsigned mismatch
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(528): warning C4018: '<': signed/unsigned mismatch
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(541): warning C4018: '<': signed/unsigned mismatch
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(560): warning C4018: '<': signed/unsigned mismatch
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(595): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(147): warning C4101: 'mutation_rate': unreferenced local variable
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(146): warning C4101: 'mutation_shape_param': unreferenced local variable
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(146): warning C4101: 'shearing_bias_rate': unreferenced local variable
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(144): warning C4101: 'C_dd': unreferenced local variable
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(266): warning C4244: 'argument': conversion from 'time_t' to 'unsigned long', possible loss of data
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(307): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(322): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(543): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(626): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(634): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(647): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(674): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(709): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(741): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(774): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(805): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(259): warning C4101: 'mutation_rate': unreferenced local variable
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(258): warning C4101: 'mutation_shape_param': unreferenced local variable
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(258): warning C4101: 'shearing_bias_rate': unreferenced local variable
   insilico_radseq.vcxproj -> \\VBOXSVR\Home\Projects\SCA\programs\insilico_radseq\Debug\insilico_radseq.exe
   insilico_radseq.vcxproj -> \\VBOXSVR\Home\Projects\SCA\programs\insilico_radseq\Debug\insilico_radseq.pdb (Full PDB)
