@@ -451,7 +451,7 @@ scaffs<-levels(as.factor(both[,1]))
 scaffs[1:22]<-lgs
 
 jpeg("sd-dd_Fst.jpeg",height=10,width=7.5,units="in",res=300)
-par(mfrow=c(3,1),mar=c(2,2,2,2),oma=c(1,2,1,1))
+par(mfrow=c(2,2),mar=c(2,2,2,2),oma=c(1,2,1,1))
 od<-fst.plot(od.fst[!is.na(od.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
   fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,
   groups=as.factor(scaffs[scaffs %in% levels(factor(od.fst$Chrom))]))
@@ -487,6 +487,22 @@ for(i in 1:length(lgs)){
 }
 mtext("sdRAD-ddRAD Analyzed Together, Only Loci In Separate Analyses",3,cex=0.75)
 mtext(expression(italic(F)[ST]),2,outer=T,cex=0.75)
+
+odbc<-fst.plot(od.both.fst[od.both.fst$SNP %in% cov.pass & !is.na(od.both.fst$Fst),],
+               ci.dat=c(-10,10),sig.col=c("black","black"), 
+               fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,
+               groups=as.factor(scaffs[scaffs %in% 
+                levels(factor(od.both.fst[od.both.fst$SNP %in% cov.pass & !is.na(od.both.fst$Fst),"Chrom"]))]))
+last<-0
+for(i in 1:length(lgs)){
+  if(lgs[i] %in% levels(factor(odbc$Chrom))){
+    text(x=mean(odbc[odbc$Chrom ==lgs[i],"Pos"]),y=-1.5,
+         labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+    last<-max(odbc[odbc$Chrom ==lgs[i],"Pos"])
+  }
+}
+mtext("sdRAD-ddRAD Analyzed Together, High Coverage Removed",3,cex=0.75)
+
 dev.off()
 
 fst.aov.dat<-data.frame(Fst=c(od$Fst,odb$Fst,odbs$Fst),

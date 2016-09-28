@@ -20,6 +20,15 @@ Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias
 
 
 #############################################LAB BOOK###########################################
+#####Wednesday, 28 September 2016
+Neither single-digest nor double digest had any polymorphic restriction site events.
+sdigest had 7308 PCR duplication events
+ddigest had 67122 PCR duplication events
+
+The Fsts from these don't have the same crazy pattern.
+
+Running it with pcr_duplicate_rate ranging from 0.01 to 0.1 (although maybe I need to stop at 0.05 because that would be 100% w/ 20 cycles.)
+
 #####Tuesday, 27 September 2016
 I made the insilico digestion more object-oriented and it feels so much better! Now it's running, but it's sort of slow.
 We'll see if it works the way I think it should.

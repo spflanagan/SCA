@@ -262,21 +262,22 @@ int main()
 	ifstream genome_file;
 	ofstream ddigest_file,sdigest_file, vcf, summ_stats;
 	vector<fragment> ddigest, sdigest;
-	string sequence, seq_name;
+	string sequence, seq_name, output_add;
 	sgenrand(time(0));
 
 	
 	genome_name = "../../SSC_integrated.fa";
-	ddigest_name = "../../results/insilico/SSC_ddigested.txt";
-	sdigest_name = "../../results/insilico/SSC_sdigested.txt";
-	vcf_name = "../../results/insilico/ssc_insilico.vcf";
-	summ_stats_name = "../../results/insilico/ssc_insilico_summstats.txt";
+	output_add = "pcr.06";
+	ddigest_name = "../../results/insilico/SSC_ddigested"+ output_add + ".txt";
+	sdigest_name = "../../results/insilico/SSC_sdigested"+ output_add + ".txt";
+	vcf_name = "../../results/insilico/ssc_insilico" + output_add + ".vcf";
+	summ_stats_name = "../../results/insilico/ssc_insilico_summstats" + output_add + ".txt";
 	enz1.rec_seq = "CTGCAG"; //PstI
 	enz1.overhang = "G";
 	enz2.rec_seq = "GATC"; //MboI
 	enz2.overhang = "";
 	sd_ind = dd_ind = 50;
-	pcr_duplicate_rate = 0.02;//2% of reads per cycle
+	pcr_duplicate_rate = 0.06;//% of reads per cycle
 	Ne = 10000;
 	reads_per_ind = 1114632;
 	dd_pcr_cycles = 12;
@@ -665,7 +666,7 @@ int main()
 	for (i = 0; i < dd_ind; i++)
 		vcf << "\tdd" << i;
 	summ_stats.open(summ_stats_name);
-	summ_stats << "Chrom\tPos\tSDLoc\tDDLoc\tPoly\tPopAF\tsdNum\tsdAF\tsdObsHet\tsdExpHet\tddNum\tddAF\tddObsHet\tddExpHet\tFst";
+	summ_stats << "Chrom\tPos\tSDLoc\tDDLoc\tPoly\tPopAF\tsdNum\tsdAF\tsdObsHet\tsdExpHet\tddNum\tddAF\tddObsHet\tddExpHet\tHt\tFst";
 	int sd_pcr_dup_count, dd_pcr_dup_count, sd_count;
 	double sd_het, dd_het, ht, fst, sd_act_het, dd_act_het, p, q;
 	sd_het = dd_het = ht = fst = sd_act_het = dd_act_het = p = q = 0;
@@ -703,7 +704,7 @@ int main()
 			individual sind;
 			sind.assign_alleles(sdigest[i].pop_af);
 			//polymorphic restriction site adjustment
-			sdigest[i].poly_rs_ado(sind, 6);
+			sind = sdigest[i].poly_rs_ado(sind, 6);
 			sd_poly_rs_rate = sd_poly_rs_rate + sind.counter;
 			//pcr duplicates
 			C_sd = ceil(pcr_duplicate_rate*sd_pcr_cycles*sdigest.size()*sd_ind);
@@ -720,7 +721,7 @@ int main()
 		q = sd_tracker.q / (2*sd_tracker.counter);
 		sd_act_het = sd_tracker.obs_het/sd_tracker.counter;
 		sd_het = 2 * p * q;
-		summ_stats << '\t' << sd_count << '\t' << p << '\t' << sd_act_het << '\t' << sd_het;
+		summ_stats << '\t' << sd_tracker.counter << '\t' << p << '\t' << sd_act_het << '\t' << sd_het;
 
 		p = q = 0;
 		int dd_count = 0;
@@ -733,9 +734,9 @@ int main()
 				dind.assign_alleles(ddigest[sdigest[i].shared].pop_af);
 				
 				//polymorphic restriction site adjustment
-				ddigest[sdigest[i].shared].poly_rs_ado(dind, 6);
+				dind = ddigest[sdigest[i].shared].poly_rs_ado(dind, 6);
 				dd_poly_rs_rate = dd_poly_rs_rate + dind.counter;
-				ddigest[sdigest[i].shared].poly_rs_ado(dind, 4);
+				dind = ddigest[sdigest[i].shared].poly_rs_ado(dind, 4);
 				dd_poly_rs_rate = dd_poly_rs_rate + dind.counter;
 				//pcr duplicates
 				C_dd = ceil(pcr_duplicate_rate * dd_pcr_cycles * ddigest.size()*dd_ind);
@@ -760,7 +761,7 @@ int main()
 			overall_tracker.exp_het = 2 * overall_tracker.p*overall_tracker.q;
 			ht = overall_tracker.exp_het;
 			fst = (ht - ((sd_het + dd_het) / 2)) / ht;
-			summ_stats << '\t' << dd_count << '\t' << p << '\t' << dd_act_het << '\t' << dd_het << '\t' << ht << '\t' <<fst;
+			summ_stats << '\t' << dd_tracker.counter << '\t' << p << '\t' << dd_act_het << '\t' << dd_het << '\t' << ht << '\t' <<fst;
 		}//if it's a shared locus
 		else
 		{
@@ -797,9 +798,9 @@ int main()
 				individual dind;
 				dind.assign_alleles(ddigest[i].pop_af);
 				//polymorphic restriction site adjustment
-				ddigest[i].poly_rs_ado(dind, 6);
+				dind = ddigest[i].poly_rs_ado(dind, 6);
 				dd_poly_rs_rate = dd_poly_rs_rate + dind.counter;
-				ddigest[i].poly_rs_ado(dind, 4);
+				dind = ddigest[i].poly_rs_ado(dind, 4);
 				dd_poly_rs_rate = dd_poly_rs_rate + dind.counter;
 				//pcr duplicates
 				C_dd = ceil(pcr_duplicate_rate * dd_pcr_cycles * ddigest.size()*dd_ind);
