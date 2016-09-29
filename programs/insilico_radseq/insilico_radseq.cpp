@@ -267,7 +267,7 @@ int main()
 
 	
 	genome_name = "../../SSC_integrated.fa";
-	output_add = "pcr.06";
+	output_add = ".ne50000";
 	ddigest_name = "../../results/insilico/SSC_ddigested"+ output_add + ".txt";
 	sdigest_name = "../../results/insilico/SSC_sdigested"+ output_add + ".txt";
 	vcf_name = "../../results/insilico/ssc_insilico" + output_add + ".vcf";
@@ -277,8 +277,8 @@ int main()
 	enz2.rec_seq = "GATC"; //MboI
 	enz2.overhang = "";
 	sd_ind = dd_ind = 50;
-	pcr_duplicate_rate = 0.06;//% of reads per cycle
-	Ne = 10000;
+	pcr_duplicate_rate = 0.0;//% of reads per cycle
+	Ne = 50000;
 	reads_per_ind = 1114632;
 	dd_pcr_cycles = 12;
 	sd_pcr_cycles = 20;

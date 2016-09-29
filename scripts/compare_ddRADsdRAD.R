@@ -135,7 +135,7 @@ fst.two.vcf<-function(vcf1.row,vcf2,match.index){
         ht<-1-sum(freqall^2)
         fst<-(ht-hs)/ht
       }
-      if(length(freqall)<=1){ fst<-1 }
+      if(length(freqall)<=1){ fst<-0 }
     }#end else good to go
   }#end else vcf2
 
