@@ -263,11 +263,12 @@ int main()
 	ofstream ddigest_file,sdigest_file, vcf, summ_stats;
 	vector<fragment> ddigest, sdigest;
 	string sequence, seq_name, output_add;
+	bool afs_skewed;
 	sgenrand(time(0));
 
 	
 	genome_name = "../../SSC_integrated.fa";
-	output_add = ".ne50000";
+	output_add = ".afs.pcr05";
 	ddigest_name = "../../results/insilico/SSC_ddigested"+ output_add + ".txt";
 	sdigest_name = "../../results/insilico/SSC_sdigested"+ output_add + ".txt";
 	vcf_name = "../../results/insilico/ssc_insilico" + output_add + ".vcf";
@@ -277,11 +278,14 @@ int main()
 	enz2.rec_seq = "GATC"; //MboI
 	enz2.overhang = "";
 	sd_ind = dd_ind = 50;
-	pcr_duplicate_rate = 0.0;//% of reads per cycle
-	Ne = 50000;
+	pcr_duplicate_rate = 0.05;//% of reads per cycle
+	Ne = 10000;
 	reads_per_ind = 1114632;
 	dd_pcr_cycles = 12;
 	sd_pcr_cycles = 20;
+	afs_skewed = true;
+	default_random_engine generator;
+	uniform_real_distribution<double> distribution(0.000000001, 0.00000001);
 
 	//read in the fasta file
 	genome_file.open(genome_name);
@@ -622,8 +626,6 @@ int main()
 	cout << "\nPreparing to sample the population.\n";
 	//set up the mutational structure of restriction sites
 
-	default_random_engine generator;
-	uniform_real_distribution<double> distribution(0.000000001, 0.00000001);
 	for (i = 0; i < ddigest.size(); i++)
 	{
 		if (genrand() > 0.1)//if not constant, could be null
@@ -631,7 +633,14 @@ int main()
 		else
 			ddigest[i].polymorphic = false;
 		ddigest[i].mutation_rate = 4*Ne*distribution(generator);
-		ddigest[i].pop_af = genrand();
+		if (afs_skewed)
+		{
+			ddigest[i].pop_af = randnorm(0.8, 0.13);
+			while(ddigest[i].pop_af>=0.975)
+				ddigest[i].pop_af = randnorm(0.8, 0.13);
+		}
+		else
+			ddigest[i].pop_af = genrand();
 		for (ii = 0; ii < sdigest.size(); ii++)
 		{
 			if (ddigest[i].chrom == sdigest[ii].chrom && ddigest[i].pos == sdigest[ii].pos)

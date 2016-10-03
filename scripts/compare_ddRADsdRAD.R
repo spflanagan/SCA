@@ -144,6 +144,39 @@ fst.two.vcf<-function(vcf1.row,vcf2,match.index){
     Num1=length(gt1),Num2=(length(gt2))))
 }#end function
 
+
+calc.afs.vcf<-function(vcf.row){
+  #use in conjunction with apply
+  #e.g. apply(vcf,1,afs.vcf)
+  gt1<-unlist(lapply(vcf.row,function(x){ 
+    c<-strsplit(as.character(x),split=":")[[1]][1]
+    return(c)
+  }))
+  gt1<-gt1[gt1 %in% c("0/0","1/0","0/1","1/1")]
+  gt1[gt1=="1/0"]<-"0/1"
+  gt1<-gsub(pattern = "0",replacement = vcf.row["REF"],gt1)
+  gt1<-gsub(pattern = "1",replacement = vcf.row["ALT"],gt1)
+  al1<-unlist(strsplit(as.character(gt1),split = "/"))
+  #calculate frequencies
+  freq1<-summary(factor(al1))/sum(summary(factor(al1)))	
+  if(length(freq1)==1)
+  {
+    if(names(freq1)==vcf.row["REF"])
+    {
+      freq1<-c(freq1,0)
+      names(freq1)<-unlist(c(vcf.row["REF"],vcf.row["ALT"]))
+    }
+    else
+    {
+      freq1<-c(freq1,0)
+      names(freq1)<-unlist(c(vcf.row["ALT"],vcf.row["REF"]))
+    }
+  }
+  return(data.frame(Chrom=vcf.row["#CHROM"], Pos=vcf.row["POS"], Ref=vcf.row["REF"],
+    RefFreq=freq1[names(freq1) %in% vcf.row["REF"]],
+    Alt=vcf.row["ALT"],AltFreq=freq1[names(freq1) %in% vcf.row["ALT"]]))
+}
+
 ######FILES#####
 drad<-parse.vcf("drad.vcf")
 orad<-parse.vcf("orad.vcf")
@@ -559,6 +592,9 @@ legend("top",ncol=2,levels(factor(dcomp$Plate)),col=alpha(as.numeric(as.factor(l
 
 summary(aov(dcomp$PropMissing~dcomp$Plate))
 TukeyHSD(aov(dcomp$PropMissing~dcomp$Plate))
+
+###############################ALLELE FREQUENCIES#####################################
+both.afs<-do.call("rbind",apply(both,1,afs.vcf))
 
 ############################ORIGINAL INVESTIGATION###################################
 setwd("E:/ubuntushare/SCA/results/biallelic/both_datasets/")
