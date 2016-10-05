@@ -50,9 +50,6 @@ summstats.plot<-function(file.list,make.png=T,file.name="")
 barplot(dpois(seq(0,10,1),lambda=0.000625))
 
 #analyze the fsts--as calculated by C++
-lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
-       "LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
-       "LG22")
 pcr.files<-list.files(pattern="summstatspcr")
 
 png("fsts_summstats_pcr.png",height=10,width=7.5,units="in",res=300)
@@ -149,3 +146,13 @@ afs.vcf<-parse.vcf("ssc_insilico.afs.vcf")
 afs.afs<-do.call("rbind",apply(afs.vcf,1,calc.afs.vcf))
 
 afs.list<-list.files(pattern="summstats.afs")
+
+noshear<-read.table("ssc_insilico_summstats.afs.pcr02.noshear.txt",sep='\t',
+                                header=T,stringsAsFactors=F)
+
+null<-read.table("ssc_insilico_summstats.null.skewedAFS.txt",sep='\t',
+                                header=T,stringsAsFactors=F)
+
+####
+gwsca<-read.table("../gwsca_fsts_both.txt",header=T,stringsAsFactors=F)
+gwsca_summ<-read.delim("../gwsca_summary_both.txt",header=T,stringsAsFactors=F)

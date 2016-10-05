@@ -256,19 +256,19 @@ int main()
 	int s_start, s_end, s_frag_count, s_cutsite, s_length, sd_ind, dd_ind;
 	int sd_pcr_cycles, dd_pcr_cycles;
 	double mutation_shape_param, pcr_duplicate_rate, shearing_bias_rate, mean_sheared_length;
-	double mutation_rate, sd_poly_rs_rate, dd_poly_rs_rate;
+	double mutation_rate, sd_poly_rs_rate, dd_poly_rs_rate, prop_rs_constant;
 	string genome_name, sdigest_name,ddigest_name, line, overhang, vcf_name, summ_stats_name;
 	restriction_enzyme enz1, enz2;
 	ifstream genome_file;
 	ofstream ddigest_file,sdigest_file, vcf, summ_stats;
 	vector<fragment> ddigest, sdigest;
 	string sequence, seq_name, output_add;
-	bool afs_skewed;
+	bool afs_skewed, shear_bias, shear_this_one;
 	sgenrand(time(0));
 
 	
 	genome_name = "../../SSC_integrated.fa";
-	output_add = ".afs.pcr05";
+	output_add = ".null.skewedAFS";
 	ddigest_name = "../../results/insilico/SSC_ddigested"+ output_add + ".txt";
 	sdigest_name = "../../results/insilico/SSC_sdigested"+ output_add + ".txt";
 	vcf_name = "../../results/insilico/ssc_insilico" + output_add + ".vcf";
@@ -278,12 +278,14 @@ int main()
 	enz2.rec_seq = "GATC"; //MboI
 	enz2.overhang = "";
 	sd_ind = dd_ind = 50;
-	pcr_duplicate_rate = 0.05;//% of reads per cycle
+	pcr_duplicate_rate = 0.0;//% of reads per cycle
+	prop_rs_constant = 1.0;//usually 0.1
 	Ne = 10000;
 	reads_per_ind = 1114632;
 	dd_pcr_cycles = 12;
 	sd_pcr_cycles = 20;
 	afs_skewed = true;
+	shear_bias = false;
 	default_random_engine generator;
 	uniform_real_distribution<double> distribution(0.000000001, 0.00000001);
 
@@ -319,7 +321,15 @@ int main()
 					else
 					{
 						s_length = s_cutsite - s_start;
-						if ((mean_sheared_length + s_length)/(s_frag_count+1) > 500)//then it gets sheared
+						
+						if (shear_bias == true)
+						{
+							if((mean_sheared_length + s_length) / (s_frag_count + 1) > 500)
+								shear_this_one = true;
+							else
+								shear_this_one = false;
+						}
+						if (shear_bias == false || shear_this_one == true)//then it gets sheared
 						{															//and we only keep sheared fragments
 							int new_length = s_length;
 							int new_end = 0;
@@ -628,7 +638,7 @@ int main()
 
 	for (i = 0; i < ddigest.size(); i++)
 	{
-		if (genrand() > 0.1)//if not constant, could be null
+		if (genrand() > prop_rs_constant)//if not constant, could be null
 			ddigest[i].polymorphic = true;
 		else
 			ddigest[i].polymorphic = false;
@@ -658,7 +668,7 @@ int main()
 	{
 		if (sdigest[i].shared < 0)
 		{
-			if (genrand() > 0.1)//if not constant, could be null
+			if (genrand() > prop_rs_constant)//if not constant, could be null
 				sdigest[i].polymorphic = true;
 			else
 				sdigest[i].polymorphic = false;

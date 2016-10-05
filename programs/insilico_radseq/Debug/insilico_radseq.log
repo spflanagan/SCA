@@ -1,17 +1,17 @@
 ﻿  insilico_radseq.cpp
 \\vboxsvr\home\projects\sca\programs\insilico_radseq\random_numbers.h(225): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
 \\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(267): warning C4244: 'argument': conversion from 'time_t' to 'unsigned long', possible loss of data
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(312): warning C4018: '<': signed/unsigned mismatch
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(327): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(548): warning C4018: '<': signed/unsigned mismatch
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(629): warning C4018: '<': signed/unsigned mismatch
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(644): warning C4018: '<': signed/unsigned mismatch
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(657): warning C4018: '<': signed/unsigned mismatch
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(684): warning C4018: '<': signed/unsigned mismatch
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(719): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(751): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(784): warning C4018: '<': signed/unsigned mismatch
-\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(815): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(314): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(337): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(558): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(639): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(654): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(667): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(694): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(729): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(761): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(794): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(825): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
 \\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(259): warning C4101: 'mutation_rate': unreferenced local variable
 \\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(258): warning C4101: 'mutation_shape_param': unreferenced local variable
 \\vboxsvr\home\projects\sca\programs\insilico_radseq\insilico_radseq.cpp(258): warning C4101: 'shearing_bias_rate': unreferenced local variable

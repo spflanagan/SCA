@@ -20,6 +20,35 @@ Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias
 
 
 #############################################LAB BOOK###########################################
+#####Wednesday, 5 October 2016
+I am unhappy with the Fst calculations I've got from R. It doesn't seem right that there should be so many ==1 or < 0
+
+Maybe run gwsca_biallelic_vcf? See if that gives the same distribution? 
+
+Meanwhile, I'm thinking about things still to-do:
+1. Choose one SNP per locus
+2. Decide what to do, if anything, about loci at the same location
+3. Compare hardy weinberg equilibrium between sdRAD and ddRAD
+4. What about comparisons of the different ddRAD plates?
+5. Add coverage differences to in silico digestion.
+
+The gwsca_biallelic_vcf provides a drastically different set of Fsts for orad-drad in the 'both' analysis:
+summary(gwsca$orad.drad[gwsca$orad.drad!=-1])
+     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+2.000e-08 4.731e-04 1.391e-03 3.390e-03 3.399e-03 1.366e-01 
+
+
+
+#####Tuesday, 4 October 2016
+I've decided to log-transform the coverage statistics and then use aov() and TukeyHSD() to compare them.
+At least for now...I need to ask Adam re: normality assumptions (they're not really normal)
+
+Also adding a coverage threshold to the fst calculation--must be in 50% of individuals. I'll see if that changes it.
+
+Re: in-silico digestion...what if I remove the random shearing step and have every restriction site have a RAD locus?
+-> or just choose a random number and that's where the length comes from
+^^implementing this one and I'll see what happens
+
 #####Wednesday, 28 September 2016
 Neither single-digest nor double digest had any polymorphic restriction site events.
 sdigest had 7308 PCR duplication events

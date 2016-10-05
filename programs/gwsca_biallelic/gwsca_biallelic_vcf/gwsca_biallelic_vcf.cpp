@@ -148,11 +148,11 @@ int main()
 	vector<locus> reference;
 	vector<locus_statistics> pop_stats;
 
-	ind_info_name = "E://ubuntushare//SCA//results//biallelic//ind_info_vcf.txt";//"../../../results/biallelic/id.names.txt";//"../../../results/gatk/gatk_gwsca/gatk.ind.info.txt";//
-	vcf_name = "E://ubuntushare//SCA//results//biallelic//biallelic_merge.vcf"; //"E://ubuntushare//SCA//results//gatk//gatk_gwsca//gatk.gt.vcf";//
-	summary_out_name = "E://ubuntushare//SCA//results//biallelic//gwsca_summary_new.txt";//"../../../results/gatk/gatk_gwsca/gatk_gwsca_summary";//
-	fst_out_name = "E://ubuntushare//SCA//results//biallelic//gwsca_fsts_new.txt";//"../../../results/gatk/gatk_gwsca/gatk_gwsca_fsts";//
-	debug_out_name = "../../../results/biallelic/group_assignments_new.txt";//"../../../results/gatk/gatk_gwsca/gatk_group_assingments.txt";//
+	ind_info_name = "../../../results/both.vcf.names.txt";//"E://ubuntushare//SCA//results//biallelic//ind_info_vcf.txt";
+	vcf_name = "../../../results/both.vcf";//"E://ubuntushare//SCA//results//biallelic//biallelic_merge.vcf";
+	summary_out_name = "../../../results/gwsca_summary_both.txt";//"E://ubuntushare//SCA//results//biallelic//gwsca_summary_new.txt";
+	fst_out_name = "../../../results/gwsca_fsts_both.txt";//"E://ubuntushare//SCA//results//biallelic//gwsca_fsts_new.txt";
+	debug_out_name = "../../../results/group_assignments_both.txt";// "../../../results/biallelic/group_assignments_new.txt";
 	
 	ind_info.open(ind_info_name);
 	FileTest(ind_info, ind_info_name);
@@ -294,7 +294,7 @@ int main()
 	{
 		if (!vcf.eof())
 		{
-			if (line.substr(0, 5) == "CHROM")
+			if (line.substr(0, 6) == "#CHROM" || line.substr(0, 5) == "CHROM")
 			{
 				//need to determine male-offspring indices
 				stringstream ss;

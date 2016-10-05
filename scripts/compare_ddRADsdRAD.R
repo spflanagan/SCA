@@ -8,7 +8,7 @@ library(ggplot2)
 setwd("~/Projects/SCA/results")
 source("../scripts/plotting_functions.R")
 
-###############FUNCTIONS####################
+#################FUNCTIONS####################
 parse.vcf<-function(filename){
   vcf<-read.delim(filename,comment.char="#",sep='\t',header=F,stringsAsFactors = F)
   header.start<-grep("#CHROM",scan(filename,what="character"))
@@ -79,7 +79,7 @@ vcf.cov.ind<-function(vcf.col){
   return(list(NumMissing=miss,NumPresent=pres,AvgCovRef=ref,AvgCovAlt=alt,AvgCovTot=tot,PropHet=het/pres, NumReads=tot*pres))
 }
   
-fst.two.vcf<-function(vcf1.row,vcf2,match.index){
+fst.two.vcf<-function(vcf1.row,vcf2,match.index, cov.thresh=0.2){
   #match.index is the column used to match the two
   #use in conjunction with apply
     #e.g. apply(vcf,1,fst.two.vcf,vcf2=vcf.2,match.index="SNP")
@@ -102,40 +102,45 @@ fst.two.vcf<-function(vcf1.row,vcf2,match.index){
         c<-strsplit(as.character(x),split=":")[[1]][1]
         return(c)
       }))
+      num.ind<-length(gt1)-10
       gt1<-gt1[gt1 %in% c("0/0","1/0","0/1","1/1")]
       gt1[gt1=="1/0"]<-"0/1"
       gt1<-gsub(pattern = "0",replacement = vcf1.row["REF"],gt1)
       gt1<-gsub(pattern = "1",replacement = vcf1.row["ALT"],gt1)
-      al1<-unlist(strsplit(as.character(gt1),split = "/"))
-      gt2<-unlist(lapply(vcf2.row,function(x){ 
-        c<-strsplit(as.character(x),split=":")[[1]][1]
-        return(c)
-      }))
-      gt2<-gt2[gt2 %in% c("0/0","1/0","0/1","1/1")]
-      gt2[gt2=="1/0"]<-"0/1"
-      gt2<-gsub(pattern = "0",replacement = vcf2.row["REF"],gt2)
-      gt2<-gsub(pattern = "1",replacement = vcf2.row["ALT"],gt2)
-      al2<-unlist(strsplit(as.character(gt2),split="/"))
-       #calculate frequencies
-      freq1<-summary(factor(al1))/sum(summary(factor(al1)))	
-      freq2<-summary(factor(al2))/sum(summary(factor(al2)))	
-      freqall<-summary(as.factor(c(al1,al2)))/
-        sum(summary(as.factor(c(al1,al2))))
-      hets<-c(names(freq1)[2],names(freq2)[2])
-      if(length(freq1)>1){ hs1<-1-sum(freq1^2) 
-      } else {
-        hs1<-0
+      if(length(gt1)/num.ind>=cov.thresh){
+        al1<-unlist(strsplit(as.character(gt1),split = "/"))
+        gt2<-unlist(lapply(vcf2.row,function(x){ 
+          c<-strsplit(as.character(x),split=":")[[1]][1]
+          return(c)
+        }))
+        gt2<-gt2[gt2 %in% c("0/0","1/0","0/1","1/1")]
+        gt2[gt2=="1/0"]<-"0/1"
+        gt2<-gsub(pattern = "0",replacement = vcf2.row["REF"],gt2)
+        gt2<-gsub(pattern = "1",replacement = vcf2.row["ALT"],gt2)
+        al2<-unlist(strsplit(as.character(gt2),split="/"))
+         #calculate frequencies
+        freq1<-summary(factor(al1))/sum(summary(factor(al1)))	
+        freq2<-summary(factor(al2))/sum(summary(factor(al2)))	
+        freqall<-summary(as.factor(c(al1,al2)))/
+          sum(summary(as.factor(c(al1,al2))))
+        hets<-c(names(freq1)[2],names(freq2)[2])
+        if(length(freq1)>1){ hs1<-1-sum(freq1^2) 
+        } else {
+          hs1<-0
+        }
+        if(length(freq2)>1){ hs2<-1-sum(freq2^2)
+        } else {
+          hs2<-0
+        }
+        if(length(freqall)>1){
+          hs<-mean(c(hs1,hs2))
+          ht<-1-sum(freqall^2)
+          fst<-(ht-hs)/ht
+        }
+        if(length(freqall)<=1){ fst<-0 }
+      }else {
+        fst<-NA #it doesn't pass the coverage threshold
       }
-      if(length(freq2)>1){ hs2<-1-sum(freq2^2)
-      } else {
-        hs2<-0
-      }
-      if(length(freqall)>1){
-        hs<-mean(c(hs1,hs2))
-        ht<-1-sum(freqall^2)
-        fst<-(ht-hs)/ht
-      }
-      if(length(freqall)<=1){ fst<-0 }
     }#end else good to go
   }#end else vcf2
 
@@ -177,55 +182,85 @@ calc.afs.vcf<-function(vcf.row){
     Alt=vcf.row["ALT"],AltFreq=freq1[names(freq1) %in% vcf.row["ALT"]]))
 }
 
-######FILES#####
+choose.one.snp<-function(vcf){
+  new.vcf<-data.frame()
+  RAD.loc<-levels(factor(as.character(vcf$ID)))
+  for(i in 1: length(RAD.loc)){
+    t<-vcf[vcf$ID==RAD.loc[i],]
+    w<-sample(nrow(t),1)
+    new.vcf<-rbind(new.vcf,t[w,])
+  }
+ # colnames(new.vcf)<-colnames(vcf)
+  return(new.vcf)
+}
+#################FILES#################
 drad<-parse.vcf("drad.vcf")
 orad<-parse.vcf("orad.vcf")
 both<-parse.vcf("both.vcf")
-
+drad$SNP<-paste(drad$`#CHROM`,drad$POS,sep=".")
+orad$SNP<-paste(orad$`#CHROM`,orad$POS,sep=".")
+both$SNP<-paste(both$`#CHROM`,both$POS,sep=".")
+locus.info<-c("#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT","SNP")
 o.ind<-grep("orad",colnames(both),value=T)
 d.ind<-grep("sample",colnames(both),value=T)
-#########ANALYSIS##########
-###coverage per locus
-#assembled together
-
-bo.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=o.ind))
-bd.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=d.ind))
-b.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=c(o.ind,d.ind)))
-loc.cov<-merge(o.cov,d.cov,by="Locus")
+#################ANALYSIS#################
+##ran these already--read in files##
+#bo.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=o.ind))
+#bd.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=d.ind))
+#b.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=c(o.ind,d.ind)))
+#bo.cov$SNP<-paste(bo.cov$Chrom,bo.cov$Pos,sep=".")
+#bd.cov$SNP<-paste(bd.cov$Chrom,bd.cov$Pos,sep=".")
+#b.cov$SNP<-paste(b.cov$Chrom,b.cov$Pos,sep=".")
+#o.cov<-do.call("rbind",apply(orad,1,vcf.cov.loc,subset=o.ind))
+#o.cov$SNP<-paste(o.cov$Chrom,o.cov$Pos,sep=".")
+#d.cov<-do.call("rbind",apply(drad,1,vcf.cov.loc,subset=d.ind))
+#d.cov$SNP<-paste(d.cov$Chrom,d.cov$Pos,sep=".")
+#loc.cov<-merge(o.cov,d.cov,by="SNP")
 #because some of them have no alt
-loc.cov$oRAD.AvgCovRatio[loc.cov$oRAD.AvgCovRatio=="Inf"]<-loc.cov[loc.cov$oRAD.AvgCovRatio=="Inf","AvgCovRef.x"]
-loc.cov$dRAD.AvgCovRatio[loc.cov$dRAD.AvgCovRatio=="Inf"]<-loc.cov[loc.cov$dRAD.AvgCovRatio=="Inf","AvgCovRef.y"]
+#loc.cov$AvgCovRatio.x[loc.cov$AvgCovRatio.x=="Inf"]<-loc.cov[loc.cov$AvgCovRatio.x=="Inf","AvgCovRef.x"]
+#loc.cov$AvgCovRatio.y[loc.cov$AvgCovRatio.y=="Inf"]<-loc.cov[loc.cov$AvgCovRatio.y=="Inf","AvgCovRef.y"]
+#write.csv(b.cov,"Both_overallCov.csv")
+#write.csv(bo.cov,"Both_sdRADCov.csv")
+#write.csv(bd.cov,"Both_ddRADCov.csv")
+#write.csv(o.cov,"Sep_sdRADCov.csv")
+#write.csv(d.cov,"Sep_ddRADCov.csv")
+#write.csv(loc.cov,"Sep_Combined.csv")
+b.cov<-read.csv("Both_overallCov.csv")
+bo.cov<-read.csv("Both_sdRADCov.csv")
+bd.cov<-read.csv("Both_ddRADCov.csv")
+o.cov<-read.csv("Sep_sdRADCov.csv")
+d.cov<-read.csv("Sep_ddRADCov.csv")
+loc.cov<-read.csv("Sep_Combined.csv")
 
-t.test(loc.cov$oRAD.AvgCovRatio,loc.cov$dRAD.AvgCovRatio,paired=T,alternative="less")
+bo.cov$AvgCovRatio[bo.cov$AvgCovRatio=="Inf"]<-bo.cov[bo.cov$AvgCovRatio=="Inf","AvgCovRef"]
+bd.cov$AvgCovRatio[bd.cov$AvgCovRatio=="Inf"]<-bd.cov[bd.cov$AvgCovRatio=="Inf","AvgCovRef"]
 #private alleles
 dim(loc.cov[(loc.cov$AvgCovRef.x == 0 & loc.cov$AvgCovAlt.y == 0) | (loc.cov$AvgCovAlt.x == 0 & loc.cov$AvgCovRef.y == 0),])#2042
 dim(loc.cov[loc.cov$NumHet.x==0,])#72307
 dim(loc.cov[loc.cov$NumHet.y==0,])#14436
 
-#assembled separately
-o.cov<-do.call("rbind",apply(orad,1,vcf.cov.loc,subset=o.ind))
-d.cov<-do.call("rbind",apply(drad,1,vcf.cov.loc,subset=d.ind))
-#compare assembly methods
-wilcox.test(loc.cov$oRAD.AvgCovRatio,o.cov$AvgCovRatio,"greater")
-wilcox.test(loc.cov$dRAD.AvgCovRatio,d.cov$AvgCovRatio,"less")
-wilcox.test(loc.cov$AvgCovTotal.x,o.cov$AvgCovTotal,"less")
-wilcox.test(loc.cov$AvgCovTotal.y,d.cov$AvgCovTotal,"greater")
+####Average Coverage####
 #compare sd vs dd
 lc.comp<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(o.cov)),rep("ddRAD",nrow(d.cov)),
-    rep("sdRAD",nrow(loc.cov)),rep("ddRAD",nrow(loc.cov))), 
+    rep("sdRAD",nrow(bo.cov)),rep("ddRAD",nrow(bd.cov))), 
   Assembly=c(rep("Alone",nrow(o.cov)),rep("Alone",nrow(d.cov)),
-             rep("Together",nrow(loc.cov)),rep("Together",nrow(loc.cov))),
-  AvgCovRatio=c(o.cov$AvgCovRatio,d.cov$AvgCovRatio,loc.cov$oRAD.AvgCovRatio,loc.cov$dRAD.AvgCovRatio),
-  AvgCovTotal=c(o.cov$AvgCovTotal,d.cov$AvgCovTotal,loc.cov$AvgCovTotal.x,loc.cov$AvgCovTotal.y))
+             rep("Together",nrow(bo.cov)),rep("Together",nrow(bd.cov))),
+  AvgCovRatio=c(o.cov$AvgCovRatio,d.cov$AvgCovRatio,bo.cov$AvgCovRatio,bd.cov$AvgCovRatio),
+  AvgCovTotal=c(o.cov$AvgCovTotal,d.cov$AvgCovTotal,bd.cov$AvgCovTotal,bd.cov$AvgCovTotal))
 #NumReadsPerInd=c(oc$NumReadsAlone,dc$NumReadsAlone,oc$NumReadsTogether,dc$NumReadsTogether)
-#using separate assemblies
-wilcox.test(o.cov$AvgCovRatio,d.cov$AvgCovRatio,"less")
-wilcox.test(o.cov$AvgCovTotal,d.cov$AvgCovTotal)
-#using same assembly
-wilcox.test(loc.cov$oRAD.AvgCovRatio,loc.cov$dRAD.AvgCovRatio,paired=T,"less")
-wilcox.test(loc.cov$AvgCovTotal.x,loc.cov$AvgCovTotal.y,paired=T,"less")
-summary(aov(lc.comp$AvgCovRatio~lc.comp$LibraryPrep*lc.comp$Assembly))
 
+#total coverage
+summary(aov(log(lc.comp$AvgCovTotal)~lc.comp$LibraryPrep*lc.comp$Assembly))
+TukeyHSD(aov(log(lc.comp$AvgCovTotal)~lc.comp$LibraryPrep*lc.comp$Assembly))#use this!
+summary(lm(log(lc.comp$AvgCovTotal)~lc.comp$LibraryPrep*lc.comp$Assembly))
+boxplot(log(lc.comp$AvgCovTotal)~lc.comp$LibraryPrep*lc.comp$Assembly)
+#ref/alt ratio
+summary(aov(lc.comp$AvgCovRatio~lc.comp$LibraryPrep*lc.comp$Assembly))
+TukeyHSD(aov(log(lc.comp$AvgCovRatio+1)~lc.comp$LibraryPrep*lc.comp$Assembly))#use this!
+summary(lm(lc.comp$AvgCovRatio~lc.comp$LibraryPrep*lc.comp$Assembly))
+boxplot(log(lc.comp$AvgCovRatio+1)~lc.comp$LibraryPrep*lc.comp$Assembly)
+
+####PLOT: Coverage comparison boxplot####
 jpeg("CoverageComparisonBoxplot.jpeg",height=7,width=7,units="in",res=300)
 par(mfrow=c(2,1),oma=c(1,2,1,1),mar=c(2,2,2,2))
 boxplot(log(lc.comp$AvgCovRatio+1)~lc.comp$LibraryPrep*lc.comp$Assembly,names=F,
@@ -239,29 +274,28 @@ mtext("log(Avg Num Reads\nPer Individual Per Locus)",2,outer=F,line=2)
 axis(1,at=c(1.5,3.5),labels=c("Alone","Together"))
 dev.off()
 
-#Coverage by individual--assembled in one
-o.icov<-as.data.frame(do.call("rbind",apply(both[,o.ind],2,vcf.cov.ind)))
-o.icov$Method<-rep("oRAD",nrow(o.icov))
-d.icov<-as.data.frame(do.call("rbind",apply(both[,d.ind],2,vcf.cov.ind)))
-d.icov$Method<-rep("dRAD",nrow(d.icov))
-ind.cov<-as.data.frame(rbind(o.icov,d.icov))
-ind.cov$NumReads<-as.numeric(ind.cov$AvgCovTot)*as.numeric(ind.cov$NumPresent)
-ic<-as.data.frame(apply(ind.cov,2,as.numeric))
-rownames(ic)<-rownames(ind.cov)
-ic$Method<-as.factor(ind.cov$Method)
-#Coverage by individual--assembled separately
-orad.icov<-as.data.frame(do.call("rbind",apply(orad[,10:ncol(orad)],2,vcf.cov.ind)))
-oic<-apply(orad.icov,2,as.numeric)
-rownames(oic)<-rownames(orad.icov)
-drad.icov<-as.data.frame(do.call("rbind",apply(drad[,10:ncol(drad)],2,vcf.cov.ind)))
-dic<-apply(drad.icov,2,as.numeric)
-rownames(dic)<-rownames(drad.icov)
-
-#write these to file so I can easily pick back up later
-write.table(oic,"orad_coverage.csv",quote=T,row.names=T,col.names=T,sep='\t')
-write.table(dic,"drad_coverage.csv",quote=T,row.names=T,col.names=T,sep='\t')
-write.table(ic,"both_coverage.csv",quote=T,row.names=T,col.name=T,sep='\t')
-
+####Coverage by individual--assembled in one####
+##Generate the dataset##
+#o.icov<-as.data.frame(do.call("rbind",apply(both[,o.ind],2,vcf.cov.ind)))
+#o.icov$Method<-rep("oRAD",nrow(o.icov))
+#d.icov<-as.data.frame(do.call("rbind",apply(both[,d.ind],2,vcf.cov.ind)))
+#d.icov$Method<-rep("dRAD",nrow(d.icov))
+#ind.cov<-as.data.frame(rbind(o.icov,d.icov))
+#ind.cov$NumReads<-as.numeric(ind.cov$AvgCovTot)*as.numeric(ind.cov$NumPresent)
+#ic<-as.data.frame(apply(ind.cov,2,as.numeric))
+#rownames(ic)<-rownames(ind.cov)
+#ic$Method<-as.factor(ind.cov$Method)
+##Coverage by individual--assembled separately
+#orad.icov<-as.data.frame(do.call("rbind",apply(orad[,10:ncol(orad)],2,vcf.cov.ind)))
+#oic<-apply(orad.icov,2,as.numeric)
+#rownames(oic)<-rownames(orad.icov)
+#drad.icov<-as.data.frame(do.call("rbind",apply(drad[,10:ncol(drad)],2,vcf.cov.ind)))
+#dic<-apply(drad.icov,2,as.numeric)
+#rownames(dic)<-rownames(drad.icov)
+##write these to file so I can easily pick back up later
+#write.table(oic,"orad_coverage.csv",quote=T,row.names=T,col.names=T,sep='\t')
+#write.table(dic,"drad_coverage.csv",quote=T,row.names=T,col.names=T,sep='\t')
+#write.table(ic,"both_coverage.csv",quote=T,row.names=T,col.name=T,sep='\t')
 oic<-read.delim("orad_coverage.csv")
 dic<-read.delim("drad_coverage.csv")
 ic<-read.delim("both_coverage.csv")
@@ -275,56 +309,66 @@ oc<-data.frame(NumReadsTogether=mo$NumReads.x,NumReadsAlone=mo$NumReads.y,row.na
 dc<-data.frame(NumReadsTogether=md$NumReads.x,NumReadsAlone=md$NumReads.y,row.names=md$Row.names)
 t.test(oc$NumReadsTogether,oc$NumReadsAlone,paired=T,alternative="less")
 t.test(dc$NumReadsTogether,dc$NumReadsAlone,paired=T,alternative="greater")
+wilcox.test(oc$NumReadsTogether,oc$NumReadsAlone,paired=T,alternative="less")
+wilcox.test(dc$NumReadsTogether,dc$NumReadsAlone,paired=T,alternative="greater")
 
-#plot
+ind.cov<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(oic)),rep("ddRAD",nrow(dic)),
+    rep("sdRAD",nrow(oic)),rep("ddRAD",nrow(dic))), 
+  Assembly=c(rep("Alone",nrow(oic)),rep("Alone",nrow(dic)),
+    rep("Together",nrow(ic))),
+  NumReads=c(oic$NumReads,dic$NumReads,ic$NumReads),
+  NumMissing=c(oic$NumMissing,dic$NumMissing,ic$NumMissing),
+  NumPresent=c(oic$NumPresent,dic$NumPresent,ic$NumPresent))
+
+summary(lm(log(ind.cov$NumReads)~ind.cov$LibraryPrep*ind.cov$Assembly))
+summary(glm(log(ind.cov$NumReads)~ind.cov$LibraryPrep*ind.cov$Assembly))
+summary(glm(cbind(ind.cov$NumMissing,ind.cov$NumPresent)~ind.cov$LibraryPrep*ind.cov$Assembly,family=binomial))
+
+####PLOT: Fig 1. Coverage Assembly Method Comp####
 jpeg("CoverageAssemblyMethodComp.jpeg",height=10.5,width=7,units="in",res=300)
 par(mfrow=c(3,2),oma=c(1,1,1,1),mar=c(2,2,2,2))
-hist(log(loc.cov$AvgCovTotal.x),col=rgb(0,0,1,0.5),main="sdRAD-seq",axes=F,xlab="",ylab="",
-     xlim=c(0,10.5),ylim=c(0,200000),breaks=seq(0,10.5,0.5))
-hist(log(o.cov$AvgCovTotal), col=rgb(1,0,0,0.5), add=T,breaks=seq(0,10.5,0.5))
-axis(1,pos=0)
-axis(2,pos=0)
-mtext("Number of Loci",2,outer=F,line=1,cex=0.75)
-hist(log(loc.cov$AvgCovTotal.y), col=rgb(0,0,1,0.5),main="ddRAD-seq",axes=F,ylab="",xlab="",
-     xlim=c(0,8),ylim=c(0,150000),breaks=seq(0,8,0.5))
-hist(log(d.cov$AvgCovTotal), col=rgb(1,0,0,0.5), add=T,breaks=seq(0,8,0.5))
-axis(1,pos=0)
-axis(2,pos=0)
-mtext("ln(Average Number of Reads Per Individual)",1,outer=T,line=-52,cex=0.75)
-
-
-hist(log(loc.cov$oRAD.AvgCovRatio),col=rgb(0,0,1,0.5),main="",axes=F,xlab="",ylab="",breaks=seq(-10,10,1),ylim=c(0,150000))
-hist(log(o.cov$AvgCovRatio), col=rgb(1,0,0,0.5), add=T,breaks=seq(-10,10,1))
-axis(1,pos=0)
-axis(2,pos=-10)
-mtext("Number of Loci",2,outer=F,line=1,cex=0.75)
-hist(log(loc.cov$dRAD.AvgCovRatio), col=rgb(0,0,1,0.5),main="",axes=F,ylab="",xlab="",breaks=seq(-5,14,1),ylim=c(0,150000))
-hist(log(d.cov$AvgCovRatio), col=rgb(1,0,0,0.5), add=T,breaks=seq(-5,14,1))
-axis(1,pos=0)
-axis(2,pos=-5)
-mtext("ln(Average Number of Reads in Ref/Avg Number of Reads in Alt)",1,outer=T,line=-27,cex=0.75)
-
-
 hist(oc$NumReadsTogether, col=rgb(0,0,1,0.5), ylim=c(0,30), breaks=seq(200000,8000000,400000),
-     main="",axes=F,xlim=c(0,8000000))
+     main="sdRAD-seq",axes=F,xlim=c(0,8000000))
 hist(oc$NumReadsAlone,col=rgb(1,0,0,0.5), add=T,breaks=seq(200000,8000000,400000))
 axis(1,pos=0)
 axis(2,pos=0)
 mtext("Number of Individuals",2,outer=F,line=1,cex=0.75)
 hist(dc$NumReadsTogether, col=rgb(0,0,1,0.5), ylim=c(0,150), breaks=seq(2000,4000000,200000),
-     main="",axes=F)
+     main="ddRAD-seq",axes=F)
 hist(dc$NumReadsAlone,col=rgb(1,0,0,0.5), add=T,breaks=seq(2000,4000000,200000))
 axis(1,pos=0)
 axis(2,pos=0)
 legend("topright",c("Assembled Together", "Assembled Separately"),pch=15,col=c(rgb(1,0,0,0.5),rgb(0,0,1,0.5)),bty='n')
-mtext("Total Number of Reads",1,outer=T,cex=0.75)
+mtext("Total Number of Reads",1,outer=T,cex=0.75,line=-52)
+
+hist(log(bo.cov$AvgCovTotal),col=rgb(0,0,1,0.5),axes=F,xlab="",ylab="",main="",
+     xlim=c(0,10.5),ylim=c(0,200000),breaks=seq(0,10.5,0.5))
+hist(log(o.cov$AvgCovTotal), col=rgb(1,0,0,0.5), add=T,breaks=seq(0,10.5,0.5))
+axis(1,pos=0)
+axis(2,pos=0)
+mtext("Number of Loci",2,outer=F,line=1,cex=0.75)
+hist(log(bd.cov$AvgCovTotal), col=rgb(0,0,1,0.5),main="",axes=F,ylab="",xlab="",
+     xlim=c(0,8),ylim=c(0,50000),breaks=seq(0,8,0.5))
+hist(log(d.cov$AvgCovTotal), col=rgb(1,0,0,0.5), add=T,breaks=seq(0,8,0.5))
+axis(1,pos=0)
+axis(2,pos=0)
+mtext("ln(Average Number of Reads Per Individual Per SNP)",1,outer=T,line=-27,cex=0.75)
+
+hist(log(bo.cov$AvgCovRatio),col=rgb(0,0,1,0.5),main="",axes=F,xlab="",ylab="",breaks=seq(-10,10,1),ylim=c(0,150000))
+hist(log(o.cov$AvgCovRatio), col=rgb(1,0,0,0.5), add=T,breaks=seq(-10,10,1))
+axis(1,pos=0)
+axis(2,pos=-10)
+mtext("Number of Loci",2,outer=F,line=1,cex=0.75)
+hist(log(bd.cov$AvgCovRatio), col=rgb(0,0,1,0.5),main="",axes=F,ylab="",xlab="",breaks=seq(-5,14,1),ylim=c(0,50000))
+hist(log(d.cov$AvgCovRatio), col=rgb(1,0,0,0.5), add=T,breaks=seq(-5,14,1))
+axis(1,pos=0)
+axis(2,pos=-5)
+mtext("ln(Average Number of Reads in Ref/Avg Number of Reads in Alt)",1,outer=T,cex=0.75)
 dev.off()
 
-wilcox.test(oc$NumReadsTogether,oc$NumReadsAlone,paired=T,alternative="less")
-wilcox.test(dc$NumReadsTogether,dc$NumReadsAlone,paired=T,alternative="greater")
 
 
-###Variance in coverage
+####Variance in coverage####
 #assembled separately
 hist(log(o.cov$CovVariance),col=alpha("cadetblue",0.5))
 hist(log(d.cov$CovVariance),col=alpha("coral1",0.5),add=T)
@@ -367,39 +411,31 @@ wilcox.test(o.cov$CovVariance,ds.cov$CovVariance,"greater")
 #assembled together
 wilcox.test(bo.cov$PropHet,bd.cov$PropHet,paired=T,"less")
 
-
-lc.comp<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(o.cov)),rep("ddRAD",nrow(d.cov)),
+##The real analysis
+lcv.comp<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(o.cov)),rep("ddRAD",nrow(d.cov)),
                                   rep("sdRAD",nrow(bo.cov)),rep("ddRAD",nrow(bd.cov))), 
                     Assembly=c(rep("Alone",nrow(o.cov)),rep("Alone",nrow(d.cov)),
                                rep("Together",nrow(bo.cov)),rep("Together",nrow(bd.cov))),
                     CovVariance=c(o.cov$CovVariance,d.cov$CovVariance,bo.cov$CovVariance,bd.cov$CovVariance),
                     PropHet=c(o.cov$PropHet,d.cov$PropHet,bo.cov$PropHet,bd.cov$PropHet))
 
-summary(aov(log(lc.comp$CovVariance+1)~lc.comp$LibraryPrep*lc.comp$Assembly))
-summary(aov(lc.comp$PropHet~lc.comp$LibraryPrep*lc.comp$Assembly))
+summary(aov(log(lcv.comp$CovVariance+1)~lcv.comp$LibraryPrep*lcv.comp$Assembly))
+summary(aov(lcv.comp$PropHet~lcv.comp$LibraryPrep*lcv.comp$Assembly))
 
 jpeg("VarianceInCov.jpeg",height=8.5,width=7,units="in",res=300)
 par(mfrow=c(2,1),oma=c(1,2,1,1),mar=c(2,2,2,2))
-boxplot(log(lc.comp$CovVariance+1)~lc.comp$LibraryPrep*lc.comp$Assembly,col=c("cadetblue","coral1"),
+boxplot(log(lcv.comp$CovVariance+1)~lcv.comp$LibraryPrep*lcv.comp$Assembly,col=c("cadetblue","coral1"),
         names=F,xaxt='n')
 axis(1,at=c(1.5,3.5),c("Alone","Together"))
-mtext("log(Variance in Coverage)",2,outer=F,line=2)
-legend("topleft",ncol=2,c("sdRAD","ddRAD"),pch=15,col=c("cadetblue","coral1"),bty='n')
-boxplot(lc.comp$PropHet~lc.comp$LibraryPrep*lc.comp$Assembly,col=c("cadetblue","coral1"),
+mtext("ln(Variance in Coverage)",2,outer=F,line=2)
+legend("topleft",ncol=2,c("ddRAD","sdRAD"),pch=15,col=c("cadetblue","coral1"),bty='n')
+boxplot(lcv.comp$PropHet~lcv.comp$LibraryPrep*lcv.comp$Assembly,col=c("cadetblue","coral1"),
         names=F,xaxt='n')
 mtext("Proportion Heterozygotes",2,outer=F,line=2)
 axis(1,at=c(1.5,3.5),c("Alone","Together"))
 dev.off()
 
 ###########################LOOKING FOR THE SAME LOCI#################################
-#drad,orad,both
-drad$SNP<-paste(drad$`#CHROM`,drad$POS,sep=".")
-orad$SNP<-paste(orad$`#CHROM`,orad$POS,sep=".")
-both$SNP<-paste(both$`#CHROM`,both$POS,sep=".")
-locus.info<-c("#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT","SNP")
-d.cov$SNP<-paste(d.cov$Chrom,d.cov$Pos,sep=".")
-o.cov$SNP<-paste(o.cov$Chrom,o.cov$Pos,sep=".")
-b.cov$SNP<-paste(b.cov$Chrom,b.cov$Pos,sep=".")
 #sdRAD-ddRAD
 od.loci<-merge(orad[,locus.info],drad[,locus.info],"SNP")
 dim(od.loci[(od.loci$REF.x != od.loci$REF.y & od.loci$REF.x != od.loci$ALT.y) |
@@ -458,14 +494,15 @@ d.share<-drad[drad$SNP %in% od.loci$SNP,]
 od.vcf<-merge(orad,drad,"SNP")
 
 
-od.fst<-do.call("rbind",apply(o.share,1,fst.two.vcf,vcf2=d.share,match.index="SNP"))
-write.table(od.fst,"orad-drad.fst.txt",col.names=T,row.names=F,quote=F,sep='\t')
+#od.fst<-do.call("rbind",apply(o.share,1,fst.two.vcf,vcf2=d.share,match.index="SNP"))
+#write.table(od.fst,"orad-drad.fst.txt",col.names=T,row.names=F,quote=F,sep='\t')
+od.fst<-read.table("orad-drad.fst.txt",header=T,sep='\t')
 
 #FROM SAME ANALYSIS
 both$SNP<-paste(both$`#CHROM`,both$POS,sep=".")
 both.o<-cbind(both[,locus.info],both[,o.ind])
 both.d<-cbind(both[,locus.info],both[,d.ind])
-od.both.fst<-do.call("rbind",apply(both.o,1,fst.two.vcf,vcf2=both.d,match.index="SNP"))
+od.both.fst<-do.call("rbind",apply(both.o,1,fst.two.vcf,vcf2=both.d,match.index="SNP",cov.thresh=0.5))
 od.both.fst$SNP<-paste(od.both.fst$Chrom,od.both.fst$Pos,sep=".")
 od.fst.1<-od.both.fst[od.both.fst$Fst ==1,]
 bd.cov$SNP<-paste(bd.cov$Chrom,bd.cov$Pos,sep=".")
@@ -473,7 +510,7 @@ bo.cov$SNP<-paste(bo.cov$Chrom,bo.cov$Pos,sep=".")
 bd.cov.pass<-bd.cov[bd.cov$AvgCovTotal > 3 & bd.cov$AvgCovTotal <=50,"SNP"]
 bo.cov.pass<-bo.cov[bo.cov$AvgCovTotal > 3 & bo.cov$AvgCovTotal <=50,"SNP"]
 cov.pass<-bd.cov.pass[bd.cov.pass %in% bo.cov.pass]
-plot(od.both.fst[od.both.fst$SNP %in% cov.pass,"Fst"])
+summary(od.both.fst[od.both.fst$SNP %in% cov.pass,"Fst"])
 
 #PLOTTING
 lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
@@ -484,7 +521,7 @@ scaffs<-levels(as.factor(both[,1]))
 scaffs[1:22]<-lgs
 
 jpeg("sd-dd_Fst.jpeg",height=10,width=7.5,units="in",res=300)
-par(mfrow=c(2,2),mar=c(2,2,2,2),oma=c(1,2,1,1))
+par(mfrow=c(4,1),mar=c(2,2,2,2),oma=c(1,2,1,1))
 od<-fst.plot(od.fst[!is.na(od.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
   fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,
   groups=as.factor(scaffs[scaffs %in% levels(factor(od.fst$Chrom))]))
@@ -519,7 +556,6 @@ for(i in 1:length(lgs)){
   }
 }
 mtext("sdRAD-ddRAD Analyzed Together, Only Loci In Separate Analyses",3,cex=0.75)
-mtext(expression(italic(F)[ST]),2,outer=T,cex=0.75)
 
 odbc<-fst.plot(od.both.fst[od.both.fst$SNP %in% cov.pass & !is.na(od.both.fst$Fst),],
                ci.dat=c(-10,10),sig.col=c("black","black"), 
@@ -535,7 +571,7 @@ for(i in 1:length(lgs)){
   }
 }
 mtext("sdRAD-ddRAD Analyzed Together, High Coverage Removed",3,cex=0.75)
-
+mtext(expression(italic(F)[ST]),2,outer=T,cex=0.75)
 dev.off()
 
 fst.aov.dat<-data.frame(Fst=c(od$Fst,odb$Fst,odbs$Fst),
@@ -544,11 +580,9 @@ fst.aov<-aov(Fst~Type,dat=fst.aov.dat)
 
 ##############################DRAD DIFFERENT PLATES##################################
 
-drad$SNP<-paste(drad$`#CHROM`,drad$ID,drad$POS,sep=".")
-
-d.cov<-do.call("rbind",apply(drad,1,vcf.cov.loc,subset=d.ind))
-d.cov$SNP<-paste(d.cov$Chrom,d.cov$Locus,d.cov$Pos,sep=".")
-d.cov$AvgCovRatio[d.cov$AvgCovRatio=="Inf"]<-0
+#d.cov<-do.call("rbind",apply(drad,1,vcf.cov.loc,subset=d.ind))
+#d.cov$SNP<-paste(d.cov$Chrom,d.cov$Locus,d.cov$Pos,sep=".")
+#d.cov$AvgCovRatio[d.cov$AvgCovRatio=="Inf"]<-0
 d.keep<-d.cov[d.cov$PropMissing>0.5,]
 plate1<-unlist(as.list(read.delim("../plate1.txt",stringsAsFactors = F)))
 plate2<-unlist(as.list(read.delim("../plate2.txt",stringsAsFactors = F)))
