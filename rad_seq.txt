@@ -37,8 +37,25 @@ summary(gwsca$orad.drad[gwsca$orad.drad!=-1])
      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
 2.000e-08 4.731e-04 1.391e-03 3.390e-03 3.399e-03 1.366e-01 
 
+Ran popgen/prune_snps.cpp...retained:
+	32910 SNPs in both
+	29631 SNPs in drad
+	92973 SNPs in orad
 
-
+Then plink:
+in stacks/
+	plink --file drad --hwe 0.001 --noweb --allow-no-sex --write-snplist
+	plink --file drad --extract plink.snplist --recode --recodeA --recode-structure --out subset --noweb --allow-no-sex
+	plink --file drad --extract plink.snplist --recodeA --out subset --noweb --allow-no-sex
+in stacks_both/
+	plink --file both --hwe 0.001 --noweb --allow-no-sex --write-snplist
+	plink --file both --extract plink.snplist --recode --recodeA --recode-structure --out subset --noweb --allow-no-sex
+	plink --file both --extract plink.snplist --recodeA --out subset --noweb --allow-no-sex
+in stacks_orad/
+	plink --file orad --hwe 0.001 --noweb --allow-no-sex --write-snplist
+	plink --file orad --extract plink.snplist --recode --recodeA --recode-structure --out subset --noweb --allow-no-sex
+	plink --file orad --extract plink.snplist --recodeA --out subset --noweb --allow-no-sex
+	
 #####Tuesday, 4 October 2016
 I've decided to log-transform the coverage statistics and then use aov() and TukeyHSD() to compare them.
 At least for now...I need to ask Adam re: normality assumptions (they're not really normal)
