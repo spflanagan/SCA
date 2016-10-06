@@ -7,7 +7,7 @@ rm(list=ls())
 library(ggplot2)
 setwd("~/Projects/SCA/results")
 source("../scripts/plotting_functions.R")
-
+both<-parse.vcf("stacks_both/batch_3.vcf")
 #################FUNCTIONS####################
 parse.vcf<-function(filename){
   vcf<-read.delim(filename,comment.char="#",sep='\t',header=F,stringsAsFactors = F)
@@ -124,17 +124,22 @@ fst.two.vcf<-function(vcf1.row,vcf2,match.index, cov.thresh=0.2){
         freqall<-summary(as.factor(c(al1,al2)))/
           sum(summary(as.factor(c(al1,al2))))
         hets<-c(names(freq1)[2],names(freq2)[2])
-        if(length(freq1)>1){ hs1<-1-sum(freq1^2) 
+        if(length(freq1)>1){ 
+		hs1<-freq1*freq1
+		hs1<-1-sum(hs1)
         } else {
           hs1<-0
         }
-        if(length(freq2)>1){ hs2<-1-sum(freq2^2)
+        if(length(freq2)>1){ 
+		hs2<-freq2*freq2
+		hs2<-1-sum(hs2)
         } else {
           hs2<-0
         }
         if(length(freqall)>1){
           hs<-mean(c(hs1,hs2))
-          ht<-1-sum(freqall^2)
+          ht<-freqall*freqall
+		ht<-1-sum(ht)
           fst<-(ht-hs)/ht
         }
         if(length(freqall)<=1){ fst<-0 }
