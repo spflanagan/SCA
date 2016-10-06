@@ -583,6 +583,7 @@ fst.aov.dat<-data.frame(Fst=c(od$Fst,odb$Fst,odbs$Fst),
   Type=c(rep("Alone",nrow(od)),rep("Together",nrow(odb)),rep("Together,Alone Loci",nrow(odbs))))
 fst.aov<-aov(Fst~Type,dat=fst.aov.dat)
 
+gwsca<-read.delim("gwsca_fsts_both.txt")
 ##############################DRAD DIFFERENT PLATES##################################
 
 #d.cov<-do.call("rbind",apply(drad,1,vcf.cov.loc,subset=d.ind))

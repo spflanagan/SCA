@@ -20,6 +20,9 @@ Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias
 
 
 #############################################LAB BOOK###########################################
+#####Thursday, 6 October 2016
+OK, so maybe the Fst calculation in gwsca_biallelic_vcf was missing a parentheses..re-running it to check.
+
 #####Wednesday, 5 October 2016
 I am unhappy with the Fst calculations I've got from R. It doesn't seem right that there should be so many ==1 or < 0
 

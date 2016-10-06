@@ -452,8 +452,8 @@ int main()
 							{
 								double avgp, avgq;
 								avgp = avgq = 0;
-								avgp = (pop_stats[t].freq1 + pop_stats[tt].freq1) / 2;
-								avgq = (pop_stats[t].freq2 + pop_stats[tt].freq2) / 2;
+								avgp = ((pop_stats[t].freq1*pop_stats[t].two_n) + (pop_stats[tt].freq1*pop_stats[tt].two_n)) / (pop_stats[t].two_n+pop_stats[tt].two_n);
+								avgq = ((pop_stats[t].freq2*pop_stats[t].two_n) + (pop_stats[tt].freq2*pop_stats[tt].two_n)) / (pop_stats[t].two_n + pop_stats[tt].two_n);
 								ht[index] = ht[index] - ((avgp * avgp) + (avgq*avgq));
 							}
 							else
@@ -472,7 +472,8 @@ int main()
 						{
 							double hs = (pop_stats[t].hs + pop_stats[tt].hs) / 2;
 							if (ht[index] > 0)
-								fsts[index] = 1 - (pop_stats[t].hs + pop_stats[tt].hs) / (2*ht[index]);
+								fsts[index] = (ht[index] - hs) / ht[index];
+								//fsts[index] = 1 - ((pop_stats[t].hs + pop_stats[tt].hs) / (2*ht[index]));
 							else
 								fsts[index] = -1.0;
 							if (fsts[index]>1)
