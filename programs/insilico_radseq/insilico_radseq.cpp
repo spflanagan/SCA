@@ -268,7 +268,7 @@ int main()
 
 	
 	genome_name = "../../SSC_integrated.fa";
-	output_add = ".null.skewedAFS";
+	output_add = ".null";
 	ddigest_name = "../../results/insilico/SSC_ddigested"+ output_add + ".txt";
 	sdigest_name = "../../results/insilico/SSC_sdigested"+ output_add + ".txt";
 	vcf_name = "../../results/insilico/ssc_insilico" + output_add + ".vcf";
@@ -284,7 +284,7 @@ int main()
 	reads_per_ind = 1114632;
 	dd_pcr_cycles = 12;
 	sd_pcr_cycles = 20;
-	afs_skewed = true;
+	afs_skewed = false;
 	shear_bias = false;
 	default_random_engine generator;
 	uniform_real_distribution<double> distribution(0.000000001, 0.00000001);

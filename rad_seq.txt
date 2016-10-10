@@ -20,11 +20,35 @@ Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias
 
 
 #############################################LAB BOOK###########################################
+#####Monday, 10 October 2016
+Running the in silico with null distribution and non-skewed AFS.
+
+Then I'll run it with the different numbers of individuals.
+
+Some of the Fst weirdness seems to have come from loci that are polymorphic in one dataset but not the other.
+In both:
+	68008 are polymorphic
+	1216 are fixed for different alleles
+	15627 are fixed in one pop but not the other.
+	summary(fsts.both$Fst)
+	> summary(fsts.both$Fst[!is.na(fsts.both$Fst)])
+     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+-2.135000 -0.040860  0.005249  0.004975  0.074550  0.959200 
+	 
+I randomly sampled 120 dRAD individuals and compared 60 and 60.
+> summary(drad.tes.fst$Fst[!is.na(drad.tes.fst$Fst)])
+     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+-0.218600  0.000000  0.002123  0.006264  0.009188  0.227800 
+
+
+	
+
 #####Thursday, 6 October 2016
 OK, so maybe the Fst calculation in gwsca_biallelic_vcf was missing a parentheses..re-running it to check.
 
 #####Wednesday, 5 October 2016
-I am unhappy with the Fst calculations I've got from R. It doesn't seem right that there should be so many ==1 or < 0
+I am unhappy with the Fst calculations I've got from R. 
+It doesn't seem right that there should be so many ==1 or < 0
 
 Maybe run gwsca_biallelic_vcf? See if that gives the same distribution? 
 

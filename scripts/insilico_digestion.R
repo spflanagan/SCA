@@ -102,6 +102,7 @@ for(i in 1:length(ne.files))
   mut.dat<-data.frame(rbind(mut.dat,
     cbind(Ne=rep(as.numeric(n),length(fsts)),MinMut=rep(as.character(m),length(fsts)),Fst=as.numeric(fsts))),stringsAsFactors=FALSE)
 }
+mut.dat$Fst<-as.numeric(as.character(mut.dat$Fst))
 
 ###PLOTS####
 boxplot(pcr.afs.dat$Fst~pcr.afs.dat$AFS*pcr.afs.dat$PCR,
@@ -111,12 +112,18 @@ axis(2,pos=0.1,las=1,at=seq(-0.02,0.06,0.01))
 legend("topleft",c("Mean p = 0.5","Mean p = 0.8"),pt.bg=c("white","grey"),
        pch=22,bty="n",ncol=2)
 
-boxplot(mut.dat$Fst~mut.dat$MinMut*mut.dat$Ne)
-        #col=c("white","grey"),pch=19,axes=F,ylim=c(-0.02,0.06))
-axis(1,at=c(0,seq(1.5,11.5,2)),labels=c("",seq(1,5),""),pos=-0.02)
-axis(2,pos=0.1,las=1,at=seq(-0.02,0.06,0.01))
-legend("topleft",c("Mean p = 0.5","Mean p = 0.8"),pt.bg=c("white","grey"),
-       pch=22,bty="n",ncol=2)
+boxplot(mut.dat$Fst~mut.dat$MinMut*as.numeric(as.character(mut.dat$Ne)),
+  col=c("white","grey"),pch=21,axes=F,ylim=c(-0.06,0.06),
+  outcol="black",outbg=c("white","grey"))
+axis(1,at=c(0,seq(1.5,8.5,2)),labels=c("",5000,10000,20000,""),pos=-0.06)
+axis(2,pos=0.3,las=1,at=seq(-0.06,0.06,0.01))
+legend("topleft",
+  c(expression(mu~"from ["~10^{-9}~","~10^{-8}~"]"),expression(mu~"from ["~10^{-8}~","~10^{-7}~"]")),
+  pt.bg=c("white","grey"),
+  pch=21,bty="n")
+
+hist(log(null$Fst))
+
 ####FOR COMPARISON####
 #analyze the fsts--using fst.two.vcf
 lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",

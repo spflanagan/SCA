@@ -113,36 +113,41 @@ fst.two.vcf<-function(vcf1.row,vcf2,match.index, cov.thresh=0.2){
           c<-strsplit(as.character(x),split=":")[[1]][1]
           return(c)
         }))
+        num.ind<-length(gt2)
         gt2<-gt2[gt2 %in% c("0/0","1/0","0/1","1/1")]
         gt2[gt2=="1/0"]<-"0/1"
         gt2<-gsub(pattern = "0",replacement = vcf2.row["REF"],gt2)
         gt2<-gsub(pattern = "1",replacement = vcf2.row["ALT"],gt2)
-        al2<-unlist(strsplit(as.character(gt2),split="/"))
-         #calculate frequencies
-        freq1<-summary(factor(al1))/sum(summary(factor(al1)))	
-        freq2<-summary(factor(al2))/sum(summary(factor(al2)))	
-        freqall<-summary(as.factor(c(al1,al2)))/
-          sum(summary(as.factor(c(al1,al2))))
-        hets<-c(names(freq1)[2],names(freq2)[2])
-        if(length(freq1)>1){ 
-		hs1<-freq1*freq1
-		hs1<-1-sum(hs1)
-        } else {
-          hs1<-0
+        if(length(gt2)/num.ind>=cov.thresh){
+          al2<-unlist(strsplit(as.character(gt2),split="/"))
+           #calculate frequencies
+          freq1<-summary(factor(al1))/sum(summary(factor(al1)))	
+          freq2<-summary(factor(al2))/sum(summary(factor(al2)))	
+          freqall<-summary(as.factor(c(al1,al2)))/
+            sum(summary(as.factor(c(al1,al2))))
+          hets<-c(names(freq1)[2],names(freq2)[2])
+          if(length(freq1)>1){ 
+  		      hs1<-freq1*freq1
+  		      hs1<-1-sum(hs1)
+          } else {
+            hs1<-0
+          }
+          if(length(freq2)>1){ 
+  		      hs2<-freq2*freq2
+  		      hs2<-1-sum(hs2)
+          } else {
+            hs2<-0
+          }
+          if(length(freqall)>1){
+            hs<-mean(c(hs1,hs2))
+            ht<-freqall*freqall
+  		      ht<-1-sum(ht)
+            fst<-(ht-hs)/ht
+          }
+          if(length(freqall)<=1){ fst<-0 }
+        }else {
+          fst<-NA #it doesn't pass coverage threshold
         }
-        if(length(freq2)>1){ 
-		hs2<-freq2*freq2
-		hs2<-1-sum(hs2)
-        } else {
-          hs2<-0
-        }
-        if(length(freqall)>1){
-          hs<-mean(c(hs1,hs2))
-          ht<-freqall*freqall
-		ht<-1-sum(ht)
-          fst<-(ht-hs)/ht
-        }
-        if(length(freqall)<=1){ fst<-0 }
       }else {
         fst<-NA #it doesn't pass the coverage threshold
       }
@@ -186,6 +191,66 @@ calc.afs.vcf<-function(vcf.row){
     RefFreq=freq1[names(freq1) %in% vcf.row["REF"]],
     Alt=vcf.row["ALT"],AltFreq=freq1[names(freq1) %in% vcf.row["ALT"]]))
 }
+
+fst.one.vcf<-function(vcf.row,group1,group2, cov.thresh=0.2){
+  
+  hs1<-hs2<-hs<-ht<-0
+  freqall<-gt1<-gt2<-NULL
+  gt1<-unlist(lapply(vcf.row[group1],function(x){ 
+    c<-strsplit(as.character(x),split=":")[[1]][1]
+    return(c)
+  }))
+  num.ind<-length(gt1)
+  gt1<-gt1[gt1 %in% c("0/0","1/0","0/1","1/1")]
+  gt1[gt1=="1/0"]<-"0/1"
+  gt1<-gsub(pattern = "0",replacement = vcf.row["REF"],gt1)
+  gt1<-gsub(pattern = "1",replacement = vcf.row["ALT"],gt1)
+  if(length(gt1)/num.ind>=cov.thresh){
+    al1<-unlist(strsplit(as.character(gt1),split = "/"))
+    gt2<-unlist(lapply(vcf.row[group2],function(x){ 
+      c<-strsplit(as.character(x),split=":")[[1]][1]
+      return(c)
+    }))
+    num.ind<-length(gt2)
+    gt2<-gt2[gt2 %in% c("0/0","1/0","0/1","1/1")]
+    gt2[gt2=="1/0"]<-"0/1"
+    gt2<-gsub(pattern = "0",replacement = vcf.row["REF"],gt2)
+    gt2<-gsub(pattern = "1",replacement = vcf.row["ALT"],gt2)
+    if(length(gt2)/num.ind>=cov.thresh){
+      al2<-unlist(strsplit(as.character(gt2),split="/"))
+      #calculate frequencies
+      freq1<-summary(factor(al1))/sum(summary(factor(al1)))	
+      freq2<-summary(factor(al2))/sum(summary(factor(al2)))	
+      freqall<-summary(as.factor(c(al1,al2)))/
+        sum(summary(as.factor(c(al1,al2))))
+      hets<-c(names(freq1)[2],names(freq2)[2])
+      if(length(freq1)>1 & length(freq2)>1){ #both must be polymorphic
+        hs1<-2*freq1[1]*freq1[2]
+        hs2<-2*freq2[1]*freq2[2]
+        hs<-mean(c(hs1,hs2))
+        ht<-2*freqall[1]*freqall[2]
+        fst<-(ht-hs)/ht
+      } else {
+        hs1<-1-sum(freq1*freq1)
+        hs2<-1-sum(freq2*freq2)
+        if(length(freqall)<=1){ fst<-0 }
+        else{ 
+          ht<-2*freqall[1]*freqall[2]
+          fst<-NA
+        }
+      }
+    }
+    else {
+      fst<-NA #gt2 doesn't pass coverage threshold
+    }
+  }else {
+    fst<-NA #it doesn't pass the coverage threshold
+  }
+
+  return(data.frame(Chrom=vcf.row["#CHROM"],Pos=vcf.row["POS"],
+                  Hs1=hs1,Hs2=hs2,Hs=hs,Ht=ht,Fst=fst,NumAlleles=length(factor(freqall)),
+                  Num1=length(gt1),Num2=length(gt2)))
+}#end function fst.one.vcf
 
 choose.one.snp<-function(vcf){
   new.vcf<-data.frame()
@@ -516,6 +581,7 @@ bd.cov.pass<-bd.cov[bd.cov$AvgCovTotal > 3 & bd.cov$AvgCovTotal <=50,"SNP"]
 bo.cov.pass<-bo.cov[bo.cov$AvgCovTotal > 3 & bo.cov$AvgCovTotal <=50,"SNP"]
 cov.pass<-bd.cov.pass[bd.cov.pass %in% bo.cov.pass]
 summary(od.both.fst[od.both.fst$SNP %in% cov.pass,"Fst"])
+fsts.both<-do.call("rbind",apply(both,1,fst.one.vcf,group1=o.ind,group2=d.ind,cov.thresh=0.2))
 
 #PLOTTING
 lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
@@ -584,6 +650,9 @@ fst.aov.dat<-data.frame(Fst=c(od$Fst,odb$Fst,odbs$Fst),
 fst.aov<-aov(Fst~Type,dat=fst.aov.dat)
 
 gwsca<-read.delim("gwsca_fsts_both.txt")
+
+drad.test<-sample(d.ind,120)
+drad.tes.fst<-do.call("rbind", apply(both, 1, fst.one.vcf,group1=drad.test[1:60],group2=drad.test[61:120],cov.thresh=0.2))
 ##############################DRAD DIFFERENT PLATES##################################
 
 #d.cov<-do.call("rbind",apply(drad,1,vcf.cov.loc,subset=d.ind))
