@@ -20,6 +20,12 @@ Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias
 
 
 #############################################LAB BOOK###########################################
+#####Tuesday, 11 October 2016
+Today I worked mostly on identifying the genomic locations of SNPs 
+(though I need to still work with it because 57827 of 69309 SNPs aren't being matched to a genomic region)
+
+Also ran the null in silico digest with sdRAD n = 60, ddRAD n = 400.
+
 #####Monday, 10 October 2016
 Running the in silico with null distribution and non-skewed AFS.
 

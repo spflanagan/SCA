@@ -268,7 +268,7 @@ int main()
 
 	
 	genome_name = "../../SSC_integrated.fa";
-	output_add = ".null";
+	output_add = ".null.skewedAFS.asymmetric";
 	ddigest_name = "../../results/insilico/SSC_ddigested"+ output_add + ".txt";
 	sdigest_name = "../../results/insilico/SSC_sdigested"+ output_add + ".txt";
 	vcf_name = "../../results/insilico/ssc_insilico" + output_add + ".vcf";
@@ -277,14 +277,15 @@ int main()
 	enz1.overhang = "G";
 	enz2.rec_seq = "GATC"; //MboI
 	enz2.overhang = "";
-	sd_ind = dd_ind = 50;
+	sd_ind = 60;
+	dd_ind = 400;
 	pcr_duplicate_rate = 0.0;//% of reads per cycle
 	prop_rs_constant = 1.0;//usually 0.1
 	Ne = 10000;
 	reads_per_ind = 1114632;
 	dd_pcr_cycles = 12;
 	sd_pcr_cycles = 20;
-	afs_skewed = false;
+	afs_skewed = true;
 	shear_bias = false;
 	default_random_engine generator;
 	uniform_real_distribution<double> distribution(0.000000001, 0.00000001);
@@ -639,10 +640,15 @@ int main()
 	for (i = 0; i < ddigest.size(); i++)
 	{
 		if (genrand() > prop_rs_constant)//if not constant, could be null
+		{
 			ddigest[i].polymorphic = true;
+			4 * Ne*distribution(generator);
+		}
 		else
+		{
 			ddigest[i].polymorphic = false;
-		ddigest[i].mutation_rate = 4*Ne*distribution(generator);
+			ddigest[i].mutation_rate = 0;
+		}
 		if (afs_skewed)
 		{
 			ddigest[i].pop_af = randnorm(0.8, 0.13);
@@ -669,11 +675,23 @@ int main()
 		if (sdigest[i].shared < 0)
 		{
 			if (genrand() > prop_rs_constant)//if not constant, could be null
+			{
 				sdigest[i].polymorphic = true;
+				sdigest[i].mutation_rate = 4 * Ne*distribution(generator);
+			}
 			else
+			{
 				sdigest[i].polymorphic = false;
-			sdigest[i].mutation_rate = 4 * Ne*distribution(generator);
-			sdigest[i].pop_af = genrand();
+				sdigest[i].mutation_rate = 0;
+			}
+			if (afs_skewed)
+			{
+				sdigest[i].pop_af = randnorm(0.8, 0.13);
+				while (sdigest[i].pop_af >= 0.975)
+					sdigest[i].pop_af = randnorm(0.8, 0.13);
+			}
+			else
+				sdigest[i].pop_af = genrand();
 		}
 	}
 	//now time to sample
