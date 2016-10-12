@@ -268,7 +268,7 @@ int main()
 
 	
 	genome_name = "../../SSC_integrated.fa";
-	output_add = ".null.skewedAFS.asymmetric";
+	output_add = ".comb.pcr3.u10E8Ne10000.asymmetric.skewed";
 	ddigest_name = "../../results/insilico/SSC_ddigested"+ output_add + ".txt";
 	sdigest_name = "../../results/insilico/SSC_sdigested"+ output_add + ".txt";
 	vcf_name = "../../results/insilico/ssc_insilico" + output_add + ".vcf";
@@ -278,9 +278,9 @@ int main()
 	enz2.rec_seq = "GATC"; //MboI
 	enz2.overhang = "";
 	sd_ind = 60;
-	dd_ind = 400;
-	pcr_duplicate_rate = 0.0;//% of reads per cycle
-	prop_rs_constant = 1.0;//usually 0.1
+	dd_ind = 340;
+	pcr_duplicate_rate = 0.03;//% of reads per cycle
+	prop_rs_constant = 0.1;//usually 0.1
 	Ne = 10000;
 	reads_per_ind = 1114632;
 	dd_pcr_cycles = 12;
@@ -288,7 +288,8 @@ int main()
 	afs_skewed = true;
 	shear_bias = false;
 	default_random_engine generator;
-	uniform_real_distribution<double> distribution(0.000000001, 0.00000001);
+	uniform_real_distribution<double> distribution(0.00000001, 0.0000001);//10E8: 0.00000001, 0.0000001
+																		//10E7: 0.0000001, 0.000001
 
 	//read in the fasta file
 	genome_file.open(genome_name);
@@ -642,7 +643,7 @@ int main()
 		if (genrand() > prop_rs_constant)//if not constant, could be null
 		{
 			ddigest[i].polymorphic = true;
-			4 * Ne*distribution(generator);
+			ddigest[i].mutation_rate = 4 * Ne*distribution(generator);
 		}
 		else
 		{

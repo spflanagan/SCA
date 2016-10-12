@@ -263,6 +263,60 @@ choose.one.snp<-function(vcf){
  # colnames(new.vcf)<-colnames(vcf)
   return(new.vcf)
 }
+
+fst.one.plink<-function(raw,group1, group2, cov.thresh=0.2){
+  fst.dat<-data.frame(Locus=character(),
+             Hs1=numeric(),Hs2=numeric(),Hs=numeric(),Ht=numeric(),Fst=numeric(),NumAlleles=numeric(),
+             Num1=numeric(),Num2=numeric(),stringsAsFactors=F)
+  grp1<-raw[raw$IID %in% group1,]
+  grp2<-raw[raw$IID %in% group2,]
+  for(i in 7:ncol(raw)){
+    na1<-length(grp1[is.na(grp1[,i]),i])/nrow(grp1)
+    na2<-length(grp2[is.na(grp2[,i]),i])/nrow(grp2)
+    gt1<-grp1[!is.na(grp1[,i]),i]
+    gt2<-grp2[!is.na(grp2[,i]),i]
+    gt1[gt1=="1"]<-"1/2"
+    gt1[gt1=="2"]<-"2/2"
+    gt1[gt1=="0"]<-"1/1"
+    gt2[gt2=="1"]<-"1/2"
+    gt2[gt2=="2"]<-"2/2"
+    gt2[gt2=="0"]<-"1/1"
+    
+    if(na1<=(1-cov.thresh)){
+      al1<-unlist(strsplit(as.character(gt1),split = "/"))
+      if(na2<=(1-cov.thresh)){
+        al2<-unlist(strsplit(as.character(gt2),split="/"))
+        #calculate frequencies
+        freq1<-summary(factor(al1))/sum(summary(factor(al1)))	
+        freq2<-summary(factor(al2))/sum(summary(factor(al2)))	
+        freqall<-summary(as.factor(c(al1,al2)))/
+          sum(summary(as.factor(c(al1,al2))))
+        if(length(freq1)>1 & length(freq2)>1){ #both must be polymorphic
+          hs1<-2*freq1[1]*freq1[2]
+          hs2<-2*freq2[1]*freq2[2]
+          hs<-mean(c(hs1,hs2))
+          ht<-2*freqall[1]*freqall[2]
+          fst<-(ht-hs)/ht
+        } else {
+          hs1<-1-sum(freq1*freq1)
+          hs2<-1-sum(freq2*freq2)
+          if(length(freqall)<=1){ fst<-0 }
+          else{ 
+            ht<-2*freqall[1]*freqall[2]
+            fst<-NA
+          }
+        }
+      }
+      else {
+        fst<-NA #gt2 doesn't pass coverage threshold
+      }
+    }else {
+      fst<-NA #it doesn't pass the coverage threshold
+    }
+    fst.dat[(i-6),]<-cbind(as.character(colnames(raw)[i]),hs1,hs2,as.numeric(hs),ht,fst,length(freqall),length(gt1),length(gt2))
+  }
+  return(fst.dat)
+}#end fst.one.plink
 #################FILES#################
 drad<-parse.vcf("drad.vcf")
 orad<-parse.vcf("orad.vcf")
@@ -273,6 +327,13 @@ both$SNP<-paste(both$`#CHROM`,both$POS,sep=".")
 locus.info<-c("#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT","SNP")
 o.ind<-grep("orad",colnames(both),value=T)
 d.ind<-grep("sample",colnames(both),value=T)
+
+dsub<-read.delim("drad.subset.raw",sep=" ")
+dmap<-read.delim("drad.map",header=F)
+osub<-read.delim("orad.subset.raw",sep=" ")
+omap<-read.delim("orad.map",header=F)
+bsub<-read.delim("both.subset.raw",sep=" ")
+bmap<-read.delim("both.map",header=F)
 #################ANALYSIS#################
 ##ran these already--read in files##
 #bo.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=o.ind))
@@ -583,6 +644,55 @@ cov.pass<-bd.cov.pass[bd.cov.pass %in% bo.cov.pass]
 summary(od.both.fst[od.both.fst$SNP %in% cov.pass,"Fst"])
 fsts.both<-do.call("rbind",apply(both,1,fst.one.vcf,group1=o.ind,group2=d.ind,cov.thresh=0.2))
 
+
+#PLINK SUBSETS
+dsub<-read.delim("drad.subset.raw",sep=" ")
+dmap<-read.delim("drad.map",header=F)
+osub<-read.delim("orad.subset.raw",sep=" ")
+omap<-read.delim("orad.map",header=F)
+bsub<-read.delim("both.subset.raw",sep=" ")
+bmap<-read.delim("both.map",header=F)
+
+#Match dsub and osub
+dmap$SNP<-paste(dmap$V1,dmap$V4,sep=".")
+omap$SNP<-paste(omap$V1,omap$V4,sep=".")
+colnames(omap)<-c("Chrom","oLocus","dist","Pos","SNP")
+colnames(dmap)<-c("Chrom","dLocus","dist","Pos","SNP")
+merge.map<-merge(omap,dmap,by="SNP")
+merge.map$oLocus<-apply(merge.map,1,function(x){
+  x["oLocus"]<-paste("X",x["oLocus"],sep="")
+})
+merge.map$dLocus<-apply(merge.map,1,function(x){
+  x["dLocus"]<-paste("X",x["dLocus"],sep="")
+})
+#match orad
+o.newcol<-colnames(osub)
+o.newcol<-unlist(lapply(o.newcol,function(x){
+  o.newcol<-gsub("(X\\d+_\\d+)_\\w","\\1",x)
+}))
+colnames(osub)<-o.newcol
+omerge.keep<-merge.map[merge.map$oLocus %in% colnames(osub),]
+omerge.keep<-omerge.keep[!duplicated(omerge.keep$oLocus),]
+odsub<-osub[,colnames(osub)%in%omerge.keep$oLocus]
+odsub<-odsub[,order(colnames(odsub))]
+omerge.keep<-omerge.keep[order(omerge.keep$oLocus),]
+colnames(odsub)<-omerge.keep[omerge.keep$oLocus %in% colnames(odsub),"SNP"]
+mo<-odsub[,!duplicated(colnames(odsub))]
+#match drad
+d.newcol<-colnames(dsub)
+d.newcol<-unlist(lapply(d.newcol,function(x){
+  d.newcol<-gsub("(X\\d+_\\d+)_\\w","\\1",x)
+}))
+colnames(dsub)<-d.newcol
+dmerge.keep<-merge.map[merge.map$dLocus %in% colnames(dsub),]
+dmerge.keep<-dmerge.keep[!duplicated(dmerge.keep$dLocus),]
+ddsub<-dsub[,colnames(dsub)%in%dmerge.keep$dLocus]
+ddsub<-ddsub[,order(colnames(ddsub))]
+dmerge.keep<-dmerge.keep[order(dmerge.keep$dLocus),]
+colnames(ddsub)<-dmerge.keep[dmerge.keep$dLocus %in% colnames(ddsub),"SNP"]
+md<-ddsub[,!duplicated(colnames(ddsub))]
+mergedsub<-merge(mo,md)
+#
 #PLOTTING
 lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
        "LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",

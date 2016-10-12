@@ -36,4 +36,14 @@ poly.agp<-function(poly, agp,gff){
 }
 
 drad.annotate<-do.call("rbind",apply(poly.loc,1,poly.agp,agp=agp,gff=gff))
-
+type<-drad.annotate$type
+type[type=="CDS,contig,exon,five_prime_UTR,gene,mRNA"]<-"five_prime_UTR"
+type[type=="CDS,contig,exon,gene,mRNA"]<-"gene"
+type[type=="CDS,contig,exon,gene,mRNA,three_prime_UTR"]<-"three_prime_UTR"
+type[type=="contig,exon,five_prime_UTR,gene,mRNA"]<-"five_prime_UTR"
+type[type=="contig,exon,gene,mRNA,three_prime_UTR"]<-"three_prime_UTR"
+type[type=="contig,five_prime_UTR"]<-"five_prime_UTR"
+type[type=="contig,exon,five_prime_UTR,gene,mRNA,three_prime_UTR"]<-"gene"
+type[type=="contig,gene,mRNA"]<-"gene"
+type[is.na(type)]<-"gap"
+barplot(summary(factor(type)))

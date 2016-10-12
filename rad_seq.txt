@@ -20,6 +20,23 @@ Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias
 
 
 #############################################LAB BOOK###########################################
+#####Wednesday, 12 October 2016
+The 20 remaining NAs are in gap regions of the genome.
+The question is: are outliers more likely to be in coding regions?
+All SNPs from drad:
+        contig  five_prime_UTR             gap            gene three_prime_UTR 
+          28576             962              20           37435            2116 
+	Should I just look locus-by-locus? probably..
+	
+Returning to the in silico results...
+
+reading in the subsetted "raw" from PLINK from last week...now I just need to do fsts with plink files.
+I want to characterize the number of loci fixed for different alleles!
+
+summary(as.numeric(bsub.fst$Fst))
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+-1.9890 -0.0386  0.0122  0.0116  0.0873  0.5456     604 
+
 #####Tuesday, 11 October 2016
 Today I worked mostly on identifying the genomic locations of SNPs 
 (though I need to still work with it because 57827 of 69309 SNPs aren't being matched to a genomic region)
