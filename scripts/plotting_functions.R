@@ -41,7 +41,7 @@ plot.genome.wide<-function(bp,var,y.max,x.max, rect.xs=NULL,y.min=0,x.min=0,
 
 fst.plot<-function(fst.dat,ci.dat, sig.col=c("red","yellow"),
 	fst.name="Fst", chrom.name="Chrom", bp.name="BP",axis.size=0.5,
-	scaffold.order=NULL,groups=NULL,print.names=FALSE){
+	scaffold.order=NULL,groups=NULL,print.names=FALSE,y.lim=NULL){
 	if(!is.null(scaffold.order)){
 		scaff.ord<-scaffold.order$component_id
 		lgs<-scaffold.order$object
@@ -53,6 +53,8 @@ fst.plot<-function(fst.dat,ci.dat, sig.col=c("red","yellow"),
 		lgs<-groups
 		scaff.ord<-groups
 	}
+  fst.dat[,fst.name]<-as.numeric(as.character(fst.dat[,fst.name]))
+  
 	all.scaff<-split(fst.dat, factor(fst.dat[,chrom.name]))
 	last.max<-0
 	rect.xs<-NULL
@@ -76,16 +78,20 @@ fst.plot<-function(fst.dat,ci.dat, sig.col=c("red","yellow"),
 	#change BP to plot
 	x.max<-max(xs)
 	x.min<-min(xs)
-	y.max<-max(fst.dat[,fst.name])+0.1*max(fst.dat[,fst.name])
-	y.min<-min(fst.dat[,fst.name])-0.1*min(fst.dat[,fst.name])
-	if(min(fst.dat[,fst.name]) < 0) {
-		y.min<-min(fst.dat[,fst.name]) - 0.1*min(fst.dat[,fst.name])
-	} else {
-		y.min<-0
+	if(is.null(y.lim)){
+  	y.max<-max(fst.dat[,fst.name])+0.1*max(fst.dat[,fst.name])
+  	y.min<-min(fst.dat[,fst.name])-0.1*min(fst.dat[,fst.name])
+  	if(min(fst.dat[,fst.name]) < 0) {
+  		y.min<-min(fst.dat[,fst.name]) - 0.1*min(fst.dat[,fst.name])
+  	} else {
+  		y.min<-0
+  	}
+  
+  	y.lim<-c(y.min,y.max)
 	}
-	displacement<-y.min-((y.max-y.min)/30)
+	displacement<-y.lim[1]-((y.lim[2]-y.lim[1])/30)
 	plot(c(x.min,x.max),c(y.min,y.max),xlim=c(x.min,x.max), 
-		ylim=c(y.min, y.max), 
+		ylim=y.lim, 
 		bty="n",type="n",	axes=F, xlab="", ylab="")
 	for(i in 1:nrow(rect.xs)){
 		if(i%%2 == 0) {
@@ -93,7 +99,7 @@ fst.plot<-function(fst.dat,ci.dat, sig.col=c("red","yellow"),
 		} else {
 			rect.color<-"gray75"
 		}
-		rect(rect.xs[i,1],y.min,rect.xs[i,2],y.max, 
+		rect(rect.xs[i,1],y.lim[1],rect.xs[i,2],y.lim[2], 
 			col=rect.color, border=NA)
 		if(print.names==T){
 			text(x=mean(all.scaff[[scaff.ord[i]]][
@@ -107,7 +113,7 @@ fst.plot<-function(fst.dat,ci.dat, sig.col=c("red","yellow"),
 		points(all.scaff[[scaff.ord[i]]][,bp.name], 
 			all.scaff[[scaff.ord[i]]][,fst.name], 
 			pch=19, cex=0.5,col="grey7",
-			xlim=c(x.min,x.max),ylim=c(y.min, y.max))
+			xlim=c(x.min,x.max),ylim=y.lim)
 		#plot.genome.wide(all.scaff[[i]][,bp.name], 
 		#	all.scaff[[i]][,fst.name],plot.rect=FALSE,
 		#	y.max,x.max, y.min=y.min,x.min=x.min, 
@@ -121,11 +127,11 @@ fst.plot<-function(fst.dat,ci.dat, sig.col=c("red","yellow"),
 			col=sig.col[2], pch=19, cex=0.5)
 	}
 	if(axis.size>0){
-		axis(2, at = seq(round(y.min,2),round(y.max,2),
-			round((y.max-y.min)/2, digits=2)),
-			ylim = c(y.min, y.max), pos=0,
-			labels=seq(round(y.min,2),round(y.max,2),
-				round((y.max-y.min)/2, digits=2)),
+		axis(2, at = seq(round(y.lim[1],2),round(y.lim[2],2),
+			round((y.lim[2]-y.lim[1])/2, digits=2)),
+			ylim =y.lim, pos=0,
+			labels=seq(round(y.lim[1],2),round(y.lim[2],2),
+				round((y.lim[2]-y.lim[1])/2, digits=2)),
 			las=1,tck = -0.01, xlab="", ylab="", cex.axis=axis.size)
 	}
 	xes<-do.call("rbind",all.scaff)

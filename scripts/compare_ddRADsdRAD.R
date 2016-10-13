@@ -334,6 +334,13 @@ osub<-read.delim("orad.subset.raw",sep=" ")
 omap<-read.delim("orad.map",header=F)
 bsub<-read.delim("both.subset.raw",sep=" ")
 bmap<-read.delim("both.map",header=F)
+
+dmap$SNP<-paste(dmap$V1,dmap$V4,sep=".")
+omap$SNP<-paste(omap$V1,omap$V4,sep=".")
+bmap$SNP<-paste(bmap$V1,bmap$V4,sep=".")
+colnames(omap)<-c("Chrom","oLocus","dist","Pos","SNP")
+colnames(dmap)<-c("Chrom","dLocus","dist","Pos","SNP")
+colnames(bmap)<-c("Chrom","Locus","dist","Pos","SNP")
 #################ANALYSIS#################
 ##ran these already--read in files##
 #bo.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=o.ind))
@@ -356,19 +363,22 @@ bmap<-read.delim("both.map",header=F)
 #write.csv(o.cov,"Sep_sdRADCov.csv")
 #write.csv(d.cov,"Sep_ddRADCov.csv")
 #write.csv(loc.cov,"Sep_Combined.csv")
-b.cov<-read.csv("Both_overallCov.csv")
-bo.cov<-read.csv("Both_sdRADCov.csv")
-bd.cov<-read.csv("Both_ddRADCov.csv")
-o.cov<-read.csv("Sep_sdRADCov.csv")
-d.cov<-read.csv("Sep_ddRADCov.csv")
-loc.cov<-read.csv("Sep_Combined.csv")
+b.cov<-read.csv("Both_overallCov.csv",row.names=1)
+b.cov$SNP<-paste(b.cov$Chrom,b.cov$Pos,sep=".")
+bo.cov<-read.csv("Both_sdRADCov.csv",row.names=1)
+bo.cov$SNP<-paste(bo.cov$Chrom,bo.cov$Pos,sep=".")
+bd.cov<-read.csv("Both_ddRADCov.csv",row.names=1)
+bd.cov$SNP<-paste(bd.cov$Chrom,bd.cov$Pos,sep=".")
+o.cov<-read.csv("Sep_sdRADCov.csv",row.names=1)
+o.cov$SNP<-paste(o.cov$Chrom,o.cov$Pos,sep=".")
+d.cov<-read.csv("Sep_ddRADCov.csv",row.names=1)
+d.cov$SNP<-paste(d.cov$Chrom,d.cov$Pos,sep=".")
+loc.cov<-read.csv("Sep_Combined.csv",row.names=1)
+loc.cov$SNP<-paste(loc.cov$Chrom.x,loc.cov$Pos.x,sep=".")
 
+bo.cov$AvgCovRatio[is.na(bo.cov$AvgCovRatio)]<-0
 bo.cov$AvgCovRatio[bo.cov$AvgCovRatio=="Inf"]<-bo.cov[bo.cov$AvgCovRatio=="Inf","AvgCovRef"]
 bd.cov$AvgCovRatio[bd.cov$AvgCovRatio=="Inf"]<-bd.cov[bd.cov$AvgCovRatio=="Inf","AvgCovRef"]
-#private alleles
-dim(loc.cov[(loc.cov$AvgCovRef.x == 0 & loc.cov$AvgCovAlt.y == 0) | (loc.cov$AvgCovAlt.x == 0 & loc.cov$AvgCovRef.y == 0),])#2042
-dim(loc.cov[loc.cov$NumHet.x==0,])#72307
-dim(loc.cov[loc.cov$NumHet.y==0,])#14436
 
 ####Average Coverage####
 #compare sd vs dd
@@ -654,10 +664,6 @@ bsub<-read.delim("both.subset.raw",sep=" ")
 bmap<-read.delim("both.map",header=F)
 
 #Match dsub and osub
-dmap$SNP<-paste(dmap$V1,dmap$V4,sep=".")
-omap$SNP<-paste(omap$V1,omap$V4,sep=".")
-colnames(omap)<-c("Chrom","oLocus","dist","Pos","SNP")
-colnames(dmap)<-c("Chrom","dLocus","dist","Pos","SNP")
 merge.map<-merge(omap,dmap,by="SNP")
 merge.map$oLocus<-apply(merge.map,1,function(x){
   x["oLocus"]<-paste("X",x["oLocus"],sep="")
@@ -691,15 +697,61 @@ ddsub<-ddsub[,order(colnames(ddsub))]
 dmerge.keep<-dmerge.keep[order(dmerge.keep$dLocus),]
 colnames(ddsub)<-dmerge.keep[dmerge.keep$dLocus %in% colnames(ddsub),"SNP"]
 md<-ddsub[,!duplicated(colnames(ddsub))]
-mergedsub<-merge(mo,md)
-#
-#PLOTTING
+mo<-mo[,order(colnames(mo))]
+md<-md[,order(colnames(md))]
+mergedsub<-data.frame(rbind(cbind(osub[,1:6],mo[,colnames(mo) %in% colnames(md)]),
+  cbind(dsub[,1:6],md[,colnames(md)%in% colnames(mo)])))
+#fsts
+plink.diff.fst<-fst.one.plink(mergedsub,group1 = osub$IID,group2 = dsub$IID)
+plink.both.fst<-fst.one.plink(bsub,group1 = osub$IID,group2 = dsub$IID)
+plink.diff.fst$Chrom<-gsub("(\\w+\\d+).\\d+","\\1",plink.diff.fst$Locus)
+plink.diff.fst$Pos<-gsub("(\\w+\\d+).(\\d+)","\\2",plink.diff.fst$Locus)
+
+plink.both.fst$Chrom<-apply(plink.both.fst,1,function(x){
+  chrom<-bmap[bmap$V2 %in% gsub("X(\\d+_\\d+)_\\w","\\1",x),"V1"]
+})
+plink.both.fst$Chrom<-factor(plink.both.fst$Chrom)
+plink.both.fst$Pos<-apply(plink.both.fst,1,function(x){
+  pos<-bmap[bmap$V2 %in% gsub("X(\\d+_\\d+)_\\w","\\1",x),"V4"]
+})
+
+#PLOTTING##
 lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
        "LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
        "LG22")
 lgn<-seq(1,22)
-scaffs<-levels(as.factor(both[,1]))
+scaffs<-levels(as.factor(plink.both.fst[,"Chrom"]))
 scaffs[1:22]<-lgs
+
+jpeg("sd-dd_Fst_subset.jpeg",height=10,width=7.5,units="in",res=300)
+par(mfrow=c(2,1),mar=c(2,2,2,2),oma=c(1,2,1,1))
+od<-fst.plot(plink.both.fst[!is.na(plink.both.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
+             fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(-2,0.6),
+             groups=as.factor(scaffs[scaffs %in% levels(factor(plink.both.fst$Chrom[!is.na(plink.both.fst$Fst)]))]))
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(od[od$Chrom ==lgs[i],"Pos"]),y=-2.1,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(od[od$Chrom ==lgs[i],"Pos"])
+}
+mtext("sdRAD-ddRAD Analyzed Together",3,cex=0.75)
+odb<-fst.plot(plink.diff.fst[!is.na(plink.diff.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
+              fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(-1,0.3),
+              groups=as.factor(scaffs[scaffs %in% levels(factor(plink.diff.fst[!is.na(plink.diff.fst),"Chrom"]))]))
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(odb[odb$Chrom ==lgs[i],"Pos"]),y=-1.1,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(odb[odb$Chrom ==lgs[i],"Pos"])
+}
+mtext("sdRAD-ddRAD Analyzed Separately",3,cex=0.75)
+dev.off()
+
+##STATS
+plink.fst<-data.frame(Fst=as.numeric(c(plink.both.fst$Fst,plink.diff.fst$Fst)),
+  Analysis=c(rep("Together",length(plink.both.fst$Fst)),rep("Separately",length(plink.diff.fst$Fst))))
+
+##########
 
 jpeg("sd-dd_Fst.jpeg",height=10,width=7.5,units="in",res=300)
 par(mfrow=c(4,1),mar=c(2,2,2,2),oma=c(1,2,1,1))

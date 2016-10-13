@@ -20,6 +20,28 @@ Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias
 
 
 #############################################LAB BOOK###########################################
+#####Thursday, 13 October 2016
+Did anovas to compare the in silico digest results, but I'm not sure that's the best approach.
+Attempting to pull out loci from the coverage analysis that are in the subsets, but apparently they're different?
+> dim(omap)
+[1] 92973     5
+> dim(o.cov)
+[1] 250425     15
+> dim(o.cov[o.cov$SNP %in% omap$SNP,])
+[1] 2222   15
+> dim(omap[omap$SNP %in% o.cov$SNP,])
+[1] 2207    5
+
+This is just frustrating.
+
+It seems that the vcf and plink files have different SNPs.
+> dim(orad[orad$SNP %in% omap$SNP,])
+[1] 2222   70
+
+maybe I took plink files from the wrong place?
+
+Maybe I should just subset the vcf file and ignore the HWE concerns
+
 #####Wednesday, 12 October 2016
 The 20 remaining NAs are in gap regions of the genome.
 The question is: are outliers more likely to be in coding regions?
