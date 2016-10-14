@@ -20,6 +20,56 @@ Overall: try to distinguish between allelic dropout, shearing bias, and PCR bias
 
 
 #############################################LAB BOOK###########################################
+#####Friday, 14 October 2016
+I wrote a quick little subsetting function in R to subset the vcf files rather than deal with the plink BS
+Now I'll take the things I've already run, use the subsets to subset those, and re-do the analysis.
+1. Coverage
+	> TukeyHSD(aov(log(lc.comp$AvgCovRatio+1)~lc.comp$LibraryPrep*lc.comp$Assembly))#use this!
+	  Tukey multiple comparisons of means
+		95% family-wise confidence level
+
+	Fit: aov(formula = log(lc.comp$AvgCovRatio + 1) ~ lc.comp$LibraryPrep * lc.comp$Assembly)
+
+	$`lc.comp$LibraryPrep`
+					   diff         lwr         upr p adj
+	sdRAD-ddRAD -0.03182711 -0.03928312 -0.02437109     0
+
+	$`lc.comp$Assembly`
+						  diff         lwr         upr p adj
+	Together-Alone -0.04790026 -0.05669206 -0.03910845     0
+
+	$`lc.comp$LibraryPrep:lc.comp$Assembly`
+										  diff          lwr          upr     p adj
+	sdRAD:Alone-ddRAD:Alone       -0.021023595 -0.032383659 -0.009663531 0.0000118
+	ddRAD:Together-ddRAD:Alone     0.002094985 -0.016315944  0.020505915 0.9913092
+	sdRAD:Together-ddRAD:Alone    -0.107643717 -0.125241228 -0.090046206 0.0000000
+	ddRAD:Together-sdRAD:Alone     0.023118580  0.006827704  0.039409457 0.0015201
+	sdRAD:Together-sdRAD:Alone    -0.086620122 -0.101985756 -0.071254487 0.0000000
+	sdRAD:Together-ddRAD:Together -0.109738702 -0.130857746 -0.088619659 0.0000000
+
+	> TukeyHSD(aov(log(lc.comp$AvgCovTotal)~lc.comp$LibraryPrep*lc.comp$Assembly))#use this!
+	  Tukey multiple comparisons of means
+		95% family-wise confidence level
+
+	Fit: aov(formula = log(lc.comp$AvgCovTotal) ~ lc.comp$LibraryPrep * lc.comp$Assembly)
+
+	$`lc.comp$LibraryPrep`
+					  diff        lwr         upr p adj
+	sdRAD-ddRAD -0.1022779 -0.1064995 -0.09805627     0
+
+	$`lc.comp$Assembly`
+						 diff        lwr        upr p adj
+	Together-Alone 0.04921168 0.04423373 0.05418964     0
+
+	$`lc.comp$LibraryPrep:lc.comp$Assembly`
+										  diff         lwr          upr     p adj
+	sdRAD:Alone-ddRAD:Alone       -0.113786883 -0.12021900 -0.107354762 0.0000000
+	ddRAD:Together-ddRAD:Alone    -0.003228407 -0.01365276  0.007195946 0.8564623
+	sdRAD:Together-ddRAD:Alone    -0.024045719 -0.03400951 -0.014081927 0.0000000
+	ddRAD:Together-sdRAD:Alone     0.110558476  0.10133451  0.119782445 0.0000000
+	sdRAD:Together-sdRAD:Alone     0.089741164  0.08104107  0.098441257 0.0000000
+	sdRAD:Together-ddRAD:Together -0.020817312 -0.03277501 -0.008859612 0.0000457
+
 #####Thursday, 13 October 2016
 Did anovas to compare the in silico digest results, but I'm not sure that's the best approach.
 Attempting to pull out loci from the coverage analysis that are in the subsets, but apparently they're different?

@@ -90,7 +90,7 @@ fst.plot<-function(fst.dat,ci.dat, sig.col=c("red","yellow"),
   	y.lim<-c(y.min,y.max)
 	}
 	displacement<-y.lim[1]-((y.lim[2]-y.lim[1])/30)
-	plot(c(x.min,x.max),c(y.min,y.max),xlim=c(x.min,x.max), 
+	plot(c(x.min,x.max),y.lim,xlim=c(x.min,x.max), 
 		ylim=y.lim, 
 		bty="n",type="n",	axes=F, xlab="", ylab="")
 	for(i in 1:nrow(rect.xs)){
