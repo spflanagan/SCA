@@ -174,19 +174,32 @@ fm.prune<-fm.prune[fm.prune$FEM.MAL>0,]
 mo.prune<-gw.fst[gw.fst$Locus %in% fem.n$Locus&gw.fst$Locus %in% mom.n$Locus, ]
 mo.prune<-mo.prune[mo.prune$MOM.FEM>0,]
 
+aj.prune$SNP<-paste(aj.prune$Chrom,aj.prune$Pos,sep=".")
+fm.prune$SNP<-paste(fm.prune$Chrom,fm.prune$Pos,sep=".")
+mo.prune$SNP<-paste(mo.prune$Chrom,mo.prune$Pos,sep=".")
+
 #write.table(fm.prune, "fm.plot.txt",row.names=F,col.names=T,quote=F,sep='\t')
 #write.table(mo.prune, "mo.plot.txt",row.names=F,col.names=T,quote=F,sep='\t')
 #write.table(aj.prune,"aj.plot.txt",row.names=F,col.names=T,quote=F,sep='\t')
+
+#Maximum coverage
+all.inds<-colnames(vcf)[10:ncol(vcf)]
+sca.cov<-do.call("rbind",apply(vcf,1,vcf.cov.loc,subset=all.inds))
+sca.cov$SNP<-paste(sca.cov$Chrom,as.numeric(sca.cov$Pos),sep=".")
+keep.snps<-sca.cov[sca.cov$AvgCovTotal >= 3 & sca.cov$AvgCovTotal <= 20,"SNP"]
 #############################################################################
 
 #################################ANALYSIS####################################
 aj.plot<-aj.prune[order(aj.prune$ADULT.JUVIE),] #ascending
+aj.plot<-aj.plot[aj.plot$SNP %in% keep.snps,]
 aj.top1<-aj.plot[round(nrow(aj.plot)*0.99),"ADULT.JUVIE"]
 aj.out1<-aj.plot[aj.plot$ADULT.JUVIE >= aj.top1,]
 fm.plot<-fm.prune[order(fm.prune$FEM.MAL),]#ascending
+fm.plot<-fm.plot[fm.plot$SNP %in% keep.snps,]
 fm.top1<-fm.plot[round(nrow(fm.plot)*0.99),"FEM.MAL"]
 fm.out1<-fm.prune[fm.prune$FEM.MAL >= fm.top1,]
 mo.plot<-mo.prune[order(mo.prune$MOM.FEM),]#ascending
+mo.plot<-mo.plot[mo.plot$SNP %in% keep.snps,]
 mo.top1<-mo.plot[round(nrow(mo.plot)*0.99),"MOM.FEM"]
 mo.out1<-mo.prune[mo.prune$MOM.FEM >= mo.top1,]
 
@@ -202,7 +215,7 @@ fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", chrom.name="Chrom"
 aj.plot$CompLoc<-paste(aj.plot$Chrom,aj.plot$Pos,sep=".")
 aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", 
 	chrom.name="Chrom", axis.size=0.75,bp.name="Pos",sig.col=c("red","black"))
-
+dev.off()
 #mo.plot<-mo.plot[mo.plot$Chrom %in% lgs,]
 #mo.plot$Chrom<-factor(mo.plot$Chrom)
 #fm.plot<-fm.plot[fm.plot$Chrom %in% lgs,]
@@ -233,6 +246,9 @@ fm.mo<-fm.out[fm.out$LocID %in% mo.out$LocID,]
 length(levels(factor(c(as.character(aj.fm$Locus),as.character(aj.mo$Locus),
 	as.character(fm.mo$Locus)))))
 
+aj.cov<-sca.cov[sca.cov$SNP %in% aj.out$SNP,]
+fm.cov<-sca.cov[sca.cov$SNP %in% fm.out$SNP,]
+mo.cov<-sca.cov[sca.cov$SNP %in% mo.out$SNP,]
 #####COMPARE TO MONNAHAN/KELLY
 hd$Locus<-paste(hd$chrom,hd$pos,sep=".")
 
