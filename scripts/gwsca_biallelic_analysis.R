@@ -186,7 +186,7 @@ mo.prune$SNP<-paste(mo.prune$Chrom,mo.prune$Pos,sep=".")
 all.inds<-colnames(vcf)[10:ncol(vcf)]
 sca.cov<-do.call("rbind",apply(vcf,1,vcf.cov.loc,subset=all.inds))
 sca.cov$SNP<-paste(sca.cov$Chrom,as.numeric(sca.cov$Pos),sep=".")
-keep.snps<-sca.cov[sca.cov$AvgCovTotal >= 3 & sca.cov$AvgCovTotal <= 20,"SNP"]
+keep.snps<-sca.cov[sca.cov$AvgCovTotal > 3 & sca.cov$AvgCovTotal <= 20,"SNP"]
 #############################################################################
 
 #################################ANALYSIS####################################
@@ -249,8 +249,43 @@ length(levels(factor(c(as.character(aj.fm$Locus),as.character(aj.mo$Locus),
 aj.cov<-sca.cov[sca.cov$SNP %in% aj.out$SNP,]
 fm.cov<-sca.cov[sca.cov$SNP %in% fm.out$SNP,]
 mo.cov<-sca.cov[sca.cov$SNP %in% mo.out$SNP,]
-#####COMPARE TO MONNAHAN/KELLY
+
+#####EVALUATE SAMPLE SIZE FOR HIGH FSTS#####
+gw.sum$CompLoc<-paste(gw.sum$Chrom,gw.sum$LocID,gw.sum$Pos,sep=".")
+aj.ss<-data.frame(cbind(SNP=gw.sum[gw.sum$CompLoc %in% aj.plot$Locus & gw.sum$Pop=="ADULT","CompLoc"],
+      AdultN=as.numeric(gw.sum[gw.sum$CompLoc %in% aj.plot$Locus & gw.sum$Pop=="ADULT","N"]/(2*224)),
+      JuvN=as.numeric(gw.sum[gw.sum$CompLoc %in% aj.plot$Locus & gw.sum$Pop=="JUVIE","N"]/(2*160)),
+      Outlier=rep("no",nrow(gw.sum[gw.sum$CompLoc %in% aj.plot$Locus & gw.sum$Pop=="ADULT",]))),stringsAsFactors=F)
+aj.ss$Outlier[aj.ss$SNP %in% aj.out$Locus]<-"yes"
+fm.ss<-data.frame(cbind(SNP=gw.sum[gw.sum$CompLoc %in% fm.plot$Locus & gw.sum$Pop=="FEM","CompLoc"],
+             FemN=as.numeric(gw.sum[gw.sum$CompLoc %in% fm.plot$Locus & gw.sum$Pop=="FEM","N"]/(2*57)),
+             MalN=as.numeric(gw.sum[gw.sum$CompLoc %in% fm.plot$Locus & gw.sum$Pop=="MAL","N"]/(2*167)),
+             Outlier=rep("no",nrow(gw.sum[gw.sum$CompLoc %in% fm.plot$Locus & gw.sum$Pop=="FEM",]))),stringsAsFactors=F)
+fm.ss$Outlier[fm.ss$SNP %in% fm.out$Locus]<-"yes"
+mo.ss<-data.frame(cbind(SNP=gw.sum[gw.sum$CompLoc %in% mo.plot$Locus & gw.sum$Pop=="FEM","CompLoc"],
+             FemN=as.numeric(gw.sum[gw.sum$CompLoc %in% mo.plot$Locus & gw.sum$Pop=="FEM","N"]/(2*57)),
+             MomN=as.numeric(gw.sum[gw.sum$CompLoc %in% mo.plot$Locus & gw.sum$Pop=="MOM","N"]/(2*128)),
+             Outlier=rep("no",nrow(gw.sum[gw.sum$CompLoc %in% mo.plot$Locus & gw.sum$Pop=="FEM",]))),stringsAsFactors=F)
+mo.ss$Outlier[mo.ss$SNP %in% mo.out$Locus]<-"yes"
+
+wilcox.test(as.numeric(aj.ss$AdultN)~aj.ss$Outlier)
+tapply(as.numeric(aj.ss$AdultN),aj.ss$Outlier,mean)
+wilcox.test(as.numeric(aj.ss$JuvN)~aj.ss$Outlier)
+tapply(as.numeric(aj.ss$JuvN),aj.ss$Outlier,mean)
+
+wilcox.test(as.numeric(fm.ss$MalN)~fm.ss$Outlier)
+tapply(as.numeric(fm.ss$MalN),fm.ss$Outlier,mean)
+wilcox.test(as.numeric(fm.ss$FemN)~fm.ss$Outlier)
+tapply(as.numeric(fm.ss$FemN),fm.ss$Outlier,mean)
+
+wilcox.test(as.numeric(mo.ss$FemN)~mo.ss$Outlier)
+tapply(as.numeric(mo.ss$FemN),mo.ss$Outlier,mean)
+wilcox.test(as.numeric(mo.ss$MomN)~mo.ss$Outlier)
+tapply(as.numeric(mo.ss$MomN),mo.ss$Outlier,mean)
+
+#####COMPARE TO MONNAHAN/KELLY#####
 hd$Locus<-paste(hd$chrom,hd$pos,sep=".")
+hd<-hd[hd$Locus %in% keep.snps,]
 
 hd$p_0<- 1 - pchisq(hd$LRT0, df = 1)
 hd$p_2<- 1 - pchisq(hd$LRT2, df = 2)
@@ -267,6 +302,14 @@ dim(hd[hd$bh_0<=0.05,])#87
 dim(hd[hd$bh_2<=0.05,])#0
 dim(hd[hd$bh_3<=0.05,])#19
 
+hd0.top1<-hd[order(hd$LRT0),]
+hd0.top1<-hd0.top1[round(nrow(hd0.top1)*0.99),"LRT0"]
+hd0.out1<-hd[hd$LRT0 >= hd0.top1,]
+
+hd3.top1<-hd[order(hd$LRT3),]
+hd3.top1<-hd3.top1[round(nrow(hd3.top1)*0.99),"LRT3"]
+hd3.out1<-hd[hd$LRT3 >= hd3.top1,]
+
 #compare these to those in sca
 aj.out1$CompLoc<-paste(aj.out1$Chrom,aj.out1$Pos,sep=".")
 fm.out1$CompLoc<-paste(fm.out1$Chrom,fm.out1$Pos,sep=".")
@@ -277,8 +320,9 @@ fm.plot$CompLoc<-paste(fm.plot$Chrom,fm.plot$Pos,sep=".")
 mo.plot$CompLoc<-paste(mo.plot$Chrom,mo.plot$Pos,sep=".")
 gw.sum$CompLoc<-paste(gw.sum$Chrom,gw.sum$Pos,sep=".")
 
-fm.both.out<-fm.out1[fm.out1$CompLoc %in% hd[hd$bh_0<=0.05,"Locus"],"CompLoc"]#22
-mo.both.out<-mo.out1[mo.out1$CompLoc %in% hd[hd$bh_3<=0.05,"Locus"],"CompLoc"]#5
+fm.both.out<-fm.out1[fm.out1$SNP %in% hd0.out1$Locus,"SNP"]
+mo.both.out<-mo.out1[mo.out1$SNP %in% hd3.out1$Locus, "SNP"]
+
 
 #############################################################################
 
