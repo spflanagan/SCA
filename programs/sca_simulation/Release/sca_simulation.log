@@ -1,0 +1,55 @@
+﻿Build started 4/15/2016 7:33:46 AM.
+     1>Project "E:\ubuntushare\SCA\programs\sca_simulation\sca_simulation.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt sca_simulation.cpp
+         sca_simulation.cpp
+     1>e:\ubuntushare\sca\programs\sca_simulation\random_numbers.h(118): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+     1>e:\ubuntushare\sca\programs\sca_simulation\random_numbers.h(281): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\random_numbers.h(287): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\random_numbers.h(266): warning C4101: 'jjj' : unreferenced local variable
+     1>e:\ubuntushare\sca\programs\sca_simulation\random_numbers.h(265): warning C4101: 'last_prob' : unreferenced local variable
+     1>e:\ubuntushare\sca\programs\sca_simulation\random_numbers.h(265): warning C4101: 'last_interval' : unreferenced local variable
+     1>e:\ubuntushare\sca\programs\sca_simulation\random_numbers.h(266): warning C4101: 'jj' : unreferenced local variable
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(213): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(220): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(229): warning C4244: 'argument' : conversion from 'time_t' to 'unsigned long', possible loss of data
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(255): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(270): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(276): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(296): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(238): warning C4101: 'last_prob' : unreferenced local variable
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(238): warning C4101: 'last_interval' : unreferenced local variable
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(428): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(429): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(689): warning C4101: 'rnd2' : unreferenced local variable
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(877): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1074): warning C4101: 'jjj' : unreferenced local variable
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1092): warning C4101: 'rand_num' : unreferenced local variable
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1091): warning C4101: 'jjj' : unreferenced local variable
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1132): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1143): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1155): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1157): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1164): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1166): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1174): warning C4101: 'jjj' : unreferenced local variable
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1174): warning C4101: 'jj' : unreferenced local variable
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1261): warning C4018: '<' : signed/unsigned mismatch
+     1>e:\ubuntushare\sca\programs\sca_simulation\population.h(1328): warning C4018: '<' : signed/unsigned mismatch
+     1>sca_simulation.cpp(109): warning C4018: '<' : signed/unsigned mismatch
+     1>sca_simulation.cpp(128): warning C4018: '<' : signed/unsigned mismatch
+     1>sca_simulation.cpp(165): warning C4018: '<' : signed/unsigned mismatch
+     1>sca_simulation.cpp(168): warning C4018: '<' : signed/unsigned mismatch
+     1>sca_simulation.cpp(171): warning C4018: '<' : signed/unsigned mismatch
+     1>sca_simulation.cpp(174): warning C4018: '<' : signed/unsigned mismatch
+     1>sca_simulation.cpp(177): warning C4018: '<' : signed/unsigned mismatch
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\ubuntushare\SCA\programs\sca_simulation\Release\sca_simulation.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\ubuntushare\SCA\programs\sca_simulation\Release\sca_simulation.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\ubuntushare\SCA\programs\sca_simulation\Release\sca_simulation.lib" /MACHINE:X86 /SAFESEH Release\sca_simulation.obj
+         Generating code
+         Finished generating code
+         sca_simulation.vcxproj -> E:\ubuntushare\SCA\programs\sca_simulation\Release\sca_simulation.exe
+     1>Done Building Project "E:\ubuntushare\SCA\programs\sca_simulation\sca_simulation.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:02.96
