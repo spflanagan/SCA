@@ -202,10 +202,10 @@ public:
 		afs_file_name = "../../results/biallelic/empirical_allelefreqs.txt";
 
 		adult_samplesize = 216;
-		offspring_samplesize = 131;
+		offspring_samplesize = 130;
 		male_samplesize = 57;//females in pipefish
 		female_samplesize = 159;//males in pipefish
-		dad_samplesize = 131;//moms in pipefish
+		dad_samplesize = 130;//moms in pipefish
 
 		error_rate = 0.1;
 		recombination_rate = 0.2;

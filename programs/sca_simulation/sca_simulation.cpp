@@ -22,7 +22,7 @@ int main()
 	int num_reps = 1;
 	string base_name = "../../results/sca_simulation_output/ddraddist.test.afs";
 	bool known_qtl = false;
-	bool empirical_afs = true;
+	bool empirical_afs = false;
 	bool add_allelic_dropout = false;
 	int end, generations, reps, i, ii, iii, ld_count;
 	population pop;

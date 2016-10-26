@@ -122,6 +122,7 @@ parse.snps<-function(snp){
 	}))
 	return(ex.dat)
 }
+
 #############################################################################
 
 ###################################PRUNING###################################
@@ -186,7 +187,7 @@ mo.prune$SNP<-paste(mo.prune$Chrom,mo.prune$Pos,sep=".")
 all.inds<-colnames(vcf)[10:ncol(vcf)]
 sca.cov<-do.call("rbind",apply(vcf,1,vcf.cov.loc,subset=all.inds))
 sca.cov$SNP<-paste(sca.cov$Chrom,as.numeric(sca.cov$Pos),sep=".")
-keep.snps<-sca.cov[sca.cov$AvgCovTotal > 3 & sca.cov$AvgCovTotal <= 20,"SNP"]
+keep.snps<-sca.cov[sca.cov$AvgCovTotal > 5 & sca.cov$AvgCovTotal <= 20,"SNP"]
 #############################################################################
 
 #################################ANALYSIS####################################
@@ -283,8 +284,33 @@ tapply(as.numeric(mo.ss$FemN),mo.ss$Outlier,mean)
 wilcox.test(as.numeric(mo.ss$MomN)~mo.ss$Outlier)
 tapply(as.numeric(mo.ss$MomN),mo.ss$Outlier,mean)
 
+aj.fst<-merge(aj.ss, aj.plot[,c("Locus","ADULT.JUVIE")], by.x = "SNP", by.y = "Locus")
+aj.fst$AdultN<-as.numeric(aj.fst$AdultN)*224
+aj.fst$JuvN<-as.numeric(aj.fst$JuvN)*160
+colnames(aj.fst)<-c("SNP","AdultN","JuvN","Outlier", "Fst")
+aj.fst$Chi<-2*(aj.fst$AdultN+aj.fst$JuvN)*aj.fst$Fst
+aj.fst$Chi.p<-1-pchisq(aj.fst$Chi,1)
+aj.fst$Chi.p.adj<-p.adjust(aj.fst$Chi.p,method="BH")
+
+fm.fst<-merge(fm.ss, fm.plot[,c("Locus","FEM.MAL")], by.x = "SNP", by.y = "Locus")
+fm.fst$FemN<-as.numeric(fm.fst$FemN)*57
+fm.fst$MalN<-as.numeric(fm.fst$MalN)*167
+colnames(fm.fst)<-c("SNP","FemN","MalN","Outlier", "Fst")
+fm.fst$Chi<-2*(fm.fst$FemN+fm.fst$MalN)*fm.fst$Fst
+fm.fst$Chi.p<-1-pchisq(fm.fst$Chi,1)
+fm.fst$Chi.p.adj<-p.adjust(fm.fst$Chi.p,method="BH")
+
+mo.fst<-merge(mo.ss, mo.plot[,c("Locus","MOM.FEM")], by.x = "SNP", by.y = "Locus")
+mo.fst$FemN<-as.numeric(mo.fst$FemN)*57
+mo.fst$MomN<-as.numeric(mo.fst$MomN)*128
+colnames(mo.fst)<-c("SNP","FemN","MomN","Outlier", "Fst")
+mo.fst$Chi<-2*(mo.fst$FemN+mo.fst$MomN)*mo.fst$Fst
+mo.fst$Chi.p<-1-pchisq(mo.fst$Chi,1)
+mo.fst$Chi.p.adj<-p.adjust(mo.fst$Chi.p,method="BH")
+
 #####COMPARE TO MONNAHAN/KELLY#####
 hd$Locus<-paste(hd$chrom,hd$pos,sep=".")
+hd.all<-hd
 hd<-hd[hd$Locus %in% keep.snps,]
 
 hd$p_0<- 1 - pchisq(hd$LRT0, df = 1)
@@ -298,9 +324,9 @@ hd$bh_3<-p.adjust(hd$p_3,method="BH")
 hd$lnp0<-log(hd$p_0,base=10)*-1
 hd$lnp3<-log(hd$p_3,base=10)*-1
 
-dim(hd[hd$bh_0<=0.05,])#87
-dim(hd[hd$bh_2<=0.05,])#0
-dim(hd[hd$bh_3<=0.05,])#19
+hd0.sig<-hd[hd$bh_0<=0.05,]
+hd2.sig<-hd[hd$bh_2<=0.05,]
+hd3.sig<-hd[hd$bh_3<=0.05,]
 
 hd0.top1<-hd[order(hd$LRT0),]
 hd0.top1<-hd0.top1[round(nrow(hd0.top1)*0.99),"LRT0"]
@@ -320,8 +346,13 @@ fm.plot$CompLoc<-paste(fm.plot$Chrom,fm.plot$Pos,sep=".")
 mo.plot$CompLoc<-paste(mo.plot$Chrom,mo.plot$Pos,sep=".")
 gw.sum$CompLoc<-paste(gw.sum$Chrom,gw.sum$Pos,sep=".")
 
-fm.both.out<-fm.out1[fm.out1$SNP %in% hd0.out1$Locus,"SNP"]
-mo.both.out<-mo.out1[mo.out1$SNP %in% hd3.out1$Locus, "SNP"]
+fm.both1<-fm.out1[fm.out1$SNP %in% hd0.out1$Locus,"SNP"]
+mo.both1<-mo.out1[mo.out1$SNP %in% hd3.out1$Locus, "SNP"]
+
+fm.fst$Locus<-gsub("(\\d+)\\.(\\d+)\\.(\\d+)", "\\1.\\3",fm.fst$SNP)
+mo.fst$Locus<-gsub("(\\d+)\\.(\\d+)\\.(\\d+)", "\\1.\\3",mo.fst$SNP)
+fm.both.out<-fm.fst[fm.fst$Locus %in% hd0.sig$Locus & fm.fst$Chi.p.adj<=0.05,"Locus"]
+mo.both.out<-mo.fst[mo.fst$Locus %in% hd3.sig$Locus & mo.fst$Chi.p.adj<=0.05, "Locus"]
 
 
 #############################################################################
@@ -334,13 +365,18 @@ png("../fst.selection.episodes_redo_all.png",height=300,width=300,
 par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
 mo<-fst.plot(mo.plot, ci.dat=c(mo.top1,0),fst.name="MOM.FEM", 
              chrom.name="Chrom", axis.size=0,bp.name="Pos",
-             sig.col=c("purple3","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(mo.plot$Chrom))]))
+             sig.col=c("black","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(mo.plot$Chrom))]))
+points(mo$Pos[mo$Locus %in% mo.fst$SNP[mo.fst$Chi.p.adj<= 0.05]],
+       mo$MOM.FEM[mo$Locus %in% mo.fst$SNP[mo.fst$Chi.p.adj<= 0.05]],
+       col="darkorchid4",pch=19,cex=0.75)
+points(mo$Pos[mo$CompLoc %in% mo.both.out[substr(mo.both.out,1,2)=="LG"]],
+       mo$MOM.FEM[mo$CompLoc %in% mo.both.out[substr(mo.both.out,1,2)=="LG"]],
+       col="darkorchid1",pch=5,cex=1)
 points(mo$Pos[mo$LocID %in% shared.out$LocID & mo$MOM.FEM >= mo.top1],
        mo$MOM.FEM[mo$LocID %in% shared.out$LocID & mo$MOM.FEM >= mo.top1],
        col="red",pch=8)
-points(mo$Pos[mo$CompLoc %in% mo.both.out[substr(mo.both.out,1,2)=="LG"]],
-       mo$MOM.FEM[mo$CompLoc %in% mo.both.out[substr(mo.both.out,1,2)=="LG"]],
-       col="purple3",pch=5,cex=1)
+clip(0,max(mo$Pos),-1,1)
+abline(h=mo.top1,col="darkorchid1",lwd=1.3)
 axis(2,at=seq(0,0.2,0.05),pos=0,las=1,cex.axis=0.75)
 legend("top","Females-Inferred Mothers",bty='n',cex=0.75,text.font=2)
 last<-0
@@ -352,13 +388,18 @@ for(i in 1:length(lgs)){
 
 fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", 
              chrom.name="Chrom", axis.size=0,bp.name="Pos",
-             sig.col=c("green4","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(fm.plot$Chrom))]))
+             sig.col=c("black","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(fm.plot$Chrom))]))
+points(fm$Pos[fm$Locus %in% fm.fst$SNP[fm.fst$Chi.p.adj<= 0.05]],
+       fm$FEM.MAL[fm$Locus %in% fm.fst$SNP[fm.fst$Chi.p.adj<= 0.05]],
+       col="green4",pch=19,cex=0.75)
 points(fm$Pos[fm$LocID %in% shared.out$LocID & fm$FEM.MAL >= fm.top1],
        fm$FEM.MAL[fm$LocID %in% shared.out$LocID& fm$FEM.MAL >= fm.top1],
        col="red",pch=8)
 points(fm$Pos[fm$CompLoc %in% fm.both.out[substr(fm.both.out,1,2)=="LG"]],
        fm$FEM.MAL[fm$CompLoc %in% fm.both.out[substr(fm.both.out,1,2)=="LG"]],
-       col="green4",pch=5,cex=1)
+       col="green3",pch=5,cex=1)
+clip(0,max(fm$Pos),-1,1)
+abline(h=fm.top1,col="green3",lwd=1.3)
 axis(2,at=seq(0,0.2,0.1),pos=0,las=1,cex.axis=0.75)
 legend("top","Male-Female",bty='n',cex=0.75,text.font=2)
 
@@ -371,7 +412,12 @@ for(i in 1:length(lgs)){
 
 aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", 
              chrom.name="Chrom", axis.size=0, bp.name="Pos",
-             sig.col=c("dodgerblue","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(aj.plot$Chrom))]))
+             sig.col=c("black","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(aj.plot$Chrom))]))
+points(aj$Pos[aj$Locus %in% aj.fst$SNP[aj.fst$Chi.p.adj<= 0.05]],
+       aj$ADULT.JUVIE[aj$Locus %in% aj.fst$SNP[aj.fst$Chi.p.adj<= 0.05]],
+       col="dodgerblue3",pch=19)
+clip(0,max(aj$Pos),-1,1)
+abline(h=aj.top1,col="dodgerblue",lwd=1.3)
 axis(2,at=c(0,0.025,0.05),pos=0,las=1,cex.axis=0.75)
 points(aj$Pos[aj$LocID %in% shared.out$LocID& aj$ADULT.JUVIE >= aj.top1],
        aj$ADULT.JUVIE[aj$LocID %in% shared.out$LocID& aj$ADULT.JUVIE >= aj.top1],
@@ -388,11 +434,17 @@ mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1,las=0)
 par(fig = c(0, 1, 0, 1), oma=c(2,1,0,1), mar = c(0, 0, 0, 0), new = TRUE,
     cex=1)
 plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
-legend("top",col=c("green4","purple3","dodgerblue","red","black"),
-       pch=c(19,19,19,8,5),
+legend("top",col=c("green4","darkorchid3","dodgerblue3","red","green3"),
+       pch=c(19,19,19,8,5),lty=c(1,1,1,0,0),text.col="white",
        c("Viability Selection","Sexual Selection","Overall Selection",
          "Shared Outlier","Shared with LRT"),
        bg="white",ncol=5,box.lty=0)
+legend("top",col=c("green3","darkorchid1","dodgerblue","white","white"),
+      lty=c(1,1,1,0,0),text.col="black",
+       c("Viability Selection","Sexual Selection","Overall Selection",
+         "Shared Outlier","Shared with LRT"),
+       ncol=5,box.lty=0,bty='n')
+
 dev.off()
 
 
