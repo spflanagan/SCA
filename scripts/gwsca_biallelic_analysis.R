@@ -308,6 +308,181 @@ mo.fst$Chi<-2*(mo.fst$FemN+mo.fst$MomN)*mo.fst$Fst
 mo.fst$Chi.p<-1-pchisq(mo.fst$Chi,1)
 mo.fst$Chi.p.adj<-p.adjust(mo.fst$Chi.p,method="BH")
 
+
+##What's special about those shared by fm and mo as opposed to those unique?
+#get maj allele freqs and observed heterozygosity
+mal.af<-gw.sum[gw.sum$Pop=="MAL",c("Locus","Ho","Hs","Allele1Freq")]
+colnames(mal.af)<-c("Locus","MalHo","MalHs","MalAllele1Freq")
+fem.af<-gw.sum[gw.sum$Pop=="FEM",c("Locus","Ho","Hs","Allele1Freq")]
+colnames(fem.af)<-c("Locus","FemHo","FemHs","FemAllele1Freq")
+mom.af<-gw.sum[gw.sum$Pop=="MOM",c("Locus","Ho","Hs","Allele1Freq")]
+colnames(mom.af)<-c("Locus","MomHo","MomHs","MomAllele1Freq")
+
+fm.fst<-merge(fm.fst,mal.af,by.x="SNP",by.y="Locus")
+fm.fst<-merge(fm.fst,fem.af,by.x="SNP",by.y="Locus")
+fm.sig<-fm.fst[fm.fst$Outlier=="yes" | fm.fst$Chi.p.adj<=0.05,]
+fm.sig$Shared<-"no"
+fm.sig$Shared[fm.sig$SNP %in% mo.sig$SNP]<-"yes"
+
+mo.fst<-merge(mo.fst,fem.af,by.x="SNP",by.y="Locus")
+mo.fst<-merge(mo.fst,mom.af,by.x="SNP",by.y="Locus")
+mo.sig<-mo.fst[mo.fst$Outlier=="yes" | mo.fst$Chi.p.adj<=0.05,]
+mo.sig$Shared<-"no"
+mo.sig$Shared[mo.sig$SNP %in% fm.sig$SNP]<-"yes"
+
+sig.hs<-data.frame(Hs=c(mo.sig$MomHs,mo.sig$FemHs,fm.sig$MalHs,fm.sig$FemHs),
+  Shared=c(mo.sig$Shared,mo.sig$Shared,fm.sig$Shared,fm.sig$Shared),
+  Group=c(rep("1Mom",nrow(mo.sig)),rep("2FemMO",nrow(mo.sig)),
+    rep("3Mal",nrow(fm.sig)),rep("4FemFM",nrow(fm.sig))),stringsAsFactors = F)
+
+sig.ho<-data.frame(Ho=c(mo.sig$MomHo,mo.sig$FemHo,fm.sig$MalHo,fm.sig$FemHo),
+                   Shared=c(mo.sig$Shared,mo.sig$Shared,fm.sig$Shared,fm.sig$Shared),
+                   Group=c(rep("1Mom",nrow(mo.sig)),rep("2FemMO",nrow(mo.sig)),
+                           rep("3Mal",nrow(fm.sig)),rep("4FemFM",nrow(fm.sig))),stringsAsFactors = F)
+
+sig.af<-data.frame(AF=c(mo.sig$MomAllele1Freq,mo.sig$FemAllele1Freq,fm.sig$MalAllele1Freq,fm.sig$FemAllele1Freq),
+                   Shared=c(mo.sig$Shared,mo.sig$Shared,fm.sig$Shared,fm.sig$Shared),
+                   Group=c(rep("1Mom",nrow(mo.sig)),rep("2FemMO",nrow(mo.sig)),
+                           rep("3Mal",nrow(fm.sig)),rep("4FemFM",nrow(fm.sig))),stringsAsFactors = F)
+sig.af$newAF<-sapply(sig.af$AF,function(x){
+  if(x < 0.5){
+    af<-1-x
+  }else{
+    af<-x
+  }
+  return(af)
+})
+
+par(mfrow=c(3,1),oma=c(1,2,0,2),mar=c(2,2,1,2))
+boxplot(sig.hs$Hs~sig.hs$Shared*sig.hs$Group,col=c("white","grey"),xaxt='n')
+axis(1,at=seq(0.5,8.5,2),labels=NA)
+mtext(expression(italic(H)[S]),2,outer=F,line=1.75,cex=0.75)
+boxplot(sig.ho$Ho~sig.ho$Shared*sig.ho$Group,col=c("white","grey"),xaxt='n')
+axis(1,at=seq(0.5,8.5,2),labels=NA)
+mtext(expression(italic(H)[O]),2,outer=F,line=1.75,cex=0.75)
+legend("topleft",bty='n',pch=22,col="black",pt.bg=c("white","grey"),c("Not Shared","Shared"))
+boxplot(sig.af$newAF~sig.af$Shared*sig.af$Group,col=c("white","grey"),xaxt='n')
+axis(1,at=seq(0.5,8.5,2),labels=NA)
+axis(1,at=c(1.5,3.5,5.5,7.5),
+    labels=c("Mothers\nin Sex. Sel", "Females\nin Sex. Sel","Males\nin Viab. Sel","Females\nin Viab. Sel"),tck=0)
+mtext("Allele Frequency",2,outer=F,line=1.75,cex=0.75)
+
+#ok, what about the alleles?
+vcf$Locus<-paste(vcf$`#CHROM`,vcf$POS,sep=".")
+mo.sig$Locus<-gsub("(\\d+).(\\d+).(\\d+)","\\1.\\3",mo.sig$SNP)
+fm.sig$Locus<-gsub("(\\d+).(\\d+).(\\d+)","\\1.\\3",fm.sig$SNP)
+mo.sig<-merge(mo.sig,vcf[,c("REF","ALT","Locus")],by="Locus")
+fm.sig<-merge(fm.sig,vcf[,c("REF","ALT","Locus")],by="Locus")
+pop.af<-do.call("rbind",apply(vcf,1,calc.afs.vcf))
+pop.af$Locus<-paste(pop.af$Chrom,as.numeric(as.character(pop.af$Pos)),sep=".")
+
+mo.sig<-merge(mo.sig,pop.af[,c("Locus","RefFreq")],by="Locus")
+fm.sig<-merge(fm.sig,pop.af[,c("Locus","RefFreq")],by="Locus")
+
+sex.sel.alleles<-data.frame(do.call(rbind,apply(mo.sig,1,function(x){
+  if(x["FemAllele1Freq"] < x["MomAllele1Freq"]){
+    popFreq<-x["RefFreq"]
+    FavoredAllele<-x["REF"]
+  }else{
+    popFreq<-1-as.numeric(as.character(x["RefFreq"]))
+    FavoredAllele<-x["ALT"]
+  }
+  return(list(x["Locus"],popFreq,FavoredAllele))
+})))
+colnames(sex.sel.alleles)<-c("Locus","PopulationFrequency","FavoredAllele")
+sex.sel.alleles<-data.frame(Locus=unlist(sex.sel.alleles$Locus),PopulationFrequency=unlist(sex.sel.alleles$PopulationFrequency),
+                            FavoredAllele=unlist(sex.sel.alleles$FavoredAllele),stringsAsFactors = F)
+
+via.sel.alleles<-data.frame(do.call(rbind,apply(fm.sig,1,function(x){
+  if(x["FemAllele1Freq"] < x["MalAllele1Freq"]){
+    popFreq<-x["RefFreq"]
+    FavoredAllele<-x["REF"]
+  }else{
+    popFreq<-1-as.numeric(as.character(x["RefFreq"]))
+    FavoredAllele<-x["ALT"]
+  }
+  return(list(x["Locus"],popFreq,FavoredAllele))
+})))
+colnames(via.sel.alleles)<-c("Locus","PopulationFrequency","MalFavoredAllele")
+via.sel.alleles<-data.frame(Locus=unlist(via.sel.alleles$Locus),PopulationFrequency=unlist(via.sel.alleles$PopulationFrequency),
+  FavoredAllele=unlist(via.sel.alleles$MalFavoredAllele),stringsAsFactors = F)
+
+png("../AlleleFrequencies.png",height=10,width=7,units="in",res=300)
+par(mfrow=c(2,1),oma=c(2,2,2,2),mar=c(2,2,2,2))
+hist(as.numeric(sex.sel.alleles$PopulationFrequency),breaks=seq(0,1,1/20),col="black",ylim=c(0,75),axes=F,main="",
+     ylab="",xlab="")
+hist(mo.sig$FemAllele1Freq,add=T,breaks=seq(0,1,1/20),col=alpha("grey",0.5),border=alpha("grey",0.5),ylim=c(0,75))
+hist(mo.sig$MomAllele1Freq,add=T,breaks=seq(0,1,1/20),col=alpha("red",0.5),border=alpha("red",0.5),ylim=c(0,75))
+axis(1,pos=0,seq(0,1,0.2))
+axis(2,pos=0,las=1,seq(0,75,25))
+legend(0.01,75,pch=15,col=c("black",alpha("grey",0.5),alpha("red",0.5)),
+       c("Population","Females","Mothers"),bty='n')
+
+hist(as.numeric(via.sel.alleles$PopulationFrequency),breaks=seq(0,1,1/20),col="black",ylim=c(0,150),axes=F,main="",
+     ylab="",xlab="",xlim=c(0,1))
+hist(fm.sig$FemAllele1Freq,add=T,breaks=seq(0,1,1/20),col=alpha("grey",0.5),border=alpha("grey",0.5),ylim=c(0,150))
+hist(fm.sig$MalAllele1Freq,add=T,breaks=seq(0,1,1/20),col=alpha("red",0.5),border=alpha("red",0.5),ylim=c(0,150))
+axis(1,pos=0,seq(0,1,0.2))
+axis(2,pos=0,las=1,seq(0,150,25))
+legend(0.01,150,pch=15,col=c("black",alpha("grey",0.5),alpha("red",0.5)),
+       c("Population","Females","Males"),bty='n')
+mtext("Number of Loci",2,outer=T)
+mtext("Allele Frequency",1,outer=T)
+dev.off()
+
+wilcox.test(fm.sig$FemAllele1Freq[fm.sig$Chi.p.adj<=0.05],fm.sig$RefFreq[fm.sig$Chi.p.adj<=0.05],paired=T,alternative = "greater")
+wilcox.test(fm.sig$MalAllele1Freq[fm.sig$Chi.p.adj<=0.05],fm.sig$RefFreq[fm.sig$Chi.p.adj<=0.05],paired=T,alternative = "less")
+
+
+wilcox.test(mo.sig$FemAllele1Freq[mo.sig$Chi.p.adj<=0.05],mo.sig$RefFreq[mo.sig$Chi.p.adj<=0.05],paired=T,alternative = "greater")
+wilcox.test(mo.sig$MomAllele1Freq[mo.sig$Chi.p.adj<=0.05],mo.sig$RefFreq[mo.sig$Chi.p.adj<=0.05],paired=T,alternative = "less")
+
+shared.alleles<-merge(via.sel.alleles, sex.sel.alleles,by="Locus")
+
+via.all.alleles<-data.frame(do.call(rbind,apply(fm.fst,1,function(x){
+  if(as.numeric(x["FemAllele1Freq"]) < as.numeric(x["MalAllele1Freq"])){
+    FavoredAllele<-"REF"
+  }else{
+    FavoredAllele<-"ALT"
+  }
+  return(list(x["SNP"],FavoredAllele))
+})))
+male.alleles<-data.frame(Locus=unlist(via.all.alleles$X1),
+                            FavoredAllele=unlist(via.all.alleles$X2),stringsAsFactors = F)
+sex.alleles<-merge(male.alleles, sex.sel.alleles,by="Locus")
+sex.alleles<-merge(sex.alleles,pop.af,by="Locus")
+sex.alleles$MaleAllele<-apply(sex.alleles,1,function(x){
+  if(x["FavoredAllele.x"]=="REF"){
+    x["FavoredAllele.x"]<-x["Ref"]
+  }else{
+    x["FavoredAllele.x"]<-x["Alt"]
+  }
+})
+dim(sex.alleles[sex.alleles$FavoredAllele.y==sex.alleles$MaleAllele,])
+dim(sex.alleles[sex.alleles$FavoredAllele.y!=sex.alleles$MaleAllele,])
+
+sex.all.alleles<-data.frame(do.call(rbind,apply(mo.fst,1,function(x){
+  if(as.numeric(x["FemAllele1Freq"]) < as.numeric(x["MomAllele1Freq"])){
+    FavoredAllele<-"REF"
+  }else{
+    FavoredAllele<-"ALT"
+  }
+  return(list(x["SNP"],FavoredAllele))
+})))
+mom.alleles<-data.frame(Locus=unlist(sex.all.alleles$X1),
+                        FavoredAllele=unlist(sex.all.alleles$X2),stringsAsFactors = F)
+mom.alleles$Locus<-gsub("(\\d+).(\\d+).(\\d+)","\\1.\\3",mom.alleles$Locus)
+via.alleles<-merge(mom.alleles, via.sel.alleles,by="Locus")
+via.alleles<-merge(via.alleles,pop.af,by="Locus")
+via.alleles$MomAllele<-apply(via.alleles,1,function(x){
+  if(x["FavoredAllele.x"]=="REF"){
+    x["FavoredAllele.x"]<-x["Ref"]
+  }else{
+    x["FavoredAllele.x"]<-x["Alt"]
+  }
+})
+
+
 #####COMPARE TO MONNAHAN/KELLY#####
 hd$Locus<-paste(hd$chrom,hd$pos,sep=".")
 hd.all<-hd

@@ -35,6 +35,39 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Thursday, 27 October 2016
+> wilcox.test(fm.sig$FemAllele1Freq[fm.sig$Chi.p.adj<=0.05],fm.sig$RefFreq[fm.sig$Chi.p.adj<=0.05],paired=T,alternative = "greater")
+
+	Wilcoxon signed rank test with continuity correction
+
+data:  fm.sig$FemAllele1Freq[fm.sig$Chi.p.adj <= 0.05] and fm.sig$RefFreq[fm.sig$Chi.p.adj <= 0.05]
+V = 114910, p-value = 4.924e-06
+alternative hypothesis: true location shift is greater than 0
+
+> wilcox.test(fm.sig$MalAllele1Freq[fm.sig$Chi.p.adj<=0.05],fm.sig$RefFreq[fm.sig$Chi.p.adj<=0.05],paired=T,alternative = "less")
+
+	Wilcoxon signed rank test with continuity correction
+
+data:  fm.sig$MalAllele1Freq[fm.sig$Chi.p.adj <= 0.05] and fm.sig$RefFreq[fm.sig$Chi.p.adj <= 0.05]
+V = 70438, p-value = 9.628e-09
+alternative hypothesis: true location shift is less than 0
+
+wilcox.test(mo.sig$FemAllele1Freq[mo.sig$Chi.p.adj<=0.05],mo.sig$RefFreq[mo.sig$Chi.p.adj<=0.05],paired=T,alternative = "less")
+
+	Wilcoxon signed rank test with continuity correction
+
+data:  mo.sig$FemAllele1Freq[mo.sig$Chi.p.adj <= 0.05] and mo.sig$RefFreq[mo.sig$Chi.p.adj <= 0.05]
+V = 678, p-value = 0.2216
+alternative hypothesis: true location shift is less than 0
+
+> wilcox.test(mo.sig$MomAllele1Freq[mo.sig$Chi.p.adj<=0.05],mo.sig$RefFreq[mo.sig$Chi.p.adj<=0.05],paired=T,alternative = "less")
+
+	Wilcoxon signed rank test with continuity correction
+
+data:  mo.sig$MomAllele1Freq[mo.sig$Chi.p.adj <= 0.05] and mo.sig$RefFreq[mo.sig$Chi.p.adj <= 0.05]
+V = 521, p-value = 0.01867
+alternative hypothesis: true location shift is less than 0
+
 #####Friday, 2 September 2016
 I've figured out the issue--it wasn't standardized. So I exported everything with Level 3 Biological Process. 
 
