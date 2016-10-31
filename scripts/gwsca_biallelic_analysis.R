@@ -123,6 +123,10 @@ parse.snps<-function(snp){
 	return(ex.dat)
 }
 
+sem<-function(x){
+  se<-sd(x)/sqrt(length(x))
+  return(se)
+}
 #############################################################################
 
 ###################################PRUNING###################################
@@ -213,9 +217,9 @@ mo<-fst.plot(mo.plot, ci.dat=c(mo.top1,0),fst.name="MOM.FEM", chrom.name="Chrom"
 fm.plot$CompLoc<-paste(fm.plot$Chrom,fm.plot$Pos,sep=".")
 fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", chrom.name="Chrom"
 	, axis.size=0.75,bp.name="Pos",sig.col=c("red","black"))
-aj.plot$CompLoc<-paste(aj.plot$Chrom,aj.plot$Pos,sep=".")
-aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", 
-	chrom.name="Chrom", axis.size=0.75,bp.name="Pos",sig.col=c("red","black"))
+#aj.plot$CompLoc<-paste(aj.plot$Chrom,aj.plot$Pos,sep=".")
+#aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", 
+#	chrom.name="Chrom", axis.size=0.75,bp.name="Pos",sig.col=c("red","black"))
 dev.off()
 #mo.plot<-mo.plot[mo.plot$Chrom %in% lgs,]
 #mo.plot$Chrom<-factor(mo.plot$Chrom)
@@ -225,29 +229,26 @@ dev.off()
 #aj.plot$Chrom<-factor(aj.plot$Chrom)
 
 ###COMPARISONS
-aj.out<-aj.plot[aj.plot$ADULT.JUVIE >= aj.top1[1],]
+#aj.out<-aj.plot[aj.plot$ADULT.JUVIE >= aj.top1[1],]
 fm.out<-fm.plot[fm.plot$FEM.MAL >= fm.top1[1],]
 mo.out<-mo.plot[mo.plot$MOM.FEM >= mo.top1[1],]
-aj.out.plot<-aj[aj$ADULT.JUVIE >= aj.top1[1],]
+#aj.out.plot<-aj[aj$ADULT.JUVIE >= aj.top1[1],]
 fm.out.plot<-fm[fm$FEM.MAL >= fm.top1[1],]
 mo.out.plot<-mo[mo$MOM.FEM >= mo.top1[1],]
 
-aj.unique<-aj.out[!(aj.out$Locus %in% fm.out$Locus) & 
-	!(aj.out$Locus %in% mo.out$Locus),]
-fm.unique<-fm.out[!(fm.out$Locus %in% aj.out$Locus) & 
-	!(fm.out$Locus %in% mo.out$Locus),]
-mo.unique<-mo.out[!(mo.out$Locus %in% aj.out$Locus) &
-	!(mo.out$Locus %in% fm.out$Locus),]
-shared.out<-aj.out[(aj.out$LocID %in% mo.out$LocID) & 
-	(aj.out$LocID %in% fm.out$LocID),]
+#aj.unique<-aj.out[!(aj.out$Locus %in% fm.out$Locus) & 
+#	!(aj.out$Locus %in% mo.out$Locus),]
+fm.unique<-fm.out[!(fm.out$Locus %in% mo.out$Locus),]
+mo.unique<-mo.out[!(mo.out$Locus %in% fm.out$Locus),]
+shared.out<-mo.out[(mo.out$Locus %in% fm.out$Locus),]
+#shared.out<-aj.out[(aj.out$LocID %in% mo.out$LocID) & 
+#	(aj.out$LocID %in% fm.out$LocID),]
 
-aj.fm<-aj.out[(aj.out$LocID %in% fm.out$LocID),]
-aj.mo<-aj.out[(aj.out$LocID %in% mo.out$LocID),]
-fm.mo<-fm.out[fm.out$LocID %in% mo.out$LocID,]
-length(levels(factor(c(as.character(aj.fm$Locus),as.character(aj.mo$Locus),
-	as.character(fm.mo$Locus)))))
+#aj.fm<-aj.out[(aj.out$LocID %in% fm.out$LocID),]
+#aj.mo<-aj.out[(aj.out$LocID %in% mo.out$LocID),]
+#fm.mo<-fm.out[fm.out$LocID %in% mo.out$LocID,]
 
-aj.cov<-sca.cov[sca.cov$SNP %in% aj.out$SNP,]
+#aj.cov<-sca.cov[sca.cov$SNP %in% aj.out$SNP,]
 fm.cov<-sca.cov[sca.cov$SNP %in% fm.out$SNP,]
 mo.cov<-sca.cov[sca.cov$SNP %in% mo.out$SNP,]
 
@@ -1096,40 +1097,41 @@ out.names<-c("LocID","NumSNPs","Chrom","Pos","Description","Length",
 	"NumHits","e.Value","sim.mean","NumGO","GO.Names.list","Enzyme.Codes.list","Seq")
 blast2go.files<-list.files(pattern="blast2go")
 ajfm.b2g<-read.delim("ajfm_blast2go.txt",sep='\t',header=T)
-ajfm.b2g$Comparison<-"AO-FM"
+#ajfm.b2g$Comparison<-"AO-FM"
 ajmo.b2g<-read.delim("ajmo_blast2go.txt",sep='\t',header=T)
-ajmo.b2g$Comparison<-"AO-MO"
+#ajmo.b2g$Comparison<-"AO-MO"
 fmmo.b2g<-read.delim("fmmo_blast2go.txt",sep='\t',header=T)
-fmmo.b2g$Comparison<-"MO-FM"
+#fmmo.b2g$Comparison<-"MO-FM"
 shared.b2g<-read.delim("sharedall_blast2go.txt",sep='\t',header=T,stringsAsFactors=F)
 shared1.b2g<-read.delim("shared_blast2go.txt",sep='\t',header=T,stringsAsFactors=F)
 shared.b2g<-rbind(shared.b2g,shared1.b2g)
 
+allshared.b2g<-rbind(ajfm.b2g,ajmo.b2g,fmmo.b2g,shared.b2g)
 
-shared.out$SeqName<-"LG21_1363556-1368556"
-shared.out$Comparison<-"ALL"
+#shared.out$SeqName<-"LG21_1363556-1368556"
+#shared.out$Comparison<-"ALL"
 
-aj.fm$start<-aj.fm$Pos-2500
-aj.fm$end<-aj.fm$Pos+2500
-aj.fm$start[aj.fm$start<0]<-0
-aj.fm$SeqName<-paste(aj.fm$Chrom,"_",aj.fm$start,"-",aj.fm$end,sep="")
+#aj.fm$start<-aj.fm$Pos-2500
+#aj.fm$end<-aj.fm$Pos+2500
+#aj.fm$start[aj.fm$start<0]<-0
+#aj.fm$SeqName<-paste(aj.fm$Chrom,"_",aj.fm$start,"-",aj.fm$end,sep="")
 #ajfm<-merge(aj.fm,ajfm.b2g,by="SeqName")
 #ajfm<-merge(ajfm,aj.out.dat,by.x="LocID",by.y="LocusID")
 #ajfm<-ajfm[,out.cnames]
 #colnames(ajfm)<-out.names
-aj.fm$Comparison<-"AdultOff-MalFem"
-aj.fm<-aj.fm[!duplicated(aj.fm$LocID),]
+#aj.fm$Comparison<-"AdultOff-MalFem"
+#aj.fm<-aj.fm[!duplicated(aj.fm$LocID),]
 
-aj.mo$start<-aj.mo$Pos-2500
-aj.mo$end<-aj.mo$Pos+2500
-aj.mo$start[aj.mo$start<0]<-0
-aj.mo$SeqName<-paste(aj.mo$Chrom,"_",aj.mo$start,"-",aj.mo$end,sep="")
+#aj.mo$start<-aj.mo$Pos-2500
+#aj.mo$end<-aj.mo$Pos+2500
+#aj.mo$start[aj.mo$start<0]<-0
+#aj.mo$SeqName<-paste(aj.mo$Chrom,"_",aj.mo$start,"-",aj.mo$end,sep="")
 #ajmo<-merge(aj.mo,ajmo.b2g,by="SeqName")
 #ajmo<-merge(ajmo,mo.out.dat,by.x="LocID",by.y="LocusID")
 #ajmo<-ajmo[,out.cnames]
 #colnames(ajmo)<-out.names
-aj.mo$Comparison<-"AdultOff-FemMom"
-aj.mo<-aj.mo[!duplicated(aj.mo$LocID),]
+#aj.mo$Comparison<-"AdultOff-FemMom"
+#aj.mo<-aj.mo[!duplicated(aj.mo$LocID),]
 
 fm.mo$start<-fm.mo$Pos-2500
 fm.mo$end<-fm.mo$Pos+2500
@@ -1138,13 +1140,17 @@ fm.mo$SeqName<-paste(fm.mo$Chrom,"_",fm.mo$start,"-",fm.mo$end,sep="")
 fm.mo$Comparison<-"FemMal-FemMom"
 fm.mo<-fm.mo[!duplicated(fm.mo$LocID),]
 
-shared<-rbind(aj.fm,aj.mo,fm.mo,shared.out)
-shared.blast<-merge(shared,shared.b2g,by="SeqName")
-all.out.dat<-rbind(mo.out.dat,aj.out.dat,fm.out.dat)
-all.out.dat<-all.out.dat[!duplicated(all.out.dat$LocusID),]
+#shared<-rbind(aj.fm,aj.mo,fm.mo,shared.out)
+#shared.blast<-merge(shared,shared.b2g,by="SeqName")
+#all.out.dat<-rbind(mo.out.dat,aj.out.dat,fm.out.dat)
+#all.out.dat<-all.out.dat[!duplicated(all.out.dat$LocusID),]
+#shared.blast<-merge(shared.blast,all.out.dat,by.x="LocID",by.y="LocusID")
+#shared.blast<-cbind(shared.blast[,"Comparison"],shared.blast[,out.cnames])
+#colnames(shared.blast)<-c("Comparison",out.names)
+shared.blast<-merge(allshared.b2g,fm.mo,by="SeqName")
+shared.blast<-merge(shared.blast,f)
 shared.blast<-merge(shared.blast,all.out.dat,by.x="LocID",by.y="LocusID")
-shared.blast<-cbind(shared.blast[,"Comparison"],shared.blast[,out.cnames])
-colnames(shared.blast)<-c("Comparison",out.names)
+shared.blast<-shared.blast[,out.cnames]
 
 write.table(shared.blast,"../../S1_SharedOutliersBlast.txt",sep='\t',col.names=T,
 	row.names=F,quote=F)
