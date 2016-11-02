@@ -1,0 +1,17 @@
+﻿  maternal_alleles_sim.cpp
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\random_numbers.h(118): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\random_numbers.h(281): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\random_numbers.h(287): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\random_numbers.h(266): warning C4101: 'jjj': unreferenced local variable
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\random_numbers.h(265): warning C4101: 'last_interval': unreferenced local variable
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\random_numbers.h(266): warning C4101: 'jj': unreferenced local variable
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\random_numbers.h(265): warning C4101: 'last_prob': unreferenced local variable
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\maternal_alleles_sim.cpp(145): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\maternal_alleles_sim.cpp(161): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\maternal_alleles_sim.cpp(189): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\maternal_alleles_sim.cpp(198): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\maternal_alleles_sim.cpp(257): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\maternal_alleles_sim.cpp(267): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\maternal_alleles_sim.cpp(68): warning C4101: 'iii': unreferenced local variable
+  maternal_alleles_sim.vcxproj -> \\VBOXSVR\Home\Projects\SCA\programs\maternal_alleles_sim\Debug\maternal_alleles_sim.exe
+  maternal_alleles_sim.vcxproj -> \\VBOXSVR\Home\Projects\SCA\programs\maternal_alleles_sim\Debug\maternal_alleles_sim.pdb (Full PDB)

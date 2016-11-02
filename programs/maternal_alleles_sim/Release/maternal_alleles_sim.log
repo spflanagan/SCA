@@ -1,0 +1,22 @@
+﻿  maternal_alleles_sim.cpp
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\random_numbers.h(118): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\random_numbers.h(281): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\random_numbers.h(287): warning C4018: '<': signed/unsigned mismatch
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\random_numbers.h(266): warning C4101: 'jjj': unreferenced local variable
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\random_numbers.h(265): warning C4101: 'last_interval': unreferenced local variable
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\random_numbers.h(266): warning C4101: 'jj': unreferenced local variable
+\\vboxsvr\home\projects\sca\programs\maternal_alleles_sim\random_numbers.h(265): warning C4101: 'last_prob': unreferenced local variable
+maternal_alleles_sim.cpp(147): warning C4018: '<': signed/unsigned mismatch
+maternal_alleles_sim.cpp(163): warning C4018: '<': signed/unsigned mismatch
+maternal_alleles_sim.cpp(192): warning C4018: '<': signed/unsigned mismatch
+maternal_alleles_sim.cpp(202): warning C4018: '<': signed/unsigned mismatch
+maternal_alleles_sim.cpp(285): warning C4018: '<': signed/unsigned mismatch
+maternal_alleles_sim.cpp(295): warning C4018: '<': signed/unsigned mismatch
+maternal_alleles_sim.cpp(68): warning C4101: 'iii': unreferenced local variable
+  Generating code
+  Finished generating code
+  1 of 442 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  maternal_alleles_sim.vcxproj -> \\VBOXSVR\Home\Projects\SCA\programs\maternal_alleles_sim\Release\maternal_alleles_sim.exe
+  maternal_alleles_sim.vcxproj -> \\VBOXSVR\Home\Projects\SCA\programs\maternal_alleles_sim\Release\maternal_alleles_sim.pdb (Full PDB)

@@ -1251,4 +1251,29 @@ length(popgen.out$scaffold[popgen.out$scaffold %in% mo.out$Chrom])
 length(popgen.out$scaffold[popgen.out$scaffold %in% bj.out$Chrom])
 ############################################################################
 
+######################MATERNAL ALLELE FREQS SIMULATION####################
+setwd("//VBOXSVR/Home/Projects/SCA/results/")
+mat.all<-read.table("sca_simulation_output/maternal_alleles_sim_out_error0.005.txt",
+	header=T)
+t.test(mat.all$ActualMomAF,mat.all$InferredMomAF,paired=T)
+
+png("InferringMaternalAllelesDistr.png",height=7,width=7,units="in",res=300)
+layout(matrix(c(1,2,3,3), 2, 2, byrow = TRUE), 
+   widths=c(2,2), heights=c(1,2))
+par(oma=c(1,3,1,1),mar=c(2,1,1,1))
+hist(mat.all$ActualMomAF,col="light grey",main="",border="light grey",
+	ylab="",xlab="",xaxt='n',yaxt='n')
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+mtext("Number of Loci",2,cex=0.8,line=2.5)
+hist(mat.all$InferredMomAF,col="light grey",main="",border="light grey",
+	ylab="",xlab="",xaxt='n',yaxt='n')
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+mtext("Allele Frequency",1,outer=T,cex=0.8,line=-27)
+boxplot(mat.all$ActualMomAF,mat.all$InferredMomAF,
+	names=c("Actual Mother","Inferred Mother"),
+	ylab="Reference Allele Frequency",col="light grey",pch=19)
+mtext("Allele Frequency",2,line=2,cex=0.8)
+dev.off()
 
