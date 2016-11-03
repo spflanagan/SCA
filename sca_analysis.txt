@@ -35,6 +35,20 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Thursday, 3 November 2016
+Comparing the simulated maternal alleles with different error rates.
+> Anova(lm(as.numeric(inf.af$AlleleFreq)~inf.af$Type*as.factor(inf.af$ErrorRate)))
+Anova Table (Type II tests)
+
+Response: as.numeric(inf.af$AlleleFreq)
+                                        Sum Sq     Df F value Pr(>F)
+inf.af$Type                                  0      1  0.0922 0.7614
+as.factor(inf.af$ErrorRate)                  0      5  0.0195 0.9998
+inf.af$Type:as.factor(inf.af$ErrorRate)      0      5  0.0077 1.0000
+Residuals                                15582 753768 
+
+Still no bias! Let's keep increasing
+
 #####Thursday, 27 October 2016
 > wilcox.test(fm.sig$FemAllele1Freq[fm.sig$Chi.p.adj<=0.05],fm.sig$RefFreq[fm.sig$Chi.p.adj<=0.05],paired=T,alternative = "greater")
 

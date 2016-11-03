@@ -3,8 +3,8 @@
 #Started Date: 11 February 2016
 #Purpose: Analyze the output from gwsca_biallelic.
 
-source("~/Projects/SCA/scripts/plotting_functions.R")
 setwd("~/Projects/SCA/results/biallelic")
+source("../../scripts/plotting_functions.R")
 lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
 	"LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
 	"LG22")
@@ -1252,9 +1252,31 @@ length(popgen.out$scaffold[popgen.out$scaffold %in% bj.out$Chrom])
 ############################################################################
 
 ######################MATERNAL ALLELE FREQS SIMULATION####################
-setwd("//VBOXSVR/Home/Projects/SCA/results/")
-mat.all<-read.table("sca_simulation_output/maternal_alleles_sim_out_error0.005.txt",
-	header=T)
+setwd("../sca_simulation_output/")
+
+mat.files<-list.files(pattern="maternal_alleles_sim_out*")
+
+inf.af<-data.frame(AlleleFreq=numeric(),Type=factor(),ErrorRate=numeric(),
+	stringsAsFactors=F)
+for(i in 1:length(mat.files)){
+	mat<-read.table(mat.files[i],header=T)
+	mat<-mat[mat$ActualMomAF != 0,]
+	error<-gsub("maternal_alleles_sim_out_error(\\d+.*).txt","\\1",mat.files[i])
+	if(error == "maternal_alleles_sim_out.txt"){ error <- 0 }
+	inf.af<-rbind(inf.af,cbind(AlleleFreq=I(mat$ActualMomAF),
+		Type=rep("Actual",nrow(mat)),
+		ErrorRate=rep(as.numeric(error),nrow(mat))),stringsAsFactors=F)
+	inf.af<-rbind(inf.af,cbind(AlleleFreq=I(mat$InferredMomAF),
+		Type=rep("Inferred",nrow(mat)),
+		ErrorRate=rep(as.numeric(error),nrow(mat))),stringsAsFactors=F)
+}
+
+mat.all<-read.table(mat.files[1],header=T)
+mat.all<-mat.all[mat.all$ActualMomAF != 0,]
+
+inf.0<-inf.af[inf.af$ErrorRate==0,]
+boxplot(as.numeric(inf.0$AlleleFreq)~inf.0$Type)
+boxplot(as.numeric(inf.af$AlleleFreq)~inf.af$Type*as.factor(inf.af$ErrorRate))
 t.test(mat.all$ActualMomAF,mat.all$InferredMomAF,paired=T)
 
 png("InferringMaternalAllelesDistr.png",height=7,width=7,units="in",res=300)
