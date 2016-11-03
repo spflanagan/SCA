@@ -47,7 +47,18 @@ as.factor(inf.af$ErrorRate)                  0      5  0.0195 0.9998
 inf.af$Type:as.factor(inf.af$ErrorRate)      0      5  0.0077 1.0000
 Residuals                                15582 753768 
 
-Still no bias! Let's keep increasing
+Still no bias! Let's keep increasing the error rate.
+
+OK, once we get to ~30% we start to see some error.
+---
+Now I'm re-doing the blast2go stuff, which means I need to re-do the extracting of the RAD regions and re-do the blastx searches.
+in SCA/programs/extract_sequence_part/:
+./extract_sequence_part -f ../../../scovelli_genome/SSC_integrated.fa -i ../../results/biallelic_outliers/rad_region/all.shared_extract.txt -o ../../results/biallelic_outliers/rad_region/all.shared_extract.fasta
+(36 loci)
+./extract_sequence_part -f ../../../scovelli_genome/SSC_integrated.fa -i ../../results/biallelic_outliers/rad_region/all.unique_extract.txt -o ../../results/biallelic_outliers/rad_region/all.unique_extract.fasta
+(649 loci)
+Need to re-blast...best way to do this? at home?
+
 
 #####Thursday, 27 October 2016
 > wilcox.test(fm.sig$FemAllele1Freq[fm.sig$Chi.p.adj<=0.05],fm.sig$RefFreq[fm.sig$Chi.p.adj<=0.05],paired=T,alternative = "greater")

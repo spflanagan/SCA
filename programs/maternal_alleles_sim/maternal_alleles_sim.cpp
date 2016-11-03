@@ -76,9 +76,9 @@ int main()
 	string chrom, ID, ref, alt, filter, info, format, temp, temp2, last_chr, quality;
 
 	vcf_name = "../../results/stacks/batch_1.vcf";
-	out_name = "../../results/sca_simulation_output/maternal_alleles_sim_out_error0.1.txt";
+	out_name = "../../results/sca_simulation_output/maternal_alleles_sim_out_error1.txt";
 	num_offspring = 1000;
-	error_rate = 0.1;
+	error_rate = 1;
 
 	vcf.open(vcf_name);
 	FileTest(vcf, vcf_name);

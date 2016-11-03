@@ -1,5 +1,5 @@
 #Author: Sarah P. Flanagan
-#Last Updated: 9 September 2016
+#Last Updated: 3 November 2016
 #Started Date: 11 February 2016
 #Purpose: Analyze the output from gwsca_biallelic.
 
@@ -1091,10 +1091,8 @@ write.table(mo.lrt.dat,"../biallelic_outliers/mo_lrt_dat.txt",col.names=T,
 
 #############################BLAST2GO ANNOTATIONS############################
 setwd("../biallelic_outliers/rad_region/blast2go")
-out.cnames<-c("LocID","NumSNPs","Chrom.x","Pos","Description","Length",
-	"X.Hits","e.Value","sim.mean","X.GO","GO.Names.list","Enzyme.Codes.list","Seq")
-out.names<-c("LocID","NumSNPs","Chrom","Pos","Description","Length",
-	"NumHits","e.Value","sim.mean","NumGO","GO.Names.list","Enzyme.Codes.list","Seq")
+####ORIGINAL####
+
 blast2go.files<-list.files(pattern="blast2go")
 ajfm.b2g<-read.delim("ajfm_blast2go.txt",sep='\t',header=T)
 #ajfm.b2g$Comparison<-"AO-FM"
@@ -1231,6 +1229,57 @@ fm.blast$Comparison<-"LRT.Males-Females"
 unique<-rbind(aj.blast,fm.blast,mo.blast,fm.blast,mo.blast)
 write.table(unique,"../../../S2_UniqueOutliersBlast.txt",row.names=F,col.names=T,
 	sep='\t',quote=F)
+
+####Editing these to reflect updates####
+setwd("../")
+vcf$CompLoc<-paste(vcf$`#CHROM`,vcf$POS,sep=".")
+vcf$Locus<-paste(vcf$`#CHROM`,vcf$ID,vcf$POS,sep=".")
+info<-vcf[,c("#CHROM","POS","ID","CompLoc","Locus")]
+#aggregate sig snps
+fm.sig<-fm.fst[fm.fst$Chi.p.adj<= 0.05,]
+mo.sig<-mo.fst[mo.fst$Chi.p.adj<=0.05,]
+shared.sig<-fm.sig[fm.sig$Locus %in% mo.sig$Locus,]
+#shared is (1) fm in lrt and fst; (2) fm and mo in fst; (3) mo in fst and fm in lrt
+#number 3 is only 2 snps, and they are shared in fmmo fst analysis.
+mof.fml<-mo.sig[mo.sig$Locus %in% hd0.sig$Locus,]
+all.shared.loc<-data.frame(SNP=c(fm.both.out,shared.sig$Locus),
+  Analyses=c(rep("FMFst-FMLRT",length(fm.both.out)),rep("FMFst-MOFst",length(shared.sig$Locus))),stringsAsFactors=F)
+all.shared.loc[all.shared.loc$SNP%in%all.shared.loc[duplicated(all.shared.loc$SNP),"SNP"],"Analyses"]<-"FMFst-FMLRT,FMFst-MOFst"
+all.shared.loc<-all.shared.loc[!duplicated(all.shared.loc$SNP),]
+all.shared<-merge(info,all.shared.loc,by.x="CompLoc",by.y="SNP")
+all.shared$rad.start<-as.numeric(all.shared$POS)-2500
+all.shared$rad.end<-as.numeric(all.shared$POS)+2500
+write.table(data.frame(as.character(all.shared$`#CHROM`),all.shared$rad.start,all.shared$rad.end),
+            "biallelic_outliers/rad_region/all.shared_extract.txt",
+            quote=F,col.names=F,row.names=F,sep="\t")
+
+#unique
+fm.fst.unique<-fm.sig[!(fm.sig$Locus %in% all.shared.loc$SNP),]
+mo.fst.unique<-mo.sig[!(mo.sig$Locus %in% all.shared.loc$SNP),]
+fm.lrt.unique<-hd0.sig[!(hd0.sig$Locus %in% all.shared.loc$SNP),]
+all.unique.loc<-data.frame(SNP=c(fm.fst.unique$Locus,mo.fst.unique$Locus,fm.lrt.unique$Locus),
+  Analyses=c(rep("FMFst",length(fm.fst.unique$Locus)),rep("MOFst",length(mo.fst.unique$Locus)),
+             rep("FMLRT",length(fm.lrt.unique$Locus))),stringsAsFactors=F)
+all.unique<-merge(info,all.unique.loc,by.x="CompLoc",by.y="SNP")
+all.unique$rad.start<-as.numeric(all.unique$POS)-2500
+all.unique$rad.end<-as.numeric(all.unique$POS)+2500
+write.table(data.frame(as.character(all.unique$`#CHROM`),all.unique$rad.start,all.unique$rad.end),
+            "biallelic_outliers/rad_region/all.unique_extract.txt",
+            quote=F,col.names=F,row.names=F,sep="\t")
+##MATCH TO OTHERS
+
+
+snp.dat<-parse.snps(snps)
+loc.dat<-merge(info,snp.dat,by.x="ID",by.y="LocusID")
+loc.dat<-merge(loc.dat,tags,by.x="ID",by.y="LocusID")
+all.unique.dat<-merge(loc.dat,all.unique,by="CompLoc")
+all.shared.dat<-merge(loc.dat,all.shared,by="CompLoc")
+keep.cols<-c("CompLoc","ID.x","Chrom","BP","Locus.x","NumSNPs",
+            "Analyses","rad.start","rad.end","Seq","SNP1","SNP2","SNP3","SNP4")
+all.unique.dat<-all.unique.dat[,keep.cols]
+all.shared.dat<-all.shared.dat[,keep.cols]
+write.table(all.unique.dat,"all.unique.dat_noblast.txt",sep='\t',col.names=T,row.names=F,quote=F)
+write.table(all.shared.dat,"all.shared.dat_noblast.txt",sep='\t',col.names=T,row.names=F,quote=F)
 #############################################################################
 
 #######################COMPARE TO PSTFST SIGNIFICANT LOCI####################
@@ -1271,31 +1320,62 @@ for(i in 1:length(mat.files)){
 		ErrorRate=rep(as.numeric(error),nrow(mat))),stringsAsFactors=F)
 }
 
-mat.all<-read.table(mat.files[1],header=T)
-mat.all<-mat.all[mat.all$ActualMomAF != 0,]
+error.rates<-as.character(seq(0,1,0.1))
+inf.af<-inf.af[inf.af$ErrorRate %in% error.rates,]
+act.af.means<-tapply(as.numeric(inf.af$AlleleFreq[inf.af$Type=="Actual"]),inf.af$ErrorRate[inf.af$Type=="Actual"],mean)
+inf.af.means<-tapply(as.numeric(inf.af$AlleleFreq[inf.af$Type=="Inferred"]),inf.af$ErrorRate[inf.af$Type=="Inferred"],mean)
+act.af.sem<-tapply(as.numeric(inf.af$AlleleFreq[inf.af$Type=="Actual"]),inf.af$ErrorRate[inf.af$Type=="Actual"],sem)
+inf.af.sem<-tapply(as.numeric(inf.af$AlleleFreq[inf.af$Type=="Inferred"]),inf.af$ErrorRate[inf.af$Type=="Inferred"],sem)
 
-inf.0<-inf.af[inf.af$ErrorRate==0,]
-boxplot(as.numeric(inf.0$AlleleFreq)~inf.0$Type)
-boxplot(as.numeric(inf.af$AlleleFreq)~inf.af$Type*as.factor(inf.af$ErrorRate))
+png("InferredMaternalAlleles_Error.png",height=10,width=7,units="in",res=300)
+par(mfrow=c(2,1),oma=c(2,2,2,2),mar=c(2,2,2,2))
+boxplot(as.numeric(inf.af$AlleleFreq)~inf.af$Type*as.factor(inf.af$ErrorRate),
+        col=c("thistle2","darkorchid4"),notch=T,outbg=c("thistle2","darkorchid4"),
+        axes=F,pch=21)
+axis(1,pos=0.2,at=seq(-1.5,24.5,2),labels=rep("",14))
+axis(1,pos=0.2,at=seq(1.5,21.5,2),labels=error.rates,tck=0)
+axis(2,pos=0,las=1)
+
+plot(seq(0,1,0.1),act.af.means,ylim=c(0.75,0.9),pch=21,bg="thistle2",axes=F,xlab="",ylab="")
+arrows(x0=seq(0,1,0.1),x1=seq(0,1,0.1),y0=act.af.means,y1=(act.af.means+act.af.sem),col="thistle2",angle=90)
+arrows(x0=seq(0,1,0.1),x1=seq(0,1,0.1),y0=act.af.means,y1=(act.af.means-act.af.sem),col="thistle2",angle=90)
+points(seq(0,1,0.1),inf.af.means,ylim=c(0.5,1),pch=21,bg="darkorchid4")
+arrows(x0=seq(0,1,0.1),x1=seq(0,1,0.1),y0=inf.af.means,y1=(inf.af.means+inf.af.sem),col="darkorchid4",angle=90)
+arrows(x0=seq(0,1,0.1),x1=seq(0,1,0.1),y0=inf.af.means,y1=(inf.af.means-inf.af.sem),col="darkorchid4",angle=90)
+axis(1,at=seq(-0.1,1,0.1),pos=0.75)
+axis(2,pos=-0.04,las=1)
+legend("top",c("Actual Maternal Allele Frequencies","Inferred Maternal Allele Frequencies"),
+       pt.bg=c("thistle2","darkorchid4"),pch=21,bty='n',ncol=1)
+mtext("Allele Frequency",2,outer=T,line=0.5)
+mtext("Error Rate",1,outer=T)
+dev.off()
+
+library(car)
+Anova(lm(as.numeric(inf.af$AlleleFreq)~inf.af$Type*as.factor(inf.af$ErrorRate)),
+	type="III")
+
+#no error
+mat.all<-read.table("maternal_alleles_sim_out.txt",header=T)
+mat.all<-mat.all[mat.all$ActualMomAF != 0,]
 t.test(mat.all$ActualMomAF,mat.all$InferredMomAF,paired=T)
 
 png("InferringMaternalAllelesDistr.png",height=7,width=7,units="in",res=300)
-layout(matrix(c(1,2,3,3), 2, 2, byrow = TRUE), 
-   widths=c(2,2), heights=c(1,2))
+layout(matrix(c(1,2,3,3), 2, 2, byrow = TRUE),  widths=c(2,2), heights=c(1,2))
 par(oma=c(1,3,1,1),mar=c(2,1,1,1))
-hist(mat.all$ActualMomAF,col="light grey",main="",border="light grey",
-	ylab="",xlab="",xaxt='n',yaxt='n')
+hist(mat.all$ActualMomAF,col="thistle2",main="",border="thistle2",
+	ylab="",xlab="",xaxt='n',yaxt='n',xlim=c(0,1))
 axis(1,pos=0)
 axis(2,pos=0,las=1)
 mtext("Number of Loci",2,cex=0.8,line=2.5)
-hist(mat.all$InferredMomAF,col="light grey",main="",border="light grey",
-	ylab="",xlab="",xaxt='n',yaxt='n')
+hist(mat.all$InferredMomAF,col="darkorchid4",main="",border="darkorchid4",
+	ylab="",xlab="",xaxt='n',yaxt='n',xlim=c(0,1))
 axis(1,pos=0)
 axis(2,pos=0,las=1)
 mtext("Allele Frequency",1,outer=T,cex=0.8,line=-27)
 boxplot(mat.all$ActualMomAF,mat.all$InferredMomAF,
 	names=c("Actual Mother","Inferred Mother"),
-	ylab="Reference Allele Frequency",col="light grey",pch=19)
+	ylab="Reference Allele Frequency",col=c("thistle2","darkorchid4"),pch=21,
+	outbg=c("thistle2","darkorchid4"),notch=T)
 mtext("Allele Frequency",2,line=2,cex=0.8)
 dev.off()
 
