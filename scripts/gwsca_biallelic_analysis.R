@@ -127,6 +127,42 @@ sem<-function(x){
   se<-sd(x)/sqrt(length(x))
   return(se)
 }
+
+vcf.cov.loc<-function(vcf.row,subset){
+  cov<-unlist(lapply(vcf.row[subset],function(x){ 
+    c<-strsplit(as.character(x),split=":")[[1]][3]
+    return(c)
+  }))
+  miss<-length(cov[cov==".,."])
+  pres<-length(cov[cov!=".,."])
+  ref<-sum(as.numeric(unlist(lapply(cov[cov!=".,."],
+                                    function(x){
+                                      strsplit(as.character(x),",")[[1]][1] 
+                                    }))))/pres
+  alt<-sum(as.numeric(unlist(lapply(cov[cov!=".,."],
+                                    function(x){
+                                      strsplit(as.character(x),",")[[1]][2] 
+                                    }))))/pres
+  tot<-sum(as.numeric(unlist(lapply(cov[cov!=".,."],
+                                    function(x){
+                                      as.numeric(strsplit(as.character(x),",")[[1]][1]) + 
+                                        as.numeric(strsplit(as.character(x),",")[[1]][2])
+                                    }))))
+  var.cov<-var(as.numeric(unlist(lapply(cov[cov!=".,."],
+                                        function(x){
+                                          as.numeric(strsplit(as.character(x),",")[[1]][1]) + 
+                                            as.numeric(strsplit(as.character(x),",")[[1]][2])
+                                        }))))
+  het<-unlist(lapply(vcf.row[subset],function(x){ 
+    strsplit(as.character(x),split=":")[[1]][1]
+  }))
+  het<-length(het[het=="0/1" | het=="1/0"])
+  return(data.frame(Chrom=vcf.row[1],Pos=vcf.row["POS"],Locus=vcf.row["ID"],
+                    NumMissing=miss, NumPresent=pres,PropMissing=miss/(miss+pres),
+                    AvgCovRef=ref,AvgCovAlt=alt, AvgCovRatio=ref/alt,AvgCovTotal=tot/pres, CovVariance=var.cov,
+                    NumHet=het,PropHet=het/pres,TotalNumReads = tot,stringsAsFactors = F))
+}
+
 #############################################################################
 
 ###################################PRUNING###################################
@@ -1280,6 +1316,60 @@ all.unique.dat<-all.unique.dat[,keep.cols]
 all.shared.dat<-all.shared.dat[,keep.cols]
 write.table(all.unique.dat,"all.unique.dat_noblast.txt",sep='\t',col.names=T,row.names=F,quote=F)
 write.table(all.shared.dat,"all.shared.dat_noblast.txt",sep='\t',col.names=T,row.names=F,quote=F)
+
+####Add the blast tables####
+setwd("../biallelic_outliers/")
+all.unique.dat<-read.table("rad_region/blast2go/all.unique.dat_noblast.txt",header=T)
+all.unique.dat$BlastLoc<-paste(all.unique.dat$Chrom,"_",all.unique.dat$rad.start,"-",all.unique.dat$rad.end,sep="")
+all.shared.dat<-read.table("rad_region/blast2go/all.shared.dat_noblast.txt",header=T)
+all.shared.dat$BlastLoc<-paste(all.shared.dat$Chrom,"_",all.shared.dat$rad.start,"-",all.shared.dat$rad.end,sep="")
+
+shared.b2g<-read.delim("shared_blast2go_table_20161114_0654.txt")
+unique.b2g<-read.delim("unique_blast2go_table_20161114_0654.txt")
+
+all.unique<-merge(all.unique.dat,unique.b2g,by.x="BlastLoc",by.y="SeqName")
+all.shared<-merge(all.shared.dat,shared.b2g,by.x="BlastLoc",by.y="SeqName")
+
+#need to split up unique
+fmf<-all.unique[all.unique$Analyses=="FMFst",]
+fml<-all.unique[all.unique$Analyses=="FMLRT",]
+mof<-all.unique[all.unique$Analyses=="MOFst",]
+
+#blast2go aggregations by go category
+shared.blast<-read.delim("shared_blast2go_graph_20161114_0655.txt")
+shared.go2<-shared.blast[shared.blast$Level == 2,c("GO.Name","X.Seqs","Sequence.Names")]
+
+unique.blast<-read.delim("unique_blast2go_graph_20161114_0652.txt")
+unique.go2<-unique.blast[unique.blast$Level==2,c("GO.Name","X.Seqs","Sequence.Names")]
+
+sh2<-do.call("rbind",apply(shared.go2,1,function(x){
+  if(x[[2]] > 1)
+  {
+    seqs<-strsplit(x[[3]],",")
+    y<-data.frame(GO=rep(x[[1]],length(seqs)),NumSeqs=rep(x[[2]],length(seqs)),Seq=seqs,stringsAsFactors = FALSE)
+  } else{
+    y<-data.frame(GO=x[[1]],NumSeqs=x[[2]],Seq=x[[3]],stringsAsFactors = FALSE)
+  }
+  colnames(y)<-c("GO","NumSeqs","Seq")
+  return(y)
+}))
+
+un2<-do.call("rbind",apply(unique.go2,1,function(x){
+  if(x[[2]] > 1)
+  {
+    seqs<-strsplit(x[[3]],",")
+    y<-data.frame(GO=rep(x[[1]],length(seqs)),NumSeqs=rep(x[[2]],length(seqs)),Seq=seqs,stringsAsFactors = FALSE)
+  } else{
+    y<-data.frame(GO=x[[1]],NumSeqs=x[[2]],Seq=x[[3]],stringsAsFactors = FALSE)
+  }
+  colnames(y)<-c("GO","NumSeqs","Seq")
+  return(y)
+}))
+
+fmf.b2g<-merge(fmf,un2,by.x="BlastLoc",by.y="Seq",all.x=T)
+fml.b2g<-merge(fml,un2,by.x="BlastLoc",by.y="Seq",all.x=T)
+mof.b2g<-merge(mof,un2,by.x="BlastLoc",by.y="Seq",all.x=T)
+
 #############################################################################
 
 #######################COMPARE TO PSTFST SIGNIFICANT LOCI####################
