@@ -1480,8 +1480,9 @@ p<-ggplot(bio2.dat,aes(factor(GO),Freq,fill = factor(Analysis))) +
   geom_bar(stat="identity",position="dodge") + 
   scale_fill_brewer(palette="Set1",name="Analysis") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  coord_flip() + theme(panel.grid.minor =   element_blank(),panel.grid.major=element_blank())+
-  #scale_x_continuous(breaks = seq(0,100,5)) +
+  coord_flip() + #theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank())+
+ # geom_vline(aes(xintercept=seq(0.5,18.5,1)))+
+  scale_y_discrete(breaks=seq(0.5,18.5,1))+
   xlab("Gene Ontology") + ylab("Proportion")
 print(p)
 dev.off()
