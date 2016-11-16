@@ -1330,10 +1330,35 @@ unique.b2g<-read.delim("unique_blast2go_table_20161114_0654.txt")
 all.unique<-merge(all.unique.dat,unique.b2g,by.x="BlastLoc",by.y="SeqName")
 all.shared<-merge(all.shared.dat,shared.b2g,by.x="BlastLoc",by.y="SeqName")
 
+supp.names<-c("Analyses","ID.x","NumSNPs","Chrom","BP","Description","Length","X.Hits","e.Value",
+                    "sim.mean","X.GO","GO.Names.list","Enzyme.Codes.list","Seq")
+supplement.names<-c("Analyses","LocID","NumSNPs","Chrom","Pos","Description","Length","NumHits","e.Value",
+                    "sim.mean","NumGO","GO.Name","Enzyme.Codes.list","Seq")
+S1.out<-all.shared[,supp.names]
+S2.out<-all.unique[,supp.names]
+write.table(S1.out,"../S1.shared.txt",col.names=supplement.names,row.names=F,quote=F,sep='\t')
+write.table(S2.out,"../S2.shared.txt",col.names=supplement.names,row.names=F,quote=F,sep='\t')
+
 #need to split up unique
 fmf<-all.unique[all.unique$Analyses=="FMFst",]
 fml<-all.unique[all.unique$Analyses=="FMLRT",]
 mof<-all.unique[all.unique$Analyses=="MOFst",]
+fmfl<-all.shared[all.shared$Analyses=="FMFst-FMLRT",]
+fmmob<-all.shared[all.shared$Analyses=="FMFst-MOFst",]
+shared<-all.shared[all.shared$Analyses=="FMFst-FMLRT,FMFst-MOFst",]
+
+#I want to look only at the significant loci...
+fm.sig<-fm.sig[fm.sig$Chi.p.adj<=0.05,]
+fm.sig$RADloc<-gsub("(\\w+.*\\.\\d+)\\.\\d+","\\1",fm.sig$SNP)
+fm.sig$comploc<-gsub("(\\w+.*)\\.\\d+\\(.\\d+)","\\1\\2",fm.sig$SNP)
+mo.sig<-mo.sig[mo.sig$Chi.p.adj<=0.05,]
+mo.sig$RADloc<-gsub("(\\w+.*\\.\\d+)\\.\\d+","\\1",mo.sig$SNP)
+fmmo<-fm.sig[fm.sig$SNP %in% mo.sig$SNP,]
+fm.fstlrt<-fm.fst[fm.fst$Locus %in% hd0.sig$Locus & fm.fst$Chi.p.adj<=0.05,]
+fm.fstlrt$RADloc<-gsub("(\\w+.*\\.\\d+)\\.\\d+","\\1",fm.fstlrt$SNP)
+fm.sig.un<-fm.sig[!(fm.sig$SNP %in% fmmo$SNP) & !(fm.sig$SNP %in% fm.fstlrt$SNP),]
+mo.sig.un<-mo.sig[!(mo.sig$SNP %in% fmmo$SNP),]
+fml.un<-hd0.sig[!(hd0.sig$Locus %in% fm.fst$Locus),]
 
 #blast2go aggregations by go category
 shared.blast<-read.delim("shared_blast2go_graph_20161114_0655.txt")
@@ -1366,9 +1391,100 @@ un2<-do.call("rbind",apply(unique.go2,1,function(x){
   return(y)
 }))
 
-fmf.b2g<-merge(fmf,un2,by.x="BlastLoc",by.y="Seq",all.x=T)
-fml.b2g<-merge(fml,un2,by.x="BlastLoc",by.y="Seq",all.x=T)
-mof.b2g<-merge(mof,un2,by.x="BlastLoc",by.y="Seq",all.x=T)
+
+un2$Seq<-gsub(" (\\w.*)","\\1",un2$Seq)
+sh2$Seq<-gsub(" (\\w.*)","\\1",sh2$Seq)
+
+fmf.un2<-un2[un2$Seq %in% fmf$BlastLoc,]
+fml.un2<-un2[un2$Seq %in% fml$BlastLoc,]
+mof.un2<-un2[un2$Seq %in% mof$BlastLoc,]
+
+fmlrtfst.sh2<-sh2[sh2$Seq %in% fmfl$BlastLoc,]
+fmmo.sh2<-sh2[sh2$Seq %in% fmmob$BlastLoc,]
+shared.sh2<-sh2[sh2$Seq %in% shared$BlastLoc,]
+
+fmf.un.b2g<-data.frame(table(fmf.un2$GO),stringsAsFactors = F)
+fmf.un.b2g$Var1<-as.character(fmf.un.b2g$Var1)
+fmf.un.b2g<-rbind(fmf.un.b2g,c("No Blast",nrow(fmf[is.na(fmf$X.Hits),])),
+                  c("No GO",nrow(fmf[!is.na(fmf$X.Hits) & is.na(fmf$X.GO),])))
+fml.un.b2g<-data.frame(table(fml.un2$GO),stringsAsFactors = F)
+fml.un.b2g$Var1<-as.character(fml.un.b2g$Var1)
+fml.un.b2g<-rbind(fml.un.b2g,
+                  c("No Blast",nrow(fml[is.na(fml$X.Hits),])),
+                  c("No GO",nrow(fml[!is.na(fml$X.Hits) & is.na(fml$X.GO),])))
+mof.un.b2g<-data.frame(table(mof.un2$GO),stringsAsFactors = F)
+mof.un.b2g$Var1<-as.character(mof.un.b2g$Var1)
+mof.un.b2g<-rbind(mof.un.b2g,
+                  c("No Blast",nrow(mof[is.na(mof$X.Hits),])),
+                  c("No GO",nrow(mof[!is.na(mof$X.Hits) & is.na(mof$X.GO),])))
+write.table(fmf.un.b2g,"../biallelic_outliers/rad_region/blast2go/FMFst_unique.biol2.txt",
+            quote=F,sep='\t')
+write.table(fml.un.b2g,"../biallelic_outliers/rad_region/blast2go/FMLRT_unique.biol2.txt",
+            quote=F,sep='\t')
+write.table(mof.un.b2g,"../biallelic_outliers/rad_region/blast2go/MOFst_unique.biol2.txt",
+            quote=F,sep='\t')
+
+fmlf.sh2.b2g<-data.frame(table(fmlrtfst.sh2$GO))
+fmlf.sh2.b2g$Var1<-as.character(fmlf.sh2.b2g$Var1)
+fmlf.sh2.b2g<-rbind(fmlf.sh2.b2g,c("No Blast",nrow(fmfl[is.na(fmfl$X.Hits),])),
+                  c("No GO",nrow(fmfl[!is.na(fmfl$X.Hits) & is.na(fmfl$X.GO),])))
+fmmo.sh2.b2g<-data.frame(table(fmmo.sh2$GO))
+fmmo.sh2.b2g$Var1<-as.character(fmmo.sh2.b2g$Var1)
+fmmo.sh2.b2g<-rbind(fmmo.sh2.b2g,c("No Blast",nrow(fmmob[is.na(fmmob$X.Hits),])),
+                    c("No GO",nrow(fmmob[!is.na(fmmob$X.Hits) & is.na(fmmob$X.GO),])))
+shar.sh2.b2g<-data.frame(table(shared.sh2$GO))
+shar.sh2.b2g$Var1<-as.character(shar.sh2.b2g$Var1)
+shar.sh2.b2g<-rbind(shar.sh2.b2g,c("No Blast",nrow(shared[is.na(shared$X.Hits),])),
+                    c("No GO",nrow(shared[!is.na(shared$X.Hits) & is.na(shared$X.GO),])))
+write.table(fmlf.sh2.b2g,"../biallelic_outliers/rad_region/blast2go/FMFst-FMLRT.biol2.txt",
+            quote=F,sep='\t')
+write.table(fmmo.sh2.b2g,"../biallelic_outliers/rad_region/blast2go/FMFst-MOFst.biol2.txt",
+            quote=F,sep='\t')
+write.table(shar.sh2.b2g,"../biallelic_outliers/rad_region/blast2go/Shared.biol2.txt",
+            quote=F,sep='\t')
+
+
+analysis.names<-c("Fst Males-Females (448)","LRT Males-Females (40)","Fst Mothers-Females (29)",
+                  "Fst and LRT Males-Females (14)", "Fst Males-Females and Mothers-Females (18)",
+                  "Shared in Multiple (2)")
+bio2.comp<-c("FMFst_unique.biol2.txt","FMLRT_unique.biol2.txt","MOFst_unique.biol2.txt",
+             "FMFst-FMLRT.biol2.txt","FMFst-MOFst.biol2.txt","Shared.biol2.txt")
+setwd("../biallelic_outliers/rad_region/blast2go")
+bio2.dat<-data.frame(GO=c(fmf.un.b2g$Var1,fml.un.b2g$Var1,mof.un.b2g$Var1,fmlf.sh2.b2g$Var1,fmmo.sh2.b2g$Var1,shar.sh2.b2g$Var1),
+  Freq=c(as.numeric(fmf.un.b2g$Freq)/448,as.numeric(fml.un.b2g$Freq)/40,
+    as.numeric(mof.un.b2g$Freq)/29,as.numeric(fmlf.sh2.b2g$Freq)/14,
+    as.numeric(fmmo.sh2.b2g$Freq)/18,as.numeric(shar.sh2.b2g$Freq)/2),
+  Analysis=c(rep("Fst Males-Females (448)",nrow(fmf.un.b2g)),rep("LRT Males-Females (40)",nrow(fml.un.b2g)),
+             rep("Fst Mothers-Females (29)",nrow(mof.un.b2g)),rep("Fst and LRT Males-Females (14)",nrow(fmlf.sh2.b2g)),
+             rep("Fst Males-Females and Mothers-Females (18)",nrow(fmmo.sh2.b2g)),rep("Shared in Multiple (2)",nrow(shar.sh2.b2g))),
+  stringsAsFactors = F)
+#add zeroes
+all.go<-levels(as.factor(bio2.dat$GO))
+for(i in 1:length(all.go)){
+  t<-bio2.dat[bio2.dat$GO %in% all.go[i],]
+  if(nrow(t)<length(analysis.names)){
+    a.new<-analysis.names[!(analysis.names %in% t$Analysis)]
+    g.new<-rep(t$GO[1],length(a.new))
+    n.new<-rep(0,length(a.new))
+    t.add<-data.frame(GO=g.new,Freq=n.new,Analysis=a.new)
+    bio2.dat<-rbind(bio2.dat,t.add)
+  }
+}
+bio2.dat<-bio2.dat[order(bio2.dat$GO),]
+
+write.table(bio2.dat,"rad_region/blast2go/blast_table_bio2_revised.txt",col.names=T,row.names=F,quote=F)
+
+jpeg("../../../Fig3_blast2go_revisions.jpeg",height=10,width=9,units="in",res=300)
+par(mar=c(2,2,2,2),oma=c(2,2,2,2),cex=2,lwd=1.3)
+p<-ggplot(bio2.dat,aes(factor(GO),Freq,fill = factor(Analysis))) + 
+  geom_bar(stat="identity",position="dodge") + 
+  scale_fill_brewer(palette="Set1",name="Analysis") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  coord_flip() + theme(panel.grid.minor =   element_blank(),panel.grid.major=element_blank())+
+  #scale_x_continuous(breaks = seq(0,100,5)) +
+  xlab("Gene Ontology") + ylab("Proportion")
+print(p)
+dev.off()
 
 #############################################################################
 
