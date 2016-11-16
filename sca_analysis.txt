@@ -35,6 +35,11 @@ Outline of the approach:
 
 
 #############################################LAB BOOK###########################################
+#####Wednesday, 16 November 2016
+Trying to figure out the GO results - it's a different format now, so that's a bit tricky.
+Also it seems like very few have biology 2nd level GO annotations, so that's confusing.
+
+
 #####Thursday, 3 November 2016
 Comparing the simulated maternal alleles with different error rates.
 > Anova(lm(as.numeric(inf.af$AlleleFreq)~inf.af$Type*as.factor(inf.af$ErrorRate)))
