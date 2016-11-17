@@ -288,6 +288,20 @@ shared.out<-mo.out[(mo.out$Locus %in% fm.out$Locus),]
 fm.cov<-sca.cov[sca.cov$SNP %in% fm.out$SNP,]
 mo.cov<-sca.cov[sca.cov$SNP %in% mo.out$SNP,]
 
+#I want to look only at the significant loci...
+fm.sig<-fm.sig[fm.sig$Chi.p.adj<=0.05,]
+fm.sig$RADloc<-gsub("(\\w+.*\\.\\d+)\\.\\d+","\\1",fm.sig$SNP)
+fm.sig$comploc<-gsub("(\\w+.*)\\.\\d+(\\.\\d+)","\\1\\2",fm.sig$SNP)
+mo.sig<-mo.sig[mo.sig$Chi.p.adj<=0.05,]
+mo.sig$RADloc<-gsub("(\\w+.*\\.\\d+)\\.\\d+","\\1",mo.sig$SNP)
+fmmo<-fm.sig[fm.sig$SNP %in% mo.sig$SNP,]
+fm.fstlrt<-fm.fst[fm.fst$Locus %in% hd0.sig$Locus & fm.fst$Chi.p.adj<=0.05,]
+fm.fstlrt$RADloc<-gsub("(\\w+.*\\.\\d+)\\.\\d+","\\1",fm.fstlrt$SNP)
+fm.sig.un<-fm.sig[!(fm.sig$SNP %in% fmmo$SNP) & !(fm.sig$SNP %in% fm.fstlrt$SNP),]
+mo.sig.un<-mo.sig[!(mo.sig$SNP %in% fmmo$SNP),]
+fml.un<-hd0.sig[!(hd0.sig$Locus %in% fm.fst$Locus),]
+shared.sig<-fm.sig[fm.sig$SNP %in% mo.sig$SNP & fm.sig$comploc %in% hd0.sig$Locus,]
+
 #####EVALUATE SAMPLE SIZE FOR HIGH FSTS#####
 gw.sum$CompLoc<-paste(gw.sum$Chrom,gw.sum$LocID,gw.sum$Pos,sep=".")
 aj.ss<-data.frame(cbind(SNP=gw.sum[gw.sum$CompLoc %in% aj.plot$Locus & gw.sum$Pop=="ADULT","CompLoc"],
@@ -571,24 +585,27 @@ mo.both.out<-mo.fst[mo.fst$Locus %in% hd3.sig$Locus & mo.fst$Chi.p.adj<=0.05, "L
 
 ####################################PLOT#####################################
 #Includes scaffolds
-png("../fst.selection.episodes_redo_all.png",height=300,width=300,
+png("../fst.selection.episodes_redo_all.png",height=200,width=300,
 	units="mm",res=300)
 #pdf("../fst.selection.episodes_redo_all.pdf",height=11.5,width=11.5)
-par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
+par(mfrow=c(2,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
 mo<-fst.plot(mo.plot, ci.dat=c(mo.top1,0),fst.name="MOM.FEM", 
              chrom.name="Chrom", axis.size=0,bp.name="Pos",
              sig.col=c("black","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(mo.plot$Chrom))]))
-points(mo$Pos[mo$Locus %in% mo.fst$SNP[mo.fst$Chi.p.adj<= 0.05]],
-       mo$MOM.FEM[mo$Locus %in% mo.fst$SNP[mo.fst$Chi.p.adj<= 0.05]],
-       col="darkorchid4",pch=19,cex=0.75)
-points(mo$Pos[mo$CompLoc %in% mo.both.out[substr(mo.both.out,1,2)=="LG"]],
-       mo$MOM.FEM[mo$CompLoc %in% mo.both.out[substr(mo.both.out,1,2)=="LG"]],
-       col="darkorchid1",pch=5,cex=1)
-points(mo$Pos[mo$LocID %in% shared.out$LocID & mo$MOM.FEM >= mo.top1],
-       mo$MOM.FEM[mo$LocID %in% shared.out$LocID & mo$MOM.FEM >= mo.top1],
-       col="red",pch=8)
-clip(0,max(mo$Pos),-1,1)
-abline(h=mo.top1,col="darkorchid1",lwd=1.3)
+points(mo$Pos[mo$Locus %in% mo.sig$SNP], #mo fst
+       mo$MOM.FEM[mo$Locus %in% mo.sig$SNP],
+       col="green4",pch=19,cex=0.75)
+#points(mo$Pos[mo$CompLoc %in% mo.both.out[substr(mo.both.out,1,2)=="LG"]],
+#       mo$MOM.FEM[mo$CompLoc %in% mo.both.out[substr(mo.both.out,1,2)=="LG"]],
+#       col="green2",pch=5,cex=1)#none of these
+points(mo$Pos[mo$Locus %in% fmmo$SNP], #fm-mo fst
+       mo$MOM.FEM[mo$Locus %in% fmmo$SNP],
+       col="royalblue4",pch=8)
+points(mo$Pos[mo$Locus %in% shared.sig$SNP], #shared in all
+       mo$MOM.FEM[mo$Locus %in% shared.sig$SNP],
+       col="dodgerblue1",pch=5)
+#clip(0,max(mo$Pos),-1,1)
+#abline(h=mo.top1,col="darkorchid1",lwd=1.3)
 axis(2,at=seq(0,0.2,0.05),pos=0,las=1,cex.axis=0.75)
 legend("top","Females-Inferred Mothers",bty='n',cex=0.75,text.font=2)
 last<-0
@@ -601,17 +618,20 @@ for(i in 1:length(lgs)){
 fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", 
              chrom.name="Chrom", axis.size=0,bp.name="Pos",
              sig.col=c("black","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(fm.plot$Chrom))]))
-points(fm$Pos[fm$Locus %in% fm.fst$SNP[fm.fst$Chi.p.adj<= 0.05]],
-       fm$FEM.MAL[fm$Locus %in% fm.fst$SNP[fm.fst$Chi.p.adj<= 0.05]],
-       col="green4",pch=19,cex=0.75)
-points(fm$Pos[fm$LocID %in% shared.out$LocID & fm$FEM.MAL >= fm.top1],
-       fm$FEM.MAL[fm$LocID %in% shared.out$LocID& fm$FEM.MAL >= fm.top1],
-       col="red",pch=8)
-points(fm$Pos[fm$CompLoc %in% fm.both.out[substr(fm.both.out,1,2)=="LG"]],
-       fm$FEM.MAL[fm$CompLoc %in% fm.both.out[substr(fm.both.out,1,2)=="LG"]],
-       col="green3",pch=5,cex=1)
-clip(0,max(fm$Pos),-1,1)
-abline(h=fm.top1,col="green3",lwd=1.3)
+points(fm$Pos[fm$Locus %in% fm.sig$SNP], #fm fst sig
+       fm$FEM.MAL[fm$Locus %in% fm.sig$SNP],
+       col="orchid1",pch=19,cex=0.75)
+points(fm$Pos[fm$Locus %in% fmmo$SNP], #fm-mo fst sig
+       fm$FEM.MAL[fm$Locus %in% fmmo$SNP],
+       col="royalblue4",pch=8,cex=1)
+points(fm$Pos[fm$Locus %in% fm.fstlrt$SNP], #fm fst - fm lrt
+       fm$FEM.MAL[fm$Locus %in% fm.fstlrt$SNP],
+       col="darkorchid4",pch=5,cex=1)
+points(fm$Pos[fm$Locus %in% shared.sig$SNP], #shared in all
+       fm$FEM.MAL[fm$Locus %in% shared.sig$SNP],
+       col="dodgerblue1",pch=5)
+#clip(0,max(fm$Pos),-1,1)
+#abline(h=fm.top1,col="green3",lwd=1.3)
 axis(2,at=seq(0,0.2,0.1),pos=0,las=1,cex.axis=0.75)
 legend("top","Male-Female",bty='n',cex=0.75,text.font=2)
 
@@ -621,111 +641,106 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
   last<-max(fm[fm$Chrom ==lgs[i],"Pos"])
 }
-
-aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", 
-             chrom.name="Chrom", axis.size=0, bp.name="Pos",
-             sig.col=c("black","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(aj.plot$Chrom))]))
-points(aj$Pos[aj$Locus %in% aj.fst$SNP[aj.fst$Chi.p.adj<= 0.05]],
-       aj$ADULT.JUVIE[aj$Locus %in% aj.fst$SNP[aj.fst$Chi.p.adj<= 0.05]],
-       col="dodgerblue3",pch=19)
-clip(0,max(aj$Pos),-1,1)
-abline(h=aj.top1,col="dodgerblue",lwd=1.3)
-axis(2,at=c(0,0.025,0.05),pos=0,las=1,cex.axis=0.75)
-points(aj$Pos[aj$LocID %in% shared.out$LocID& aj$ADULT.JUVIE >= aj.top1],
-       aj$ADULT.JUVIE[aj$LocID %in% shared.out$LocID& aj$ADULT.JUVIE >= aj.top1],
-       col="red",pch=8)
-legend("top","Adult-Offspring",bty='n',cex=0.75,text.font=2)
-last<-0
-for(i in 1:length(lgs)){
-  text(x=mean(aj[aj$Chrom ==lgs[i],"Pos"]),y=-0.002,
-       labels=lgn[i],  adj=1, xpd=TRUE,srt=90,cex=0.75)
-  last<-max(aj[aj$Chrom ==lgs[i],"Pos"])
-}
 mtext("Linkage Group", 1, outer=T, cex=1)
 mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1,las=0)
 par(fig = c(0, 1, 0, 1), oma=c(2,1,0,1), mar = c(0, 0, 0, 0), new = TRUE,
     cex=1)
 plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
-legend("top",col=c("green4","darkorchid3","dodgerblue3","red","green3"),
-       pch=c(19,19,19,8,5),lty=c(1,1,1,0,0),text.col="white",
-       c("Viability Selection","Sexual Selection","Overall Selection",
-         "Shared Outlier","Shared with LRT"),
+legend("top",col=c("orchid1","green4","royalblue4","darkorchid4","dodgerblue1"),
+       pch=c(19,19,8,5,5),text.col="black",
+       c("Viability Selection","Sexual Selection",expression(Shared~italic(F)[ST]),
+         "Shared with LRT","Shared in All"),
        bg="white",ncol=5,box.lty=0)
-legend("top",col=c("green3","darkorchid1","dodgerblue","white","white"),
-      lty=c(1,1,1,0,0),text.col="black",
-       c("Viability Selection","Sexual Selection","Overall Selection",
-         "Shared Outlier","Shared with LRT"),
-       ncol=5,box.lty=0,bty='n')
 
 dev.off()
 
+#aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", 
+#             chrom.name="Chrom", axis.size=0, bp.name="Pos",
+#             sig.col=c("black","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(aj.plot$Chrom))]))
+#points(aj$Pos[aj$Locus %in% aj.fst$SNP[aj.fst$Chi.p.adj<= 0.05]],
+#       aj$ADULT.JUVIE[aj$Locus %in% aj.fst$SNP[aj.fst$Chi.p.adj<= 0.05]],
+#       col="dodgerblue3",pch=19)
+#clip(0,max(aj$Pos),-1,1)
+#abline(h=aj.top1,col="dodgerblue",lwd=1.3)
+#axis(2,at=c(0,0.025,0.05),pos=0,las=1,cex.axis=0.75)
+#points(aj$Pos[aj$LocID %in% shared.out$LocID& aj$ADULT.JUVIE >= aj.top1],
+#       aj$ADULT.JUVIE[aj$LocID %in% shared.out$LocID& aj$ADULT.JUVIE >= aj.top1],
+#       col="red",pch=8)
+#legend("top","Adult-Offspring",bty='n',cex=0.75,text.font=2)
+#last<-0
+#for(i in 1:length(lgs)){
+#  text(x=mean(aj[aj$Chrom ==lgs[i],"Pos"]),y=-0.002,
+#       labels=lgn[i],  adj=1, xpd=TRUE,srt=90,cex=0.75)
+#  last<-max(aj[aj$Chrom ==lgs[i],"Pos"])
+#}
 
-png("../fst.selection.episodes_redo_lgs.png",height=300,width=300,units="mm",
-	res=300)
+####Mapping only the chromosomes####
+#png("../fst.selection.episodes_redo_lgs.png",height=300,width=300,units="mm",
+#	res=300)
 #pdf("../fst.selection.episodes_redo_lgs.pdf",height=11.5,width=11.5)
-par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
-mo<-fst.plot(mo.plot, ci.dat=c(mo.top1,0),fst.name="MOM.FEM", 
-	chrom.name="Chrom", axis.size=0,bp.name="Pos",
-	sig.col=c("purple3","black"),groups=lgs)
-points(mo$Pos[mo$LocID %in% shared.out$LocID & mo$MOM.FEM >= mo.top1],
-	mo$MOM.FEM[mo$LocID %in% shared.out$LocID & mo$MOM.FEM >= mo.top1],
-	col="red",pch=8)
-points(mo$Pos[mo$CompLoc %in% mo.both.out[substr(mo.both.out,1,2)=="LG"]],
-	mo$MOM.FEM[mo$CompLoc %in% mo.both.out[substr(mo.both.out,1,2)=="LG"]],
-	col="purple3",pch=5,cex=1)
-axis(2,at=seq(0,0.2,0.05),pos=0,las=1,cex.axis=0.75)
-legend("top","Females-Inferred Mothers",bty='n',cex=0.75,text.font=2)
-last<-0
-for(i in 1:length(lgs)){
-	text(x=mean(mo[mo$Chrom ==lgs[i],"Pos"]),y=-0.004,
-		labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
-	last<-max(mo[mo$Chrom ==lgs[i],"Pos"])
-}
+#par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
+#mo<-fst.plot(mo.plot, ci.dat=c(mo.top1,0),fst.name="MOM.FEM", 
+#	chrom.name="Chrom", axis.size=0,bp.name="Pos",
+#	sig.col=c("purple3","black"),groups=lgs)
+#points(mo$Pos[mo$LocID %in% shared.out$LocID & mo$MOM.FEM >= mo.top1],
+#	mo$MOM.FEM[mo$LocID %in% shared.out$LocID & mo$MOM.FEM >= mo.top1],
+#	col="red",pch=8)
+#points(mo$Pos[mo$CompLoc %in% mo.both.out[substr(mo.both.out,1,2)=="LG"]],
+#	mo$MOM.FEM[mo$CompLoc %in% mo.both.out[substr(mo.both.out,1,2)=="LG"]],
+#	col="purple3",pch=5,cex=1)
+#axis(2,at=seq(0,0.2,0.05),pos=0,las=1,cex.axis=0.75)
+#legend("top","Females-Inferred Mothers",bty='n',cex=0.75,text.font=2)
+#last<-0
+#for(i in 1:length(lgs)){
+#	text(x=mean(mo[mo$Chrom ==lgs[i],"Pos"]),y=-0.004,
+#		labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
+#	last<-max(mo[mo$Chrom ==lgs[i],"Pos"])
+#}
 
-fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", 
-	chrom.name="Chrom", axis.size=0,bp.name="Pos",
-	sig.col=c("green4","black"),groups=lgs)
-points(fm$Pos[fm$LocID %in% shared.out$LocID & fm$FEM.MAL >= fm.top1],
-	fm$FEM.MAL[fm$LocID %in% shared.out$LocID& fm$FEM.MAL >= fm.top1],
-	col="red",pch=8)
-points(fm$Pos[fm$CompLoc %in% fm.both.out[substr(fm.both.out,1,2)=="LG"]],
-	fm$FEM.MAL[fm$CompLoc %in% fm.both.out[substr(fm.both.out,1,2)=="LG"]],
-	col="green4",pch=5,cex=1)
-axis(2,at=seq(0,0.2,0.1),pos=0,las=1,cex.axis=0.75)
-legend("top","Male-Female",bty='n',cex=0.75,text.font=2)
+#fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", 
+#	chrom.name="Chrom", axis.size=0,bp.name="Pos",
+#	sig.col=c("green4","black"),groups=lgs)
+#points(fm$Pos[fm$LocID %in% shared.out$LocID & fm$FEM.MAL >= fm.top1],
+#	fm$FEM.MAL[fm$LocID %in% shared.out$LocID& fm$FEM.MAL >= fm.top1],
+#	col="red",pch=8)
+#points(fm$Pos[fm$CompLoc %in% fm.both.out[substr(fm.both.out,1,2)=="LG"]],
+#	fm$FEM.MAL[fm$CompLoc %in% fm.both.out[substr(fm.both.out,1,2)=="LG"]],
+#	col="green4",pch=5,cex=1)
+#axis(2,at=seq(0,0.2,0.1),pos=0,las=1,cex.axis=0.75)
+#legend("top","Male-Female",bty='n',cex=0.75,text.font=2)
 
-last<-0
-for(i in 1:length(lgs)){
-	text(x=mean(fm[fm$Chrom ==lgs[i],"Pos"]),y=-0.004,
-		labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
-	last<-max(fm[fm$Chrom ==lgs[i],"Pos"])
-}
+#last<-0
+#for(i in 1:length(lgs)){#
+#	text(x=mean(fm[fm$Chrom ==lgs[i],"Pos"]),y=-0.004,
+#		labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
+#	last<-max(fm[fm$Chrom ==lgs[i],"Pos"])
+#}
 
-aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", 
-	chrom.name="Chrom", axis.size=0, bp.name="Pos",
-	sig.col=c("dodgerblue","black"),groups=lgs)
-axis(2,at=c(0,0.025,0.05),pos=0,las=1,cex.axis=0.75)
-points(aj$Pos[aj$LocID %in% shared.out$LocID& aj$ADULT.JUVIE >= aj.top1],
-	aj$ADULT.JUVIE[aj$LocID %in% shared.out$LocID& aj$ADULT.JUVIE >= aj.top1],
-	col="red",pch=8)
-legend("top","Adult-Offspring",bty='n',cex=0.75,text.font=2)
-last<-0
-for(i in 1:length(lgs)){
-	text(x=mean(aj[aj$Chrom ==lgs[i],"Pos"]),y=-0.002,
-		labels=lgn[i],  adj=1, xpd=TRUE,srt=90,cex=0.75)
-	last<-max(aj[aj$Chrom ==lgs[i],"Pos"])
-}
-mtext("Linkage Group", 1, outer=T, cex=1)
-mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1,las=0)
-par(fig = c(0, 1, 0, 1), oma=c(2,1,0,1), mar = c(0, 0, 0, 0), new = TRUE,
-	cex=1)
-plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
-legend("top",col=c("green4","purple3","dodgerblue","red","black"),
-	pch=c(19,19,19,8,5),
-	c("Viability Selection","Sexual Selection","Overall Selection",
-		"Shared Outlier","Shared with LRT"),
-	bg="white",ncol=5,box.lty=0)
-dev.off()
+#aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", 
+#	chrom.name="Chrom", axis.size=0, bp.name="Pos",
+#	sig.col=c("dodgerblue","black"),groups=lgs)
+#axis(2,at=c(0,0.025,0.05),pos=0,las=1,cex.axis=0.75)
+#points(aj$Pos[aj$LocID %in% shared.out$LocID& aj$ADULT.JUVIE >= aj.top1],
+#	aj$ADULT.JUVIE[aj$LocID %in% shared.out$LocID& aj$ADULT.JUVIE >= aj.top1],
+#	col="red",pch=8)
+#legend("top","Adult-Offspring",bty='n',cex=0.75,text.font=2)
+#last<-0
+#for(i in 1:length(lgs)){
+#	text(x=mean(aj[aj$Chrom ==lgs[i],"Pos"]),y=-0.002,
+#		labels=lgn[i],  adj=1, xpd=TRUE,srt=90,cex=0.75)
+#	last<-max(aj[aj$Chrom ==lgs[i],"Pos"])
+#}
+#mtext("Linkage Group", 1, outer=T, cex=1)
+#mtext(expression(italic(F)[italic(ST)]), 2, outer=T, cex=1,las=0)
+#par(fig = c(0, 1, 0, 1), oma=c(2,1,0,1), mar = c(0, 0, 0, 0), new = TRUE,
+#	cex=1)
+#plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
+#legend("top",col=c("green4","purple3","dodgerblue","red","black"),
+#	pch=c(19,19,19,8,5),
+#	c("Viability Selection","Sexual Selection","Overall Selection",
+#		"Shared Outlier","Shared with LRT"),
+#	bg="white",ncol=5,box.lty=0)
+#dev.off()
 
 
 png("../male-female.png",height=100,width=300,units="mm",res=300)
@@ -743,69 +758,69 @@ for(i in 1:length(lgs)){
 }
 dev.off()
 
-##########KELLY/MONNAHAN
-png("../kelly_analysis_lgs.png",height=200,width=300,units="mm",res=300)
+##########KELLY/MONNAHAN#####
+#png("../kelly_analysis_lgs.png",height=200,width=300,units="mm",res=300)
 #pdf("../kelly_analysis_lgs.pdf",height=7.66666,width=11.5)
-par(mfrow=c(2,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
-hd3<-fst.plot(hd, ci.dat=c(100,-100),fst.name="lnp3", chrom.name="chrom"
-	, axis.size=0,bp.name="pos",sig.col=c("purple3","black"),groups=lgs)
-points(hd3[hd3$bh_3<=0.05 & hd3$chrom %in% lgs,"pos"],
-	hd3[hd3$bh_3<=0.05 & hd3$chrom %in% lgs,"lnp3"],
-	col="purple3",pch=19,cex=0.75)
-points(hd3[hd3$bh_3<=0.05 & hd3$Locus %in% mo.out1$CompLoc & 
-		hd3$chrom %in% lgs,"pos"],
-	hd3[hd3$bh_3<=0.05 & hd3$Locus %in% mo.out1$CompLoc & 
-		hd3$chrom %in% lgs,"lnp3"],
-	col="purple3",pch=5,cex=1)
-axis(2,at=seq(0,15,5),pos=0,las=1,cex.axis=0.75)
-legend("top","Successful Females-Adults",bty='n',cex=0.75,text.font=2)
-last<-0
-for(i in 1:length(lgs)){
-	text(x=mean(hd3[hd3$chrom ==lgs[i],"pos"]),y=-0.5,
-		labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
-	last<-max(hd3[hd3$chrom ==lgs[i],"pos"])
-}
-hd0<-fst.plot(hd, ci.dat=c(100,-100),fst.name="lnp0", chrom.name="chrom"
-	, axis.size=0,bp.name="pos",sig.col=c("green4","black"),groups=lgs)
-points(hd0[hd0$bh_0<=0.05 & hd0$chrom %in% lgs,"pos"],
-	hd0[hd0$bh_0<=0.05 & hd0$chrom %in% lgs,"lnp0"],
-	col="green4",pch=19,cex=0.75)
-points(hd0[hd0$bh_0<=0.05 & hd0$Locus %in% fm.out1$CompLoc & 
-		hd0$chrom %in% lgs,"pos"],
-	hd0[hd0$bh_0<=0.05 & hd0$Locus %in% fm.out1$CompLoc & 
-		hd0$chrom %in% lgs,"lnp0"],
-	col="green4",pch=5,cex=1)
-axis(2,at=seq(0,15,5),pos=0,las=1,cex.axis=0.75)
-legend("top","Males-Females",bty='n',cex=0.75,text.font=2)
-last<-0
-for(i in 1:length(lgs)){
-	text(x=mean(hd0[hd0$chrom ==lgs[i],"pos"]),y=-0.5,
-		labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
-	last<-max(hd0[hd0$chrom ==lgs[i],"pos"])
-}
-mtext("Linkage Group", 1, outer=T, cex=1)
-mtext(expression(-log[10]~italic(p)), 2, outer=T, cex=1,las=0)
-par(fig = c(0, 1, 0, 1), oma=c(2,1,0,1), mar = c(0, 0, 0, 0), new = TRUE,
-	cex=1)
-plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
-legend("top",col=c("green4","purple3","black"),pch=c(19,19,5),
-	c("Viability Selection","Sexual Selection",
-		expression(Shared~with~italic(F)[ST])),
-	bg="white",ncol=3,box.lty=0)
-dev.off()
+#par(mfrow=c(2,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
+#hd3<-fst.plot(hd, ci.dat=c(100,-100),fst.name="lnp3", chrom.name="chrom"
+#	, axis.size=0,bp.name="pos",sig.col=c("purple3","black"),groups=lgs)
+#points(hd3[hd3$bh_3<=0.05 & hd3$chrom %in% lgs,"pos"],
+#	hd3[hd3$bh_3<=0.05 & hd3$chrom %in% lgs,"lnp3"],
+#	col="purple3",pch=19,cex=0.75)
+#points(hd3[hd3$bh_3<=0.05 & hd3$Locus %in% mo.out1$CompLoc & 
+#		hd3$chrom %in% lgs,"pos"],
+#	hd3[hd3$bh_3<=0.05 & hd3$Locus %in% mo.out1$CompLoc & 
+#		hd3$chrom %in% lgs,"lnp3"],
+#	col="purple3",pch=5,cex=1)
+#axis(2,at=seq(0,15,5),pos=0,las=1,cex.axis=0.75)
+#legend("top","Successful Females-Adults",bty='n',cex=0.75,text.font=2)
+#last<-0
+#for(i in 1:length(lgs)){
+#	text(x=mean(hd3[hd3$chrom ==lgs[i],"pos"]),y=-0.5,
+#		labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
+#	last<-max(hd3[hd3$chrom ==lgs[i],"pos"])
+#}
+#hd0<-fst.plot(hd, ci.dat=c(100,-100),fst.name="lnp0", chrom.name="chrom"
+#	, axis.size=0,bp.name="pos",sig.col=c("green4","black"),groups=lgs)
+#points(hd0[hd0$bh_0<=0.05 & hd0$chrom %in% lgs,"pos"],
+#	hd0[hd0$bh_0<=0.05 & hd0$chrom %in% lgs,"lnp0"],
+#	col="green4",pch=19,cex=0.75)
+#points(hd0[hd0$bh_0<=0.05 & hd0$Locus %in% fm.out1$CompLoc & 
+#		hd0$chrom %in% lgs,"pos"],
+#	hd0[hd0$bh_0<=0.05 & hd0$Locus %in% fm.out1$CompLoc & 
+#		hd0$chrom %in% lgs,"lnp0"],
+#	col="green4",pch=5,cex=1)
+#axis(2,at=seq(0,15,5),pos=0,las=1,cex.axis=0.75)
+#legend("top","Males-Females",bty='n',cex=0.75,text.font=2)
+#last<-0
+#for(i in 1:length(lgs)){
+#	text(x=mean(hd0[hd0$chrom ==lgs[i],"pos"]),y=-0.5,
+#		labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
+#	last<-max(hd0[hd0$chrom ==lgs[i],"pos"])
+#}
+#mtext("Linkage Group", 1, outer=T, cex=1)
+#mtext(expression(-log[10]~italic(p)), 2, outer=T, cex=1,las=0)
+#par(fig = c(0, 1, 0, 1), oma=c(2,1,0,1), mar = c(0, 0, 0, 0), new = TRUE,
+#	cex=1)
+#plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
+#legend("top",col=c("green4","purple3","black"),pch=c(19,19,5),
+#	c("Viability Selection","Sexual Selection",
+#		expression(Shared~with~italic(F)[ST])),
+#	bg="white",ncol=3,box.lty=0)
+#dev.off()
 
-png("../kelly_analysis_scaffolds.png",height=200,width=300,units="mm",res=300)
+png("../kelly_analysis_redo.png",height=200,width=300,units="mm",res=300)
 #pdf("../kelly_analysis_scaffolds.pdf",height=7.66666,width=11.5)
 par(mfrow=c(2,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
 hd3<-fst.plot(hd, ci.dat=c(100,-100),fst.name="lnp3", chrom.name="chrom"
-	, axis.size=0,bp.name="pos",sig.col=c("purple3","black"),
+	, axis.size=0,bp.name="pos",sig.col=c("black","black"),y.lim=c(0,7),
 	groups=as.factor(scaffs[scaffs %in% levels(factor(hd$chrom))]))
-points(hd3[hd3$bh_3<=0.05,"pos"],
-	hd3[hd3$bh_3<=0.05,"lnp3"],
-	col="purple3",pch=19,cex=0.75)
-points(hd3[hd3$bh_3<=0.05 & hd3$Locus %in% mo.out1$CompLoc,"pos"],
-	hd3[hd3$bh_3<=0.05 & hd3$Locus %in% mo.out1$CompLoc,"lnp3"],
-	col="purple3",pch=5,cex=1)
+#points(hd3[hd3$bh_3<=0.05,"pos"], #none are sig!
+#	hd3[hd3$bh_3<=0.05,"lnp3"],
+#	col="purple3",pch=19,cex=0.75)
+#points(hd3[hd3$bh_3<=0.05 & hd3$Locus %in% mo.out1$CompLoc,"pos"],
+#	hd3[hd3$bh_3<=0.05 & hd3$Locus %in% mo.out1$CompLoc,"lnp3"],
+#	col="purple3",pch=5,cex=1)
 axis(2,at=seq(0,15,5),pos=0,las=1,cex.axis=0.75)
 legend("top","Successful Females-Adults",bty='n',cex=0.75,text.font=2)
 last<-0
@@ -815,14 +830,17 @@ for(i in 1:length(lgs)){
 	last<-max(hd3[hd3$chrom ==lgs[i],"pos"])
 }
 hd0<-fst.plot(hd, ci.dat=c(100,-100),fst.name="lnp0", chrom.name="chrom"
-	, axis.size=0,bp.name="pos",sig.col=c("green4","black"),
+	, axis.size=0,bp.name="pos",sig.col=c("black","black"),
 	groups=as.factor(scaffs[scaffs %in% levels(factor(hd$chrom))]))
 points(hd0[hd0$bh_0<=0.05,"pos"],
 	hd0[hd0$bh_0<=0.05,"lnp0"],
-	col="green4",pch=19,cex=0.75)
-points(hd0[hd0$bh_0<=0.05 & hd0$Locus %in% fm.out1$CompLoc,"pos"],
-	hd0[hd0$bh_0<=0.05 & hd0$Locus %in% fm.out1$CompLoc,"lnp0"],
-	col="green4",pch=5,cex=1)
+	col="mediumorchid3",pch=19,cex=0.75)
+points(hd0[hd0$Locus %in% fm.fstlrt$Locus,"pos"],
+	hd0[hd0$Locus %in% fm.fstlrt$Locus,"lnp0"],
+	col="darkorchid4",pch=5,cex=1)
+points(hd0[hd0$Locus %in% shared.sig$comploc,"pos"],
+       hd0[hd0$Locus %in% shared.sig$comploc,"lnp0"],
+       col="dodgerblue1",pch=5,cex=1)
 axis(2,at=seq(0,15,5),pos=0,las=1,cex.axis=0.75)
 legend("top","Males-Females",bty='n',cex=0.75,text.font=2)
 last<-0
@@ -836,10 +854,11 @@ mtext(expression(-log[10]~italic(p)), 2, outer=T, cex=1,las=0)
 par(fig = c(0, 1, 0, 1), oma=c(2,1,0,1), mar = c(0, 0, 0, 0), new = TRUE,
 	cex=1)
 plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
-legend("top",col=c("green4","purple3","black"),pch=c(19,19,5),
-	c("Viability Selection","Sexual Selection",
-		expression(Shared~with~italic(F)[ST])),
-	bg="white",ncol=3,box.lty=0)
+legend("top",col=c("orchid1","darkorchid4","dodgerblue1"),
+       pch=c(19,5,5),text.col="black",
+       c("Viability Selection",
+         expression(Shared~with~Males-Females~italic(F)[ST]),"Shared in All"),
+       bg="white",ncol=3,box.lty=0)
 dev.off()
 
 
@@ -1347,18 +1366,6 @@ fmfl<-all.shared[all.shared$Analyses=="FMFst-FMLRT",]
 fmmob<-all.shared[all.shared$Analyses=="FMFst-MOFst",]
 shared<-all.shared[all.shared$Analyses=="FMFst-FMLRT,FMFst-MOFst",]
 
-#I want to look only at the significant loci...
-fm.sig<-fm.sig[fm.sig$Chi.p.adj<=0.05,]
-fm.sig$RADloc<-gsub("(\\w+.*\\.\\d+)\\.\\d+","\\1",fm.sig$SNP)
-fm.sig$comploc<-gsub("(\\w+.*)\\.\\d+\\(.\\d+)","\\1\\2",fm.sig$SNP)
-mo.sig<-mo.sig[mo.sig$Chi.p.adj<=0.05,]
-mo.sig$RADloc<-gsub("(\\w+.*\\.\\d+)\\.\\d+","\\1",mo.sig$SNP)
-fmmo<-fm.sig[fm.sig$SNP %in% mo.sig$SNP,]
-fm.fstlrt<-fm.fst[fm.fst$Locus %in% hd0.sig$Locus & fm.fst$Chi.p.adj<=0.05,]
-fm.fstlrt$RADloc<-gsub("(\\w+.*\\.\\d+)\\.\\d+","\\1",fm.fstlrt$SNP)
-fm.sig.un<-fm.sig[!(fm.sig$SNP %in% fmmo$SNP) & !(fm.sig$SNP %in% fm.fstlrt$SNP),]
-mo.sig.un<-mo.sig[!(mo.sig$SNP %in% fmmo$SNP),]
-fml.un<-hd0.sig[!(hd0.sig$Locus %in% fm.fst$Locus),]
 
 #blast2go aggregations by go category
 shared.blast<-read.delim("shared_blast2go_graph_20161114_0655.txt")
@@ -1406,57 +1413,55 @@ shared.sh2<-sh2[sh2$Seq %in% shared$BlastLoc,]
 fmf.un.b2g<-data.frame(table(fmf.un2$GO),stringsAsFactors = F)
 fmf.un.b2g$Var1<-as.character(fmf.un.b2g$Var1)
 fmf.un.b2g<-rbind(fmf.un.b2g,c("No Blast",nrow(fmf[is.na(fmf$X.Hits),])),
-                  c("No GO",nrow(fmf[!is.na(fmf$X.Hits) & is.na(fmf$X.GO),])))
+                  c("No GO",nrow(fmf[!is.na(fmf$X.Hits) & !(fmf$BlastLoc %in% fmf.un2$Seq),])))
 fml.un.b2g<-data.frame(table(fml.un2$GO),stringsAsFactors = F)
 fml.un.b2g$Var1<-as.character(fml.un.b2g$Var1)
 fml.un.b2g<-rbind(fml.un.b2g,
                   c("No Blast",nrow(fml[is.na(fml$X.Hits),])),
-                  c("No GO",nrow(fml[!is.na(fml$X.Hits) & is.na(fml$X.GO),])))
+                  c("No GO",nrow(fml[!is.na(fml$X.Hits) & !(fml$BlastLoc %in% fml.un2$Seq),])))
 mof.un.b2g<-data.frame(table(mof.un2$GO),stringsAsFactors = F)
 mof.un.b2g$Var1<-as.character(mof.un.b2g$Var1)
 mof.un.b2g<-rbind(mof.un.b2g,
                   c("No Blast",nrow(mof[is.na(mof$X.Hits),])),
-                  c("No GO",nrow(mof[!is.na(mof$X.Hits) & is.na(mof$X.GO),])))
-write.table(fmf.un.b2g,"../biallelic_outliers/rad_region/blast2go/FMFst_unique.biol2.txt",
+                  c("No GO",nrow(mof[!is.na(mof$X.Hits) & !(mof$BlastLoc %in% mof.un2$Seq),])))
+write.table(fmf.un.b2g,"FMFst_unique.biol2.txt",
             quote=F,sep='\t')
-write.table(fml.un.b2g,"../biallelic_outliers/rad_region/blast2go/FMLRT_unique.biol2.txt",
+write.table(fml.un.b2g,"FMLRT_unique.biol2.txt",
             quote=F,sep='\t')
-write.table(mof.un.b2g,"../biallelic_outliers/rad_region/blast2go/MOFst_unique.biol2.txt",
+write.table(mof.un.b2g,"MOFst_unique.biol2.txt",
             quote=F,sep='\t')
 
 fmlf.sh2.b2g<-data.frame(table(fmlrtfst.sh2$GO))
 fmlf.sh2.b2g$Var1<-as.character(fmlf.sh2.b2g$Var1)
 fmlf.sh2.b2g<-rbind(fmlf.sh2.b2g,c("No Blast",nrow(fmfl[is.na(fmfl$X.Hits),])),
-                  c("No GO",nrow(fmfl[!is.na(fmfl$X.Hits) & is.na(fmfl$X.GO),])))
+                  c("No GO",nrow(fmfl[!is.na(fmfl$X.Hits) & !(fmfl$BlastLoc %in% fmlrtfst.sh2$Seq),])))
 fmmo.sh2.b2g<-data.frame(table(fmmo.sh2$GO))
 fmmo.sh2.b2g$Var1<-as.character(fmmo.sh2.b2g$Var1)
 fmmo.sh2.b2g<-rbind(fmmo.sh2.b2g,c("No Blast",nrow(fmmob[is.na(fmmob$X.Hits),])),
-                    c("No GO",nrow(fmmob[!is.na(fmmob$X.Hits) & is.na(fmmob$X.GO),])))
+                    c("No GO",nrow(fmmob[!is.na(fmmob$X.Hits) & !(fmmob$BlastLoc %in% fmmo.sh2$Seq),])))
 shar.sh2.b2g<-data.frame(table(shared.sh2$GO))
 shar.sh2.b2g$Var1<-as.character(shar.sh2.b2g$Var1)
 shar.sh2.b2g<-rbind(shar.sh2.b2g,c("No Blast",nrow(shared[is.na(shared$X.Hits),])),
-                    c("No GO",nrow(shared[!is.na(shared$X.Hits) & is.na(shared$X.GO),])))
-write.table(fmlf.sh2.b2g,"../biallelic_outliers/rad_region/blast2go/FMFst-FMLRT.biol2.txt",
+                    c("No GO",nrow(shared[!is.na(shared$X.Hits) & !(shared$BlastLoc %in% shared.sh2$Seq),])))
+write.table(fmlf.sh2.b2g,"FMFst-FMLRT.biol2.txt",
             quote=F,sep='\t')
-write.table(fmmo.sh2.b2g,"../biallelic_outliers/rad_region/blast2go/FMFst-MOFst.biol2.txt",
+write.table(fmmo.sh2.b2g,"FMFst-MOFst.biol2.txt",
             quote=F,sep='\t')
-write.table(shar.sh2.b2g,"../biallelic_outliers/rad_region/blast2go/Shared.biol2.txt",
+write.table(shar.sh2.b2g,"Shared.biol2.txt",
             quote=F,sep='\t')
 
 
-analysis.names<-c("Fst Males-Females (448)","LRT Males-Females (40)","Fst Mothers-Females (29)",
-                  "Fst and LRT Males-Females (14)", "Fst Males-Females and Mothers-Females (18)",
-                  "Shared in Multiple (2)")
-bio2.comp<-c("FMFst_unique.biol2.txt","FMLRT_unique.biol2.txt","MOFst_unique.biol2.txt",
-             "FMFst-FMLRT.biol2.txt","FMFst-MOFst.biol2.txt","Shared.biol2.txt")
-setwd("../biallelic_outliers/rad_region/blast2go")
+analysis.names<-c("Males-Females Fst (448)","Males-Females LRT (40)","Mothers-Females Fst (29)",
+                  "Shared Males-Females Fst and LRT (14)", "Shared Males-Females and Mothers-Females Fst (18)",
+                  "Shared in All 3 (2)")
+
 bio2.dat<-data.frame(GO=c(fmf.un.b2g$Var1,fml.un.b2g$Var1,mof.un.b2g$Var1,fmlf.sh2.b2g$Var1,fmmo.sh2.b2g$Var1,shar.sh2.b2g$Var1),
   Freq=c(as.numeric(fmf.un.b2g$Freq)/448,as.numeric(fml.un.b2g$Freq)/40,
     as.numeric(mof.un.b2g$Freq)/29,as.numeric(fmlf.sh2.b2g$Freq)/14,
     as.numeric(fmmo.sh2.b2g$Freq)/18,as.numeric(shar.sh2.b2g$Freq)/2),
-  Analysis=c(rep("Fst Males-Females (448)",nrow(fmf.un.b2g)),rep("LRT Males-Females (40)",nrow(fml.un.b2g)),
-             rep("Fst Mothers-Females (29)",nrow(mof.un.b2g)),rep("Fst and LRT Males-Females (14)",nrow(fmlf.sh2.b2g)),
-             rep("Fst Males-Females and Mothers-Females (18)",nrow(fmmo.sh2.b2g)),rep("Shared in Multiple (2)",nrow(shar.sh2.b2g))),
+  Analysis=c(rep("Males-Females Fst (448)",nrow(fmf.un.b2g)),rep("Males-Females LRT (40)",nrow(fml.un.b2g)),
+             rep("Mothers-Females Fst (29)",nrow(mof.un.b2g)),rep("Shared Males-Females Fst and LRT (14)",nrow(fmlf.sh2.b2g)),
+             rep("Shared Males-Females and Mothers-Females Fst (18)",nrow(fmmo.sh2.b2g)),rep("Shared in All 3 (2)",nrow(shar.sh2.b2g))),
   stringsAsFactors = F)
 #add zeroes
 all.go<-levels(as.factor(bio2.dat$GO))
@@ -1472,20 +1477,49 @@ for(i in 1:length(all.go)){
 }
 bio2.dat<-bio2.dat[order(bio2.dat$GO),]
 
-write.table(bio2.dat,"rad_region/blast2go/blast_table_bio2_revised.txt",col.names=T,row.names=F,quote=F)
+write.table(bio2.dat,"blast_table_bio2_revised.txt",col.names=T,row.names=F,quote=F)
 
-jpeg("../../../Fig3_blast2go_revisions.jpeg",height=10,width=9,units="in",res=300)
+jpeg("Fig3_blast2go_revisions.jpeg",height=10,width=9,units="in",res=300)
 par(mar=c(2,2,2,2),oma=c(2,2,2,2),cex=2,lwd=1.3)
 p<-ggplot(bio2.dat,aes(factor(GO),Freq,fill = factor(Analysis))) + 
   geom_bar(stat="identity",position="dodge") + 
-  scale_fill_brewer(palette="Set1",name="Analysis") +
+  scale_fill_manual(name="Analysis",
+                    values=c("orchid1","mediumorchid3","green4","dodgerblue1","royalblue4","darkorchid4"),
+                    labels=c(expression(Males-Females~italic(F)[ST]~(448)),"Males-Females LRT (40)",
+                            expression(Mothers-Females~italic(F)[ST]~(29)),
+                            expression(Shared~Males-Females~italic(F)[ST]~and~LRT~(14)), 
+                            expression(Shared~Males-Females~and~Mothers-Females~italic(F)[ST]~(18)),
+                            "Shared in All 3 (2)")) + theme(legend.text.align=0)+
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  coord_flip() + #theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank())+
- # geom_vline(aes(xintercept=seq(0.5,18.5,1)))+
-  scale_y_discrete(breaks=seq(0.5,18.5,1))+
-  xlab("Gene Ontology") + ylab("Proportion")
+  coord_flip() +  # geom_vline(aes(xintercept=seq(0.5,18.5,1)))+
+  #scale_y_discrete(breaks=seq(0.5,18.5,1))+
+  xlab("Gene Ontology") + ylab("Proportion")+
+theme(panel.grid.major= element_blank(),
+  panel.grid.minor = element_blank())+
+#scale_x_discrete(limits=c(0.5,18.5))+
+geom_vline(aes(xintercept=0.5),colour="white")+
+geom_vline(aes(xintercept=1.5),colour="white")+
+geom_vline(aes(xintercept=2.5),colour="white")+
+geom_vline(aes(xintercept=3.5),colour="white")+
+geom_vline(aes(xintercept=4.5),colour="white")+
+geom_vline(aes(xintercept=5.5),colour="white")+
+geom_vline(aes(xintercept=6.5),colour="white")+
+geom_vline(aes(xintercept=7.5),colour="white")+
+geom_vline(aes(xintercept=8.5),colour="white")+
+geom_vline(aes(xintercept=9.5),colour="white")+
+geom_vline(aes(xintercept=10.5),colour="white")+
+geom_vline(aes(xintercept=11.5),colour="white")+
+geom_vline(aes(xintercept=12.5),colour="white")+
+geom_vline(aes(xintercept=13.5),colour="white")+
+geom_vline(aes(xintercept=14.5),colour="white")+
+geom_vline(aes(xintercept=15.5),colour="white")+
+geom_vline(aes(xintercept=16.5),colour="white")+
+geom_vline(aes(xintercept=17.5),colour="white")+
+geom_vline(aes(xintercept=18.5),colour="white")
+
 print(p)
 dev.off()
+
 
 #############################################################################
 
