@@ -228,6 +228,8 @@ all.inds<-colnames(vcf)[10:ncol(vcf)]
 sca.cov<-do.call("rbind",apply(vcf,1,vcf.cov.loc,subset=all.inds))
 sca.cov$SNP<-paste(sca.cov$Chrom,as.numeric(sca.cov$Pos),sep=".")
 keep.snps<-sca.cov[sca.cov$AvgCovTotal > 5 & sca.cov$AvgCovTotal <= 20,"SNP"]
+keep.vcf<-vcf[paste(vcf$`#CHROM`,vcf$POS,sep=".") %in% keep.snps,]
+write.table(keep.vcf,"keep.vcf",col.names=T,row.names=F,quote=F)
 #############################################################################
 
 #################################ANALYSIS####################################
@@ -587,7 +589,7 @@ mo.both.out<-mo.fst[mo.fst$Locus %in% hd3.sig$Locus & mo.fst$Chi.p.adj<=0.05, "L
 #Includes scaffolds
 png("../fst.selection.episodes_redo_all.png",height=200,width=300,
 	units="mm",res=300)
-#pdf("../fst.selection.episodes_redo_all.pdf",height=11.5,width=11.5)
+pdf("fst.selection.episodes_redo_all.pdf",height=7.66666,width=11.5)
 par(mfrow=c(2,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
 mo<-fst.plot(mo.plot, ci.dat=c(mo.top1,0),fst.name="MOM.FEM", 
              chrom.name="Chrom", axis.size=0,bp.name="Pos",
@@ -810,7 +812,7 @@ dev.off()
 #dev.off()
 
 png("../kelly_analysis_redo.png",height=200,width=300,units="mm",res=300)
-#pdf("../kelly_analysis_scaffolds.pdf",height=7.66666,width=11.5)
+pdf("kelly_analysis_scaffolds.pdf",height=7.66666,width=11.5)
 par(mfrow=c(2,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
 hd3<-fst.plot(hd, ci.dat=c(100,-100),fst.name="lnp3", chrom.name="chrom"
 	, axis.size=0,bp.name="pos",sig.col=c("black","black"),y.lim=c(0,7),
@@ -1480,6 +1482,7 @@ bio2.dat<-bio2.dat[order(bio2.dat$GO),]
 write.table(bio2.dat,"blast_table_bio2_revised.txt",col.names=T,row.names=F,quote=F)
 
 jpeg("Fig3_blast2go_revisions.jpeg",height=10,width=9,units="in",res=300)
+#pdf("Fig3_blast2go_revisions.pdf",height=10,width=9)
 par(mar=c(2,2,2,2),oma=c(2,2,2,2),cex=2,lwd=1.3)
 p<-ggplot(bio2.dat,aes(factor(GO),Freq,fill = factor(Analysis))) + 
   geom_bar(stat="identity",position="dodge") + 

@@ -4,7 +4,7 @@ gff<-read.delim("annotated_scovelli_scaffolds_March2016.gff",stringsAsFactors = 
 gagp<-read.delim("SSC_genome.agp",stringsAsFactors = F,skip=3,header=F)
 sagp<-read.delim("SSC_scaffolds.agp",stringsAsFactors = F,skip=3,header=F)
 agp<-rbind(gagp,sagp)
-poly.loc<-drad[,c("#CHROM","POS")]
+poly.loc<-drad[,c("#CHROM","POS")]#use keep.vcf
 
 #match polymorphic loci to genome
 poly.agp<-function(poly, agp,gff){
@@ -47,3 +47,15 @@ type[type=="contig,exon,five_prime_UTR,gene,mRNA,three_prime_UTR"]<-"gene"
 type[type=="contig,gene,mRNA"]<-"gene"
 type[is.na(type)]<-"gap"
 barplot(summary(factor(type)))
+
+type.fm<-drad.annotate$type[paste(drad.annotate$Chrom,drad.annotate$Pos,sep=".") %in% fm.sig$comploc]
+type.fm[type.fm=="CDS,contig,exon,five_prime_UTR,gene,mRNA"]<-"five_prime_UTR"
+type.fm[type.fm=="CDS,contig,exon,gene,mRNA"]<-"gene"
+type.fm[type.fm=="CDS,contig,exon,gene,mRNA,three_prime_UTR"]<-"three_prime_UTR"
+type.fm[type.fm=="contig,exon,five_prime_UTR,gene,mRNA"]<-"five_prime_UTR"
+type.fm[type.fm=="contig,exon,gene,mRNA,three_prime_UTR"]<-"three_prime_UTR"
+type.fm[type.fm=="contig,five_prime_UTR"]<-"five_prime_UTR"
+type.fm[type.fm=="contig,exon,five_prime_UTR,gene,mRNA,three_prime_UTR"]<-"gene"
+type.fm[type.fm=="contig,gene,mRNA"]<-"gene"
+type.fm[is.na(type.fm)]<-"gap"
+barplot(summary(factor(type.fm)))
