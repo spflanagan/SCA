@@ -1356,7 +1356,9 @@ supp.names<-c("Analyses","ID.x","NumSNPs","Chrom","BP","Description","Length","X
 supplement.names<-c("Analyses","LocID","NumSNPs","Chrom","Pos","Description","Length","NumHits","e.Value",
                     "sim.mean","NumGO","GO.Name","Enzyme.Codes.list","Seq")
 S1.out<-all.shared[,supp.names]
+S1.out<-S1.out[!duplicated(S1.out[,1:4]),]
 S2.out<-all.unique[,supp.names]
+S2.out<-S2.out[!duplicated(S2.out[,1:4]),]
 write.table(S1.out,"../S1.shared.txt",col.names=supplement.names,row.names=F,quote=F,sep='\t')
 write.table(S2.out,"../S2.shared.txt",col.names=supplement.names,row.names=F,quote=F,sep='\t')
 
