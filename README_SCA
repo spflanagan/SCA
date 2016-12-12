@@ -25,26 +25,55 @@ HOW TO RUN
 	The program currently (5 May 2016) cannot be run interactively or on the command line. I plan to change this in the near future to make it more user-friendly.
 	You must go into the source file and edit the path (where things are), dad_kid_name (name of the father-offspring pairs list file), vcf_name (vcf file name), and summary_name (output vcf) settings.
 	
-********************************gwsca_biallelic***************************************
+
+	
+********************************gwsca_biallelic_vcf***************************************
 PURPOSE
 	This program calculates all pairwise FST estimates between groups within a population.
 NOTES
 	You must provide the program with the assignment of each individual to the groups. This program does not do any filtering, although it does output summary files that will help with filterings steps.
 INPUT
-	a batch_X.sumstats.tsv file output from Stacks' population module (Catchen et al. 2013)
-	A file with each individual's assignment to groups. The file must be tab-delimited and contain five columns: individual ID in the sumstats file, an individual ID (can be the same as the first column), the sex of the individual, the age or other grouping factor, and a phenotype/status of that individual. Assignments should be string factors (e.g. "MALE" or "FEMALE") and non-assignment is a 0. Here are some examples:
-		sample_PRM001_align	PRM001	MAL	ADULT	PREGNANT
-		sample_NPM001_align	NPM001	MAL	ADULT	NONPREGNANT
-		sample_FEM001_align	FEM001	FEM	ADULT	0
-		MOM001_inferred	MOM001	0	0	MOM
-		sample_OFF001_align	OFF001	0	OFFSPRING	0
+	A vcf file
+	A file with each individual's assignment to groups. The file must be tab-delimited and contain six columns: individual ID in the sumstats file, an individual ID (can be the same as the first column), the sex of the individual, the age or other grouping factor, and two columns with phenotype/status of that individual. Assignments should be string factors (e.g. "MALE" or "FEMALE") and non-assignment is a 0. Here are some examples:
+		sample_MOM001_align	MOM001	0	0	0	MOM
+		sample_FEM087_align	FEM087	FEM	ADULT	0	0
+		sample_NPM005_align	NPM005	MAL	ADULT	NONPREG	0
+		sample_OFF015_align	OFF015	0	JUVIE	0	0
+		sample_PRM085_align	PRM085	MAL	ADULT	PREGNANT	0
 OUTPUT
-	File with the Fsts, with a column describingthe locus and then columns for each pairwise Fst comparison
-	Summary file containing columns PopID, Locus Name, expected heterozygosity (Hs), observed heterozygosity (Ho), and the number of alleles (NumAlleles)
-	File with all of the alleles at each locus.
+	File with the Fsts, with a column describing the locus and then columns for each pairwise Fst comparison
+	Summary file containing columns PopID, Chromosome (Chrom), Locus position on chromosome (Pos), Locus Name, Number of individuals genotyped at the locus (N), expected heterozygosity (Hs), observed heterozygosity (Ho), Allele frequency in group 1 (Allele1Freq), Allele frequency in group 2 (Allele2Freq), the frequency of homozygotes for major allele (AA), frequency of heterozygotes (Aa), and frequency of homozygotes for minor allele (aa).
+	A file containing the index (IndCount), individual ID (IndID), population ID (PopIndex) and Pop ID (PopName) for each individual. Individuals belonging to multiple groups will be listed multiple times, once for each group.
 HOW TO RUN
-	The program currently (5 May 2016) cannot be run interactively or on the command line. I plan to change this in the near future to make it more user-friendly.
-	You must go into the source file and edit the sumstats_name (batch_X.sumstats.tsv file name) and ind_info_name (file with individual assignments to groups) settings.
+	The program currently (12 December 2016) cannot be run interactively or on the command line. I plan to change this in the near future to make it more user-friendly.
+	You must go into the source file and edit the filename settings.
+	
+*******************************maternal_alleles_sim**********************************
+PURPOSE
+	To simulate the inference of maternal alleles and identify bias.
+NOTES
+	This is based on actual allele frequencies from a vcf file. The results of the simulation are analyzed in gwsca_biallelic_analysis.R and reported in the supporting information file of the Flanagan & Jones Evolution paper.
+INPUT
+	A vcf file
+	You must specify the number of offspring to simulate and an error rate.
+OUTPUT
+	A tab-delimited file containing the locus ID (Locus), reference allele (Ref), alternative allele (Alt), female allele frequency (FemaleAF), male allele frequency (MaleAF), actual maternal allele frequency (ActualMomAF), and the inferred maternal allele frequency (InferredMomAF)
+HOW TO RUN
+	The program currently (12 December 2016) cannot be run interactively or on the command line. You must go into the source file and edit the filename settings.
+	
+*******************************vcf_to_sca_monnahan**********************************
+PURPOSE
+	The purpose of vcf_to_sca_monnahan is to convert a vcf file into input files for the Monnahan/Kelly python script.
+NOTES
+	You must provide the file with parent-offspring matches. You can provide a whitelist if there is a subset of loci you would like to convert (rather than the entire vcf file).
+INPUT
+	A vcf file
+	A text file containing two tab-separated columns, the first containing the parent ID and the second containing the offspring ID.
+	[Optional] A text file containing a list of Locus IDs to convert. All other loci will not be included in the output.
+OUTPUT
+	A file compatible with ML.2016.pipefish.py
+HOW TO RUN
+	The program currently (12 December 2016) cannot be run interactively or on the command line. You must go into the source file and edit the filename settings.
 	
 ******************************extract_sequence_part***********************************
 PURPOSE
@@ -81,6 +110,158 @@ HOW TO RUN
 		-w:	Optional whitelist name (with path)
 		no arguments:	interactive mode
 		
+********************************gwsca_biallelic***************************************
+PURPOSE
+	This program calculates all pairwise FST estimates between groups within a population.
+NOTES
+	You must provide the program with the assignment of each individual to the groups. This program does not do any filtering, although it does output summary files that will help with filterings steps.
+	THIS WAS NOT USED IN THE PAPER - gwsca_biallelic_vcf WAS USED INSTEAD
+INPUT
+	a batch_X.sumstats.tsv file output from Stacks' population module (Catchen et al. 2013)
+	A file with each individual's assignment to groups. The file must be tab-delimited and contain five columns: individual ID in the sumstats file, an individual ID (can be the same as the first column), the sex of the individual, the age or other grouping factor, and a phenotype/status of that individual. Assignments should be string factors (e.g. "MALE" or "FEMALE") and non-assignment is a 0. Here are some examples:
+		sample_PRM001_align	PRM001	MAL	ADULT	PREGNANT
+		sample_NPM001_align	NPM001	MAL	ADULT	NONPREGNANT
+		sample_FEM001_align	FEM001	FEM	ADULT	0
+		MOM001_inferred	MOM001	0	0	MOM
+		sample_OFF001_align	OFF001	0	OFFSPRING	0
+OUTPUT
+	File with the Fsts, with a column describingthe locus and then columns for each pairwise Fst comparison
+	Summary file containing columns PopID, Locus Name, expected heterozygosity (Hs), observed heterozygosity (Ho), and the number of alleles (NumAlleles)
+	File with all of the alleles at each locus.
+HOW TO RUN
+	The program currently (5 May 2016) cannot be run interactively or on the command line. I plan to change this in the near future to make it more user-friendly.
+	You must go into the source file and edit the sumstats_name (batch_X.sumstats.tsv file name) and ind_info_name (file with individual assignments to groups) settings.
+		
 ######################################################################################
 ***************************************SCRIPTS****************************************
 ######################################################################################
+********************************convert_snps.R**************************************
+PURPOSE
+	This script converts *.snps.tsv files output from Stacks into a more user-friendly format
+NOTES
+	This contains a function, reformat.snp(), which does the reformatting and re-writing of files.
+INPUT
+	You must specify a list of snps files to convert.
+OUTPUT
+	For each file in the list of snps files, a tab-delimited file with the locus ID, major allele, and alternative allele are output. 
+HOW TO RUN
+	Run it line-by-line in R to specify the working directory, etc.
+	
+********************************merge_vcfs.R**************************************
+PURPOSE
+	This script merges two vcf files.
+NOTES
+	This was used to combine the inferred maternal alleles and the genotypes from ddRAD-seq in the Flanagan & Jones paper. This script also removes one redundant individual from the analysis.
+INPUT
+	You need to specify the working directory, the input vcf files, and output file names and locations.
+OUTPUT
+	A single vcf file. 
+HOW TO RUN
+	Run it line-by-line in R to specify the working directory, etc.
+	
+********************************gwsca_biallelic_analysis.R**************************************
+PURPOSE
+	This script contains most of the analysis for the Flanagan & Jones paper in Evolution.
+NOTES
+	This was used to combine the inferred maternal alleles and the genotypes from ddRAD-seq in the Flanagan & Jones paper. This script also removes one redundant individual from the analysis.
+	It contains the following functions:
+		extract.info() combines information from a summary file, Stacks tags files, and Stacks snps files to output a dataframe with the columns: "LocusID","NumSNPsOut","BPs","Pop1AF","Pop1Ho","Pop1Hs",
+			"Pop1N","Pop2AF","Pop2Ho","Pop2Hs","Pop2N"
+		parse.snps() extracts all of the SNPs from a Stacks snps file.
+		sem() calculates the standard error of the mean
+		vcf.cov.loc() calculates the coverage per locus from a vcf file
+	The file is split into the following sections:
+	PRUNING
+		loci with low coverage, genotyped in few individuals, and deviating significantly from hardy weinberg are excluded
+	ANALYSIS
+		Create an initial plot, identify outliers and significant loci
+		Investigate allele frequency changes
+		Compare to Monnahan/Kelly approach
+	PLOT
+		Where Figures 1 and 2 are made.
+	WRITE TO FILE
+		Outliers are written to file, along with their surrounding 5kb regions for blastx.
+	LOOK INTO EXTREME OUTLIERS
+		Investigate coverage etc. in the outliers with extremely high FST values
+	BLAST2GO ANNOTATIONS
+		Match Blast2Go results back up with their loci
+	COMPARE TO PSTFST SIG LOCI
+		This compared the outliers in this analysis to the significant Pst-Fst loci from Flanagan et al. (2016) in Molecular Ecology. Not included in the Flanagan & Jones Evolution paper.
+	MATERNAL ALLELE FREQS SIMULATION
+		This is an analysis of the results from the maternal allele frequency simulation presented in the supplementary material.
+INPUT
+	At the top of the file is a section (FILES) where the major files used can be specified. Some other files are read in during specific analyses.
+OUTPUT
+	A single vcf file. 
+HOW TO RUN
+	Run it line-by-line in R to specify the working directory, etc.
+		
+********************************plotting_functions.R**************************************
+PURPOSE
+	This script contains several functions required to plot genome-wide summary statistics like Fst.
+NOTES
+	plot.genome.wide() and fst.plot() both plot genome-wide statistics. fst.plot() is what was used in Flanagan & Jones to make figures 1 and 2.
+INPUT
+	Each function has its own input requirements.
+OUTPUT
+	genome-wide graphs of summary statistics.
+HOW TO RUN
+	I use this through source() in other R codes.
+	
+********************************GO_plot.R**************************************
+PURPOSE
+	Create a bar plot summarizing the gene ontology results
+NOTES
+	This was used to create figure 3. 
+	This script contains a function, go.plot(), which does all the hard work of plotting and creating a file.
+INPUT
+	You must provide the blast2go results.
+OUTPUT
+	A barplot summarizing the blast2go results.
+HOW TO RUN
+	Run it line-by-line in R to specify the working directory, etc.
+	
+********************************ML.2016.pipefish.py**************************************
+PURPOSE
+	Run the analysis from Monnahan et al. (2015), but adapted for the pipefish case.
+NOTES
+	This should be run in the same directory as where you want the output to go.
+INPUT
+	Run it with the output from vcf_to_sca_monnahan
+OUTPUT
+	ML.2016.pipes.calling1.txt with the parameter estimates, maximum log-likelihoods, and likelihood ratio tests.
+	Detail.output.txt for diagnostics
+HOW TO RUN
+	On the command line: python ML.2016.pipefish.py input_file.txt
+
+********************************plot_structure.R**************************************
+PURPOSE
+	Create a Structure plot
+NOTES
+	This was not included in the Flanagan & Jones analysis, but could be useful for others.
+	It contains a structure plotting function
+INPUT
+	Structure files
+OUTPUT
+	A Structure plot
+HOW TO RUN
+	Run it line-by-line in R to specify the working directory, etc.
+	
+######################################################################################
+*********************************SHELL SCRIPTS****************************************
+######################################################################################
+run_bowtie.sh and bowtie_rerun_duplicates.sh
+	Runs bowtie2 on all of the samples
+run_refmap_ddrad.sh
+	Runs Stacks on the SCA samples.
+extract_sequence_parts.sh
+	Runs extract_sequence_parts on 5kb regions surrounding significant loci
+	
+**NOT USED IN THE Flanagan & Jones Evolution paper**
+extract_structure_info.sh
+	Extracts structure information using a program parse_structure_output in another repository.
+run_process_alleles_files.sh
+	Runs the program process_alleles_files (used if not using biallelic SNPs)
+run_convert_matches.sh, matches.sh
+	Runs convert_matches, a program that converts matches files from Stacks into a more user-friendly format.
+

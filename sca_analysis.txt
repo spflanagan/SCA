@@ -18,6 +18,7 @@ Outline of the approach:
 			-> vcf_to_sca_monnahan
 			-> ML.2016.pipefish.py
 			-> gwsca_biallelic_analysis.R
+	#NOT PART OF THE PAPER:
 	haplotypes:
 		-> convert_matches 
 		-> infer_maternal_contribution 
