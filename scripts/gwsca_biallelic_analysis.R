@@ -36,6 +36,11 @@ vcf<-read.delim("../stacks/batch_1.vcf",comment.char="#",sep='\t',header=F)
 	header<-scan("../stacks/batch_1.vcf",what="character")[header.start:
 	(header.start+ncol(vcf)-1)]
 	colnames(vcf)<-header
+keep.vcf<-read.delim("keep.vcf",comment.char="#",sep='\t',header=F)
+header.start<-grep("#CHROM",scan("keep.vcf",what="character"))
+header<-scan("keep.vcf",what="character")[header.start:
+                                                         (header.start+ncol(vcf)-1)]
+colnames(vcf)<-header
 scaffs<-levels(as.factor(vcf[,1]))
   scaffs[1:22]<-lgs
 #############################################################################
@@ -163,6 +168,39 @@ vcf.cov.loc<-function(vcf.row,subset){
                     NumHet=het,PropHet=het/pres,TotalNumReads = tot,stringsAsFactors = F))
 }
 
+
+calc.afs.vcf<-function(vcf.row){
+  #use in conjunction with apply
+  #e.g. apply(vcf,1,afs.vcf)
+  gt1<-unlist(lapply(vcf.row,function(x){ 
+    c<-strsplit(as.character(x),split=":")[[1]][1]
+    return(c)
+  }))
+  gt1<-gt1[gt1 %in% c("0/0","1/0","0/1","1/1")]
+  gt1[gt1=="1/0"]<-"0/1"
+  gt1<-gsub(pattern = "0",replacement = vcf.row["REF"],gt1)
+  gt1<-gsub(pattern = "1",replacement = vcf.row["ALT"],gt1)
+  al1<-unlist(strsplit(as.character(gt1),split = "/"))
+  #calculate frequencies
+  freq1<-summary(factor(al1))/sum(summary(factor(al1)))	
+  if(length(freq1)==1)
+  {
+    if(names(freq1)==vcf.row["REF"])
+    {
+      freq1<-c(freq1,0)
+      names(freq1)<-unlist(c(vcf.row["REF"],vcf.row["ALT"]))
+    }
+    else
+    {
+      freq1<-c(freq1,0)
+      names(freq1)<-unlist(c(vcf.row["ALT"],vcf.row["REF"]))
+    }
+  }
+  return(data.frame(Chrom=vcf.row["#CHROM"], Pos=vcf.row["POS"], Ref=vcf.row["REF"],
+                    RefFreq=freq1[names(freq1) %in% vcf.row["REF"]],
+                    Alt=vcf.row["ALT"],AltFreq=freq1[names(freq1) %in% vcf.row["ALT"]]))
+}
+
 #############################################################################
 
 ###################################PRUNING###################################
@@ -233,6 +271,13 @@ write.table(keep.vcf,"keep.vcf",col.names=T,row.names=F,quote=F)
 #############################################################################
 
 #################################ANALYSIS####################################
+keep.vcf<-read.delim("keep.vcf",comment.char="#",sep=" ",header=F)
+header.start<-grep("#CHROM",scan("keep.vcf",what="character"))
+header<-scan("keep.vcf",what="character")[header.start:
+  (header.start+ncol(vcf)-1)]
+colnames(keep.vcf)<-header
+keep.snps<-paste(keep.vcf$`#CHROM`,keep.vcf$POS,sep=".")
+
 aj.plot<-aj.prune[order(aj.prune$ADULT.JUVIE),] #ascending
 aj.plot<-aj.plot[aj.plot$SNP %in% keep.snps,]
 aj.top1<-aj.plot[round(nrow(aj.plot)*0.99),"ADULT.JUVIE"]
@@ -291,18 +336,6 @@ fm.cov<-sca.cov[sca.cov$SNP %in% fm.out$SNP,]
 mo.cov<-sca.cov[sca.cov$SNP %in% mo.out$SNP,]
 
 #I want to look only at the significant loci...
-fm.sig<-fm.sig[fm.sig$Chi.p.adj<=0.05,]
-fm.sig$RADloc<-gsub("(\\w+.*\\.\\d+)\\.\\d+","\\1",fm.sig$SNP)
-fm.sig$comploc<-gsub("(\\w+.*)\\.\\d+(\\.\\d+)","\\1\\2",fm.sig$SNP)
-mo.sig<-mo.sig[mo.sig$Chi.p.adj<=0.05,]
-mo.sig$RADloc<-gsub("(\\w+.*\\.\\d+)\\.\\d+","\\1",mo.sig$SNP)
-fmmo<-fm.sig[fm.sig$SNP %in% mo.sig$SNP,]
-fm.fstlrt<-fm.fst[fm.fst$Locus %in% hd0.sig$Locus & fm.fst$Chi.p.adj<=0.05,]
-fm.fstlrt$RADloc<-gsub("(\\w+.*\\.\\d+)\\.\\d+","\\1",fm.fstlrt$SNP)
-fm.sig.un<-fm.sig[!(fm.sig$SNP %in% fmmo$SNP) & !(fm.sig$SNP %in% fm.fstlrt$SNP),]
-mo.sig.un<-mo.sig[!(mo.sig$SNP %in% fmmo$SNP),]
-fml.un<-hd0.sig[!(hd0.sig$Locus %in% fm.fst$Locus),]
-shared.sig<-fm.sig[fm.sig$SNP %in% mo.sig$SNP & fm.sig$comploc %in% hd0.sig$Locus,]
 
 #####EVALUATE SAMPLE SIZE FOR HIGH FSTS#####
 gw.sum$CompLoc<-paste(gw.sum$Chrom,gw.sum$LocID,gw.sum$Pos,sep=".")
@@ -360,7 +393,6 @@ colnames(mo.fst)<-c("SNP","FemN","MomN","Outlier", "Fst")
 mo.fst$Chi<-2*(mo.fst$FemN+mo.fst$MomN)*mo.fst$Fst
 mo.fst$Chi.p<-1-pchisq(mo.fst$Chi,1)
 mo.fst$Chi.p.adj<-p.adjust(mo.fst$Chi.p,method="BH")
-
 
 ##What's special about those shared by fm and mo as opposed to those unique?
 #get maj allele freqs and observed heterozygosity
@@ -582,6 +614,20 @@ mo.fst$Locus<-gsub("(\\d+)\\.(\\d+)\\.(\\d+)", "\\1.\\3",mo.fst$SNP)
 fm.both.out<-fm.fst[fm.fst$Locus %in% hd0.sig$Locus & fm.fst$Chi.p.adj<=0.05,"Locus"]
 mo.both.out<-mo.fst[mo.fst$Locus %in% hd3.sig$Locus & mo.fst$Chi.p.adj<=0.05, "Locus"]
 
+
+#Significant loci
+fm.sig<-fm.sig[fm.sig$Chi.p.adj<=0.05,]
+fm.sig$RADloc<-gsub("(\\w+.*\\.\\d+)\\.\\d+","\\1",fm.sig$SNP)
+fm.sig$comploc<-gsub("(\\w+.*)\\.\\d+(\\.\\d+)","\\1\\2",fm.sig$SNP)
+mo.sig<-mo.sig[mo.sig$Chi.p.adj<=0.05,]
+mo.sig$RADloc<-gsub("(\\w+.*\\.\\d+)\\.\\d+","\\1",mo.sig$SNP)
+fmmo<-fm.sig[fm.sig$SNP %in% mo.sig$SNP,]
+fm.fstlrt<-fm.fst[fm.fst$Locus %in% hd0.sig$Locus & fm.fst$Chi.p.adj<=0.05,]
+fm.fstlrt$RADloc<-gsub("(\\w+.*\\.\\d+)\\.\\d+","\\1",fm.fstlrt$SNP)
+fm.sig.un<-fm.sig[!(fm.sig$SNP %in% fmmo$SNP) & !(fm.sig$SNP %in% fm.fstlrt$SNP),]
+mo.sig.un<-mo.sig[!(mo.sig$SNP %in% fmmo$SNP),]
+fml.un<-hd0.sig[!(hd0.sig$Locus %in% fm.fst$Locus),]
+shared.sig<-fm.sig[fm.sig$SNP %in% mo.sig$SNP & fm.sig$comploc %in% hd0.sig$Locus,]
 
 #############################################################################
 
