@@ -798,7 +798,8 @@ int main()
 			overall_tracker.q = overall_tracker.q / (2 * overall_tracker.counter);
 			overall_tracker.exp_het = 2 * overall_tracker.p*overall_tracker.q;
 			ht = overall_tracker.exp_het;
-			fst = (ht - ((sd_het + dd_het) / 2)) / ht;
+			double hs = ((sd_het*sd_tracker.counter) + (dd_het*dd_tracker.counter)) / (dd_tracker.counter + sd_tracker.counter);
+			fst = (ht - hs) / ht;
 			summ_stats << '\t' << dd_tracker.counter << '\t' << p << '\t' << dd_act_het << '\t' << dd_het << '\t' << ht << '\t' <<fst;
 		}//if it's a shared locus
 		else

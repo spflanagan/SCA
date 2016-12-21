@@ -59,8 +59,8 @@ comb.files<-list.files(pattern="summstats.comb")
 
 #Summstats plots
 summstats.plot(pcr.files,file.name="fsts_summstats_pcr.png")
-summstats.plot(mig.files,file.name="fsts_mutation.png")
-summstats.plot(shear.list,file.name="fsts_shear.png")
+summstats.plot(mut.files,file.name="fsts_mutation.png")
+summstats.plot(shear.files,file.name="fsts_shear.png")
 
 
 ##Rearrange data for plots
@@ -141,8 +141,8 @@ for(i in 1:length(comb.files))
   fsts<-as.numeric(dat$Fst[dat$Fst!=-1])
   fsts<-fsts[!is.na(fsts)]
   name<-gsub("ssc_insilico_summstats.comb.(\\w+.*).txt","\\1",comb.files[i])
-  comb.dat<-data.frame(rbind(comb.dat,cbind(Description=rep(name,length(fsts)),
-    Fst=as.numeric(fsts))),stringsAsFactors=FALSE)
+  comb.dat<-rbind(comb.dat,cbind(Description=rep(name,length(fsts)),
+    Fst=fsts))
 }
 comb.dat$Fst<-as.numeric(as.character(comb.dat$Fst))
 ###PLOTS####
