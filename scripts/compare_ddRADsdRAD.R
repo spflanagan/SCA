@@ -204,6 +204,7 @@ fst.one.vcf<-function(vcf.row,group1,group2, cov.thresh=0.2){
   return(fst)
 }
 #fsts.both<-do.call("rbind",apply(both.sub,1,fst.one.vcf,group1=c(locus.info,o.ind),group2=c(locus.info,d.ind),cov.thresh=0.5))
+
 calc.afs.vcf<-function(vcf.row){
   #use in conjunction with apply
   #e.g. apply(vcf,1,afs.vcf)
