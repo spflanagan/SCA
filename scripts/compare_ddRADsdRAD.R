@@ -6,338 +6,9 @@
 rm(list=ls())
 library(ggplot2)
 setwd("~/Projects/SCA/results")
-source("../scripts/plotting_functions.R")
+source("../../gwscaR/gwscaR.R")
 both<-parse.vcf("stacks_both/batch_3.vcf")
-#################FUNCTIONS####################
-parse.vcf<-function(filename){
-  vcf<-read.delim(filename,comment.char="#",sep='\t',header=F,stringsAsFactors = F)
-  header.start<-grep("#CHROM",scan(filename,what="character"))
-  header<-scan(filename,what="character")[header.start:(header.start+ncol(vcf)-1)]
-  colnames(vcf)<-header
-  return(vcf)
-}
 
-vcf.cov.loc<-function(vcf.row,subset){
-  cov<-unlist(lapply(vcf.row[subset],function(x){ 
-    c<-strsplit(as.character(x),split=":")[[1]][3]
-    return(c)
-  }))
-  miss<-length(cov[cov==".,."])
-  pres<-length(cov[cov!=".,."])
-  ref<-sum(as.numeric(unlist(lapply(cov[cov!=".,."],
-                                    function(x){
-                                      strsplit(as.character(x),",")[[1]][1] 
-                                    }))))/pres
-  alt<-sum(as.numeric(unlist(lapply(cov[cov!=".,."],
-                                    function(x){
-                                      strsplit(as.character(x),",")[[1]][2] 
-                                    }))))/pres
-  tot<-sum(as.numeric(unlist(lapply(cov[cov!=".,."],
-                                    function(x){
-                                      as.numeric(strsplit(as.character(x),",")[[1]][1]) + 
-                                        as.numeric(strsplit(as.character(x),",")[[1]][2])
-                                    }))))
-  var.cov<-var(as.numeric(unlist(lapply(cov[cov!=".,."],
-                                        function(x){
-                                          as.numeric(strsplit(as.character(x),",")[[1]][1]) + 
-                                            as.numeric(strsplit(as.character(x),",")[[1]][2])
-                                        }))))
-  het<-unlist(lapply(vcf.row[subset],function(x){ 
-    strsplit(as.character(x),split=":")[[1]][1]
-  }))
-  het<-length(het[het=="0/1" | het=="1/0"])
-  return(data.frame(Chrom=vcf.row[1],Pos=vcf.row["POS"],Locus=vcf.row["ID"],
-                    NumMissing=miss, NumPresent=pres,PropMissing=miss/(miss+pres),
-                    AvgCovRef=ref,AvgCovAlt=alt, AvgCovRatio=ref/alt,AvgCovTotal=tot/pres, CovVariance=var.cov,
-                    NumHet=het,PropHet=het/pres,TotalNumReads = tot,stringsAsFactors = F))
-}
-
-vcf.cov.ind<-function(vcf.col){
-  cov<-unlist(lapply(vcf.col,function(x){ 
-    c<-strsplit(as.character(x),split=":")[[1]][3]
-    return(c)
-  }))
-  miss<-length(cov[cov==".,."])
-  pres<-length(cov[cov!=".,."])
-  ref<-sum(as.numeric(unlist(lapply(cov[cov!=".,."],
-                                    function(x){
-                                      strsplit(as.character(x),",")[[1]][1] 
-                                    }))))/pres
-  alt<-sum(as.numeric(unlist(lapply(cov[cov!=".,."],
-                                    function(x){
-                                      strsplit(as.character(x),",")[[1]][2] 
-                                    }))))/pres
-  tot<-sum(as.numeric(unlist(lapply(cov[cov!=".,."],
-                                    function(x){
-                                      as.numeric(strsplit(as.character(x),",")[[1]][1]) + 
-                                        as.numeric(strsplit(as.character(x),",")[[1]][2])
-                                    }))))/pres
-  het<-unlist(lapply(vcf.col,function(x){ 
-    strsplit(as.character(x),split=":")[[1]][1]
-  }))
-  het<-length(het[het=="0/1" | het=="1/0"])
-  return(list(NumMissing=miss,NumPresent=pres,AvgCovRef=ref,AvgCovAlt=alt,AvgCovTot=tot,PropHet=het/pres, NumReads=tot*pres))
-}
-
-fst.two.vcf<-function(vcf1.row,vcf2,match.index, cov.thresh=0.2){
-  #match.index is the column used to match the two
-  #use in conjunction with apply
-  #e.g. apply(vcf,1,fst.two.vcf,vcf2=vcf.2,match.index="SNP")
-  hs1<-hs2<-hs<-ht<-0
-  freqall<-gt1<-gt2<-NULL
-  vcf2.row<-vcf2[vcf2[,match.index]%in%vcf1.row[match.index],]
-  if(nrow(vcf2.row)>1)#first make sure we have one reading per locus
-  {
-    print("Multiple instances in vcf2.")
-    fst<-NA
-  }
-  else{
-    if(nrow(vcf2.row)==0)
-    {
-      print("No instances in vcf2.")
-      fst<-NA
-    }else #we're good to go
-    {
-      al1<-vcf.alleles(vcf1.row)
-      al2<-vcf.alleles(vcf2.row)
-      if((length(al1)/2)/(length(vcf1.row)-10)>=cov.thresh & (length(al2)/2)/(ncol(vcf2.row)-10)>=cov.thresh){
-        #calculate frequencies
-        fst<-calc.fst.wright(al1,al2)
-      }else {
-        # print(paste(vcf.row["#CHROM"],vcf.row["POS"],"fails cov thresh"),sep=" ")
-        fst<-data.frame(Hs1=NA,Hs2=NA,Hs=NA,Ht=NA,Fst=NA,NumAlleles=length(factor(c(al1,al2))),
-                        Num1=length(al1),Num2=length(al2)) #it doesn't pass the coverage threshold
-      }
-    }#good to go
-  }
-  return(data.frame(Chrom=vcf1.row["#CHROM"],Pos=vcf1.row["POS"],
-                    Hs1=fst["Hs1"],Hs2=fst["Hs2"],Hs=fst["Hs"],Ht=fst["Ht"],Fst=as.numeric(fst["Fst"]),NumAlleles=fst["NumAlleles"],
-                    Num1=fst["Num1"],Num2=fst["Num2"],stringsAsFactors=FALSE))
-}#end function
-
-vcf.alleles<-function(vcf.row){
-  gt1<-unlist(lapply(vcf.row,function(x){ 
-    c<-strsplit(as.character(x),split=":")[[1]][1]
-    return(c)
-  }))
-  gt1<-gt1[gt1 %in% c("0/0","1/0","0/1","1/1")]
-  gt1[gt1%in%"1/0"]<-"0/1"
-  gt1<-gsub(pattern = "0",replacement = vcf.row["REF"],gt1)
-  gt1<-gsub(pattern = "1",replacement = vcf.row["ALT"],gt1)
-  al1<-unlist(strsplit(as.character(gt1),split = "/"))
-  return(al1)
-}
-
-calc.fst.nei<-function(al1,al2){
-  hw<-hb<-fst<-0
-  freq1<-summary(factor(al1))/sum(summary(factor(al1)))	
-  freq2<-summary(factor(al2))/sum(summary(factor(al2)))	
-  al12<-c(al1,al2)
-  freqall<-summary(as.factor(al12))/
-    sum(summary(as.factor(al12)))
-  if(length(freq1)>1 & length(freq2)>1){ #both must be polymorphic
-    hs1<-1-sum(freq1*freq1)
-    hs2<-1-sum(freq2*freq2)
-    hw<-sum(hs1,hs2)
-    hb<-1-sum(freqall*freqall)
-    fst<-1-(hw/(2*hb))
-  } else {
-    hs1<-1-sum(freq1*freq1)
-    hs2<-1-sum(freq2*freq2)
-    if(length(freqall)<=1){ 
-      hw<-1
-      fst<-NA
-    } else{ 
-      hw<-1-sum(freqall*freqall)
-      fst<-NA
-    }
-  }
-  return(data.frame(Hs1=hs1,Hs2=hs2,Hs=hb,Ht=hw,Fst=as.numeric(fst),NumAlleles=length(factor(freqall)),
-                    Num1=length(al1),Num2=length(al2)))
-}
-
-
-calc.fst.wright<-function(al1,al2){
-  hs<-ht<-fst<-0
-  freq1<-summary(factor(al1))/sum(summary(factor(al1)))	
-  freq2<-summary(factor(al2))/sum(summary(factor(al2)))	
-  al12<-c(al1,al2)
-  freqall<-summary(as.factor(al12))/
-    sum(summary(as.factor(al12)))
-  if(length(freq1)>1 & length(freq2)>1){ #both must be polymorphic
-    hs1<-1-sum(freq1*freq1)
-    hs2<-1-sum(freq2*freq2)
-    hs<-(hs1*length(al1)+hs2*length(al2))/(length(al1)+length(al2))
-    ht<-1-sum(freqall*freqall)
-    fst<-(ht-hs)/ht
-  } else {
-    hs1<-1-sum(freq1*freq1)
-    hs2<-1-sum(freq2*freq2)
-    if(length(freqall)<=1){ 
-      ht<-1
-      fst<-NA
-    } else{ 
-      ht<-1-sum(freqall*freqall)
-      fst<-NA
-    }
-  }
-  return(data.frame(Hs1=hs1,Hs2=hs2,Hs=hs,Ht=ht,Fst=as.numeric(fst),NumAlleles=length(factor(freqall)),
-                    Num1=length(al1),Num2=length(al2)))
-}
-
-fst.one.vcf<-function(vcf.row,group1,group2, cov.thresh=0.2){
-  al1<-vcf.alleles(vcf.row[group1])
-  al2<-vcf.alleles(vcf.row[group2])
-  if(((length(al2)/2)/(length(group2)-10))>=cov.thresh & ((length(al1)/2)/(length(group1)-10))>=cov.thresh){
-    # print(paste(vcf.row["#CHROM"],vcf.row["POS"],"passes cov thresh"),sep=" ")
-    fst<-calc.fst.wright(al1,al2)
-  }else {
-    # print(paste(vcf.row["#CHROM"],vcf.row["POS"],"fails cov thresh"),sep=" ")
-    fst<-data.frame(Hs1=NA,Hs2=NA,Hs=NA,Ht=NA,Fst=NA,NumAlleles=length(summary(factor(c(al1,al2)))),
-                    Num1=length(al1),Num2=length(al2)) #it doesn't pass the coverage threshold
-  }
-  
-  return(data.frame(Chrom=vcf.row["#CHROM"],Pos=vcf.row["POS"],
-                    Hs1=fst["Hs1"],Hs2=fst["Hs2"],Hs=fst["Hs"],Ht=fst["Ht"],Fst=as.numeric(fst["Fst"]),NumAlleles=fst["NumAlleles"],
-                    Num1=fst["Num1"],Num2=fst["Num2"],stringsAsFactors=FALSE))
-  
-  return(fst)
-}
-#fsts.both<-do.call("rbind",apply(both.sub,1,fst.one.vcf,group1=c(locus.info,o.ind),group2=c(locus.info,d.ind),cov.thresh=0.5))
-
-calc.afs.vcf<-function(vcf.row){
-  #use in conjunction with apply
-  #e.g. apply(vcf,1,afs.vcf)
-  al1<-vcf.alleles(vcf.row)
-  #calculate frequencies
-  freq1<-summary(factor(al1))/sum(summary(factor(al1)))	
-  if(length(freq1)==1)
-  {
-    if(names(freq1)==vcf.row["REF"])
-    {
-      freq1<-c(freq1,0)
-      names(freq1)<-unlist(c(vcf.row["REF"],vcf.row["ALT"]))
-    }
-    else
-    {
-      freq1<-c(freq1,0)
-      names(freq1)<-unlist(c(vcf.row["ALT"],vcf.row["REF"]))
-    }
-  }
-  return(data.frame(Chrom=vcf.row["#CHROM"], Pos=vcf.row["POS"], Ref=vcf.row["REF"],
-                    RefFreq=freq1[names(freq1) %in% vcf.row["REF"]],
-                    Alt=vcf.row["ALT"],AltFreq=freq1[names(freq1) %in% vcf.row["ALT"]]))
-}
-
-#fst.one.vcf<-function(vcf.row,group1,group2, cov.thresh=0.2){
-#  hs1<-hs2<-hs<-ht<-0
-#  freqall<-gt1<-gt2<-NULL
-#  al1<-vcf.alleles(vcf.row[group1])
-#  gt1<-unlist(lapply(vcf.row[group1],function(x){ 
-#    c<-strsplit(as.character(x),split=":")[[1]][1]
-#    return(c)
-#  }))
-#  num.ind<-length(gt1)
-#  gt1<-gt1[gt1 %in% c("0/0","1/0","0/1","1/1")]
-#  gt1[gt1=="1/0"]<-"0/1"
-#  gt1<-gsub(pattern = "0",replacement = vcf.row["REF"],gt1)
-#  gt1<-gsub(pattern = "1",replacement = vcf.row["ALT"],gt1)
-#  if(length(gt1)/num.ind>=cov.thresh){
-#    al1<-unlist(strsplit(as.character(gt1),split = "/"))
-#    gt2<-unlist(lapply(vcf.row[group2],function(x){ 
-#      c<-strsplit(as.character(x),split=":")[[1]][1]
-#      return(c)
-#    }))
-#    num.ind<-length(gt2)
-#    gt2<-gt2[gt2 %in% c("0/0","1/0","0/1","1/1")]
-#    gt2[gt2=="1/0"]<-"0/1"
-#    gt2<-gsub(pattern = "0",replacement = vcf.row["REF"],gt2)
-#    gt2<-gsub(pattern = "1",replacement = vcf.row["ALT"],gt2)
-#    if(length(gt2)/num.ind>=cov.thresh){
-#      al2<-unlist(strsplit(as.character(gt2),split="/"))
-#      #calculate frequencies
-#      freq1<-summary(factor(al1))/sum(summary(factor(al1)))	
-#      freq2<-summary(factor(al2))/sum(summary(factor(al2)))	
-#      freqall<-summary(as.factor(c(al1,al2)))/
-#        sum(summary(as.factor(c(al1,al2))))
-#      hets<-c(names(freq1)[2],names(freq2)[2])
-#      if(length(freq1)>1 & length(freq2)>1){ #both must be polymorphic
-#        hs1<-2*freq1[1]*freq1[2]
-#        hs2<-2*freq2[1]*freq2[2]
-#        hs<-mean(c(hs1,hs2))
-#        ht<-2*freqall[1]*freqall[2]
-#        fst<-(ht-hs)/ht
-#      } else {
-#        hs1<-1-sum(freq1*freq1)
-#        hs2<-1-sum(freq2*freq2)
-#        if(length(freqall)<=1){ fst<-0 }
-#        else{ 
-#          ht<-2*freqall[1]*freqall[2]
-#          fst<-NA
-#        }
-#      }
-#    }
-#    else {
-#      fst<-NA #gt2 doesn't pass coverage threshold
-#    }
-#  }else {
-#    fst<-NA #it doesn't pass the coverage threshold
-#  }
-
-#  return(data.frame(Chrom=vcf.row["#CHROM"],Pos=vcf.row["POS"],
-#                  Hs1=hs1,Hs2=hs2,Hs=hs,Ht=ht,Fst=fst,NumAlleles=length(factor(freqall)),
-#                  Num1=length(gt1),Num2=length(gt2)))
-#}#end function fst.one.vcf
-
-choose.one.snp<-function(vcf){
-  keep.col<-colnames(vcf)
-  vcf$id.pos<-paste(vcf$ID,vcf$POS,sep=".")
-  sub.vcf<-tapply(vcf$id.pos,vcf$ID, sample,size=1)
-  new.vcf<-vcf[vcf$id.pos %in% sub.vcf,keep.col]
-  return(new.vcf)
-}
-
-
-
-fst.one.plink<-function(raw,group1, group2, cov.thresh=0.2){
-  fst.dat<-data.frame(Locus=character(),
-                      Hs1=numeric(),Hs2=numeric(),Hs=numeric(),Ht=numeric(),Fst=numeric(),NumAlleles=numeric(),
-                      Num1=numeric(),Num2=numeric(),stringsAsFactors=F)
-  grp1<-raw[raw$IID %in% group1,]
-  grp2<-raw[raw$IID %in% group2,]
-  for(i in 7:ncol(raw)){
-    na1<-length(grp1[is.na(grp1[,i]),i])/nrow(grp1)
-    na2<-length(grp2[is.na(grp2[,i]),i])/nrow(grp2)
-    gt1<-grp1[!is.na(grp1[,i]),i]
-    gt2<-grp2[!is.na(grp2[,i]),i]
-    gt1[gt1=="1"]<-"1/2"
-    gt1[gt1=="2"]<-"2/2"
-    gt1[gt1=="0"]<-"1/1"
-    gt2[gt2=="1"]<-"1/2"
-    gt2[gt2=="2"]<-"2/2"
-    gt2[gt2=="0"]<-"1/1"
-    
-    if(na1<=(1-cov.thresh)){
-      al1<-unlist(strsplit(as.character(gt1),split = "/"))
-      if(na2<=(1-cov.thresh)){
-        al2<-unlist(strsplit(as.character(gt2),split="/"))
-        #calculate frequencies
-        fst<-calc.fst.wright(al1,al2)
-      }
-      else {
-        fst<-data.frame(Hs1=NA,Hs2=NA,Hs=NA,Ht=NA,Fst=NA,NumAlleles=length(factor(c(al1,al2))),
-                        Num1=length(al1),Num2=length(al2)) #gt2 doesn't pass coverage threshold
-      }
-    }else {
-      fst<-data.frame(Hs1=NA,Hs2=NA,Hs=NA,Ht=NA,Fst=NA,NumAlleles=length(factor(c(al1,al2))),
-                      Num1=length(al1),Num2=length(al2)) #it doesn't pass the coverage threshold
-    }
-    fst.dat[(i-6),]<-cbind(as.character(colnames(raw)[i]),fst["Hs1"],fst["Hs2"],as.numeric(fst["Hs"]),fst["Ht"],
-                           as.numeric(fst["Fst"]),fst["NumAlleles"],fst["Num1"],fst["Num2"])
-    
-  }
-  return(fst.dat)
-}#end fst.one.plink
 #################FILES#################
 drad<-parse.vcf("drad.vcf")
 orad<-parse.vcf("orad.vcf")
@@ -1215,6 +886,153 @@ fst.aov.dat<-data.frame(Fst=c(a.od$Fst,sd.od$Fst,dd.od$Fst,a.odb$Fst,sd.odb$Fst,
                                    rep("Filtered",(nrow(a.odc)+nrow(sd.odc)+nrow(dd.odc))),
                                    rep("Filtered",(nrow(a.odbc)+nrow(sd.odbc)+nrow(dd.odbc)))))
 fst.aov<-aov(Fst~Type*Filtered,dat=fst.aov.dat)
+
+##############################SCA##################################
+#BOTH
+setwd("both_sca/")
+#INFER MATERNAL ALLELES
+
+#SCA
+locus.info<-c("CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT","SNP")
+vcf1<-parse.vcf("both_maternal.vcf")
+#rename moms
+names1<-colnames(vcf1)
+names1[grep("MOM",names1)]<-gsub("MOM.*PRM(\\d{3})(_align)?","MOM\\1",names1[grep("MOM",names1)])
+colnames(vcf1)<-names1
+vcf2.gt<-extract.gt.vcf(both)
+merge<-merge.vcfs(vcf1,vcf2.gt)
+both.keep<-b.cov[b.cov$AvgCovTotal > 5 & b.cov$AvgCovTotal <= 20,"SNP"]
+merge$SNP<-paste(merge$CHROM,merge$POS,sep=".")
+merge<-merge[merge$SNP %in% both.keep,]
+females<-colnames(merge[grep("FEM",colnames(merge))])
+males<-c(colnames(merge[grep("PRM",colnames(merge))]),colnames(merge[grep("NPM",colnames(merge))]))
+moms<-colnames(merge[grep("MOM",colnames(merge))])
+both.sexsel<-gwsca(merge,locus.info,females,moms)
+bss.sig<-both.sexsel$index[both.sexsel$Chi.p.adj <= 0.05]
+both.viasel<-gwsca(merge,locus.info,females,males)
+bvs.sig<-both.viasel$index[both.viasel$Chi.p.adj <= 0.05]
+
+#DRAD
+drad.merge<-read.table("../biallelic/biallelic_merge.vcf",sep='\t',header=T)
+drad.keep<-d.cov[d.cov$AvgCovTotal > 5 & d.cov$AvgCovTotal <= 20,"SNP"]
+drad.merge$SNP<-paste(drad.merge$CHROM,drad.merge$POS,sep=".")
+drad.merge<-drad.merge[drad.merge$SNP %in% drad.keep,]
+#rename moms
+names1<-colnames(drad.merge)
+names1[grep("MOM",names1)]<-gsub("MOM.*PRM(\\d{3})(_align)?","MOM\\1",names1[grep("MOM",names1)])
+colnames(drad.merge)<-names1
+locus.info<-c("CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT","SNP")
+females<-colnames(drad.merge[grep("FEM",colnames(drad.merge))])
+males<-c(colnames(drad.merge[grep("PRM",colnames(drad.merge))]),colnames(drad.merge[grep("NPM",colnames(drad.merge))]))
+moms<-colnames(drad.merge[grep("MOM",colnames(drad.merge))])
+drad.sexsel<-gwsca(drad.merge,locus.info,females, moms)
+drad.sexsel$index<-paste(drad.sexsel$Chrom,drad.sexsel$Pos,sep=".")
+dss.sig<-drad.sexsel$index[drad.sexsel$Chi.p.adj <= 0.05]
+drad.viasel<-gwsca(drad.merge,locus.info,females,males)
+dvs.sig<-drad.viasel$index[drad.viasel$Chi.p.adj <= 0.05]
+
+
+#SRAD
+locus.info<-c("#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT","SNP")
+orad.keep<-o.cov[o.cov$AvgCovTotal > 5 & o.cov$AvgCovTotal <= 20,"SNP"]
+orad<-orad[orad$SNP %in% orad.keep,]
+females<-colnames(orad[grep("FEM",colnames(orad))])
+males<-colnames(orad[grep("PRM",colnames(orad))])
+orad.viasel<-gwsca(orad,locus.info,females,males)
+ovs.sig<-orad.viasel$index[orad.viasel$Chi.p.adj <= 0.05]
+
+#PLOT
+lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
+       "LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
+       "LG22")
+lgn<-seq(1,22)
+scaffs<-levels(as.factor(both[,"#CHROM"]))
+scaffs[1:22]<-lgs
+
+png("SCA_radseq.png",height=10,width=7.5,units="in",res=300)
+par(mfrow=c(2,3),mar=c(2,1.5,2,1),oma=c(1,2,1,0.5))
+##ROW 1: Males vs Females
+####both sdRAD and ddRAD (RAD)
+vs<-fst.plot(fst.dat=both.viasel[!is.na(both.viasel$Fst),],ci.dat = c(-10,10),sig.col=c("black","black"), 
+  fst.name="Fst", chrom.name="Chrom", bp.name="Pos",y.lim=c(0,1),axis.size=1,
+  groups=as.factor(scaffs[scaffs %in% levels(factor(both.viasel$Chrom[!is.na(both.viasel$Fst)]))]))
+points(vs$Pos[vs$index %in% bvs.sig$SNP], 
+       vs$Fst[vs$Locus %in% bvs.sig$SNP],
+       col="green4",pch=19,cex=0.75)
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(vs[vs$Chrom ==lgs[i],"Pos"]),y=-0.05,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(vs[vs$Chrom ==lgs[i],"Pos"])
+}
+mtext("Both ddRAD-seq and sdRAD-seq",3,cex=0.75,line=1)
+
+####ddRAD-seq only
+vsd<-fst.plot(fst.dat=drad.viasel[!is.na(drad.viasel$Fst),],ci.dat = c(-10,10),sig.col=c("black","black"), 
+              fst.name="Fst", chrom.name="Chrom", bp.name="Pos",y.lim=c(0,1),axis.size=1,
+              groups=as.factor(scaffs[scaffs %in% levels(factor(drad.viasel$Chrom[!is.na(drad.viasel$Fst)]))]))
+points(vsd$Pos[vsd$index %in% vsd.sig$SNP], 
+       vsd$Fst[vsd$Locus %in% vsd.sig$SNP],
+       col="green4",pch=19,cex=0.75)
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(vsd[vsd$Chrom ==lgs[i],"Pos"]),y=-0.05,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(vsd[vsd$Chrom ==lgs[i],"Pos"])
+}
+mtext("ddRAD-seq",3,cex=0.75, line = 1)
+
+####sdRAD-seq only
+vso<-fst.plot(fst.dat=orad.viasel[!is.na(orad.viasel$Fst),],ci.dat = c(-10,10),sig.col=c("black","black"), 
+               fst.name="Fst", chrom.name="Chrom", bp.name="Pos", axis.size=1,y.lim=c(0,1),
+                groups=as.factor(scaffs[scaffs %in% levels(factor(orad.viasel$Chrom[!is.na(orad.viasel$Fst)]))]))
+points(vso$Pos[vso$index %in% vso.sig$SNP], 
+       vso$Fst[vso$Locus %in% vso.sig$SNP],
+       col="green4",pch=19,cex=0.75)
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(vso[vso$Chrom ==lgs[i],"Pos"]),y=-0.05,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(vso[vso$Chrom ==lgs[i],"Pos"])
+}
+mtext("sdRAD-seq",3,cex=0.75, line = 1)
+
+#####ROW 2: sexual selection
+####Both sdRAD-seq and ddRAD-seq
+ss<-fst.plot(fst.dat=both.sexsel[!is.na(both.sexsel$Fst),],ci.dat = c(-10,10),sig.col=c("black","black"), 
+             fst.name="Fst", chrom.name="Chrom", bp.name="Pos",axis.size=1,y.lim=c(0,1),
+                groups=as.factor(scaffs[scaffs %in% levels(factor(od.fst$Chrom[!is.na(od.fst$Fst)& od.fst$SNP %in% cov.pass]))]))
+points(ss$Pos[ss$index %in% ss.sig], 
+       ss$Fst[ss$Locus %in% ss.sig],
+       col="orchid1",pch=19,cex=0.75)
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(ss[ss$Chrom ==lgs[i],"Pos"]),y=-0.05,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(ss[ss$Chrom ==lgs[i],"Pos"])
+}
+
+####ddRAD-seq only
+ssd<-fst.plot(fst.dat=drad.sexsel[!is.na(drad.sexsel$Fst),],ci.dat = c(-10,10),sig.col=c("black","black"), 
+              fst.name="Fst", chrom.name="Chrom", bp.name="Pos",axis.size=1,y.lim=c(0,1),
+              groups=as.factor(scaffs[scaffs %in% levels(factor(drad.sexsel[!is.na(drad.sexsel$Fst)]))]))
+points(ssd$Pos[ssd$index %in% dss.sig], 
+       ssd$Fst[ssd$Locus %in% dss.sig],
+       col="orchid1",pch=19,cex=0.75)
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(ssd[ssd$Chrom ==lgs[i],"Pos"]),y=-0.05,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(ssd[ssd$Chrom ==lgs[i],"Pos"])
+}
+
+
+####Empty plot for legend
+plot(NULL,axes=F)
+
+mtext(expression(italic(F)[ST]),2,outer=T,cex=0.75)
+mtext("Linkage Group",1,outer=T,cex=0.75)
+dev.off()
 
 ##############################DRAD DIFFERENT PLATES##################################
 
