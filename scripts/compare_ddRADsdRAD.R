@@ -9,34 +9,53 @@ setwd("~/Projects/SCA/results")
 source("../../gwscaR/gwscaR.R")
 both<-parse.vcf("stacks_both/batch_3.vcf")
 
+#################SET COLORS#################
+ddtog.col<-"#f4a582"
+ddsep.col<-"#ca0020"
+sdtog.col<-"92c5de"
+sdsep.col<-"0571b0"
+ddsdtog.col<-"#807dba" #or "#6a51a3"
+ddsdsep.col<-"#3f007d"
+sexsel.col<-"orchid1"
+viasel.col<-"green4"
 #################FILES#################
-drad<-parse.vcf("drad.vcf")
-orad<-parse.vcf("orad.vcf")
-both<-parse.vcf("both.vcf")
-drad$SNP<-paste(drad$`#CHROM`,drad$POS,sep=".")
-orad$SNP<-paste(orad$`#CHROM`,orad$POS,sep=".")
-both$SNP<-paste(both$`#CHROM`,both$POS,sep=".")
+#Original files
+#drad<-parse.vcf("drad.vcf")
+#orad<-parse.vcf("orad.vcf")
+#both<-parse.vcf("both.vcf")
+#get snp subsets and write to file
+#both.sub<-choose.one.snp(both)
+#write.table(both.sub,"both.sub.vcf",quote=F,sep="\t",col.names = T,row.names=F)
+#drad.sub<-choose.one.snp(drad)
+#write.table(drad.sub,"drad.sub.vcf",quote=F,sep="\t",col.names = T,row.names=F)
+#orad.sub<-choose.one.snp(orad)
+#write.table(orad.sub,"orad.sub.vcf",quote=F,sep="\t",col.names = T,row.names=F)
+drad<-parse.vcf("drad.sub.vcf")
+orad<-parse.vcf("orad.sub.vcf")
+both<-parse.vcf("both.sub.vcf")
+drad$SNP<-paste(drad$`#CHROM`,as.numeric(drad$POS),sep=".")
+orad$SNP<-paste(orad$`#CHROM`,as.numeric(orad$POS),sep=".")
+both$SNP<-paste(both$`#CHROM`,as.numeric(both$POS),sep=".")
 locus.info<-c("#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT","SNP")
 o.ind<-grep("orad",colnames(both),value=T)
 d.ind<-grep("sample",colnames(both),value=T)
 
-both.sub<-choose.one.snp(both)
-drad.sub<-choose.one.snp(drad)
-orad.sub<-choose.one.snp(orad)
 
-dsub<-read.delim("drad.subset.raw",sep=" ")
-dmap<-read.delim("drad.map",header=F)
-osub<-read.delim("orad.subset.raw",sep=" ")
-omap<-read.delim("orad.map",header=F)
-bsub<-read.delim("both.subset.raw",sep=" ")
-bmap<-read.delim("both.map",header=F)
 
-dmap$SNP<-paste(dmap$V1,dmap$V4,sep=".")
-omap$SNP<-paste(omap$V1,omap$V4,sep=".")
-bmap$SNP<-paste(bmap$V1,bmap$V4,sep=".")
-colnames(omap)<-c("Chrom","oLocus","dist","Pos","SNP")
-colnames(dmap)<-c("Chrom","dLocus","dist","Pos","SNP")
-colnames(bmap)<-c("Chrom","Locus","dist","Pos","SNP")
+#plink subset files - don't use
+#dsub<-read.delim("drad.subset.raw",sep=" ")
+#dmap<-read.delim("drad.map",header=F)
+#osub<-read.delim("orad.subset.raw",sep=" ")
+#omap<-read.delim("orad.map",header=F)
+#bsub<-read.delim("both.subset.raw",sep=" ")
+#bmap<-read.delim("both.map",header=F)
+
+#dmap$SNP<-paste(dmap$V1,dmap$V4,sep=".")
+#omap$SNP<-paste(omap$V1,omap$V4,sep=".")
+#bmap$SNP<-paste(bmap$V1,bmap$V4,sep=".")
+#colnames(omap)<-c("Chrom","oLocus","dist","Pos","SNP")
+#colnames(dmap)<-c("Chrom","dLocus","dist","Pos","SNP")
+#colnames(bmap)<-c("Chrom","Locus","dist","Pos","SNP")
 #################ANALYSIS#################
 ##ran these already--read in files##
 #bo.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=o.ind))
@@ -300,6 +319,7 @@ TukeyHSD(aov(log(lcv.comp$CovVariance+1)~lcv.comp$LibraryPrep*lcv.comp$Assembly)
 summary(aov(lcv.comp$PropHet~lcv.comp$LibraryPrep*lcv.comp$Assembly))
 TukeyHSD(aov(lcv.comp$PropHet~lcv.comp$LibraryPrep*lcv.comp$Assembly))
 
+####PLOT: Fig 2. Variance in Coverage####
 jpeg("VarianceInCov.jpeg",height=8.5,width=7,units="in",res=300)
 par(mfrow=c(2,1),oma=c(1,2,1,1),mar=c(2,2,2,2))
 boxplot(log(lcv.comp$CovVariance+1)~lcv.comp$LibraryPrep*lcv.comp$Assembly,col=c("cadetblue","coral1"),
@@ -371,29 +391,28 @@ dim(sdb.loci[(sdb.loci$REF.x != sdb.loci$REF.y & sdb.loci$REF.x != sdb.loci$REF
 #########################FSTS FROM INDEPENDENT ANALYSES##############################
 pop1<-colnames(orad)[10:ncol(orad)]
 pop2<-colnames(drad)[10:ncol(drad)]
+#-using the subsetted files from choose.one.snp
 o.share<-orad[orad$SNP %in% od.loci$SNP,]
 d.share<-drad[drad$SNP %in% od.loci$SNP,]
 od.vcf<-merge(orad,drad,"SNP")
 #subset
-o.share<-orad.sub[orad.sub$SNP %in% od.loci$SNP,]
-d.share<-drad.sub[drad.sub$SNP %in% od.loci$SNP,]
+#o.share<-orad.sub[orad.sub$SNP %in% od.loci$SNP,]
+#d.share<-drad.sub[drad.sub$SNP %in% od.loci$SNP,]
 od.sub<-merge(orad.sub,drad.sub,"SNP")
 od.fst<-do.call("rbind",apply(o.share,1,fst.two.vcf,vcf2=d.share,match.index="SNP",cov.thresh=0.5))
 od.fst$SNP<-paste(od.fst$Chrom,as.numeric(as.character(od.fst$Pos)),sep=".")
 #od.fst<-do.call("rbind",apply(o.share,1,fst.two.vcf,vcf2=d.share,match.index="SNP"))
-#write.table(od.fst,"orad-drad.fst.txt",col.names=T,row.names=F,quote=F,sep='\t')
-od.fst<-read.table("orad-drad.fst.txt",header=T,sep='\t')
+write.table(od.fst,"orad-drad.fst.txt",col.names=T,row.names=F,quote=F,sep='\t')
+#od.fst<-read.table("orad-drad.fst.txt",header=T,sep='\t')
 o.cov.pass<-o.cov[o.cov$AvgCovTotal > 3 & o.cov$AvgCovTotal <= 50, "SNP"]
 d.cov.pass<-d.cov[d.cov$AvgCovTotal > 3 & d.cov$AvgCovTotal <= 50, "SNP"]
 sep.cov.pass<-o.cov.pass[o.cov.pass %in% d.cov.pass]
+summary(od.fst[od.fst$SNP %in% sep.cov.pass,"Fst"])
 
-#FROM SAME ANALYSIS
+#FROM SAME ANALYSIS-using the subsetted files from choose.one.snp
 both$SNP<-paste(both$`#CHROM`,both$POS,sep=".")
 both.o<-cbind(both[,locus.info],both[,o.ind])
 both.d<-cbind(both[,locus.info],both[,d.ind])
-#subset
-both.o<-cbind(both.sub[,locus.info],both.sub[,o.ind])
-both.d<-cbind(both.sub[,locus.info],both.sub[,d.ind])
 od.both.fst<-do.call("rbind",apply(both.o,1,fst.two.vcf,vcf2=both.d,match.index="SNP",cov.thresh=0.5))
 od.both.fst$SNP<-paste(od.both.fst$Chrom,as.numeric(as.character(od.both.fst$Pos)),sep=".")
 od.fst.1<-od.both.fst[od.both.fst$Fst ==1,]
@@ -403,10 +422,10 @@ bd.cov.pass<-bd.cov[bd.cov$AvgCovTotal > 3 & bd.cov$AvgCovTotal <=50,"SNP"]
 bo.cov.pass<-bo.cov[bo.cov$AvgCovTotal > 3 & bo.cov$AvgCovTotal <=50,"SNP"]
 cov.pass<-bd.cov.pass[bd.cov.pass %in% bo.cov.pass]
 summary(od.both.fst[od.both.fst$SNP %in% cov.pass,"Fst"])
-fsts.both<-do.call("rbind",apply(both.sub,1,fst.one.vcf,group1=o.ind,group2=d.ind,cov.thresh=0.5))
+#fsts.both<-do.call("rbind",apply(both.sub,1,fst.one.vcf,group1=c(locus.info,o.ind),group2=c(locus.info,d.ind),cov.thresh=0.5))
 
 
-##########PLOTTING###########
+####PLOT: Fig 3. sd-ddRAD Fsts####
 lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
        "LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
        "LG22")
@@ -466,120 +485,23 @@ mtext("sdRAD-ddRAD Analyzed Together, Coverage Filter",3,cex=0.75)
 mtext(expression(italic(F)[ST]),2,outer=T,cex=0.75)
 dev.off()
 
-fst.aov.dat<-data.frame(Fst=c(od$Fst,odb$Fst,odc$Fst,odbc$Fst),
-  Type=c(rep("Alone",nrow(od)),rep("Together",nrow(odb)),rep("Alone",nrow(odc)),rep("Together",nrow(odbc))),
-  Filtered=c(rep("Unfiltered",nrow(od)),rep("Unfiltered",nrow(odb)),rep("Filtered",nrow(odc)),rep("Filtered",nrow(odbc))))
-fst.aov<-aov(Fst~Type*Filtered,dat=fst.aov.dat)
-
 gwsca<-read.delim("gwsca_fsts_both.txt")
 
 drad.test<-sample(d.ind,120)
 drad.tes.fst<-do.call("rbind", apply(both, 1, fst.one.vcf,group1=drad.test[1:60],group2=drad.test[61:120],cov.thresh=0.2))
 
-####PLINK SUBSETS####
-dsub<-read.delim("drad.subset.raw",sep=" ")
-dmap<-read.delim("drad.map",header=F)
-osub<-read.delim("orad.subset.raw",sep=" ")
-omap<-read.delim("orad.map",header=F)
-bsub<-read.delim("both.subset.raw",sep=" ")
-bmap<-read.delim("both.map",header=F)
-
-#Match dsub and osub
-merge.map<-merge(omap,dmap,by="SNP")
-merge.map$oLocus<-apply(merge.map,1,function(x){
-  x["oLocus"]<-paste("X",x["oLocus"],sep="")
-})
-merge.map$dLocus<-apply(merge.map,1,function(x){
-  x["dLocus"]<-paste("X",x["dLocus"],sep="")
-})
-#match orad
-o.newcol<-colnames(osub)
-o.newcol<-unlist(lapply(o.newcol,function(x){
-  o.newcol<-gsub("(X\\d+_\\d+)_\\w","\\1",x)
-}))
-colnames(osub)<-o.newcol
-omerge.keep<-merge.map[merge.map$oLocus %in% colnames(osub),]
-omerge.keep<-omerge.keep[!duplicated(omerge.keep$oLocus),]
-odsub<-osub[,colnames(osub)%in%omerge.keep$oLocus]
-odsub<-odsub[,order(colnames(odsub))]
-omerge.keep<-omerge.keep[order(omerge.keep$oLocus),]
-colnames(odsub)<-omerge.keep[omerge.keep$oLocus %in% colnames(odsub),"SNP"]
-mo<-odsub[,!duplicated(colnames(odsub))]
-#match drad
-d.newcol<-colnames(dsub)
-d.newcol<-unlist(lapply(d.newcol,function(x){
-  d.newcol<-gsub("(X\\d+_\\d+)_\\w","\\1",x)
-}))
-colnames(dsub)<-d.newcol
-dmerge.keep<-merge.map[merge.map$dLocus %in% colnames(dsub),]
-dmerge.keep<-dmerge.keep[!duplicated(dmerge.keep$dLocus),]
-ddsub<-dsub[,colnames(dsub)%in%dmerge.keep$dLocus]
-ddsub<-ddsub[,order(colnames(ddsub))]
-dmerge.keep<-dmerge.keep[order(dmerge.keep$dLocus),]
-colnames(ddsub)<-dmerge.keep[dmerge.keep$dLocus %in% colnames(ddsub),"SNP"]
-md<-ddsub[,!duplicated(colnames(ddsub))]
-mo<-mo[,order(colnames(mo))]
-md<-md[,order(colnames(md))]
-mergedsub<-data.frame(rbind(cbind(osub[,1:6],mo[,colnames(mo) %in% colnames(md)]),
-  cbind(dsub[,1:6],md[,colnames(md)%in% colnames(mo)])))
-#fsts
-plink.diff.fst<-fst.one.plink(mergedsub,group1 = osub$IID,group2 = dsub$IID)
-plink.both.fst<-fst.one.plink(bsub,group1 = osub$IID,group2 = dsub$IID)
-plink.diff.fst$Chrom<-gsub("(\\w+\\d+).\\d+","\\1",plink.diff.fst$Locus)
-plink.diff.fst$Pos<-gsub("(\\w+\\d+).(\\d+)","\\2",plink.diff.fst$Locus)
-
-plink.both.fst$Chrom<-apply(plink.both.fst,1,function(x){
-  chrom<-bmap[bmap$V2 %in% gsub("X(\\d+_\\d+)_\\w","\\1",x),"V1"]
-})
-plink.both.fst$Chrom<-factor(plink.both.fst$Chrom)
-plink.both.fst$Pos<-apply(plink.both.fst,1,function(x){
-  pos<-bmap[bmap$V2 %in% gsub("X(\\d+_\\d+)_\\w","\\1",x),"V4"]
-})
-
-#PLOTTING##
-lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
-       "LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
-       "LG22")
-lgn<-seq(1,22)
-scaffs<-levels(as.factor(plink.both.fst[,"Chrom"]))
-scaffs[1:22]<-lgs
-
-jpeg("sd-dd_Fst_subset.jpeg",height=10,width=7.5,units="in",res=300)
-par(mfrow=c(2,1),mar=c(2,2,2,2),oma=c(1,2,1,1))
-od<-fst.plot(plink.both.fst[!is.na(plink.both.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
-             fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(-2,0.6),
-             groups=as.factor(scaffs[scaffs %in% levels(factor(plink.both.fst$Chrom[!is.na(plink.both.fst$Fst)]))]))
-last<-0
-for(i in 1:length(lgs)){
-  text(x=mean(od[od$Chrom ==lgs[i],"Pos"]),y=-2.1,
-       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
-  last<-max(od[od$Chrom ==lgs[i],"Pos"])
-}
-mtext("sdRAD-ddRAD Analyzed Together",3,cex=0.75)
-odb<-fst.plot(plink.diff.fst[!is.na(plink.diff.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
-              fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(-1,0.3),
-              groups=as.factor(scaffs[scaffs %in% levels(factor(plink.diff.fst[!is.na(plink.diff.fst),"Chrom"]))]))
-last<-0
-for(i in 1:length(lgs)){
-  text(x=mean(odb[odb$Chrom ==lgs[i],"Pos"]),y=-1.1,
-       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
-  last<-max(odb[odb$Chrom ==lgs[i],"Pos"])
-}
-mtext("sdRAD-ddRAD Analyzed Separately",3,cex=0.75)
-dev.off()
-
-##STATS
-plink.fst<-data.frame(Fst=as.numeric(c(plink.both.fst$Fst,plink.diff.fst$Fst)),
-  Analysis=c(rep("Together",length(plink.both.fst$Fst)),rep("Separately",length(plink.diff.fst$Fst))))
 
 ##############################60 sdRAD and 60 ddRAD##################################
-d.ind.sub<-sample(d.ind,60,replace=F)
-sub.fsts.both<-do.call("rbind",apply(both.sub,1,fst.one.vcf,group1=c(locus.info,o.ind),group2=c(locus.info,d.ind.sub),cov.thresh=0.5))
-sub.fsts.both$SNP<-paste(sub.fsts.both$Chrom,as.numeric(as.character(sub.fsts.both$Pos)),sep=".")
-
-d.share.sub<-d.share[,colnames(d.share) %in% c(locus.info,d.ind.sub)]
-sub.od.fst<-do.call("rbind",apply(o.share,1,fst.two.vcf,vcf2=d.share.sub,match.index="SNP",cov.thresh=0.5))
-sub.od.fst$SNP<-paste(sub.od.fst$Chrom,as.numeric(as.character(sub.od.fst$Pos)),sep=".")
+#d.ind.sub<-sample(d.ind,60,replace=F)
+#d.share.sub<-d.share[,colnames(d.share) %in% c(locus.info,d.ind.sub)]
+#write.table(d.share,"drad.60ind.vcf",sep='\t',quote=F,row.names=F,col.names=T)
+#sub.fsts.both<-do.call("rbind",apply(both.sub,1,fst.one.vcf,group1=c(locus.info,o.ind),group2=colnames(d.share.sub),cov.thresh=0.5))
+#sub.fsts.both$SNP<-paste(sub.fsts.both$Chrom,as.numeric(as.character(sub.fsts.both$Pos)),sep=".")
+#sub.od.fst<-do.call("rbind",apply(o.share,1,fst.two.vcf,vcf2=d.share.sub,match.index="SNP",cov.thresh=0.5))
+#sub.od.fst$SNP<-paste(sub.od.fst$Chrom,as.numeric(as.character(sub.od.fst$Pos)),sep=".")
+#write.table(sub.od.fst,"sub.od.fst.txt",sep='\t',col.names=T,row.names=F,quote=F)
+d.share.sub<-read.table("d.share.sub",sep='\t',header=T)
+sub.od.fst<-read.table("sub.od.fst.txt",sep='\t',header=T)
 
 png("fsts_60ddrad60sdrad.png",height=10,width=7.5,units="in",res=300)
 par(mfrow=c(4,1),mar=c(2,2,2,2),oma=c(1,2,1,1))
@@ -633,22 +555,22 @@ mtext("sdRAD-ddRAD Analyzed Together, Coverage Filter",3,cex=0.75)
 mtext(expression(italic(F)[ST]),2,outer=T,cex=0.75)
 dev.off()
 
-fst.aov.dat<-data.frame(Fst=c(od$Fst,odb$Fst,odc$Fst,odbc$Fst),
-                        Type=c(rep("Alone",nrow(od)),rep("Together",nrow(odb)),rep("Alone",nrow(odc)),rep("Together",nrow(odbc))),
-                        Filtered=c(rep("Unfiltered",nrow(od)),rep("Unfiltered",nrow(odb)),rep("Filtered",nrow(odc)),rep("Filtered",nrow(odbc))))
-fst.aov<-aov(Fst~Type*Filtered,dat=fst.aov.dat)
-
 
 ##############################60 ddRAD and 60 ddRAD##################################
-d.ind.sub1<-sample(d.ind,60,replace=F)
-d.ind.sub2<-sample(d.ind[!(d.ind %in% d.ind.sub1)],60,replace=F)
-dsub.fsts.both<-do.call("rbind",apply(both.sub,1,fst.one.vcf,group1=c(locus.info,d.ind.sub2),group2=c(locus.info,d.ind.sub1),cov.thresh=0.5))
-dsub.fsts.both$SNP<-paste(dsub.fsts.both$Chrom,as.numeric(as.character(dsub.fsts.both$Pos)),sep=".")
-
-d.share.sub1<-d.share[,colnames(d.share) %in% c(locus.info,d.ind.sub1)]
-d.share.sub2<-d.share[,colnames(d.share) %in% c(locus.info,d.ind.sub2)]
-dsub.od.fst<-do.call("rbind",apply(d.share.sub1,1,fst.two.vcf,vcf2=d.share.sub2,match.index="SNP",cov.thresh=0.5))
-dsub.od.fst$SNP<-paste(dsub.od.fst$Chrom,as.numeric(as.character(dsub.od.fst$Pos)),sep=".")
+#d.ind.sub1<-sample(d.ind,60,replace=F)
+#d.ind.sub2<-sample(d.ind[!(d.ind %in% d.ind.sub1)],60,replace=F)
+#dsub.fsts.both<-do.call("rbind",apply(both.sub,1,fst.one.vcf,group1=c(locus.info,d.ind.sub2),group2=c(locus.info,d.ind.sub1),cov.thresh=0.5))
+#dsub.fsts.both$SNP<-paste(dsub.fsts.both$Chrom,as.numeric(as.character(dsub.fsts.both$Pos)),sep=".")
+#write.table(dsub.fsts.both,"dsub.fsts.both.txt",sep='\t',row.names = F,col.names = T,quote=F)
+#d.share.sub1<-d.share[,colnames(d.share) %in% c(locus.info,d.ind.sub1)]
+#d.share.sub2<-d.share[,colnames(d.share) %in% c(locus.info,d.ind.sub2)]
+#dsub.od.fst<-do.call("rbind",apply(d.share.sub1,1,fst.two.vcf,vcf2=d.share.sub2,match.index="SNP",cov.thresh=0.5))
+#dsub.od.fst$SNP<-paste(dsub.od.fst$Chrom,as.numeric(as.character(dsub.od.fst$Pos)),sep=".")
+#write.table(d.share.sub1,"drad.60sub1.vcf",row.names=F,col.names=T,quote=F,sep='\t')
+#write.table(d.share.sub2,"drad.60sub2.vcf",row.names=F,col.names=T,quote=F,sep='\t')
+#write.table(dsub.od.fst,"dsub.od.fst.txt",sep='\t',col.names = T,row.names = F,quote=F)
+dsub.od.fst<-read.table("dsub.od.fst.txt",header=T,sep='\t')
+dsub.fsts.both<-read.table("dsub.fsts.both.txt",header=T,sep='\t')
 
 png("fsts_60ddrad60sdrad.png",height=10,width=7.5,units="in",res=300)
 par(mfrow=c(4,1),mar=c(2,2,2,2),oma=c(1,2,1,1))
@@ -662,7 +584,7 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(od[od$Chrom ==lgs[i],"Pos"])
 }
-mtext("sdRAD-ddRAD Analyzed Separately",3,cex=0.75)
+mtext("Analyzed Separately",3,cex=0.75)
 odc<-fst.plot(dsub.od.fst[!is.na(dsub.od.fst$Fst) & dsub.od.fst$SNP %in% cov.pass,],ci.dat=c(-10,10),sig.col=c("black","black"), 
               fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
               groups=as.factor(scaffs[scaffs %in% levels(factor(dsub.od.fst$Chrom[!is.na(dsub.od.fst$Fst)& dsub.od.fst$SNP %in% cov.pass]))]))
@@ -703,18 +625,12 @@ mtext(expression(italic(F)[ST]),2,outer=T,cex=0.75)
 dev.off()
 
 
-
-fst.aov.dat<-data.frame(Fst=c(od$Fst,odb$Fst,odc$Fst,odbc$Fst),
-                        Type=c(rep("Alone",nrow(od)),rep("Together",nrow(odb)),rep("Alone",nrow(odc)),rep("Together",nrow(odbc))),
-                        Filtered=c(rep("Unfiltered",nrow(od)),rep("Unfiltered",nrow(odb)),rep("Filtered",nrow(odc)),rep("Filtered",nrow(odbc))))
-fst.aov<-aov(Fst~Type*Filtered,dat=fst.aov.dat)
-
-##############################THREE FST COMPARISONS##################################
+####PLOT: Fig 3NEW. Sample size on Fsts between sd and dd RAD####
 png("All3Fsts.png",height=10,width=7.5,units="in",res=300)
-par(mfrow=c(4,3),mar=c(2,1.5,2,1),oma=c(1,2,1,0.5))
+par(mfrow=c(4,3),mar=c(2,1,1,1),oma=c(1,3,1,0.5))
 ##ROW 1: Separate
 ####All sdRAD vs all ddRAD
-a.od<-fst.plot(od.fst[!is.na(od.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
+a.od<-fst.plot(od.fst[!is.na(od.fst$Fst),],pt.col=ddsdsep.col,
              fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
              groups=as.factor(scaffs[scaffs %in% levels(factor(od.fst$Chrom[!is.na(od.fst$Fst)]))]))
 last<-0
@@ -723,10 +639,11 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(a.od[a.od$Chrom ==lgs[i],"Pos"])
 }
-mtext("Full Dataset",3,cex=0.75,line=1)
+mtext("60 sdRAD and 384 ddRAD Individuals",3,cex=0.75,line=0.5)
+mtext("Analyzed Separately",2,cex=0.75,line=1.5)
 
 ####sdRAD and 60 ddRAD
-sd.od<-fst.plot(sub.od.fst[!is.na(sub.od.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
+sd.od<-fst.plot(sub.od.fst[!is.na(sub.od.fst$Fst),], pt.col=ddsdsep.col,
                 fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
                 groups=as.factor(scaffs[scaffs %in% levels(factor(sub.od.fst$Chrom[!is.na(sub.od.fst$Fst)]))]))
 last<-0
@@ -735,11 +652,10 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(sd.od[sd.od$Chrom ==lgs[i],"Pos"])
 }
-mtext("sdRAD-ddRAD Analyzed Separately",3,cex=0.75)
-mtext("sdRAD and 60 ddRAD Individuals",3,cex=0.75, line = 1)
+mtext("60 sdRAD and 60 ddRAD Individuals",3,cex=0.75, line = 0.5)
 
 ####60 ddRAD and 60 ddRAD
-dd.od<-fst.plot(dsub.od.fst[!is.na(dsub.od.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
+dd.od<-fst.plot(dsub.od.fst[!is.na(dsub.od.fst$Fst),], pt.col = ddsep.col,
                 fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
                 groups=as.factor(scaffs[scaffs %in% levels(factor(dsub.od.fst$Chrom[!is.na(dsub.od.fst$Fst)]))]))
 last<-0
@@ -748,12 +664,12 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(dd.od[dd.od$Chrom ==lgs[i],"Pos"])
 }
-mtext("60 ddRAD and 60 ddRAD Individuals",3,cex=0.75, line = 1)
+mtext("60 ddRAD and 60 ddRAD Individuals",3,cex=0.75, line = 0.5)
 
 #####ROW 2
 ####All sdRAD vs all ddRAD
-a.odc<-fst.plot(od.fst[!is.na(od.fst$Fst) & od.fst$SNP %in% cov.pass,],ci.dat=c(-10,10),sig.col=c("black","black"), 
-              fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
+a.odc<-fst.plot(od.fst[!is.na(od.fst$Fst) & od.fst$SNP %in% cov.pass,], 
+              fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),pt.col = ddsdsep.col,
               groups=as.factor(scaffs[scaffs %in% levels(factor(od.fst$Chrom[!is.na(od.fst$Fst)& od.fst$SNP %in% cov.pass]))]))
 last<-0
 for(i in 1:length(lgs)){
@@ -761,10 +677,10 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(a.odc[a.odc$Chrom ==lgs[i],"Pos"])
 }
-
+mtext("Analyzed Separately,\nCoverage Filter",2,cex=0.75,line=1.5)
 ####sdRAD vs 60 ddRAD
-sd.odc<-fst.plot(sub.od.fst[!is.na(sub.od.fst$Fst) & sub.od.fst$SNP %in% cov.pass,],ci.dat=c(-10,10),sig.col=c("black","black"), 
-                 fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
+sd.odc<-fst.plot(sub.od.fst[!is.na(sub.od.fst$Fst) & sub.od.fst$SNP %in% cov.pass,], 
+                 fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),pt.col = ddsdsep.col,
                  groups=as.factor(scaffs[scaffs %in% levels(factor(sub.od.fst$Chrom[!is.na(sub.od.fst$Fst)& sub.od.fst$SNP %in% cov.pass]))]))
 last<-0
 for(i in 1:length(lgs)){
@@ -772,12 +688,12 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(sd.odc[sd.odc$Chrom ==lgs[i],"Pos"])
 }
-mtext("sdRAD-ddRAD Analyzed Separately, Coverage Filter",3,cex=0.75)
+
 
 
 ####60 ddRAD and 60 ddRAD
-dd.odc<-fst.plot(dsub.od.fst[!is.na(dsub.od.fst$Fst) & dsub.od.fst$SNP %in% cov.pass,],ci.dat=c(-10,10),sig.col=c("black","black"), 
-                 fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
+dd.odc<-fst.plot(dsub.od.fst[!is.na(dsub.od.fst$Fst) & dsub.od.fst$SNP %in% cov.pass,],
+                 fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),pt.col = ddsep.col,
                  groups=as.factor(scaffs[scaffs %in% levels(factor(dsub.od.fst$Chrom[!is.na(dsub.od.fst$Fst)& dsub.od.fst$SNP %in% cov.pass]))]))
 last<-0
 for(i in 1:length(lgs)){
@@ -790,8 +706,8 @@ for(i in 1:length(lgs)){
 
 #####ROW 3: Together
 ####All sdRAD vs all ddRAD
-a.odb<-fst.plot(od.both.fst[!is.na(od.both.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
-              fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
+a.odb<-fst.plot(od.both.fst[!is.na(od.both.fst$Fst),],
+              fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),pt.col = ddsdtog.col,
               groups=as.factor(scaffs[scaffs %in% levels(factor(od.both.fst[!is.na(od.both.fst$Fst),"Chrom"]))]))
 a.odb$Pos<-as.numeric(as.character(a.odb$Pos))
 last<-0
@@ -801,9 +717,10 @@ for(i in 1:length(lgs)){
   last<-max(a.odb[a.odb$Chrom ==lgs[i],"Pos"],na.rm = T)
 }
 
+mtext("Analyzed Together",2,line=1.5,cex=0.75)
 ####All sdRAD vs 60 ddRAD
-sd.odb<-fst.plot(sub.fsts.both[!is.na(sub.fsts.both$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
-                 fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
+sd.odb<-fst.plot(sub.fsts.both[!is.na(sub.fsts.both$Fst),],
+                 fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),pt.col = ddsdtog.col,
                  groups=as.factor(scaffs[scaffs %in% levels(factor(sub.fsts.both[!is.na(sub.fsts.both$Fst),"Chrom"]))]))
 sd.odb$Pos<-as.numeric(as.character(sd.odb$Pos))
 last<-0
@@ -812,11 +729,10 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(sd.odb[sd.odb$Chrom ==lgs[i],"Pos"],na.rm = T)
 }
-mtext("sdRAD-ddRAD Analyzed Together",3,cex=0.75)
 
 ####60 ddRAD and 60 ddRAD
-dd.odb<-fst.plot(dsub.fsts.both[!is.na(dsub.fsts.both$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
-                 fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
+dd.odb<-fst.plot(dsub.fsts.both[!is.na(dsub.fsts.both$Fst),],
+                 fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),pt.col = ddtog.col,
                  groups=as.factor(scaffs[scaffs %in% levels(factor(dsub.fsts.both[!is.na(dsub.fsts.both$Fst),"Chrom"]))]))
 dd.odb$Pos<-as.numeric(as.character(dd.odb$Pos))
 last<-0
@@ -830,7 +746,7 @@ for(i in 1:length(lgs)){
 #####ROW 4: Together
 ####All sdRAD vs all ddRAD
 a.odbc<-fst.plot(od.both.fst[!is.na(od.both.fst$Fst) & od.both.fst$SNP %in% sep.cov.pass,],
-               ci.dat=c(-10,10),sig.col=c("black","black"), y.lim=c(0,1),
+              y.lim=c(0,1),pt.col = ddsdtog.col,
                fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,
                groups=as.factor(scaffs[scaffs %in% 
                                          levels(factor(od.both.fst[!is.na(od.both.fst$Fst) & od.both.fst$SNP %in% sep.cov.pass,"Chrom"]))]))
@@ -841,10 +757,11 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(a.odbc[a.odbc$Chrom ==lgs[i],"Pos"],na.rm = T)
 }
+mtext("Analyzed Together,\nCoverage Filter",2,line=1.5,cex=0.75)
 
 ####All sdRAD vs 60 ddRAD
 sd.odbc<-fst.plot(sub.fsts.both[!is.na(sub.fsts.both$Fst) & sub.fsts.both$SNP %in% sep.cov.pass,],
-               ci.dat=c(-10,10),sig.col=c("black","black"), y.lim=c(0,1),
+               y.lim=c(0,1),pt.col = ddsdtog.col,
                fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,
                groups=as.factor(scaffs[scaffs %in% 
                                          levels(factor(sub.fsts.both[!is.na(sub.fsts.both$Fst) & sub.fsts.both$SNP %in% sep.cov.pass,"Chrom"]))]))
@@ -855,11 +772,10 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(sd.odbc[sd.odbc$Chrom ==lgs[i],"Pos"],na.rm = T)
 }
-mtext("sdRAD-ddRAD Analyzed Together, Coverage Filter",3,cex=0.75)
 
 ###60 ddRAD vs 60 ddRAD
 dd.odbc<-fst.plot(dsub.fsts.both[!is.na(dsub.fsts.both$Fst) & dsub.fsts.both$SNP %in% sep.cov.pass,],
-               ci.dat=c(-10,10),sig.col=c("black","black"), y.lim=c(0,1),
+              y.lim=c(0,1),pt.col = ddtog.col,
                fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,
                groups=as.factor(scaffs[scaffs %in% 
                                          levels(factor(dsub.fsts.both[!is.na(dsub.fsts.both$Fst) & dsub.fsts.both$SNP %in% sep.cov.pass,"Chrom"]))]))
@@ -870,6 +786,9 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(dd.odbc[dd.odbc$Chrom ==lgs[i],"Pos"],na.rm = T)
 }
+legend("top",bty='n',pch=19,col=c(ddsdsep.col,ddsdtog.col,ddsep.col,ddtog.col),
+       c("sdRAD-ddRAD Analyzed Separately","sdRAD-ddRAD Analyzed Together","ddSNPs Analyzed Separately","ddSNPs Analyzed Together"),
+       ncol=1)
 mtext(expression(italic(F)[ST]),2,outer=T,cex=0.75)
 mtext("Linkage Group",1,outer=T,cex=0.75)
 dev.off()
@@ -877,15 +796,20 @@ dev.off()
 
 fst.aov.dat<-data.frame(Fst=c(a.od$Fst,sd.od$Fst,dd.od$Fst,a.odb$Fst,sd.odb$Fst,dd.odb$Fst,a.odc$Fst,
                               sd.odc$Fst,dd.odc$Fst,a.odbc$Fst,sd.odbc$Fst,dd.odbc$Fst),
-                        Type=c(rep("All",nrow(a.od)),rep("Each60",nrow(sd.od)),rep("ddRAD",nrow(dd.od)),
-                               rep("All",nrow(a.odb)),rep("Each60",nrow(sd.odb)),rep("ddRAD",nrow(dd.odb)),
-                               rep("All",nrow(a.odc)),rep("Each60",nrow(sd.odc)),rep("ddRAD",nrow(dd.odc)),
-                               rep("All",nrow(a.odbc)),rep("Each60",nrow(sd.odbc)),rep("ddRAD",nrow(dd.odbc))),
-                        Filtered=c(rep("Unfiltered",(nrow(a.od)+nrow(sd.od)+nrow(dd.od))),
-                                   rep("Unfiltered",(nrow(a.odb)+nrow(sd.odb)+nrow(dd.odb))),
-                                   rep("Filtered",(nrow(a.odc)+nrow(sd.odc)+nrow(dd.odc))),
-                                   rep("Filtered",(nrow(a.odbc)+nrow(sd.odbc)+nrow(dd.odbc)))))
-fst.aov<-aov(Fst~Type*Filtered,dat=fst.aov.dat)
+                        SampleSize=c(rep("All",nrow(a.od)),rep("Each60",nrow(sd.od)),rep("Each60",nrow(dd.od)),
+                               rep("All",nrow(a.odb)),rep("Each60",nrow(sd.odb)),rep("Each60",nrow(dd.odb)),
+                               rep("All",nrow(a.odc)),rep("Each60",nrow(sd.odc)),rep("Each60",nrow(dd.odc)),
+                               rep("All",nrow(a.odbc)),rep("Each60",nrow(sd.odbc)),rep("Each60",nrow(dd.odbc))),
+                        Comparison=c(rep("sd-dd",nrow(a.od)),rep("sd-dd",nrow(sd.od)),rep("dd-dd",nrow(dd.od)),
+                                     rep("sd-dd",nrow(a.odb)),rep("sd-dd",nrow(sd.odb)),rep("dd-dd",nrow(dd.odb)),
+                                     rep("sd-dd",nrow(a.odc)),rep("sd-dd",nrow(sd.odc)),rep("dd-dd",nrow(dd.odc)),
+                                     rep("sd-dd",nrow(a.odbc)),rep("sd-dd",nrow(sd.odbc)),rep("dd-dd",nrow(dd.odbc))),
+                        Analysis=c(rep("UnfilteredSeparate",(nrow(a.od)+nrow(sd.od)+nrow(dd.od))),
+                                   rep("UnfilteredTogether",(nrow(a.odb)+nrow(sd.odb)+nrow(dd.odb))),
+                                   rep("FilteredSeparate",(nrow(a.odc)+nrow(sd.odc)+nrow(dd.odc))),
+                                   rep("FilteredTogether",(nrow(a.odbc)+nrow(sd.odbc)+nrow(dd.odbc)))))
+fst.ss.aov<-aov(Fst~SampleSize*Analysis,dat=fst.aov.dat[fst.aov.dat$Comparison == "sd-dd",])
+fst.cp.aov<-aov(Fst~Comparison*Analysis,dat=fst.aov.dat)
 
 ##############################SCA##################################
 #BOTH
@@ -902,14 +826,16 @@ colnames(vcf1)<-names1
 vcf2.gt<-extract.gt.vcf(both)
 merge<-merge.vcfs(vcf1,vcf2.gt)
 both.keep<-b.cov[b.cov$AvgCovTotal > 5 & b.cov$AvgCovTotal <= 20,"SNP"]
-merge$SNP<-paste(merge$CHROM,merge$POS,sep=".")
+merge$SNP<-paste(as.character(merge$CHROM),as.character(merge$POS),sep=".")
 merge<-merge[merge$SNP %in% both.keep,]
 females<-colnames(merge[grep("FEM",colnames(merge))])
 males<-c(colnames(merge[grep("PRM",colnames(merge))]),colnames(merge[grep("NPM",colnames(merge))]))
 moms<-colnames(merge[grep("MOM",colnames(merge))])
 both.sexsel<-gwsca(merge,locus.info,females,moms)
+both.sexsel$index<-paste(both.sexsel$Chrom,both.sexsel$Pos,sep=".")
 bss.sig<-both.sexsel$index[both.sexsel$Chi.p.adj <= 0.05]
 both.viasel<-gwsca(merge,locus.info,females,males)
+both.viasel$index<-paste(both.viasel$Chrom,both.viasel$Pos,sep=".")
 bvs.sig<-both.viasel$index[both.viasel$Chi.p.adj <= 0.05]
 
 #DRAD
@@ -929,6 +855,7 @@ drad.sexsel<-gwsca(drad.merge,locus.info,females, moms)
 drad.sexsel$index<-paste(drad.sexsel$Chrom,drad.sexsel$Pos,sep=".")
 dss.sig<-drad.sexsel$index[drad.sexsel$Chi.p.adj <= 0.05]
 drad.viasel<-gwsca(drad.merge,locus.info,females,males)
+drad.viasel$index<-paste(drad.viasel$Chrom,drad.viasel$Pos,sep=".")
 dvs.sig<-drad.viasel$index[drad.viasel$Chi.p.adj <= 0.05]
 
 
@@ -939,9 +866,10 @@ orad<-orad[orad$SNP %in% orad.keep,]
 females<-colnames(orad[grep("FEM",colnames(orad))])
 males<-colnames(orad[grep("PRM",colnames(orad))])
 orad.viasel<-gwsca(orad,locus.info,females,males)
+orad.viasel$index<-paste(orad.viasel$Chrom,orad.viasel$Pos,sep=".")
 ovs.sig<-orad.viasel$index[orad.viasel$Chi.p.adj <= 0.05]
 
-#PLOT
+####PLOT: Fig ?. SCA####
 lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
        "LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
        "LG22")
@@ -949,88 +877,92 @@ lgn<-seq(1,22)
 scaffs<-levels(as.factor(both[,"#CHROM"]))
 scaffs[1:22]<-lgs
 
-png("SCA_radseq.png",height=10,width=7.5,units="in",res=300)
+#png("SCA_radseq.png",height=7.5,width=10,units="in",res=300)
 par(mfrow=c(2,3),mar=c(2,1.5,2,1),oma=c(1,2,1,0.5))
 ##ROW 1: Males vs Females
 ####both sdRAD and ddRAD (RAD)
-vs<-fst.plot(fst.dat=both.viasel[!is.na(both.viasel$Fst),],ci.dat = c(-10,10),sig.col=c("black","black"), 
-  fst.name="Fst", chrom.name="Chrom", bp.name="Pos",y.lim=c(0,1),axis.size=1,
+vs<-fst.plot(fst.dat=both.viasel[!is.na(both.viasel$Fst),],pt.col=ddsdtog.col, 
+  fst.name="Fst", chrom.name="Chrom", bp.name="Pos",y.lim=c(0,0.5),axis.size=1,
   groups=as.factor(scaffs[scaffs %in% levels(factor(both.viasel$Chrom[!is.na(both.viasel$Fst)]))]))
-points(vs$Pos[vs$index %in% bvs.sig$SNP], 
-       vs$Fst[vs$Locus %in% bvs.sig$SNP],
-       col="green4",pch=19,cex=0.75)
+points(vs$Pos[vs$index %in% bvs.sig], 
+       vs$Fst[vs$index %in% bvs.sig],
+       col=viasel.col,pch=19,cex=0.75)
 last<-0
 for(i in 1:length(lgs)){
-  text(x=mean(vs[vs$Chrom ==lgs[i],"Pos"]),y=-0.05,
+  text(x=mean(vs[vs$Chrom ==lgs[i],"Pos"]),y=-0.01,
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(vs[vs$Chrom ==lgs[i],"Pos"])
 }
-mtext("Both ddRAD-seq and sdRAD-seq",3,cex=0.75,line=1)
+mtext("Both ddRAD-seq and sdRAD-seq",3,cex=0.75,line=0.5)
+mtext(expression(Males-Females~italic(F)[ST]),2,line=2,cex=0.75)
 
 ####ddRAD-seq only
-vsd<-fst.plot(fst.dat=drad.viasel[!is.na(drad.viasel$Fst),],ci.dat = c(-10,10),sig.col=c("black","black"), 
-              fst.name="Fst", chrom.name="Chrom", bp.name="Pos",y.lim=c(0,1),axis.size=1,
+vsd<-fst.plot(fst.dat=drad.viasel[!is.na(drad.viasel$Fst),],pt.col = ddsep.col, 
+              fst.name="Fst", chrom.name="Chrom", bp.name="Pos",y.lim=c(0,0.5),axis.size=1,
               groups=as.factor(scaffs[scaffs %in% levels(factor(drad.viasel$Chrom[!is.na(drad.viasel$Fst)]))]))
-points(vsd$Pos[vsd$index %in% vsd.sig$SNP], 
-       vsd$Fst[vsd$Locus %in% vsd.sig$SNP],
-       col="green4",pch=19,cex=0.75)
+points(vsd$Pos[vsd$Chi.p.adj <= 0.05], 
+       vsd$Fst[vsd$Chi.p.adj <= 0.05],
+       col=viasel.col,pch=19,cex=0.75)
 last<-0
 for(i in 1:length(lgs)){
-  text(x=mean(vsd[vsd$Chrom ==lgs[i],"Pos"]),y=-0.05,
+  text(x=mean(as.numeric(vsd[vsd$Chrom ==lgs[i],"Pos"])),y=-0.01,
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
-  last<-max(vsd[vsd$Chrom ==lgs[i],"Pos"])
+  last<-max(as.numeric(vsd[vsd$Chrom ==lgs[i],"Pos"]))
 }
-mtext("ddRAD-seq",3,cex=0.75, line = 1)
+mtext("ddRAD-seq",3,cex=0.75, line = 0.5)
 
 ####sdRAD-seq only
-vso<-fst.plot(fst.dat=orad.viasel[!is.na(orad.viasel$Fst),],ci.dat = c(-10,10),sig.col=c("black","black"), 
-               fst.name="Fst", chrom.name="Chrom", bp.name="Pos", axis.size=1,y.lim=c(0,1),
+vso<-fst.plot(fst.dat=orad.viasel[!is.na(orad.viasel$Fst),],pt.col=sdsep.col, 
+               fst.name="Fst", chrom.name="Chrom", bp.name="Pos", axis.size=1,y.lim=c(0,0.5),
                 groups=as.factor(scaffs[scaffs %in% levels(factor(orad.viasel$Chrom[!is.na(orad.viasel$Fst)]))]))
-points(vso$Pos[vso$index %in% vso.sig$SNP], 
-       vso$Fst[vso$Locus %in% vso.sig$SNP],
-       col="green4",pch=19,cex=0.75)
+points(vso$Pos[vso$index %in% ovs.sig], 
+       vso$Fst[vso$index %in% ovs.sig],
+       col=viasel.col,pch=19,cex=0.75)
 last<-0
 for(i in 1:length(lgs)){
-  text(x=mean(vso[vso$Chrom ==lgs[i],"Pos"]),y=-0.05,
+  text(x=mean(as.numeric(vso[vso$Chrom ==lgs[i],"Pos"])),y=-0.01,
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
-  last<-max(vso[vso$Chrom ==lgs[i],"Pos"])
+  last<-max(as.numeric(vso[vso$Chrom ==lgs[i],"Pos"]))
 }
-mtext("sdRAD-seq",3,cex=0.75, line = 1)
+mtext("sdRAD-seq",3,cex=0.75, line = 0.5)
 
 #####ROW 2: sexual selection
 ####Both sdRAD-seq and ddRAD-seq
-ss<-fst.plot(fst.dat=both.sexsel[!is.na(both.sexsel$Fst),],ci.dat = c(-10,10),sig.col=c("black","black"), 
-             fst.name="Fst", chrom.name="Chrom", bp.name="Pos",axis.size=1,y.lim=c(0,1),
-                groups=as.factor(scaffs[scaffs %in% levels(factor(od.fst$Chrom[!is.na(od.fst$Fst)& od.fst$SNP %in% cov.pass]))]))
-points(ss$Pos[ss$index %in% ss.sig], 
-       ss$Fst[ss$Locus %in% ss.sig],
-       col="orchid1",pch=19,cex=0.75)
+ss<-fst.plot(fst.dat=both.sexsel[!is.na(both.sexsel$Fst),],pt.col=ddsdtog.col, 
+             fst.name="Fst", chrom.name="Chrom", bp.name="Pos",axis.size=1,y.lim=c(0,0.5),
+                groups=as.factor(scaffs[scaffs %in% levels(factor(both.sexsel$Chrom[!is.na(both.sexsel$Fst)]))]))
+points(ss$Pos[ss$index %in% bss.sig], 
+       ss$Fst[ss$index %in% bss.sig],
+       col=sexsel.col,pch=19,cex=0.75)
 last<-0
 for(i in 1:length(lgs)){
-  text(x=mean(ss[ss$Chrom ==lgs[i],"Pos"]),y=-0.05,
+  text(x=mean(ss[ss$Chrom ==lgs[i],"Pos"]),y=-0.01,
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(ss[ss$Chrom ==lgs[i],"Pos"])
 }
+mtext(expression(Inferred~Mothers-Females~italic(F)[ST]),2,line=2,cex=0.75)
 
 ####ddRAD-seq only
-ssd<-fst.plot(fst.dat=drad.sexsel[!is.na(drad.sexsel$Fst),],ci.dat = c(-10,10),sig.col=c("black","black"), 
-              fst.name="Fst", chrom.name="Chrom", bp.name="Pos",axis.size=1,y.lim=c(0,1),
-              groups=as.factor(scaffs[scaffs %in% levels(factor(drad.sexsel[!is.na(drad.sexsel$Fst)]))]))
+ssd<-fst.plot(fst.dat=drad.sexsel[!is.na(drad.sexsel$Fst),],pt.col=ddsep.col, 
+              fst.name="Fst", chrom.name="Chrom", bp.name="Pos",axis.size=1,y.lim=c(0,0.5),
+              groups=as.factor(scaffs[scaffs %in% levels(factor(drad.sexsel$Chrom[!is.na(drad.sexsel$Fst)]))]))
 points(ssd$Pos[ssd$index %in% dss.sig], 
-       ssd$Fst[ssd$Locus %in% dss.sig],
-       col="orchid1",pch=19,cex=0.75)
+       ssd$Fst[ssd$index %in% dss.sig],
+       col=sexsel.col,pch=19,cex=0.75)
 last<-0
 for(i in 1:length(lgs)){
-  text(x=mean(ssd[ssd$Chrom ==lgs[i],"Pos"]),y=-0.05,
+  text(x=mean(as.numeric(ssd[ssd$Chrom %in%lgs[i],"Pos"])),y=-0.01,
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
-  last<-max(ssd[ssd$Chrom ==lgs[i],"Pos"])
+  last<-max(as.numeric(ssd[ssd$Chrom ==lgs[i],"Pos"]))
 }
 
 
 ####Empty plot for legend
-plot(NULL,axes=F)
-
-mtext(expression(italic(F)[ST]),2,outer=T,cex=0.75)
+plot(1, type="n", xlab="", ylab="", xlim=c(0, 1), ylim=c(0, 1),axes=F,xaxt='n',yaxt='n')
+legend("top",c("sex-biased viability selection","sexual selection",
+               "sdRAD and ddRAD Analyzed Together","ddRAD Analyzed Separately","sdRAD Analyzed Separately"),
+       col=c(viasel.col,sexsel.col,ddsdtog.col,ddsep.col,sdsep.col),pch=19,
+       ncol=1,bty='n')
 mtext("Linkage Group",1,outer=T,cex=0.75)
 dev.off()
 
@@ -1148,4 +1080,99 @@ png("ddRADvoRAD.png",height=7,width=7,units="in",res=300)
 plot(ds.prune$ddRAD.oRAD,xlab="",ylab="Fst")
 dev.off()
 
+####PLINK SUBSETS--DON'T USE####
+dsub<-read.delim("drad.subset.raw",sep=" ")
+dmap<-read.delim("drad.map",header=F)
+osub<-read.delim("orad.subset.raw",sep=" ")
+omap<-read.delim("orad.map",header=F)
+bsub<-read.delim("both.subset.raw",sep=" ")
+bmap<-read.delim("both.map",header=F)
+
+#Match dsub and osub
+merge.map<-merge(omap,dmap,by="SNP")
+merge.map$oLocus<-apply(merge.map,1,function(x){
+  x["oLocus"]<-paste("X",x["oLocus"],sep="")
+})
+merge.map$dLocus<-apply(merge.map,1,function(x){
+  x["dLocus"]<-paste("X",x["dLocus"],sep="")
+})
+#match orad
+o.newcol<-colnames(osub)
+o.newcol<-unlist(lapply(o.newcol,function(x){
+  o.newcol<-gsub("(X\\d+_\\d+)_\\w","\\1",x)
+}))
+colnames(osub)<-o.newcol
+omerge.keep<-merge.map[merge.map$oLocus %in% colnames(osub),]
+omerge.keep<-omerge.keep[!duplicated(omerge.keep$oLocus),]
+odsub<-osub[,colnames(osub)%in%omerge.keep$oLocus]
+odsub<-odsub[,order(colnames(odsub))]
+omerge.keep<-omerge.keep[order(omerge.keep$oLocus),]
+colnames(odsub)<-omerge.keep[omerge.keep$oLocus %in% colnames(odsub),"SNP"]
+mo<-odsub[,!duplicated(colnames(odsub))]
+#match drad
+d.newcol<-colnames(dsub)
+d.newcol<-unlist(lapply(d.newcol,function(x){
+  d.newcol<-gsub("(X\\d+_\\d+)_\\w","\\1",x)
+}))
+colnames(dsub)<-d.newcol
+dmerge.keep<-merge.map[merge.map$dLocus %in% colnames(dsub),]
+dmerge.keep<-dmerge.keep[!duplicated(dmerge.keep$dLocus),]
+ddsub<-dsub[,colnames(dsub)%in%dmerge.keep$dLocus]
+ddsub<-ddsub[,order(colnames(ddsub))]
+dmerge.keep<-dmerge.keep[order(dmerge.keep$dLocus),]
+colnames(ddsub)<-dmerge.keep[dmerge.keep$dLocus %in% colnames(ddsub),"SNP"]
+md<-ddsub[,!duplicated(colnames(ddsub))]
+mo<-mo[,order(colnames(mo))]
+md<-md[,order(colnames(md))]
+mergedsub<-data.frame(rbind(cbind(osub[,1:6],mo[,colnames(mo) %in% colnames(md)]),
+                            cbind(dsub[,1:6],md[,colnames(md)%in% colnames(mo)])))
+#fsts
+plink.diff.fst<-fst.one.plink(mergedsub,group1 = osub$IID,group2 = dsub$IID)
+plink.both.fst<-fst.one.plink(bsub,group1 = osub$IID,group2 = dsub$IID)
+plink.diff.fst$Chrom<-gsub("(\\w+\\d+).\\d+","\\1",plink.diff.fst$Locus)
+plink.diff.fst$Pos<-gsub("(\\w+\\d+).(\\d+)","\\2",plink.diff.fst$Locus)
+
+plink.both.fst$Chrom<-apply(plink.both.fst,1,function(x){
+  chrom<-bmap[bmap$V2 %in% gsub("X(\\d+_\\d+)_\\w","\\1",x),"V1"]
+})
+plink.both.fst$Chrom<-factor(plink.both.fst$Chrom)
+plink.both.fst$Pos<-apply(plink.both.fst,1,function(x){
+  pos<-bmap[bmap$V2 %in% gsub("X(\\d+_\\d+)_\\w","\\1",x),"V4"]
+})
+
+#PLOTTING##
+lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
+       "LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
+       "LG22")
+lgn<-seq(1,22)
+scaffs<-levels(as.factor(plink.both.fst[,"Chrom"]))
+scaffs[1:22]<-lgs
+
+jpeg("sd-dd_Fst_subset.jpeg",height=10,width=7.5,units="in",res=300)
+par(mfrow=c(2,1),mar=c(2,2,2,2),oma=c(1,2,1,1))
+od<-fst.plot(plink.both.fst[!is.na(plink.both.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
+             fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(-2,0.6),
+             groups=as.factor(scaffs[scaffs %in% levels(factor(plink.both.fst$Chrom[!is.na(plink.both.fst$Fst)]))]))
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(od[od$Chrom ==lgs[i],"Pos"]),y=-2.1,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(od[od$Chrom ==lgs[i],"Pos"])
+}
+mtext("sdRAD-ddRAD Analyzed Together",3,cex=0.75)
+odb<-fst.plot(plink.diff.fst[!is.na(plink.diff.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
+              fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(-1,0.3),
+              groups=as.factor(scaffs[scaffs %in% levels(factor(plink.diff.fst[!is.na(plink.diff.fst),"Chrom"]))]))
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(odb[odb$Chrom ==lgs[i],"Pos"]),y=-1.1,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(odb[odb$Chrom ==lgs[i],"Pos"])
+}
+mtext("sdRAD-ddRAD Analyzed Separately",3,cex=0.75)
+dev.off()
+
+##STATS
+plink.fst<-data.frame(Fst=as.numeric(c(plink.both.fst$Fst,plink.diff.fst$Fst)),
+                      Analysis=c(rep("Together",length(plink.both.fst$Fst)),rep("Separately",length(plink.diff.fst$Fst))))
 
