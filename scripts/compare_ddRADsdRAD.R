@@ -12,12 +12,12 @@ both<-parse.vcf("stacks_both/batch_3.vcf")
 #################SET COLORS#################
 ddtog.col<-"#f4a582"
 ddsep.col<-"#ca0020"
-sdtog.col<-"92c5de"
-sdsep.col<-"0571b0"
+sdtog.col<-"#92c5de"
+sdsep.col<-"#0571b0"
 ddsdtog.col<-"#807dba" #or "#6a51a3"
 ddsdsep.col<-"#3f007d"
-sexsel.col<-"orchid1"
-viasel.col<-"green4"
+sexsel.col<-"navyblue"
+viasel.col<-"goldenrod"
 #################FILES#################
 #Original files
 #drad<-parse.vcf("drad.vcf")
@@ -96,12 +96,12 @@ bo.cov$AvgCovRatio[bo.cov$AvgCovRatio=="Inf"]<-bo.cov[bo.cov$AvgCovRatio=="Inf",
 bd.cov$AvgCovRatio[bd.cov$AvgCovRatio=="Inf"]<-bd.cov[bd.cov$AvgCovRatio=="Inf","AvgCovRef"]
 
 ##SUBSET
-b.cov<-b.cov[b.cov$SNP %in% both.sub$SNP,]
-bo.cov<-bo.cov[bo.cov$SNP %in% both.sub$SNP & bo.cov$SNP %in% orad.sub$SNP,]
-bd.cov<-bd.cov[bd.cov$SNP %in% both.sub$SNP & bd.cov$SNP %in% drad.sub$SNP,]
-o.cov<-o.cov[o.cov$SNP %in% orad.sub$SNP,]
-d.cov<-d.cov[d.cov$SNP %in% drad.sub$SNP,]
-loc.cov<-loc.cov[loc.cov$SNP %in% orad.sub$SNP & loc.cov$SNP %in% drad.sub$SNP,]
+b.cov<-b.cov[b.cov$SNP %in% both$SNP,]
+bo.cov<-bo.cov[bo.cov$SNP %in% both$SNP & bo.cov$SNP %in% orad$SNP,]
+bd.cov<-bd.cov[bd.cov$SNP %in% both$SNP & bd.cov$SNP %in% drad$SNP,]
+o.cov<-o.cov[o.cov$SNP %in% orad$SNP,]
+d.cov<-d.cov[d.cov$SNP %in% drad$SNP,]
+loc.cov<-loc.cov[loc.cov$SNP %in% orad$SNP & loc.cov$SNP %in% drad$SNP,]
 ####Average Coverage####
 #compare sd vs dd
 lc.comp<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(o.cov)),rep("ddRAD",nrow(d.cov)),
@@ -183,6 +183,10 @@ rownames(dic)<-rownames(drad.icov)
 write.table(oic,"orad_coverage_subset.csv",quote=T,row.names=T,col.names=T,sep='\t')
 write.table(dic,"drad_coverage_subset.csv",quote=T,row.names=T,col.names=T,sep='\t')
 write.table(ic,"both_coverage_subset.csv",quote=T,row.names=T,col.name=T,sep='\t')
+
+oic<-read.csv("orad_coverage_subset.csv",row.names=1,header=T,sep='\t')
+dic<-read.csv("drad_coverage_subset.csv",row.names=1,header=T,sep='\t')
+ic<-read.csv("both_coverage_subset.csv",row.names=1,header=T,sep='\t')
 
 ic.o<-ic[rownames(ic) %in% rownames(oic),]
 ic.d<-ic[rownames(ic) %in% rownames(dic),]
@@ -322,12 +326,13 @@ TukeyHSD(aov(lcv.comp$PropHet~lcv.comp$LibraryPrep*lcv.comp$Assembly))
 ####PLOT: Fig 2. Variance in Coverage####
 jpeg("VarianceInCov.jpeg",height=8.5,width=7,units="in",res=300)
 par(mfrow=c(2,1),oma=c(1,2,1,1),mar=c(2,2,2,2))
-boxplot(log(lcv.comp$CovVariance+1)~lcv.comp$LibraryPrep*lcv.comp$Assembly,col=c("cadetblue","coral1"),
-        names=F,xaxt='n')
+boxplot(log(lcv.comp$CovVariance+1)~lcv.comp$LibraryPrep*lcv.comp$Assembly,col=c(ddsep.col,sdsep.col,ddtog.col,sdtog.col),
+        names=F,xaxt='n',ylim=c(0,18))
 axis(1,at=c(1.5,3.5),c("Alone","Together"))
 mtext("ln(Variance in Coverage)",2,outer=F,line=2)
-legend("topleft",ncol=2,c("ddRAD","sdRAD"),pch=15,col=c("cadetblue","coral1"),bty='n')
-boxplot(lcv.comp$PropHet~lcv.comp$LibraryPrep*lcv.comp$Assembly,col=c("cadetblue","coral1"),
+legend("top",,inset=c(0,-0.05),ncol=4,c("ddRAD Alone","sdRAD Alone","ddRAD Together", "sdRAD Together"),
+       pch=15,col=c(ddsep.col,sdsep.col,ddtog.col,sdtog.col),bty='n')
+boxplot(lcv.comp$PropHet~lcv.comp$LibraryPrep*lcv.comp$Assembly,col=c(ddsep.col,sdsep.col,ddtog.col,sdtog.col),
         names=F,xaxt='n')
 mtext("Proportion Heterozygotes",2,outer=F,line=2)
 axis(1,at=c(1.5,3.5),c("Alone","Together"))
@@ -490,7 +495,6 @@ gwsca<-read.delim("gwsca_fsts_both.txt")
 drad.test<-sample(d.ind,120)
 drad.tes.fst<-do.call("rbind", apply(both, 1, fst.one.vcf,group1=drad.test[1:60],group2=drad.test[61:120],cov.thresh=0.2))
 
-
 ##############################60 sdRAD and 60 ddRAD##################################
 #d.ind.sub<-sample(d.ind,60,replace=F)
 #d.share.sub<-d.share[,colnames(d.share) %in% c(locus.info,d.ind.sub)]
@@ -639,6 +643,10 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(a.od[a.od$Chrom ==lgs[i],"Pos"])
 }
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(a.od$Fst),4))),
+        bquote(.(nrow(a.od))~" SNPs"))
+legend("top",legend=as.expression(lgnd),
+       bty='n')
 mtext("60 sdRAD and 384 ddRAD Individuals",3,cex=0.75,line=0.5)
 mtext("Analyzed Separately",2,cex=0.75,line=1.5)
 
@@ -652,6 +660,9 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(sd.od[sd.od$Chrom ==lgs[i],"Pos"])
 }
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(sd.od$Fst),4))),
+        bquote(.(nrow(sd.od))~" SNPs"))
+legend("top",legend=as.expression(lgnd),bty='n')
 mtext("60 sdRAD and 60 ddRAD Individuals",3,cex=0.75, line = 0.5)
 
 ####60 ddRAD and 60 ddRAD
@@ -664,6 +675,9 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(dd.od[dd.od$Chrom ==lgs[i],"Pos"])
 }
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(dd.od$Fst),4))),
+        bquote(.(nrow(dd.od))~" SNPs"))
+legend("top",legend=as.expression(lgnd),bty='n')
 mtext("60 ddRAD and 60 ddRAD Individuals",3,cex=0.75, line = 0.5)
 
 #####ROW 2
@@ -677,6 +691,9 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(a.odc[a.odc$Chrom ==lgs[i],"Pos"])
 }
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(a.odc$Fst),4))),
+        bquote(.(nrow(a.odc))~" SNPs"))
+legend("top",legend=as.expression(lgnd),bty='n')
 mtext("Analyzed Separately,\nCoverage Filter",2,cex=0.75,line=1.5)
 ####sdRAD vs 60 ddRAD
 sd.odc<-fst.plot(sub.od.fst[!is.na(sub.od.fst$Fst) & sub.od.fst$SNP %in% cov.pass,], 
@@ -688,7 +705,9 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(sd.odc[sd.odc$Chrom ==lgs[i],"Pos"])
 }
-
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(sd.odc$Fst),4))),
+        bquote(.(nrow(sd.odc))~" SNPs"))
+legend("top",legend=as.expression(lgnd),bty='n')
 
 
 ####60 ddRAD and 60 ddRAD
@@ -701,7 +720,9 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(dd.odc[dd.odc$Chrom ==lgs[i],"Pos"])
 }
-
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(dd.odc$Fst),4))),
+        bquote(.(nrow(dd.odc))~" SNPs"))
+legend("top",legend=as.expression(lgnd),bty='n')
 
 
 #####ROW 3: Together
@@ -716,8 +737,11 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(a.odb[a.odb$Chrom ==lgs[i],"Pos"],na.rm = T)
 }
-
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(a.odb$Fst),4))),
+        bquote(.(nrow(a.odb))~" SNPs"))
+legend("top",legend=as.expression(lgnd),bty='n')
 mtext("Analyzed Together",2,line=1.5,cex=0.75)
+
 ####All sdRAD vs 60 ddRAD
 sd.odb<-fst.plot(sub.fsts.both[!is.na(sub.fsts.both$Fst),],
                  fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),pt.col = ddsdtog.col,
@@ -729,6 +753,9 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(sd.odb[sd.odb$Chrom ==lgs[i],"Pos"],na.rm = T)
 }
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(sd.odb$Fst),4))),
+         bquote(.(nrow(sd.odb))~" SNPs"))
+legend("top",legend=as.expression(lgnd),bty='n')
 
 ####60 ddRAD and 60 ddRAD
 dd.odb<-fst.plot(dsub.fsts.both[!is.na(dsub.fsts.both$Fst),],
@@ -741,7 +768,9 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(dd.odb[dd.odb$Chrom ==lgs[i],"Pos"],na.rm = T)
 }
-
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(dd.odb$Fst),4))),
+        bquote(.(nrow(dd.odb))~" SNPs"))
+legend("top",legend=as.expression(lgnd),bty='n')
 
 #####ROW 4: Together
 ####All sdRAD vs all ddRAD
@@ -757,6 +786,9 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(a.odbc[a.odbc$Chrom ==lgs[i],"Pos"],na.rm = T)
 }
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(a.odbc$Fst),4))),
+        bquote(.(nrow(a.odbc))~" SNPs"))
+legend("top",legend=as.expression(lgnd),bty='n')
 mtext("Analyzed Together,\nCoverage Filter",2,line=1.5,cex=0.75)
 
 ####All sdRAD vs 60 ddRAD
@@ -772,6 +804,9 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(sd.odbc[sd.odbc$Chrom ==lgs[i],"Pos"],na.rm = T)
 }
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(sd.odbc$Fst),4))),
+        bquote(.(nrow(sd.odbc))~" SNPs"))
+legend("top",legend=as.expression(lgnd),bty='n')
 
 ###60 ddRAD vs 60 ddRAD
 dd.odbc<-fst.plot(dsub.fsts.both[!is.na(dsub.fsts.both$Fst) & dsub.fsts.both$SNP %in% sep.cov.pass,],
@@ -786,12 +821,25 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(dd.odbc[dd.odbc$Chrom ==lgs[i],"Pos"],na.rm = T)
 }
-legend("top",bty='n',pch=19,col=c(ddsdsep.col,ddsdtog.col,ddsep.col,ddtog.col),
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(dd.odbc$Fst),4))),
+        bquote(.(nrow(dd.odbc))~" SNPs"))
+legend("top",legend=as.expression(lgnd),bty='n')
+legend(x=500,y=0.85,bty='n',pch=19,col=c(ddsdsep.col,ddsdtog.col,ddsep.col,ddtog.col),
        c("sdRAD-ddRAD Analyzed Separately","sdRAD-ddRAD Analyzed Together","ddSNPs Analyzed Separately","ddSNPs Analyzed Together"),
        ncol=1)
 mtext(expression(italic(F)[ST]),2,outer=T,cex=0.75)
 mtext("Linkage Group",1,outer=T,cex=0.75)
 dev.off()
+
+
+fst.comp<-data.frame(Filtering=c(rep("Unfiltered",nrow(a.od)),rep("Filtered",nrow(a.odc)),
+                                 rep("Unfiltered",nrow(a.odb)),rep("Filtered",nrow(a.odbc))), 
+                     Assembly=c(rep("Alone",nrow(a.od)),rep("Alone",nrow(a.odc)),
+                                rep("Together",nrow(a.odb)),rep("Together",nrow(a.odbc))),
+                     Fsts=c(a.od$Fst,a.odc$Fst,a.odb$Fst,a.odbc$Fst))
+fst.comp.aov<-aov(Fsts~Filtering*Assembly,dat=fst.comp)
+summary(fst.comp.aov)
+TukeyHSD(fst.comp.aov)
 
 
 fst.aov.dat<-data.frame(Fst=c(a.od$Fst,sd.od$Fst,dd.od$Fst,a.odb$Fst,sd.odb$Fst,dd.odb$Fst,a.odc$Fst,
@@ -824,7 +872,7 @@ names1<-colnames(vcf1)
 names1[grep("MOM",names1)]<-gsub("MOM.*PRM(\\d{3})(_align)?","MOM\\1",names1[grep("MOM",names1)])
 colnames(vcf1)<-names1
 vcf2.gt<-extract.gt.vcf(both)
-merge<-merge.vcfs(vcf1,vcf2.gt)
+merge<-merge.vcfs(vcf1,both)
 both.keep<-b.cov[b.cov$AvgCovTotal > 5 & b.cov$AvgCovTotal <= 20,"SNP"]
 merge$SNP<-paste(as.character(merge$CHROM),as.character(merge$POS),sep=".")
 merge<-merge[merge$SNP %in% both.keep,]
@@ -837,6 +885,8 @@ bss.sig<-both.sexsel$index[both.sexsel$Chi.p.adj <= 0.05]
 both.viasel<-gwsca(merge,locus.info,females,males)
 both.viasel$index<-paste(both.viasel$Chrom,both.viasel$Pos,sep=".")
 bvs.sig<-both.viasel$index[both.viasel$Chi.p.adj <= 0.05]
+write.table(both.sexsel,"both.sexsel.txt",col.names=T,row.names=F,quote=F,sep='\t')
+write.table(both.viasel,"both.viasel.txt",col.names=T,row.names=F,quote=F,sep='\t')
 
 #DRAD
 drad.merge<-read.table("../biallelic/biallelic_merge.vcf",sep='\t',header=T)
@@ -857,7 +907,8 @@ dss.sig<-drad.sexsel$index[drad.sexsel$Chi.p.adj <= 0.05]
 drad.viasel<-gwsca(drad.merge,locus.info,females,males)
 drad.viasel$index<-paste(drad.viasel$Chrom,drad.viasel$Pos,sep=".")
 dvs.sig<-drad.viasel$index[drad.viasel$Chi.p.adj <= 0.05]
-
+write.table(drad.sexsel,"drad.sexsel.txt",col.names=T,row.names=F,quote=F,sep='\t')
+write.table(drad.viasel,"drae.viasel.txt",col.names=T,row.names=F,quote=F,sep='\t')
 
 #SRAD
 locus.info<-c("#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT","SNP")
@@ -868,8 +919,22 @@ males<-colnames(orad[grep("PRM",colnames(orad))])
 orad.viasel<-gwsca(orad,locus.info,females,males)
 orad.viasel$index<-paste(orad.viasel$Chrom,orad.viasel$Pos,sep=".")
 ovs.sig<-orad.viasel$index[orad.viasel$Chi.p.adj <= 0.05]
+write.table(orad.viasel,"orad.viasel.txt",col.names=T,row.names=F,quote=F,sep='\t')
 
-####PLOT: Fig ?. SCA####
+#STATISTICAL ANALYSIS
+viasel.dat<-data.frame(Fst=c(orad.viasel$Fst,drad.viasel$Fst,both.viasel$Fst),
+                       Method=c(rep("sdRAD",nrow(orad.viasel)),rep("ddRAD",nrow(drad.viasel)),rep("Both",nrow(both.viasel))))
+via.aov<-aov(Fst~Method,dat=viasel.dat)
+sexsel.dat<-data.frame(Fst=c(drad.sexsel$Fst,both.sexsel$Fst),
+                       Method=c(rep("ddRAD",nrow(drad.sexsel)),rep("Both",nrow(both.sexsel))))
+sex.aov<-aov(Fst~Method,dat=sexsel.dat)
+#sca.dat<-data.frame(Fst=c(orad.viasel$Fst,drad.viasel$Fst,both.viasel$Fst,drad.sexsel$Fst,both.sexsel$Fst),
+#  Method=c(rep("sdRAD",nrow(orad.viasel)),rep("ddRAD",nrow(drad.viasel)),rep("Both",nrow(both.viasel)),
+#           rep("ddRAD",nrow(drad.sexsel)),rep("Both",nrow(both.sexsel))),
+#  Analysis=c(rep("Viability",nrow(orad.viasel)),rep("Viability",nrow(drad.viasel)),rep("Viability",nrow(both.viasel)),
+#             rep("Sexual",nrow(drad.sexsel)),rep("Sexual",nrow(both.sexsel))))
+#sca.aov<-aov(Fst~Method*Analysis,dat=sca.dat)
+####PLOT: Fig 4. SCA####
 lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
        "LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
        "LG22")
@@ -877,7 +942,7 @@ lgn<-seq(1,22)
 scaffs<-levels(as.factor(both[,"#CHROM"]))
 scaffs[1:22]<-lgs
 
-#png("SCA_radseq.png",height=7.5,width=10,units="in",res=300)
+png("SCA_radseq.png",height=7.5,width=10,units="in",res=300)
 par(mfrow=c(2,3),mar=c(2,1.5,2,1),oma=c(1,2,1,0.5))
 ##ROW 1: Males vs Females
 ####both sdRAD and ddRAD (RAD)
@@ -893,6 +958,9 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(vs[vs$Chrom ==lgs[i],"Pos"])
 }
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(vs$Fst),4))),
+        bquote(.(nrow(vs))~" SNPs"), bquote(.(length(bvs.sig))~" Significant SNPs"))
+legend("top",inset=c(0,0.05),legend=as.expression(lgnd), bty='n')
 mtext("Both ddRAD-seq and sdRAD-seq",3,cex=0.75,line=0.5)
 mtext(expression(Males-Females~italic(F)[ST]),2,line=2,cex=0.75)
 
@@ -909,6 +977,9 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(as.numeric(vsd[vsd$Chrom ==lgs[i],"Pos"]))
 }
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(vsd$Fst),4))),
+         bquote(.(nrow(vsd))~" SNPs"), bquote(.(length(vsd$Fst[vsd$Chi.p.adj <= 0.05]))~" Significant SNPs"))
+legend("top",inset=c(0,0.05),legend=as.expression(lgnd), bty='n')
 mtext("ddRAD-seq",3,cex=0.75, line = 0.5)
 
 ####sdRAD-seq only
@@ -924,6 +995,9 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(as.numeric(vso[vso$Chrom ==lgs[i],"Pos"]))
 }
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(vso$Fst),4))),
+        bquote(.(nrow(vso))~" SNPs"), bquote(.(length(ovs.sig))~" Significant SNPs"))
+legend("top",inset=c(0,0.05),legend=as.expression(lgnd), bty='n')
 mtext("sdRAD-seq",3,cex=0.75, line = 0.5)
 
 #####ROW 2: sexual selection
@@ -940,6 +1014,9 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(ss[ss$Chrom ==lgs[i],"Pos"])
 }
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(ss$Fst),4))),
+        bquote(.(nrow(ss))~" SNPs"), bquote(.(length(bss.sig))~" Significant SNPs"))
+legend("top",inset=c(0,0.05),legend=as.expression(lgnd), bty='n')
 mtext(expression(Inferred~Mothers-Females~italic(F)[ST]),2,line=2,cex=0.75)
 
 ####ddRAD-seq only
@@ -955,7 +1032,9 @@ for(i in 1:length(lgs)){
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(as.numeric(ssd[ssd$Chrom ==lgs[i],"Pos"]))
 }
-
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(ssd$Fst),4))),
+        bquote(.(nrow(ssd))~" SNPs"), bquote(.(length(dss.sig))~" Significant SNPs"))
+legend("top",inset=c(0,0.05),legend=as.expression(lgnd), bty='n')
 
 ####Empty plot for legend
 plot(1, type="n", xlab="", ylab="", xlim=c(0, 1), ylim=c(0, 1),axes=F,xaxt='n',yaxt='n')
