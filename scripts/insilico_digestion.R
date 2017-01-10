@@ -219,7 +219,7 @@ summary(lm(Fst~PCR*MutationRate*Symmetric+Shearing+Skew,data = comb.dat))
 lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
        "LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
        "LG22")
-vcf.files<-list.files(pattern="pcr.\\d+.vcf")
+vcf.files<-list.files(pattern="u10E\\dNe\\d+.vcf")
 
 png("fsts_vcf_pcr.png",height=10,width=7.5,units="in",res=300)
 par(mfrow=c(6,1),oma=c(2,2,2,2),mar=c(2,2,2,2))

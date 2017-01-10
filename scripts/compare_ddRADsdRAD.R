@@ -221,45 +221,52 @@ TukeyHSD(aov(log(ind.cov$NumReads)~ind.cov$LibraryPrep*ind.cov$Assembly))
 jpeg("CoverageAssemblyMethodComp_Subset.jpeg",height=10.5,width=8,units="in",res=300)
 par(mfrow=c(3,2),oma=c(1,1,1,1),mar=c(2,2,2,2))
 par(mar=c(2,3,2,1))
-hist(oc$NumReadsTogether, col=rgb(0,0,1,0.5), ylim=c(0,30), breaks=seq(0,3500000,250000),
-     main="sdRAD-seq",axes=F,xlim=c(0,3500000))
-hist(oc$NumReadsAlone,col=rgb(1,0,0,0.5), add=T,breaks=seq(0,3500000,250000))
+hist(oc$NumReadsTogether, col=alpha(sdtog.col,0.5), ylim=c(0,30), breaks=seq(0,3500000,250000),
+     main="sdRAD-seq",axes=F,xlim=c(0,3500000),border=alpha(sdtog.col,0.5))
+hist(oc$NumReadsAlone,col=alpha(sdsep.col,0.5), add=T,breaks=seq(0,3500000,250000),density=20)
+legend("topright",c("Assembled Together", "Assembled Separately"),
+       fill=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)),bty='n',
+       density=c(NA,20),border=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)))
 axis(1,pos=0)
 axis(2,pos=0,las=1)
 mtext("Number of Individuals",2.5,outer=F,line=2,cex=0.75)
 par(mar=c(2,2,2,2))
-hist(dc$NumReadsTogether, col=rgb(0,0,1,0.5), ylim=c(0,150), breaks=seq(0,1500000,100000),
-     main="ddRAD-seq",axes=F)
-hist(dc$NumReadsAlone,col=rgb(1,0,0,0.5), add=T,breaks=seq(0,1500000,100000))
+hist(dc$NumReadsTogether, col=alpha(ddtog.col,0.5), ylim=c(0,150), breaks=seq(0,1500000,100000),
+     main="ddRAD-seq",axes=F,border=alpha(ddtog.col,0.5))
+hist(dc$NumReadsAlone,col=alpha(ddsep.col,0.5), add=T,breaks=seq(0,1500000,100000),density=20)
 axis(1,pos=0)
 axis(2,pos=0,las=1)
-legend("topright",c("Assembled Together", "Assembled Separately"),pch=15,col=c(rgb(1,0,0,0.5),rgb(0,0,1,0.5)),bty='n')
+legend("topright",c("Assembled Together", "Assembled Separately"),
+       fill=c(alpha(ddtog.col,0.5),alpha(ddsep.col,0.5)),bty='n',density = c(NA,20),
+       border=c(alpha(ddtog.col,0.5),alpha(ddsep.col,0.5)))
 mtext("Total Number of Reads",1,outer=T,cex=0.75,line=-52)#-29 for R
 
 par(mar=c(2,3,2,1))
-hist(log(bo.cov$AvgCovTotal),col=rgb(0,0,1,0.5),axes=F,xlab="",ylab="",main="",
-     xlim=c(0,10.5),ylim=c(0,80000),breaks=seq(0,10.5,0.75))
-hist(log(o.cov$AvgCovTotal), col=rgb(1,0,0,0.5), add=T,breaks=seq(0,10.5,0.75))
+hist(log(bo.cov$AvgCovTotal),col=alpha(sdtog.col,0.5),axes=F,xlab="",ylab="",main="",
+     xlim=c(0,10.5),ylim=c(0,80000),breaks=seq(0,10.5,0.75),border=alpha(sdtog.col,0.5))
+hist(log(o.cov$AvgCovTotal), col=alpha(sdsep.col,0.5), add=T,breaks=seq(0,10.5,0.75),density=20)
 axis(1,pos=0)
 axis(2,pos=0,las=1)
 mtext("Number of Loci",2,outer=F,line=2.5,cex=0.75)
 par(mar=c(2,2,2,2))
-hist(log(bd.cov$AvgCovTotal), col=rgb(0,0,1,0.5),main="",axes=F,ylab="",xlab="",
-     xlim=c(0,8),ylim=c(0,15000),breaks=seq(0,8,0.5))
-hist(log(d.cov$AvgCovTotal), col=rgb(1,0,0,0.5), add=T,breaks=seq(0,8,0.5))
+hist(log(bd.cov$AvgCovTotal), col=alpha(ddtog.col,0.5),main="",axes=F,ylab="",xlab="",
+     xlim=c(0,8),ylim=c(0,15000),breaks=seq(0,8,0.5),border=alpha(ddtog.col,0.5))
+hist(log(d.cov$AvgCovTotal), col=alpha(ddsep.col,0.5), add=T,breaks=seq(0,8,0.5),density=20)
 axis(1,pos=0)
 axis(2,pos=0,las=1)
 mtext("ln(Average Number of Reads Per Individual Per SNP)",1,outer=T,line=-27,cex=0.75)#-15 for R
 
 par(mar=c(2,3,2,1))
-hist(log(bo.cov$AvgCovRatio),col=rgb(0,0,1,0.5),main="",axes=F,xlab="",ylab="",breaks=seq(-5,5,1),ylim=c(0,50000),xlim=c(-5,7))
-hist(log(o.cov$AvgCovRatio), col=rgb(1,0,0,0.5), add=T,breaks=seq(-5,7,1))
+hist(log(bo.cov$AvgCovRatio),col=alpha(sdtog.col,0.5),main="",axes=F,xlab="",ylab="",
+     breaks=seq(-5,5,1),ylim=c(0,50000),xlim=c(-5,7),border=alpha(sdtog.col,0.5))
+hist(log(o.cov$AvgCovRatio), col=alpha(sdsep.col,0.5), add=T,breaks=seq(-5,7,1),density=20)
 axis(1,pos=0)
 axis(2,pos=-5,las=1)
 mtext("Number of Loci",2,outer=F,line=2.5,cex=0.75)
 par(mar=c(2,2,2,2))
-hist(log(bd.cov$AvgCovRatio), col=rgb(0,0,1,0.5),main="",axes=F,ylab="",xlab="",breaks=seq(-2,5,0.5),ylim=c(0,10000),xlim=c(-2,5))
-hist(log(d.cov$AvgCovRatio), col=rgb(1,0,0,0.5), add=T,breaks=seq(-5,5,0.5))
+hist(log(bd.cov$AvgCovRatio), col=alpha(ddtog.col,0.5),main="",axes=F,ylab="",xlab="",
+     breaks=seq(-2,6,0.5),ylim=c(0,10000),xlim=c(-2,6),border=alpha(ddtog.col,0.5))
+hist(log(d.cov$AvgCovRatio), col=alpha(ddsep.col,0.5), add=T,breaks=seq(-5,6,0.5),density=20)
 axis(1,pos=0)
 axis(2,pos=-2,las=1)
 mtext("ln(Average Number of Reads in Ref/Avg Number of Reads in Alt)",1,outer=T,cex=0.75)
@@ -330,7 +337,7 @@ boxplot(log(lcv.comp$CovVariance+1)~lcv.comp$LibraryPrep*lcv.comp$Assembly,col=c
         names=F,xaxt='n',ylim=c(0,18))
 axis(1,at=c(1.5,3.5),c("Alone","Together"))
 mtext("ln(Variance in Coverage)",2,outer=F,line=2)
-legend("top",,inset=c(0,-0.05),ncol=4,c("ddRAD Alone","sdRAD Alone","ddRAD Together", "sdRAD Together"),
+legend("top",ncol=2,c("ddRAD Alone","sdRAD Alone","ddRAD Together", "sdRAD Together"),
        pch=15,col=c(ddsep.col,sdsep.col,ddtog.col,sdtog.col),bty='n')
 boxplot(lcv.comp$PropHet~lcv.comp$LibraryPrep*lcv.comp$Assembly,col=c(ddsep.col,sdsep.col,ddtog.col,sdtog.col),
         names=F,xaxt='n')
@@ -559,6 +566,9 @@ mtext("sdRAD-ddRAD Analyzed Together, Coverage Filter",3,cex=0.75)
 mtext(expression(italic(F)[ST]),2,outer=T,cex=0.75)
 dev.off()
 
+#Look at coverage in subset
+d60.cov<-do.call("rbind",apply(d.share.sub,1,vcf.cov.loc,subset=d.ind.sub))
+wilcox.test(d60.cov$PropHet,o.cov$PropHet)
 
 ##############################60 ddRAD and 60 ddRAD##################################
 #d.ind.sub1<-sample(d.ind,60,replace=F)
@@ -642,9 +652,8 @@ for(i in 1:length(lgs)){
   text(x=mean(a.od[a.od$Chrom ==lgs[i],"Pos"]),y=-0.05,
        labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
   last<-max(a.od[a.od$Chrom ==lgs[i],"Pos"])
-}
-lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(a.od$Fst),4))),
-        bquote(.(nrow(a.od))~" SNPs"))
+}   
+lgnd<-c(bquote("Mean "~italic(F)[ST]~"="~.(round(mean(a.od$Fst),4))),bquote(.(nrow(a.od))~" SNPs"))
 legend("top",legend=as.expression(lgnd),
        bty='n')
 mtext("60 sdRAD and 384 ddRAD Individuals",3,cex=0.75,line=0.5)
@@ -934,6 +943,21 @@ sex.aov<-aov(Fst~Method,dat=sexsel.dat)
 #  Analysis=c(rep("Viability",nrow(orad.viasel)),rep("Viability",nrow(drad.viasel)),rep("Viability",nrow(both.viasel)),
 #             rep("Sexual",nrow(drad.sexsel)),rep("Sexual",nrow(both.sexsel))))
 #sca.aov<-aov(Fst~Method*Analysis,dat=sca.dat)
+
+#check to make sure differences aren't just due to sample size
+locus.info<-c("CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT","SNP")
+females<-colnames(drad.merge[grep("FEM",colnames(drad.merge))])
+males<-c(colnames(drad.merge[grep("PRM",colnames(drad.merge))]),colnames(drad.merge[grep("NPM",colnames(drad.merge))]))
+d30mal<-sample(males,30,replace = F)
+d30fem<-sample(females,30,replace = F)
+drad.viasel.30<-gwsca(drad.merge,locus.info,d30fem,d30mal)
+drad.viasel.30$index<-paste(as.character(drad.viasel.30$Chrom),as.numeric(drad.viasel.30$Pos),sep=".")
+dvs30.sig<-drad.viasel.30$index[drad.viasel.30$Chi.p.adj <= 0.05]
+fst.plot(fst.dat=drad.viasel.30[!is.na(drad.viasel.30$Fst),],pt.col = ddsep.col, 
+         fst.name="Fst", chrom.name="Chrom", bp.name="Pos",y.lim=c(0,0.5),axis.size=1,
+         groups=as.factor(scaffs[scaffs %in% levels(factor(drad.viasel.30$Chrom[!is.na(drad.viasel.30$Fst)]))]))
+wilcox.test(drad.viasel.30$Fst,orad.viasel$Fst,alternative="less")
+wilcox.test(drad.viasel.30$Fst,drad.viasel$Fst,alternative="greater")
 ####PLOT: Fig 4. SCA####
 lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
        "LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
@@ -1095,8 +1119,21 @@ summary(aov(dcomp$PropMissing~dcomp$Plate))
 TukeyHSD(aov(dcomp$PropMissing~dcomp$Plate))
 
 ###############################ALLELE FREQUENCIES#####################################
-both.afs<-do.call("rbind",apply(both,1,afs.vcf))
+bd.afs<-do.call("rbind",apply(both[,c(locus.info,d.ind)],1,calc.afs.vcf))
+bs.afs<-do.call("rbind",apply(both[,c(locus.info,o.ind)],1,calc.afs.vcf))
+bd.afs$index<-paste(bd.afs$Chrom,bd.afs$Pos,sep=".")
+bs.afs$index<-paste(bs.afs$Chrom,bs.afs$Pos,sep=".")
+bod.afs<-merge(bd.afs,bs.afs,by="index")
+wilcox.test(bod.afs$RefFreq.x,bod.afs$RefFreq.y,paired=T,alternative="greater")
+mean(bs.afs$RefFreq)
+mean(bd.afs$RefFreq)
 
+drad.afs<-do.call("rbind",apply(drad,1,calc.afs.vcf))
+orad.afs<-do.call("rbind",apply(orad,1,calc.afs.vcf))
+drad.afs$index<-paste(drad.afs$Chrom,drad.afs$Pos,sep=".")
+orad.afs$index<-paste(orad.afs$Chrom,orad.afs$Pos,sep=".")
+od.afs<-merge(drad.afs,orad.afs,by="index")
+wilcox.test(od.afs$RefFreq.x,od.afs$RefFreq.y,paired=T,alternative = "less")
 ############################ORIGINAL INVESTIGATION###################################
 setwd("E:/ubuntushare/SCA/results/biallelic/both_datasets/")
 summary<-read.delim("gwsca_summary_datasets.txt")
