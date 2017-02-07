@@ -156,14 +156,6 @@ public:
 			}
 		}
 	}//end pcr_duplicate
-
-	void check_alleles()
-	{
-		if (allele1 == -1 && allele2 != -1)
-			allele1 = allele2;
-		if (allele2 == -1 && allele1 != -1)
-			allele2 = allele1;
-	}//end check alleles
 };
 
 class fragment
@@ -235,180 +227,69 @@ public:
 	}
 	void update_counters(individual a)
 	{
-		if (a.allele1 != -1 && a.allele2 != -1)
-		{
-			if (a.allele1 == 0)
-				p++;
-			if (a.allele1 == 1)
-				q++;
-			if (a.allele2 == 0)
-				p++;
-			if (a.allele2 == 1)
-				q++;
-			if (a.allele1 != a.allele2)
-				obs_het++;
+		if (a.allele1 == 0)
+			p++;
+		if (a.allele1 == 1)
+			q++;
+		if (a.allele2 == 0)
+			p++;
+		if (a.allele2 == 1)
+			q++;
+		if (a.allele1 == -1 && a.allele2== 0)
+			p++;
+		if (a.allele1== -1 && a.allele2== 1)
+			q++;
+		if (a.allele1== 0 && a.allele2== -1)
+			p++;
+		if (a.allele1== 1 && a.allele2== -1)
+			q++;
+		if (a.allele1 != -1 && a.allele2!= -1 && a.allele1!= a.allele2)
+			obs_het++;
+		if (a.allele1!= -1 && a.allele2!= -1)
 			counter++;
-		}
 	}
 };
 
-int main(int argc, char*argv[])
+int main()
 {
 	int i, ii, frag_count,count, start, end,last_enz, this_enz,Ne, reads_per_ind, C_sd, C_dd;
 	int s_start, s_end, s_frag_count, s_cutsite, s_length, sd_ind, dd_ind;
 	int sd_pcr_cycles, dd_pcr_cycles;
 	double mutation_shape_param, pcr_duplicate_rate, shearing_bias_rate, mean_sheared_length;
 	double mutation_rate, sd_poly_rs_rate, dd_poly_rs_rate, prop_rs_constant;
-	string genome_name, sdigest_name,ddigest_name, line, overhang, vcf_name, summ_stats_name, mu;
+	string genome_name, sdigest_name,ddigest_name, line, overhang, vcf_name, summ_stats_name;
 	restriction_enzyme enz1, enz2;
 	ifstream genome_file;
 	ofstream ddigest_file,sdigest_file, vcf, summ_stats;
 	vector<fragment> ddigest, sdigest;
 	string sequence, seq_name, output_add;
-	bool afs_skewed, shear_bias, shear_this_one,verbose;
-	string query;
-	string tempstring1, tempstring2;
+	bool afs_skewed, shear_bias, shear_this_one;
 	sgenrand(time(0));
 
-	//set defaults
-	genome_name = "../../SSC_integrated.fa";
-	output_add = "output";
 	
+	genome_name = "../../SSC_integrated.fa";
+	output_add = ".comb.pcr3.u10E8Ne10000.asymmetric.skewed";
+	ddigest_name = "../../results/insilico/SSC_ddigested"+ output_add + ".txt";
+	sdigest_name = "../../results/insilico/SSC_sdigested"+ output_add + ".txt";
+	vcf_name = "../../results/insilico/ssc_insilico" + output_add + ".vcf";
+	summ_stats_name = "../../results/insilico/ssc_insilico_summstats" + output_add + ".txt";
 	enz1.rec_seq = "CTGCAG"; //PstI
 	enz1.overhang = "G";
 	enz2.rec_seq = "GATC"; //MboI
 	enz2.overhang = "";
-	sd_ind = 200;
-	dd_ind = 200;
-	pcr_duplicate_rate = 0;//% of reads per cycle
+	sd_ind = 60;
+	dd_ind = 340;
+	pcr_duplicate_rate = 0.03;//% of reads per cycle
 	prop_rs_constant = 0.1;//usually 0.1
 	Ne = 10000;
 	reads_per_ind = 1114632;
 	dd_pcr_cycles = 12;
 	sd_pcr_cycles = 20;
-	afs_skewed = false;
+	afs_skewed = true;
 	shear_bias = false;
-	verbose = false;
-	mu = "10E8";
-	
-	if (argc == 1)
-	{
-		cout << "\n\t\tHELP MENU\n";
-		cout << "\nRuns an in silico digestion of a genome, accounting for numerous sources of bias.\n";
-		cout << "-g:\tGenome file (including path)\n";
-		cout << "-o:\tlabel to add to this run's Output. (default: output)\n";
-		cout << "-e1:\tEnzyme 1's recognition site (default: CTGCAG, for PstI)\n";
-		cout << "-e2:\tEnzyme 2's recognition site (default: GATC, for MboI)\n";
-		cout << "-s:\tnumber of individuals for the Single digest. (default: 200)\n";
-		cout << "-d:\tnumber of individuals for the Double digest. (default: 200)\n";
-		cout << "-p:\tPCR duplication rate. (default: 0)\n";
-		cout << "-c:\tproportion of restriction sites kept Constant (default: 0.1).\n";
-		cout << "-n:\tthe Ne value for the calculation of the proportion of nucleotides with segregating mutation at restriction site. (default: 10000)\n";
-		cout << "-m:\tthe value of mu for the calculation of the proportion of nucleotides with segregating mutation at restriction site. Input 10E8 for [10-9,10-8] or 10E7 for [10-8,10-7] (default: 10E8).\n";
-		cout << "-r:\tReads per individual (default: 1114632).\n";
-		cout << "-pd:\tnumber of PCR cycles in the Double digest (default: 12).\n";
-		cout << "-ps:\tnumber of PCR cycles in the Single digets (default: 20).\n";
-		cout << "-a:\tboolean value (true/false) indicating whether the allele frequency is skewed (default: false).\n";
-		cout << "-b:\tboolean value (true/false) indicating whether shearing bias should be modeled (default: false).\n";
-		cout << "-v:\tboolean value (true/false) indicating whether you'd like Verbose mode with lots of output or not (default: false)\n";
-		cout << "-h:\tPrint this help message.\n";
-		return 0;
-	}
-	if (argc > 1)
-	{
-		tempstring1 = argv[1];
-		if (tempstring1 == "-h")
-		{
-			cout << "\nRuns an in silico digestion of a genome, accounting for numerous sources of bias.\n";
-			cout << "-g:\tGenome file (including path)\n";
-			cout << "-o:\tlabel to add to this run's Output. (default: output)\n";
-			cout << "-e1:\tEnzyme 1's recognition site (default: CTGCAG, for PstI)\n";
-			cout << "-e2:\tEnzyme 2's recognition site (default: GATC, for MboI)\n";
-			cout << "-s:\tnumber of individuals for the Single digest. (default: 200)\n";
-			cout << "-d:\tnumber of individuals for the Double digest. (default: 200)\n";
-			cout << "-p:\tPCR duplication rate. (default: 0)\n";
-			cout << "-c:\tproportion of restriction sites kept Constant (default: 0.1).\n";
-			cout << "-n:\tthe Ne value for the calculation of the proportion of nucleotides with segregating mutation at restriction site. (default: 10000)\n";
-			cout << "-m:\tthe value of mu for the calculation of the proportion of nucleotides with segregating mutation at restriction site. Input 10E8 for [10-9,10-8] or 10E7 for [10-8,10-7] (default: 10E8).\n";
-			cout << "-r:\tReads per individual (default: 1114632).\n";
-			cout << "-pd:\tnumber of PCR cycles in the Double digest (default: 12).\n";
-			cout << "-ps:\tnumber of PCR cycles in the Single digets (default: 20).\n";
-			cout << "-a:\tboolean value (true/false) indicating whether the allele frequency is skewed (default: false).\n";
-			cout << "-b:\tboolean value (true/false) indicating whether shearing bias should be modeled (default: false).\n";
-			cout << "-v:\tboolean value (true/false) indicating whether you'd like Verbose mode with lots of output or not (default: false)\n";
-			cout << "-h:\tPrint this help message.\n";
-			return 0;
-		}
-
-
-		for (i = 1; i < argc - 1; i++)
-		{
-			tempstring1 = argv[i];
-			tempstring2 = argv[i + 1];
-			if (tempstring1 == "-g")
-				genome_name = tempstring2;
-			if (tempstring1 == "-o")
-				output_add = tempstring2;
-			if (tempstring1 == "-e1")
-				enz1.rec_seq = tempstring2;
-			if (tempstring1 == "-e2")
-				enz2.rec_seq = tempstring2;
-			if (tempstring1 == "-s")
-				sd_ind = atoi(tempstring2.c_str());
-			if (tempstring1 == "-d")
-				dd_ind = atoi(tempstring2.c_str());
-			if (tempstring1 == "-p")
-				pcr_duplicate_rate = atof(tempstring2.c_str());
-			if (tempstring1 == "-c")
-				prop_rs_constant = atof(tempstring2.c_str());
-			if (tempstring1 == "-n")
-				Ne = atoi(tempstring2.c_str());
-			if (tempstring1 == "-m")
-				mu = tempstring2;
-			if (tempstring1 == "-r")
-				reads_per_ind = atoi(tempstring2.c_str());
-			if (tempstring1 == "-pd")
-				dd_pcr_cycles = atoi(tempstring2.c_str());
-			if (tempstring1 == "-ps")
-				sd_pcr_cycles = atoi(tempstring2.c_str());
-			if (tempstring1 == "-a")
-			{
-				if (tempstring2 == "false" || tempstring2 == "FALSE" || tempstring2 == "False" || tempstring2 == "F" || tempstring2 == "f" || tempstring2 == "0")
-					afs_skewed = false;
-				if (tempstring2 == "true" || tempstring2 == "TRUE" || tempstring2 == "True" || tempstring2 == "T" || tempstring2 == "t" || tempstring2 == "1")
-					afs_skewed = true;
-			}
-			if (tempstring1 == "-b")
-			{
-				if (tempstring2 == "false" || tempstring2 == "FALSE" || tempstring2 == "False" || tempstring2 == "F" || tempstring2 == "f" || tempstring2 == "0")
-					shear_bias = false;
-				if (tempstring2 == "true" || tempstring2 == "TRUE" || tempstring2 == "True" || tempstring2 == "T" || tempstring2 == "t" || tempstring2 == "1")
-					shear_bias = true;
-			}
-			if (tempstring1 == "-v")
-			{
-				if (tempstring2 == "false" || tempstring2 == "FALSE" || tempstring2 == "False" || tempstring2 == "F" || tempstring2 == "f" || tempstring2 == "0")
-					verbose = false;
-				if (tempstring2 == "true" || tempstring2 == "TRUE" || tempstring2 == "True" || tempstring2 == "T" || tempstring2 == "t" || tempstring2 == "1")
-					verbose = true;
-			}
-		}
-	}
-
-	ddigest_name = "../../results/insilico/SSC_ddigested." + output_add + ".txt";
-	sdigest_name = "../../results/insilico/SSC_sdigested." + output_add + ".txt";
-	vcf_name = "../../results/insilico/ssc_insilico." + output_add + ".vcf";
-	summ_stats_name = "../../results/insilico/ssc_insilico_summstats." + output_add + ".txt";
 	default_random_engine generator;
-	uniform_real_distribution<double> distribution(0.00000001, 0.0000001);//10E8: 0.00000001, 0.0000001		  
-	if (mu == "10E7")
-		uniform_real_distribution<double> distribution(0.0000001, 0.000001);//10E7: 0.0000001, 0.000001
-
-	cout << "\nParameters:\n" << "\t-g: " << genome_name << "\n\t-o: " << output_add << "\n\t-e1: " << enz1.rec_seq << "\n\t-e2: " <<
-		enz2.rec_seq << "\n\t-s: " << sd_ind << "\n\t-d: " << dd_ind << "\n\t-p: " << pcr_duplicate_rate << "\n\t-c: " << prop_rs_constant
-		<< "\n\t-n: " << Ne << "\n\t-m: " << mu << "\n\t-r: " << reads_per_ind << "\n\t-pd: " << dd_pcr_cycles << "\n\t-ps: " <<
-		sd_pcr_cycles << "\n\t-a: " << afs_skewed << "\n\t-b: " << shear_bias << "\n\t-v: " << verbose << '\n';
-
+	uniform_real_distribution<double> distribution(0.00000001, 0.0000001);//10E8: 0.00000001, 0.0000001
+																		//10E7: 0.0000001, 0.000001
 
 	//read in the fasta file
 	genome_file.open(genome_name);
@@ -427,8 +308,8 @@ int main(int argc, char*argv[])
 			{
 				//it's the name of the next sequence
 				//process previous sequence first
-				if(verbose)
-					cout << "\nsingle-digesting " << seq_name << ", which has " << sequence.length() << " characters.";
+				
+				cout << "\nsingle-digesting " << seq_name << ", which has " << sequence.length() << " characters.";
 				//single digest
 				s_start = s_frag_count = 0;
 				mean_sheared_length = 0;
@@ -670,11 +551,9 @@ int main(int argc, char*argv[])
 						s_start = s_cutsite + 1;
 					}
 				}//s_start
-				if(verbose)
-					cout << "\n\tFound " << s_frag_count << " single-digest fragments on " << seq_name << " with mean fragment size " << mean_sheared_length/s_frag_count;
+				cout << "\n\tFound " << s_frag_count << " single-digest fragments on " << seq_name << " with mean fragment size " << mean_sheared_length/s_frag_count;
 				//double digest
-				if(verbose)
-					cout << "\ndouble-digesting " << seq_name << ", which has " << sequence.length() << " characters.";
+				cout << "\ndouble-digesting " << seq_name << ", which has " << sequence.length() << " characters.";
 				start = 0;
 				frag_count = 0;
 				this_enz = last_enz = 0;
@@ -722,15 +601,14 @@ int main(int argc, char*argv[])
 							//set up for the next time around
 							last_enz = this_enz;
 							frag_count++;
-							if (frag_count % 100000 == 0 && verbose)
+							if (frag_count % 100000 == 0)
 								cout << "\n\tProcessing fragment starting at pos " << start;
 						}
 						start = end + 1;
 					}
 						
 				}
-				if(verbose)
-					cout << "\n\tFound " << frag_count << " double-digest fragments on " << seq_name;
+				cout << "\n\tFound " << frag_count << " double-digest fragments on " << seq_name;
 			}
 				
 			//move onto the next one
@@ -873,13 +751,9 @@ int main(int argc, char*argv[])
 				sind.pcr_duplication(pcr_duplicate_rate);
 				sd_pcr_dup_count = sd_pcr_dup_count + sind.counter;
 			}//end pcr dulication
-			sind.check_alleles();
 			sd_tracker.update_counters(sind);
 			overall_tracker.update_counters(sind);
-			if (sind.allele1 != -1 && sind.allele2 != -1)
-				vcf << '\t' << sind.allele1 << "/" << sind.allele2;
-			else
-				vcf << "\t./.";
+			vcf << '\t' << sind.allele1 << "/" << sind.allele2;
 		}//end of sd_ind
 		p = sd_tracker.p / (2*sd_tracker.counter);
 		q = sd_tracker.q / (2*sd_tracker.counter);
@@ -909,10 +783,9 @@ int main(int argc, char*argv[])
 					dind.pcr_duplication(pcr_duplicate_rate);
 					dd_pcr_dup_count = dd_pcr_dup_count + dind.counter;
 				}//end pcr dulication
-				dind.check_alleles();
 				dd_tracker.update_counters(dind);
 				overall_tracker.update_counters(dind);
-				if (dind.allele1 != -1 && dind.allele2 != -1)
+				if (dind.allele1 != -1 && dind.allele1 != -1)
 					vcf << '\t' << dind.allele1 << "/" << dind.allele2;
 				else
 					vcf << "\t./.";
@@ -925,8 +798,7 @@ int main(int argc, char*argv[])
 			overall_tracker.q = overall_tracker.q / (2 * overall_tracker.counter);
 			overall_tracker.exp_het = 2 * overall_tracker.p*overall_tracker.q;
 			ht = overall_tracker.exp_het;
-			double hs = ((sd_het*sd_tracker.counter) + (dd_het*dd_tracker.counter)) / (dd_tracker.counter + sd_tracker.counter);
-			fst = (ht - hs) / ht;
+			fst = (ht - ((sd_het + dd_het) / 2)) / ht;
 			summ_stats << '\t' << dd_tracker.counter << '\t' << p << '\t' << dd_act_het << '\t' << dd_het << '\t' << ht << '\t' <<fst;
 		}//if it's a shared locus
 		else
@@ -975,9 +847,8 @@ int main(int argc, char*argv[])
 					dind.pcr_duplication(pcr_duplicate_rate);
 					dd_pcr_dup_count = dd_pcr_dup_count + dind.counter;
 				}//end pcr dulication
-				dind.check_alleles();
 				dd_tracker.update_counters(dind);
-				if (dind.allele1 != -1 && dind.allele2 != -1)
+				if (dind.allele1 != -1 && dind.allele1 != -1)
 					vcf << '\t' << dind.allele1 << "/" << dind.allele2;
 				else
 					vcf << "\t./.";
@@ -990,8 +861,12 @@ int main(int argc, char*argv[])
 
 		}
 	}
-	cout << "\nSingle-digest polymorphic restriction site rate\tSingle-digest PCR duplication events\tDouble-digest polymorphic restriction site rate\tDouble-digest PCR duplication events\n";
-	cout << sd_poly_rs_rate / (2*sd_ind*sdigest.size()) << '\t' << sd_pcr_dup_count << '\t' << dd_poly_rs_rate / (2 * dd_ind*ddigest.size()) << '\t' << dd_pcr_dup_count << "\n\n";
-	
+	cout << "\nSingle-digest polymorphic restriction site rate: " << sd_poly_rs_rate / (2*sd_ind*sdigest.size());
+	cout << "\nSingle-digest PCR duplication events: " << sd_pcr_dup_count;
+	cout << "\n\nDouble-digest polymorphic restriction site rate: " << dd_poly_rs_rate / (2 * dd_ind*ddigest.size());
+	cout << "\nDouble-digest PCR duplication events: " << dd_pcr_dup_count;
+
+	cout << "\nDone! Input integer to quit.\n";
+	cin >> i;
 	return 0;
 }
