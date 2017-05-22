@@ -498,17 +498,19 @@ summary(aov(log(ind.cov$NumReads)~ind.cov$LibraryPrep*ind.cov$Assembly))
 TukeyHSD(aov(log(ind.cov$NumReads)~ind.cov$LibraryPrep*ind.cov$Assembly))
 
 ####PLOT: Fig 1. Coverage Assembly Method Comp####
-jpeg("CoverageAssemblyMethodComp_Subset.jpeg",height=10.5,width=8,units="in",res=300)
+jpeg("CoverageAssemblyMethodComp_Subset_rev.jpeg",height=10.5,width=8,units="in",res=300)
 par(mfrow=c(3,2),oma=c(1,1,1,1),mar=c(2,2,2,2))
 par(mar=c(2,3,2,1))
-hist(oc$NumReadsTogether, col=rgb(0,0,1,0.5), ylim=c(0,30), breaks=seq(0,3500000,250000),
+hist(oc$NumReadsTogether, col=rgb(0,0,1,0.5), ylim=c(0,150),
+ breaks=seq(0,3500000,250000),
      main="sdRAD-seq",axes=F,xlim=c(0,3500000))
 hist(oc$NumReadsAlone,col=rgb(1,0,0,0.5), add=T,breaks=seq(0,3500000,250000))
 axis(1,pos=0)
 axis(2,pos=0,las=1)
 mtext("Number of Individuals",2.5,outer=F,line=2,cex=0.75)
 par(mar=c(2,2,2,2))
-hist(dc$NumReadsTogether, col=rgb(0,0,1,0.5), ylim=c(0,150), breaks=seq(0,1500000,100000),
+hist(dc$NumReadsTogether, col=rgb(0,0,1,0.5), ylim=c(0,150), 
+	breaks=seq(0,1500000,100000),
      main="ddRAD-seq",axes=F)
 hist(dc$NumReadsAlone,col=rgb(1,0,0,0.5), add=T,breaks=seq(0,1500000,100000))
 axis(1,pos=0)
@@ -517,35 +519,87 @@ legend("topright",c("Assembled Together", "Assembled Separately"),pch=15,col=c(r
 mtext("Total Number of Reads",1,outer=T,cex=0.75,line=-52)#-29 for R
 
 par(mar=c(2,3,2,1))
-hist(log(bo.cov$AvgCovTotal),col=rgb(0,0,1,0.5),axes=F,xlab="",ylab="",main="",
-     xlim=c(0,10.5),ylim=c(0,80000),breaks=seq(0,10.5,0.75))
-hist(log(o.cov$AvgCovTotal), col=rgb(1,0,0,0.5), add=T,breaks=seq(0,10.5,0.75))
+hist(bo.cov$AvgCovTotal,col=rgb(0,0,1,0.5),axes=F,xlab="",ylab="",main="",
+     xlim=c(0,20080),ylim=c(0,150000),breaks=seq(0,21000,1000))
+hist(o.cov$AvgCovTotal, col=rgb(1,0,0,0.5), add=T,breaks=seq(0,21000,1000))
 axis(1,pos=0)
 axis(2,pos=0,las=1)
 mtext("Number of Loci",2,outer=F,line=2.5,cex=0.75)
 par(mar=c(2,2,2,2))
-hist(log(bd.cov$AvgCovTotal), col=rgb(0,0,1,0.5),main="",axes=F,ylab="",xlab="",
-     xlim=c(0,8),ylim=c(0,15000),breaks=seq(0,8,0.5))
-hist(log(d.cov$AvgCovTotal), col=rgb(1,0,0,0.5), add=T,breaks=seq(0,8,0.5))
+hist(bd.cov$AvgCovTotal, col=rgb(0,0,1,0.5),main="",axes=F,ylab="",xlab="",
+     xlim=c(0,2450),ylim=c(0,150000),breaks=seq(0,2600,150))
+hist(d.cov$AvgCovTotal, col=rgb(1,0,0,0.5), add=T,breaks=seq(0,2600,150))
 axis(1,pos=0)
 axis(2,pos=0,las=1)
-mtext("ln(Average Number of Reads Per Individual Per SNP)",1,outer=T,line=-27,cex=0.75)#-15 for R
+mtext("Average Number of Reads Per Individual Per SNP",1,outer=T,line=-27,cex=0.75)#-15 for R
 
 par(mar=c(2,3,2,1))
-hist(log(bo.cov$AvgCovRatio),col=rgb(0,0,1,0.5),main="",axes=F,xlab="",ylab="",breaks=seq(-5,5,1),ylim=c(0,50000),xlim=c(-5,7))
-hist(log(o.cov$AvgCovRatio), col=rgb(1,0,0,0.5), add=T,breaks=seq(-5,7,1))
+hist(bo.cov$AvgCovRatio,col=rgb(0,0,1,0.5),main="",axes=F,
+	xlab="",ylab="",breaks=seq(0,600,35),ylim=c(0,150000),xlim=c(0,565))
+hist(o.cov$AvgCovRatio, col=rgb(1,0,0,0.5), add=T,breaks=seq(0,600,35))
 axis(1,pos=0)
 axis(2,pos=-5,las=1)
 mtext("Number of Loci",2,outer=F,line=2.5,cex=0.75)
 par(mar=c(2,2,2,2))
-hist(log(bd.cov$AvgCovRatio), col=rgb(0,0,1,0.5),main="",axes=F,ylab="",xlab="",breaks=seq(-2,5,0.5),ylim=c(0,10000),xlim=c(-2,5))
-hist(log(d.cov$AvgCovRatio), col=rgb(1,0,0,0.5), add=T,breaks=seq(-5,5,0.5))
+hist(bd.cov$AvgCovRatio, col=rgb(0,0,1,0.5),main="",axes=F,
+	ylab="",xlab="",breaks=seq(0,2000,125),ylim=c(0,150000),xlim=c(0,2000))
+hist(d.cov$AvgCovRatio, col=rgb(1,0,0,0.5), add=T,breaks=seq(0,2000,125))
 axis(1,pos=0)
 axis(2,pos=-2,las=1)
-mtext("ln(Average Number of Reads in Ref/Avg Number of Reads in Alt)",1,outer=T,cex=0.75)
+mtext("Average Number of Reads in Ref/Avg Number of Reads in Alt",1,outer=T,cex=0.75)
 dev.off()
 
+###
+jpeg("CoverageAssemblyMethodComp_Subset_rev_small.jpeg",height=10.5,width=8,units="in",res=300)
+par(mfrow=c(3,2),oma=c(1,1,1,1),mar=c(2,2,2,2))
+par(mar=c(2,3,2,1))
+hist(oc$NumReadsTogether, col=rgb(0,0,1,0.5), ylim=c(0,50),
+ breaks=seq(0,3500000,25000),
+     main="sdRAD-seq",axes=F,xlim=c(0,3500000))
+hist(oc$NumReadsAlone,col=rgb(1,0,0,0.5), add=T,breaks=seq(0,3500000,25000))
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+mtext("Number of Individuals",2.5,outer=F,line=2,cex=0.75)
+par(mar=c(2,2,2,2))
+hist(dc$NumReadsTogether, col=rgb(0,0,1,0.5), ylim=c(0,150), 
+	breaks=seq(0,1500000,10000),
+     main="ddRAD-seq",axes=F)
+hist(dc$NumReadsAlone,col=rgb(1,0,0,0.5), add=T,breaks=seq(0,1500000,10000))
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+legend("topright",c("Assembled Together", "Assembled Separately"),pch=15,col=c(rgb(1,0,0,0.5),rgb(0,0,1,0.5)),bty='n')
+mtext("Total Number of Reads",1,outer=T,cex=0.75,line=-52)#-29 for R
 
+par(mar=c(2,3,2,1))
+hist(bo.cov$AvgCovTotal,col=rgb(0,0,1,0.5),axes=F,xlab="",ylab="",main="",
+     xlim=c(0,20080),ylim=c(0,150000),breaks=seq(0,21000,100))
+hist(o.cov$AvgCovTotal, col=rgb(1,0,0,0.5), add=T,breaks=seq(0,21000,100))
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+mtext("Number of Loci",2,outer=F,line=2.5,cex=0.75)
+par(mar=c(2,2,2,2))
+hist(bd.cov$AvgCovTotal, col=rgb(0,0,1,0.5),main="",axes=F,ylab="",xlab="",
+     xlim=c(0,2450),ylim=c(0,150000),breaks=seq(0,2600,15))
+hist(d.cov$AvgCovTotal, col=rgb(1,0,0,0.5), add=T,breaks=seq(0,2600,15))
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+mtext("Average Number of Reads Per Individual Per SNP",1,outer=T,line=-27,cex=0.75)#-15 for R
+
+par(mar=c(2,3,2,1))
+hist(bo.cov$AvgCovRatio,col=rgb(0,0,1,0.5),main="",axes=F,
+	xlab="",ylab="",breaks=seq(0,600,3.5),ylim=c(0,50000),xlim=c(0,565))
+hist(o.cov$AvgCovRatio, col=rgb(1,0,0,0.5), add=T,breaks=seq(0,600,3.5))
+axis(1,pos=0)
+axis(2,pos=-5,las=1)
+mtext("Number of Loci",2,outer=F,line=2.5,cex=0.75)
+par(mar=c(2,2,2,2))
+hist(bd.cov$AvgCovRatio, col=rgb(0,0,1,0.5),main="",axes=F,
+	ylab="",xlab="",breaks=seq(0,2000,12.5),ylim=c(0,50000),xlim=c(0,2000))
+hist(d.cov$AvgCovRatio, col=rgb(1,0,0,0.5), add=T,breaks=seq(0,2000,12.5))
+axis(1,pos=0)
+axis(2,pos=-2,las=1)
+mtext("Average Number of Reads in Ref/Avg Number of Reads in Alt",1,outer=T,cex=0.75)
+dev.off()
 
 ####Variance in coverage####
 #assembled separately
