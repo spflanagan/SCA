@@ -791,8 +791,10 @@ summary(od.fst[od.fst$SNP %in% sep.cov.pass,"Fst"])
 both$SNP<-paste(both$`#CHROM`,both$POS,sep=".")
 both.o<-cbind(both[,locus.info],both[,o.ind])
 both.d<-cbind(both[,locus.info],both[,d.ind])
-od.both.fst<-do.call("rbind",apply(both.o,1,fst.two.vcf,vcf2=both.d,match.index="SNP",cov.thresh=0.5))
-od.both.fst$SNP<-paste(od.both.fst$Chrom,as.numeric(as.character(od.both.fst$Pos)),sep=".")
+#od.both.fst<-do.call("rbind",apply(both.o,1,fst.two.vcf,vcf2=both.d,match.index="SNP",cov.thresh=0.5))
+#od.both.fst$SNP<-paste(od.both.fst$Chrom,as.numeric(as.character(od.both.fst$Pos)),sep=".")
+#write.table(od.both.fst,"od.both.fst.txt",sep='\t',col.names=T,row.names=F,quote=F)
+od.both.fst<-read.table("od.both.fst.txt",header=T,sep='\t')
 od.fst.1<-od.both.fst[od.both.fst$Fst ==1,]
 bd.cov$SNP<-paste(bd.cov$Chrom,bd.cov$Pos,sep=".")
 bo.cov$SNP<-paste(bo.cov$Chrom,bo.cov$Pos,sep=".")
@@ -811,7 +813,7 @@ lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
 lgn<-seq(1,22)
 scaffs<-levels(as.factor(od.fst[,"Chrom"]))
 scaffs[1:22]<-lgs
-
+####OLD PLOTS####
 jpeg("sd-dd_Fst_subset.jpeg",height=10,width=7.5,units="in",res=300)
 par(mfrow=c(4,1),mar=c(2,2,2,2),oma=c(1,2,1,1))
 ##Separate
@@ -879,7 +881,7 @@ drad.tes.fst<-do.call("rbind", apply(both, 1, fst.one.vcf,group1=drad.test[1:60]
 #sub.od.fst<-do.call("rbind",apply(o.share,1,fst.two.vcf,vcf2=d.share,match.index="SNP",cov.thresh=0.5))
 #sub.od.fst$SNP<-paste(sub.od.fst$Chrom,as.numeric(as.character(sub.od.fst$Pos)),sep=".")
 #write.table(sub.od.fst,"sub.od.fst.txt",sep='\t',col.names=T,row.names=F,quote=F)
-d.share.sub<-read.table("d.share.sub",sep='\t',header=T)
+d.share.sub<-read.table("drad.60ind.vcf",sep='\t',header=T)
 sub.od.fst<-read.table("sub.od.fst.txt",sep='\t',header=T)
 sub.fsts.both<-read.table("sub.fsts.both.txt",sep='\t',header=T)
 
