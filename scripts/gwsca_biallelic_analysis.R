@@ -39,13 +39,10 @@ vcf<-read.delim("../stacks/batch_1.vcf",comment.char="#",sep='\t',header=F)
 keep.vcf<-read.delim("keep.vcf",comment.char="#",sep='\t',header=F)
 header.start<-grep("#CHROM",scan("keep.vcf",what="character"))
 header<-scan("keep.vcf",what="character")[header.start:
-                                                         (header.start+ncol(keep.vcf)-1)]
-colnames(keep.vcf)<-header
-scaffs<-levels(as.factor(keep.vcf[,1]))
+                                                         (header.start+ncol(vcf)-1)]
+colnames(vcf)<-header
+scaffs<-levels(as.factor(vcf[,1]))
   scaffs[1:22]<-lgs
-  scaff.starts<-tapply(keep.vcf$POS,keep.vcf$`#CHROM`,max)
-  scaff.starts<-data.frame(rbind(cbind(names(scaff.starts),scaff.starts)),stringsAsFactors = F)
-
 #############################################################################
 
 #################################FUNCTIONS###################################
@@ -137,7 +134,7 @@ sem<-function(x){
 }
 
 vcf.cov.loc<-function(vcf.row,subset){
-  cov<-unlist(lapply(vcf.row[subset],function(x){
+  cov<-unlist(lapply(vcf.row[subset],function(x){ 
     c<-strsplit(as.character(x),split=":")[[1]][3]
     return(c)
   }))
@@ -145,23 +142,23 @@ vcf.cov.loc<-function(vcf.row,subset){
   pres<-length(cov[cov!=".,."])
   ref<-sum(as.numeric(unlist(lapply(cov[cov!=".,."],
                                     function(x){
-                                      strsplit(as.character(x),",")[[1]][1]
+                                      strsplit(as.character(x),",")[[1]][1] 
                                     }))))/pres
   alt<-sum(as.numeric(unlist(lapply(cov[cov!=".,."],
                                     function(x){
-                                      strsplit(as.character(x),",")[[1]][2]
+                                      strsplit(as.character(x),",")[[1]][2] 
                                     }))))/pres
   tot<-sum(as.numeric(unlist(lapply(cov[cov!=".,."],
                                     function(x){
-                                      as.numeric(strsplit(as.character(x),",")[[1]][1]) +
+                                      as.numeric(strsplit(as.character(x),",")[[1]][1]) + 
                                         as.numeric(strsplit(as.character(x),",")[[1]][2])
                                     }))))
   var.cov<-var(as.numeric(unlist(lapply(cov[cov!=".,."],
                                         function(x){
-                                          as.numeric(strsplit(as.character(x),",")[[1]][1]) +
+                                          as.numeric(strsplit(as.character(x),",")[[1]][1]) + 
                                             as.numeric(strsplit(as.character(x),",")[[1]][2])
                                         }))))
-  het<-unlist(lapply(vcf.row[subset],function(x){
+  het<-unlist(lapply(vcf.row[subset],function(x){ 
     strsplit(as.character(x),split=":")[[1]][1]
   }))
   het<-length(het[het=="0/1" | het=="1/0"])
@@ -175,7 +172,7 @@ vcf.cov.loc<-function(vcf.row,subset){
 calc.afs.vcf<-function(vcf.row){
   #use in conjunction with apply
   #e.g. apply(vcf,1,afs.vcf)
-  gt1<-unlist(lapply(vcf.row,function(x){
+  gt1<-unlist(lapply(vcf.row,function(x){ 
     c<-strsplit(as.character(x),split=":")[[1]][1]
     return(c)
   }))
@@ -185,7 +182,7 @@ calc.afs.vcf<-function(vcf.row){
   gt1<-gsub(pattern = "1",replacement = vcf.row["ALT"],gt1)
   al1<-unlist(strsplit(as.character(gt1),split = "/"))
   #calculate frequencies
-  freq1<-summary(factor(al1))/sum(summary(factor(al1)))
+  freq1<-summary(factor(al1))/sum(summary(factor(al1)))	
   if(length(freq1)==1)
   {
     if(names(freq1)==vcf.row["REF"])
@@ -277,7 +274,7 @@ write.table(keep.vcf,"keep.vcf",col.names=T,row.names=F,quote=F)
 keep.vcf<-read.delim("keep.vcf",comment.char="#",sep=" ",header=F)
 header.start<-grep("#CHROM",scan("keep.vcf",what="character"))
 header<-scan("keep.vcf",what="character")[header.start:
-  (header.start+ncol(keep.vcf)-1)]
+  (header.start+ncol(vcf)-1)]
 colnames(keep.vcf)<-header
 keep.snps<-paste(keep.vcf$`#CHROM`,keep.vcf$POS,sep=".")
 
@@ -298,13 +295,13 @@ mo.out1<-mo.prune[mo.prune$MOM.FEM >= mo.top1,]
 #plot with the top1%
 #NOT THE ACTUAL FIGURE
 mo.plot$CompLoc<-paste(mo.plot$Chrom,mo.plot$Pos,sep=".")
-mo<-fst.plot(mo.plot, fst.name="MOM.FEM",
-             chrom.name="Chrom", axis.size=0,bp.name="Pos",groups=scaffs,group.boundaries = scaff.starts)
+mo<-fst.plot(mo.plot, ci.dat=c(mo.top1,0),fst.name="MOM.FEM", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos",sig.col=c("red","black"),groups=lgs)
 fm.plot$CompLoc<-paste(fm.plot$Chrom,fm.plot$Pos,sep=".")
-fm<-fst.plot(fm.plot, fst.name="FEM.MAL",
-             chrom.name="Chrom", axis.size=0,bp.name="Pos",groups=scaffs,group.boundaries = scaff.starts)
-##aj.plot$CompLoc<-paste(aj.plot$Chrom,aj.plot$Pos,sep=".")
-#aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE",
+fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", chrom.name="Chrom"
+	, axis.size=0.75,bp.name="Pos",sig.col=c("red","black"))
+#aj.plot$CompLoc<-paste(aj.plot$Chrom,aj.plot$Pos,sep=".")
+#aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", 
 #	chrom.name="Chrom", axis.size=0.75,bp.name="Pos",sig.col=c("red","black"))
 dev.off()
 #mo.plot<-mo.plot[mo.plot$Chrom %in% lgs,]
@@ -322,12 +319,12 @@ mo.out<-mo.plot[mo.plot$MOM.FEM >= mo.top1[1],]
 fm.out.plot<-fm[fm$FEM.MAL >= fm.top1[1],]
 mo.out.plot<-mo[mo$MOM.FEM >= mo.top1[1],]
 
-#aj.unique<-aj.out[!(aj.out$Locus %in% fm.out$Locus) &
+#aj.unique<-aj.out[!(aj.out$Locus %in% fm.out$Locus) & 
 #	!(aj.out$Locus %in% mo.out$Locus),]
 fm.unique<-fm.out[!(fm.out$Locus %in% mo.out$Locus),]
 mo.unique<-mo.out[!(mo.out$Locus %in% fm.out$Locus),]
 shared.out<-mo.out[(mo.out$Locus %in% fm.out$Locus),]
-#shared.out<-aj.out[(aj.out$LocID %in% mo.out$LocID) &
+#shared.out<-aj.out[(aj.out$LocID %in% mo.out$LocID) & 
 #	(aj.out$LocID %in% fm.out$LocID),]
 
 #aj.fm<-aj.out[(aj.out$LocID %in% fm.out$LocID),]
@@ -373,7 +370,6 @@ tapply(as.numeric(mo.ss$FemN),mo.ss$Outlier,mean)
 wilcox.test(as.numeric(mo.ss$MomN)~mo.ss$Outlier)
 tapply(as.numeric(mo.ss$MomN),mo.ss$Outlier,mean)
 
-#####GET THE USEFUL DATAFRAMES#####
 aj.fst<-merge(aj.ss, aj.plot[,c("Locus","ADULT.JUVIE")], by.x = "SNP", by.y = "Locus")
 aj.fst$AdultN<-as.numeric(aj.fst$AdultN)*224
 aj.fst$JuvN<-as.numeric(aj.fst$JuvN)*160
@@ -458,12 +454,11 @@ mtext("Allele Frequency",2,outer=F,line=1.75,cex=0.75)
 
 #ok, what about the alleles?
 vcf$Locus<-paste(vcf$`#CHROM`,vcf$POS,sep=".")
-keep.vcf$Locus<-paste(keep.vcf$`#CHROM`,keep.vcf$POS,sep=".")
 mo.sig$Locus<-gsub("(\\d+).(\\d+).(\\d+)","\\1.\\3",mo.sig$SNP)
 fm.sig$Locus<-gsub("(\\d+).(\\d+).(\\d+)","\\1.\\3",fm.sig$SNP)
-mo.sig<-merge(mo.sig,keep.vcf[,c("REF","ALT","Locus")],by="Locus")
-fm.sig<-merge(fm.sig,keep.vcf[,c("REF","ALT","Locus")],by="Locus")
-pop.af<-do.call("rbind",apply(keep.vcf,1,calc.afs.vcf))
+mo.sig<-merge(mo.sig,vcf[,c("REF","ALT","Locus")],by="Locus")
+fm.sig<-merge(fm.sig,vcf[,c("REF","ALT","Locus")],by="Locus")
+pop.af<-do.call("rbind",apply(vcf,1,calc.afs.vcf))
 pop.af$Locus<-paste(pop.af$Chrom,as.numeric(as.character(pop.af$Pos)),sep=".")
 
 mo.sig<-merge(mo.sig,pop.af[,c("Locus","RefFreq")],by="Locus")
@@ -638,18 +633,13 @@ shared.sig<-fm.sig[fm.sig$SNP %in% mo.sig$SNP & fm.sig$comploc %in% hd0.sig$Locu
 
 ####################################PLOT#####################################
 #Includes scaffolds
-
-
-png("../fst.selection.episodes_redo_all_updatedlgs.png",height=200,width=300,
+png("../fst.selection.episodes_redo_all.png",height=200,width=300,
 	units="mm",res=300)
-pdf("fst.selection.episodes_redo_all_updatedlgs.pdf",height=7.66666,width=11.5)
+pdf("fst.selection.episodes_redo_all.pdf",height=7.66666,width=11.5)
 par(mfrow=c(2,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
-
-mo<-fst.plot(mo.plot, fst.name="MOM.FEM",
-             chrom.name="Chrom", axis.size=0,bp.name="Pos",groups=scaffs,group.boundaries = scaff.starts)
-#mo<-fst.plot(mo.plot, ci.dat=c(mo.top1,0),fst.name="MOM.FEM",
-#             chrom.name="Chrom", axis.size=0,bp.name="Pos",
-#             sig.col=c("black","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(mo.plot$Chrom))]))
+mo<-fst.plot(mo.plot, ci.dat=c(mo.top1,0),fst.name="MOM.FEM", 
+             chrom.name="Chrom", axis.size=0,bp.name="Pos",
+             sig.col=c("black","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(mo.plot$Chrom))]))
 points(mo$Pos[mo$Locus %in% mo.sig$SNP], #mo fst
        mo$MOM.FEM[mo$Locus %in% mo.sig$SNP],
        col="green4",pch=19,cex=0.75)
@@ -673,12 +663,9 @@ for(i in 1:length(lgs)){
   last<-max(mo[mo$Chrom ==lgs[i],"Pos"])
 }
 
-
-fm<-fst.plot(fm.plot, fst.name="FEM.MAL",
-             chrom.name="Chrom", axis.size=0,bp.name="Pos",groups=scaffs,group.boundaries = scaff.starts)
-#fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL",
-#             chrom.name="Chrom", axis.size=0,bp.name="Pos",
-#             sig.col=c("black","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(fm.plot$Chrom))]))
+fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", 
+             chrom.name="Chrom", axis.size=0,bp.name="Pos",
+             sig.col=c("black","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(fm.plot$Chrom))]))
 points(fm$Pos[fm$Locus %in% fm.sig$SNP], #fm fst sig
        fm$FEM.MAL[fm$Locus %in% fm.sig$SNP],
        col="orchid1",pch=19,cex=0.75)
@@ -715,7 +702,7 @@ legend("top",col=c("orchid1","green4","royalblue4","darkorchid4","dodgerblue1"),
 
 dev.off()
 
-#aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE",
+#aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", 
 #             chrom.name="Chrom", axis.size=0, bp.name="Pos",
 #             sig.col=c("black","black"),groups=as.factor(scaffs[scaffs %in% levels(factor(aj.plot$Chrom))]))
 #points(aj$Pos[aj$Locus %in% aj.fst$SNP[aj.fst$Chi.p.adj<= 0.05]],
@@ -740,7 +727,7 @@ dev.off()
 #	res=300)
 #pdf("../fst.selection.episodes_redo_lgs.pdf",height=11.5,width=11.5)
 #par(mfrow=c(3,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
-#mo<-fst.plot(mo.plot, ci.dat=c(mo.top1,0),fst.name="MOM.FEM",
+#mo<-fst.plot(mo.plot, ci.dat=c(mo.top1,0),fst.name="MOM.FEM", 
 #	chrom.name="Chrom", axis.size=0,bp.name="Pos",
 #	sig.col=c("purple3","black"),groups=lgs)
 #points(mo$Pos[mo$LocID %in% shared.out$LocID & mo$MOM.FEM >= mo.top1],
@@ -758,7 +745,7 @@ dev.off()
 #	last<-max(mo[mo$Chrom ==lgs[i],"Pos"])
 #}
 
-#fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL",
+#fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", 
 #	chrom.name="Chrom", axis.size=0,bp.name="Pos",
 #	sig.col=c("green4","black"),groups=lgs)
 #points(fm$Pos[fm$LocID %in% shared.out$LocID & fm$FEM.MAL >= fm.top1],
@@ -777,7 +764,7 @@ dev.off()
 #	last<-max(fm[fm$Chrom ==lgs[i],"Pos"])
 #}
 
-#aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE",
+#aj<-fst.plot(aj.plot, ci.dat=c(aj.top1,0),fst.name="ADULT.JUVIE", 
 #	chrom.name="Chrom", axis.size=0, bp.name="Pos",
 #	sig.col=c("dodgerblue","black"),groups=lgs)
 #axis(2,at=c(0,0.025,0.05),pos=0,las=1,cex.axis=0.75)
@@ -806,7 +793,7 @@ dev.off()
 
 png("../male-female.png",height=100,width=300,units="mm",res=300)
 par(oma=c(2,2,2,2),mar=c(4,0,0,0))
-fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL",
+fm<-fst.plot(fm.plot, ci.dat=c(fm.top1,0),fst.name="FEM.MAL", 
 	chrom.name="Chrom", axis.size=0,bp.name="Pos",
 	sig.col=c("green4","black"))
 axis(2,at=c(0,0.1,0.2,0.3),pos=0,las=1)
@@ -828,9 +815,9 @@ dev.off()
 #points(hd3[hd3$bh_3<=0.05 & hd3$chrom %in% lgs,"pos"],
 #	hd3[hd3$bh_3<=0.05 & hd3$chrom %in% lgs,"lnp3"],
 #	col="purple3",pch=19,cex=0.75)
-#points(hd3[hd3$bh_3<=0.05 & hd3$Locus %in% mo.out1$CompLoc &
+#points(hd3[hd3$bh_3<=0.05 & hd3$Locus %in% mo.out1$CompLoc & 
 #		hd3$chrom %in% lgs,"pos"],
-#	hd3[hd3$bh_3<=0.05 & hd3$Locus %in% mo.out1$CompLoc &
+#	hd3[hd3$bh_3<=0.05 & hd3$Locus %in% mo.out1$CompLoc & 
 #		hd3$chrom %in% lgs,"lnp3"],
 #	col="purple3",pch=5,cex=1)
 #axis(2,at=seq(0,15,5),pos=0,las=1,cex.axis=0.75)
@@ -846,9 +833,9 @@ dev.off()
 #points(hd0[hd0$bh_0<=0.05 & hd0$chrom %in% lgs,"pos"],
 #	hd0[hd0$bh_0<=0.05 & hd0$chrom %in% lgs,"lnp0"],
 #	col="green4",pch=19,cex=0.75)
-#points(hd0[hd0$bh_0<=0.05 & hd0$Locus %in% fm.out1$CompLoc &
+#points(hd0[hd0$bh_0<=0.05 & hd0$Locus %in% fm.out1$CompLoc & 
 #		hd0$chrom %in% lgs,"pos"],
-#	hd0[hd0$bh_0<=0.05 & hd0$Locus %in% fm.out1$CompLoc &
+#	hd0[hd0$bh_0<=0.05 & hd0$Locus %in% fm.out1$CompLoc & 
 #		hd0$chrom %in% lgs,"lnp0"],
 #	col="green4",pch=5,cex=1)
 #axis(2,at=seq(0,15,5),pos=0,las=1,cex.axis=0.75)
@@ -870,12 +857,12 @@ dev.off()
 #	bg="white",ncol=3,box.lty=0)
 #dev.off()
 
-png("../kelly_analysis_redo_updatedlgs.png",height=200,width=300,units="mm",res=300)
-pdf("kelly_analysis_scaffolds_updatedlgs.pdf",height=7.66666,width=11.5)
+png("../kelly_analysis_redo.png",height=200,width=300,units="mm",res=300)
+pdf("kelly_analysis_scaffolds.pdf",height=7.66666,width=11.5)
 par(mfrow=c(2,1),oma=c(1,1,0,0),mar=c(1,1,1,0),mgp=c(3,0.5,0), cex=1.5)
-hd3<-fst.plot(hd,fst.name="lnp3", chrom.name="chrom"
-	, axis.size=0,bp.name="pos",y.lim=c(0,7),
-	groups=scaffs,group.boundaries = scaff.starts)
+hd3<-fst.plot(hd, ci.dat=c(100,-100),fst.name="lnp3", chrom.name="chrom"
+	, axis.size=0,bp.name="pos",sig.col=c("black","black"),y.lim=c(0,7),
+	groups=as.factor(scaffs[scaffs %in% levels(factor(hd$chrom))]))
 #points(hd3[hd3$bh_3<=0.05,"pos"], #none are sig!
 #	hd3[hd3$bh_3<=0.05,"lnp3"],
 #	col="purple3",pch=19,cex=0.75)
@@ -890,9 +877,9 @@ for(i in 1:length(lgs)){
 		labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=0.75)
 	last<-max(hd3[hd3$chrom ==lgs[i],"pos"])
 }
-hd0<-fst.plot(hd,fst.name="lnp0", chrom.name="chrom"
-	, axis.size=0,bp.name="pos",
-	groups=scaffs,group.boundaries = scaff.starts)
+hd0<-fst.plot(hd, ci.dat=c(100,-100),fst.name="lnp0", chrom.name="chrom"
+	, axis.size=0,bp.name="pos",sig.col=c("black","black"),
+	groups=as.factor(scaffs[scaffs %in% levels(factor(hd$chrom))]))
 points(hd0[hd0$bh_0<=0.05,"pos"],
 	hd0[hd0$bh_0<=0.05,"lnp0"],
 	col="mediumorchid3",pch=19,cex=0.75)
@@ -955,7 +942,7 @@ write.table(mo.out1[mo.out1$CompLoc %in% hd[hd$bh_3<=0.05,"Locus"],
 	c("Chrom","Pos","LocID","Locus")],"MO_LRTandFST.txt",sep='\t',
 	col.names=T,row.names=F,quote=F)
 
-###WRITE SCAFFOLD, START, and END to file
+###WRITE SCAFFOLD, START, and END to file 
 aj.unique<-aj.plot[aj.plot$Locus %in% aj.unique$Locus,]
 aj.rad.region<-data.frame(aj.unique$Chrom,as.numeric(aj.unique$Pos)-2500,
 	as.numeric(aj.unique$Pos)+2500)
@@ -1014,10 +1001,10 @@ mo.extreme<-mo[mo$MOM.FEM >= 0.08,c("Locus","Chrom","Pos","LocID","MOM.FEM")]
 aj.extreme<-aj[aj$ADULT.JUVIE >= 0.02,c("Locus","Chrom","Pos","LocID",
 	"ADULT.JUVIE")]
 
-mo.ex.sum<-gw.sum[gw.sum$Locus %in% mo.extreme$Locus &
+mo.ex.sum<-gw.sum[gw.sum$Locus %in% mo.extreme$Locus & 
 	gw.sum$Pop %in% c("FEM","MOM"),]
 
-fm.ex.sum<-gw.sum[gw.sum$Locus %in% fm.extreme$Locus &
+fm.ex.sum<-gw.sum[gw.sum$Locus %in% fm.extreme$Locus & 
 	gw.sum$Pop %in% c("FEM","MAL"),]
 
 aj.ex.sum<-gw.sum[gw.sum$Locus %in% aj.extreme$Locus &
@@ -1094,7 +1081,7 @@ boxplot(aj.all$NumSNPs,aj.out.dat$NumSNPs,aj.ex.dat$NumSNPs,
 axis(2,at=seq(0,70,10),las=1)
 mtext("Number of SNPs Per RAD tag",2,line=2)
 text(1:9,par("usr")[3] - 1, srt = 45, adj = 1,xpd = TRUE,
-     labels = c("Adult-Off Null","Adult-Off Outliers","Adult-Off Extreme",
+     labels = c("Adult-Off Null","Adult-Off Outliers","Adult-Off Extreme", 
 	"Fem-Mom Null","Fem-Mom Outliers","Fem-Mom Extreme",
 	"Mal-Fem Null","Mal-Fem Outliers","Mal-Fem Extreme"))
 text(1:9,y=66,labels=nrad)
@@ -1115,10 +1102,10 @@ spr.lm<-lm(as.numeric(NumSNPs)~Comparison+SNPType,data=snps.per.rad)
 #Analysis of Variance Table
 #
 #Response: as.numeric(NumSNPs)
-#              Df   Sum Sq Mean Sq F value    Pr(>F)
-#Comparison     3     1584   527.8  2.4807   0.05907 .
+#              Df   Sum Sq Mean Sq F value    Pr(>F)    
+#Comparison     3     1584   527.8  2.4807   0.05907 .  
 #SNPType        2    10700  5350.1 25.1434 1.213e-11 ***
-#Residuals  76887 16360319   212.8
+#Residuals  76887 16360319   212.8                      
 
 
 #Do they have more Ns?
@@ -1163,7 +1150,7 @@ bp<-barplot(Ns$PropN,
 		"grey",alpha("dodgerblue",0.5),"dodgerblue"),
 	names="",ylim=c(0,1),las=1,ylab="Number of SNPs Per RAD tag")
 text(bp,par("usr")[3] - 0.01, srt = 45, adj = 1,xpd = TRUE,
-     labels = c("Adult-Off Null","Adult-Off Outliers","Adult-Off Extreme",
+     labels = c("Adult-Off Null","Adult-Off Outliers","Adult-Off Extreme", 
 		"Fem-Mom Null","Fem-Mom Outliers","Fem-Mom Extreme",
 		"Mal-Fem Null","Mal-Fem Outliers","Mal-Fem Extreme"))
 text(bp,y=0.05,labels=Ns$NumLoci,srt=90)
@@ -1545,13 +1532,13 @@ write.table(bio2.dat,"blast_table_bio2_revised.txt",col.names=T,row.names=F,quot
 jpeg("Fig3_blast2go_revisions.jpeg",height=10,width=9,units="in",res=300)
 #pdf("Fig3_blast2go_revisions.pdf",height=10,width=9)
 par(mar=c(2,2,2,2),oma=c(2,2,2,2),cex=2,lwd=1.3)
-p<-ggplot(bio2.dat,aes(factor(GO),Freq,fill = factor(Analysis))) +
-  geom_bar(stat="identity",position="dodge") +
+p<-ggplot(bio2.dat,aes(factor(GO),Freq,fill = factor(Analysis))) + 
+  geom_bar(stat="identity",position="dodge") + 
   scale_fill_manual(name="Analysis",
                     values=c("orchid1","mediumorchid3","green4","dodgerblue1","royalblue4","darkorchid4"),
                     labels=c(expression(Males-Females~italic(F)[ST]~(448)),"Males-Females LRT (40)",
                             expression(Mothers-Females~italic(F)[ST]~(29)),
-                            expression(Shared~Males-Females~italic(F)[ST]~and~LRT~(14)),
+                            expression(Shared~Males-Females~italic(F)[ST]~and~LRT~(14)), 
                             expression(Shared~Males-Females~and~Mothers-Females~italic(F)[ST]~(18)),
                             "Shared in All 3 (2)")) + theme(legend.text.align=0)+
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
