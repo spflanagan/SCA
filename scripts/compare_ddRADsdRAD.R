@@ -7,6 +7,7 @@ rm(list=ls())
 library(ggplot2)
 setwd("~/Projects/SCA/results")
 source("../../gwscaR/R/gwscaR.R")
+source("../scripts/plotting_functions.R")
 #################FUNCTIONS####################
 parse.vcf<-function(filename){
   vcf<-read.delim(filename,comment.char="#",sep='\t',header=F,stringsAsFactors = F)
@@ -312,15 +313,6 @@ fst.one.plink<-function(raw,group1, group2, cov.thresh=0.2){
   return(fst.dat)
 }#end fst.one.plink
 
-#Author: Sarah P. Flanagan
-#Last updated: 23 September 2016
-#Date Started: 24 February 2016
-#Purpose: compare RAD libraries prepared by two different methods
-
-rm(list=ls())
-library(ggplot2)
-setwd("~/Projects/SCA/results")
-source("../../gwscaR/R/gwscaR.R")
 
 #################SET COLORS#################
 ddtog.col<-"#f4a582"
@@ -885,6 +877,7 @@ d.share.sub<-read.table("drad.60ind.vcf",sep='\t',header=T)
 sub.od.fst<-read.table("sub.od.fst.txt",sep='\t',header=T)
 sub.fsts.both<-read.table("sub.fsts.both.txt",sep='\t',header=T)
 
+####old plots####
 png("fsts_60ddrad60sdrad.png",height=10,width=7.5,units="in",res=300)
 par(mfrow=c(4,1),mar=c(2,2,2,2),oma=c(1,2,1,1))
 ##Separate
@@ -1012,6 +1005,7 @@ dev.off()
 
 ####PLOT: Fig 3NEW. Sample size on Fsts between sd and dd RAD####
 png("All3Fsts.png",height=7,width=15,units="in",res=300)
+pdf("All3Fsts.pdf",height=7,width=15)
 par(mfrow=c(4,3),mar=c(2,1,1,0.01),oma=c(1,3,1,0.5))
 ##ROW 1: Separate
 ####All sdRAD vs all ddRAD
@@ -1240,7 +1234,6 @@ fst.cp.aov<-aov(Fst~Comparison*Analysis,dat=fst.aov.dat)
 
 ##############################SCA##################################
 #BOTH
-setwd("both_sca/")
 both.sexsel<-read.table("both.sexsel.txt",header=T,sep='\t')
 both.viasel<-read.table("both.viasel.txt",header=T,sep='\t')
 drad.sexsel<-read.table("drad.sexsel.txt",header=T,sep='\t')
@@ -1250,13 +1243,13 @@ orad.viasel<-read.table("orad.viasel.txt",header=T,sep='\t')
 
 #SCA
 locus.info<-c("CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT","SNP")
-vcf1<-parse.vcf("both_maternal.vcf")
+vcf1<-parse.vcf("both_sca/both_maternal.vcf")
 #rename moms
 names1<-colnames(vcf1)
 names1[grep("MOM",names1)]<-gsub("MOM.*PRM(\\d{3})(_align)?","MOM\\1",names1[grep("MOM",names1)])
 colnames(vcf1)<-names1
 vcf2.gt<-extract.gt.vcf(both)
-merge<-merge.vcfs(vcf1,both)
+merge<-combine.vcfs(vcf1,both)
 both.keep<-b.cov[b.cov$AvgCovTotal > 5 & b.cov$AvgCovTotal <= 20,"SNP"]
 merge$SNP<-paste(as.character(merge$CHROM),as.character(merge$POS),sep=".")
 merge<-merge[merge$SNP %in% both.keep,]
@@ -1273,7 +1266,7 @@ bvs.sig<-both.viasel$index[both.viasel$Chi.p.adj <= 0.05]
 #write.table(both.viasel,"both.viasel.txt",col.names=T,row.names=F,quote=F,sep='\t')
 
 #DRAD
-drad.merge<-read.table("../biallelic/biallelic_merge.vcf",sep='\t',header=T)
+drad.merge<-read.table("biallelic/biallelic_merge.vcf",sep='\t',header=T)
 drad.keep<-d.cov[d.cov$AvgCovTotal > 5 & d.cov$AvgCovTotal <= 20,"SNP"]
 drad.merge$SNP<-paste(drad.merge$CHROM,drad.merge$POS,sep=".")
 drad.merge<-drad.merge[drad.merge$SNP %in% drad.keep,]
@@ -1341,7 +1334,8 @@ lgn<-seq(1,22)
 scaffs<-levels(as.factor(both[,"#CHROM"]))
 scaffs[1:22]<-lgs
 
-png("SCA_radseq.png",height=7.5,width=10,units="in",res=300)
+png("SCA_radseq_rev.png",height=5,width=15,units="in",res=300)
+pdf("SCA_radseq_rev.pdf",height=5,width=15)
 par(mfrow=c(2,3),mar=c(2,1.5,2,1),oma=c(1,2,1,0.5))
 ##ROW 1: Males vs Females
 ####both sdRAD and ddRAD (RAD)
