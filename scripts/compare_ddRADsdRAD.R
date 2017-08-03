@@ -5,9 +5,19 @@
 
 rm(list=ls())
 library(ggplot2)
+library(vioplot)
+library(devtools)
+install_github("spflanagan/gwscaR")
+library(gwscaR)
 setwd("~/Projects/SCA/results")
+
+#OR
 source("../../gwscaR/R/gwscaR.R")
-source("../scripts/plotting_functions.R")
+source("../../gwscaR/R/gwscaR_plot.R")
+source("../../gwscaR/R/gwscaR_utility.R")
+source("../../gwscaR/R/gwscaR_fsts.R")
+source("../../gwscaR/R/gwscaR_popgen.R")
+
 #################FUNCTIONS####################
 parse.vcf<-function(filename){
   vcf<-read.delim(filename,comment.char="#",sep='\t',header=F,stringsAsFactors = F)
@@ -1205,6 +1215,95 @@ mtext("Linkage Group",1,outer=T,cex=0.75)
 dev.off()
 
 
+######FIG 3 VIOPLOTS FSTS #######
+sep.dat<-data.frame(Fst=c(od.fst[!is.na(od.fst$Fst),"Fst"],
+                          od.fst[!is.na(od.fst$Fst) & od.fst$SNP %in% cov.pass,"Fst"],
+                          sub.od.fst[!is.na(sub.od.fst$Fst),"Fst"],
+                          sub.od.fst[!is.na(sub.od.fst$Fst) & sub.od.fst$SNP %in% cov.pass,"Fst"],
+                          dsub.od.fst[!is.na(dsub.od.fst$Fst),"Fst"],
+                          dsub.od.fst[!is.na(dsub.od.fst$Fst) & dsub.od.fst$SNP %in% cov.pass,"Fst"],
+                          od.both.fst[!is.na(od.both.fst$Fst),"Fst"],
+                          od.both.fst[!is.na(od.both.fst$Fst) & od.both.fst$SNP %in% sep.cov.pass,"Fst"],
+                          sub.fsts.both[!is.na(sub.fsts.both$Fst),"Fst"],
+                          sub.fsts.both[!is.na(sub.fsts.both$Fst) & sub.fsts.both$SNP %in% sep.cov.pass,"Fst"],
+                          dsub.fsts.both[!is.na(dsub.fsts.both$Fst),"Fst"],
+                          dsub.fsts.both[!is.na(dsub.fsts.both$Fst) & dsub.fsts.both$SNP %in% sep.cov.pass,"Fst"]),
+                    Filtered=c(rep("NoFilter",length(od.fst[!is.na(od.fst$Fst),"Fst"])),
+                               rep("Filter",length(od.fst[!is.na(od.fst$Fst) & od.fst$SNP %in% cov.pass,"Fst"])),
+                               rep("NoFilter",length(sub.od.fst[!is.na(sub.od.fst$Fst),"Fst"])),
+                               rep("Filter",length(sub.od.fst[!is.na(sub.od.fst$Fst) & sub.od.fst$SNP %in% cov.pass,"Fst"])),
+                               rep("NoFilter",length(dsub.od.fst[!is.na(dsub.od.fst$Fst),"Fst"])),
+                               rep("Filter",length(dsub.od.fst[!is.na(dsub.od.fst$Fst) & dsub.od.fst$SNP %in% cov.pass,"Fst"])),
+                               rep("NoFilter",length(od.both.fst[!is.na(od.both.fst$Fst),"Fst"])),
+                               rep("Filter",length( od.both.fst[!is.na(od.both.fst$Fst) & od.both.fst$SNP %in% sep.cov.pass,"Fst"])),
+                               rep("NoFilter",length(sub.fsts.both[!is.na(sub.fsts.both$Fst),"Fst"])),
+                               rep("Filter",length(sub.fsts.both[!is.na(sub.fsts.both$Fst) & sub.fsts.both$SNP %in% sep.cov.pass,"Fst"])),
+                               rep("NoFilter",length(dsub.fsts.both[!is.na(dsub.fsts.both$Fst),"Fst"])),
+                               rep("Filter",length(dsub.fsts.both[!is.na(dsub.fsts.both$Fst) & dsub.fsts.both$SNP %in% sep.cov.pass,"Fst"]))),
+                    Analysis=c(rep("All",length(od.fst[!is.na(od.fst$Fst),"Fst"])),
+                               rep("All",length(od.fst[!is.na(od.fst$Fst) & od.fst$SNP %in% cov.pass,"Fst"])),
+                               rep("Sub",length(sub.od.fst[!is.na(sub.od.fst$Fst),"Fst"])),
+                               rep("Sub",length(sub.od.fst[!is.na(sub.od.fst$Fst) & sub.od.fst$SNP %in% cov.pass,"Fst"])),
+                               rep("ddR",length(dsub.od.fst[!is.na(dsub.od.fst$Fst),"Fst"])),
+                               rep("ddR",length(dsub.od.fst[!is.na(dsub.od.fst$Fst) & dsub.od.fst$SNP %in% cov.pass,"Fst"])),
+                               rep("All",length(od.both.fst[!is.na(od.both.fst$Fst),"Fst"])),
+                               rep("All",length( od.both.fst[!is.na(od.both.fst$Fst) & od.both.fst$SNP %in% sep.cov.pass,"Fst"])),
+                               rep("Sub",length(sub.fsts.both[!is.na(sub.fsts.both$Fst),"Fst"])),
+                               rep("Sub",length(sub.fsts.both[!is.na(sub.fsts.both$Fst) & sub.fsts.both$SNP %in% sep.cov.pass,"Fst"])),
+                               rep("ddR",length(dsub.fsts.both[!is.na(dsub.fsts.both$Fst),"Fst"])),
+                               rep("ddR",length(dsub.fsts.both[!is.na(dsub.fsts.both$Fst) & dsub.fsts.both$SNP %in% sep.cov.pass,"Fst"]))),
+                    Together=c(rep("Separate",length(od.fst[!is.na(od.fst$Fst),"Fst"])),
+                               rep("Separate",length(od.fst[!is.na(od.fst$Fst) & od.fst$SNP %in% cov.pass,"Fst"])),
+                               rep("Separate",length(sub.od.fst[!is.na(sub.od.fst$Fst),"Fst"])),
+                               rep("Separate",length(sub.od.fst[!is.na(sub.od.fst$Fst) & sub.od.fst$SNP %in% cov.pass,"Fst"])),
+                               rep("Separate",length(dsub.od.fst[!is.na(dsub.od.fst$Fst),"Fst"])),
+                               rep("Separate",length(dsub.od.fst[!is.na(dsub.od.fst$Fst) & dsub.od.fst$SNP %in% cov.pass,"Fst"])),
+                               rep("Together",length(od.both.fst[!is.na(od.both.fst$Fst),"Fst"])),
+                               rep("Together",length( od.both.fst[!is.na(od.both.fst$Fst) & od.both.fst$SNP %in% sep.cov.pass,"Fst"])),
+                               rep("Together",length(sub.fsts.both[!is.na(sub.fsts.both$Fst),"Fst"])),
+                               rep("Together",length(sub.fsts.both[!is.na(sub.fsts.both$Fst) & sub.fsts.both$SNP %in% sep.cov.pass,"Fst"])),
+                               rep("Together",length(dsub.fsts.both[!is.na(dsub.fsts.both$Fst),"Fst"])),
+                               rep("Together",length(dsub.fsts.both[!is.na(dsub.fsts.both$Fst) & dsub.fsts.both$SNP %in% sep.cov.pass,"Fst"]))),
+                    Group=c(rep("NAS",length(od.fst[!is.na(od.fst$Fst),"Fst"])),
+                            rep("FAS",length(od.fst[!is.na(od.fst$Fst) & od.fst$SNP %in% cov.pass,"Fst"])),
+                            rep("NSS",length(sub.od.fst[!is.na(sub.od.fst$Fst),"Fst"])),
+                            rep("FSS",length(sub.od.fst[!is.na(sub.od.fst$Fst) & sub.od.fst$SNP %in% cov.pass,"Fst"])),
+                            rep("NDS",length(dsub.od.fst[!is.na(dsub.od.fst$Fst),"Fst"])),
+                            rep("FDS",length(dsub.od.fst[!is.na(dsub.od.fst$Fst) & dsub.od.fst$SNP %in% cov.pass,"Fst"])),
+                            rep("NAT",length(od.both.fst[!is.na(od.both.fst$Fst),"Fst"])),
+                            rep("FAT",length( od.both.fst[!is.na(od.both.fst$Fst) & od.both.fst$SNP %in% sep.cov.pass,"Fst"])),
+                            rep("NST",length(sub.fsts.both[!is.na(sub.fsts.both$Fst),"Fst"])),
+                            rep("FST",length(sub.fsts.both[!is.na(sub.fsts.both$Fst) & sub.fsts.both$SNP %in% sep.cov.pass,"Fst"])),
+                            rep("NDT",length(dsub.fsts.both[!is.na(dsub.fsts.both$Fst),"Fst"])),
+                            rep("FDT",length(dsub.fsts.both[!is.na(dsub.fsts.both$Fst) & dsub.fsts.both$SNP %in% sep.cov.pass,"Fst"]))))
+
+
+
+ggplot2.violinplot(data=sep.dat,xName='Analysis',yName='Fst',groupName='Filtered',faceting=TRUE)
+
+
+fills<-c("NAS"=ddsdsep.col,"FAS"="white","NSS"=ddsdsep.col,
+         "FSS"="white","NDS"=ddsep.col,"FDS"= "white",
+         "NAT"=ddsdtog.col,"FAT"="lightgrey","NST"=ddsdtog.col,
+         "FST"="lightgrey","NDT"=ddtog.col,"FDT"="lightgrey")
+borders<-c("NAS"=ddsdsep.col,"FAS"=ddsdsep.col,"NSS"=ddsdsep.col,
+           "FSS"=ddsdsep.col,"NDS"=ddsep.col,"FDS"= ddsep.col,
+           "NAT"=ddsdtog.col,"FAT"=ddsdtog.col,"NST"=ddsdtog.col,
+           "FST"=ddsdtog.col,"NDT"=ddtog.col,"FDT"=ddtog.col)
+
+sep.vp<-ggplot(sep.dat, aes(x=Filtered,y=Fst,fill=Group,color=Group)) + 
+  geom_violin() +
+  labs(title="",x="",y=expression(italic(F[ST]))) +
+  theme(panel.grid.major=element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank())
+
+sep.vp + facet_grid(Together ~ Analysis) +
+  scale_color_manual(values=borders) +
+  scale_fill_manual(values=fills) 
+
+### Fst analysis
+
 fst.comp<-data.frame(Filtering=c(rep("Unfiltered",nrow(a.od)),rep("Filtered",nrow(a.odc)),
                                  rep("Unfiltered",nrow(a.odb)),rep("Filtered",nrow(a.odbc))), 
                      Assembly=c(rep("Alone",nrow(a.od)),rep("Alone",nrow(a.odc)),
@@ -1438,6 +1537,85 @@ legend("top",c("sex-biased viability selection","sexual selection",
 mtext("Linkage Group",1,outer=T,cex=0.75)
 dev.off()
 
+##### COVERAGE HEATMAP #####
+#as per reviewer 1's suggestion
+
+#bin coverage
+cov.bins<-data.frame(minCov=c(1,3,5,10,20,30,50),
+                     maxCov=c(3,5,10,20,30,50,1000000000),
+                     binCov=c(1,2,3,4,5,6,7))
+bin.names<-list(c("1-3","3-5","5-10","10-20","20-30","30-50","50+"))
+
+# function to get the matrix of mean Fsts
+get.cov.mat<-function(cov.fst.df,cov.bins, bin.names){
+  sdBin<-NULL
+  ddBin<-NULL
+  for(i in 1:nrow(cov.fst.df)){
+    sdb<-cov.bins[cov.bins$minCov <= cov.fst.df[i,"sdTotCov"] & 
+                      cov.bins$maxCov>cov.fst.df[i,"sdTotCov"],"binCov"]
+    ddb<-cov.bins[cov.bins$minCov <= cov.fst.df[i,"ddTotCov"] & 
+                    cov.bins$maxCov>cov.fst.df[i,"ddTotCov"],"binCov"]
+    if(length(sdb)>1){ print(i) }
+    if(length(ddb)>1){ print(i) }
+    sdBin<-c(sdBin,sdb)
+    ddBin<-c(ddBin,ddb)
+  }
+  cov.fst.df$sdBin<-sdBin
+  cov.fst.df$ddBin<-ddBin
+  covmap<-matrix(nrow=nrow(cov.bins),ncol=nrow(cov.bins))
+  for(i in 1:nrow(cov.bins)){
+    for(ii in 1:nrow(cov.bins)){
+      mfst<-mean(cov.fst.df$Fst[cov.fst.df$sdBin==cov.bins$binCov[i] & 
+                                  cov.fst.df$ddBin==cov.bins$binCov[ii] ],na.rm = T)
+      covmap[i,ii]<-mfst
+    }
+  }
+  return(as.matrix(covmap))
+}
+#df with sdTotCov, ddTotCov, Fst
+od.covmap<-data.frame(SNP=loc.cov$SNP,sdTotCov=loc.cov$AvgCovTotal.x,ddTotCov=loc.cov$AvgCovTotal.y)
+od.covmap<-merge(od.fst,od.covmap, by="SNP",all = FALSE) #10420
+od.covmat<-get.cov.mat(od.covmap,cov.bins,bin.names)
+dimnames(od.covmat)<-bin.names
+dimnames(od.covmat)[2]<-bin.names
+
+#same but with analysis of both
+both.od.cov<-merge(bo.cov,bd.cov,by="SNP")#11031
+both.covmap<-data.frame(SNP=both.od.cov$SNP,sdTotCov=both.od.cov$AvgCovTotal.x,
+                        ddTotCov=both.od.cov$AvgCovTotal.y)
+both.covmap<-merge(od.both.fst,both.covmap,by="SNP",all=FALSE)#11059
+both.covmat<-get.cov.mat(both.covmap,cov.bins,bin.names)
+dimnames(both.covmat)<-bin.names #rows, = sdRAD
+dimnames(both.covmat)[2]<-bin.names
+
+
+colors<-c("blue","yellow","red")
+pal<-colorRampPalette(colors)
+ncol=80
+cols<-pal(ncol)
+
+sep.cov.lv<-levelplot(as.matrix(od.covmat[2:7,2:7]),col.regions=cols,alpha.regions=0.7,
+                     scales = list(x=list(rot=90),tck = 0),
+                     xlab="sdRAD Coverage",ylab="ddRAD Coverage",
+                     main="Analyzed Separately")
+print(sep.cov.lv)
+bot.cov.lv<-levelplot(as.matrix(both.covmat[2:7,2:7]),col.regions=cols,alpha.regions=0.7,
+                      scales = list(x=list(rot=90),tck = 0),
+                      xlab="sdRAD Coverage",ylab="ddRAD Coverage",
+                      main="Analyzed Together")
+print(bot.cov.lv)
+#plot them together
+png("coverage_heatmaps.png",height=6,width=11,units="in",res=300)
+print(sep.cov.lv,split=c(1,1,2,1),more=TRUE)
+lattice::trellis.focus("legend", side="right", clipp.off=TRUE, highlight=FALSE)
+grid::grid.text(expression(italic(F)[ST]), 0.2, 0, hjust=0.5, vjust=1.2)
+trellis.unfocus()
+
+print(bot.cov.lv,split=c(2,1,2,1),more=FALSE)
+lattice::trellis.focus("legend", side="right", clipp.off=TRUE, highlight=FALSE)
+grid::grid.text(expression(italic(F)[ST]), 0.2, 0, hjust=0.5, vjust=1.2)
+trellis.unfocus()
+dev.off()
 ##############################DRAD DIFFERENT PLATES##################################
 
 #d.cov<-do.call("rbind",apply(drad,1,vcf.cov.loc,subset=d.ind))
@@ -1661,4 +1839,4 @@ dev.off()
 plink.fst<-data.frame(Fst=as.numeric(c(plink.both.fst$Fst,plink.diff.fst$Fst)),
                       Analysis=c(rep("Together",length(plink.both.fst$Fst)),rep("Separately",length(plink.diff.fst$Fst))))
 
->>>>>>> parent of 70c4bc9... merging
+
