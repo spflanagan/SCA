@@ -5,7 +5,7 @@
 
 rm(list=ls())
 library(ggplot2)
-library(vioplot)
+library(sm)
 library(devtools)
 install_github("spflanagan/gwscaR")
 library(gwscaR)
@@ -323,7 +323,186 @@ fst.one.plink<-function(raw,group1, group2, cov.thresh=0.2){
   return(fst.dat)
 }#end fst.one.plink
 
-
+#adpoted from vioplot()
+#requires library(sm)
+spf.vioplot <- function(x,...,range=1.5,h=NULL,ylim=NULL,names=NULL, horizontal=FALSE,
+                        col="magenta", border="black", lty=1, lwd=1, rectCol="black", colMed="white", pchMed=19, at, add=FALSE, wex=1,
+                        drawRect=TRUE,plot.axes=TRUE,axis.box=FALSE,plot.ann=TRUE)
+{
+  # process multiple datas
+  datas <- list(x,...)
+  n <- length(datas)
+  
+  if(missing(at)) at <- 1:n
+  
+  # pass 1
+  #
+  # - calculate base range
+  # - estimate density
+  #
+  
+  # setup parameters for density estimation
+  upper  <- vector(mode="numeric",length=n)
+  lower  <- vector(mode="numeric",length=n)
+  q1     <- vector(mode="numeric",length=n)
+  q3     <- vector(mode="numeric",length=n)
+  med    <- vector(mode="numeric",length=n)
+  base   <- vector(mode="list",length=n)
+  height <- vector(mode="list",length=n)
+  baserange <- c(Inf,-Inf)
+  
+  # global args for sm.density function-call
+  args <- list(display="none")
+  
+  if (!(is.null(h)))
+    args <- c(args, h=h)
+  
+  for(i in 1:n) {
+    data<-datas[[i]]
+    
+    # calculate plot parameters
+    #   1- and 3-quantile, median, IQR, upper- and lower-adjacent
+    data.min <- min(data)
+    data.max <- max(data)
+    q1[i]<-quantile(data,0.25)
+    q3[i]<-quantile(data,0.75)
+    med[i]<-median(data)
+    iqd <- q3[i]-q1[i]
+    upper[i] <- min( q3[i] + range*iqd, data.max )
+    lower[i] <- max( q1[i] - range*iqd, data.min )
+    
+    #   strategy:
+    #       xmin = min(lower, data.min))
+    #       ymax = max(upper, data.max))
+    #
+    
+    est.xlim <- c( min(lower[i], data.min), max(upper[i], data.max) )
+    
+    # estimate density curve
+    smout <- do.call("sm.density", c( list(data, xlim=est.xlim), args ) )
+    
+    # calculate stretch factor
+    #
+    #  the plots density heights is defined in range 0.0 ... 0.5
+    #  we scale maximum estimated point to 0.4 per data
+    #
+    hscale <- 0.4/max(smout$estimate) * wex
+    
+    # add density curve x,y pair to lists
+    base[[i]]   <- smout$eval.points
+    height[[i]] <- smout$estimate * hscale
+    
+    # calculate min,max base ranges
+    t <- range(base[[i]])
+    baserange[1] <- min(baserange[1],t[1])
+    baserange[2] <- max(baserange[2],t[2])
+    
+  }
+  
+  # pass 2
+  #
+  # - plot graphics
+  
+  # setup parameters for plot
+  if(!add){
+    xlim <- if(n==1)
+      at + c(-.5, .5)
+    else
+      range(at) + min(diff(at))/2 * c(-1,1)
+    
+    if (is.null(ylim)) {
+      ylim <- baserange
+    }
+  }
+  if (is.null(names)) {
+    label <- 1:n
+  } else {
+    label <- names
+  }
+  # setup colors and borders
+  if(length(col) < n){
+    col<-rep(col,n-length(col))
+  }
+  if(length(border)<n){
+    border<-rep(border,n-length(border))
+  }
+  if(length(colMed)<n){
+    colMed<-rep(colMed,n-length(colMed))
+  }
+  boxwidth <- 0.05 * wex
+  
+  # setup plot
+  if(!add)
+    plot.new()
+  if(!horizontal) {
+    if(!add){
+      plot.window(xlim = xlim, ylim = ylim)
+      if(plot.axes){
+        if(plot.ann){
+          axis(2)
+          axis(1,at = at, label=label )
+        }else{
+          axis(2,labels=F)
+          axis(1,at = at, labels=F )
+        }
+      }
+    }
+    
+    if(axis.box){ box() }
+    for(i in 1:n) {
+      # plot left/right density curve
+      polygon( c(at[i]-height[[i]], rev(at[i]+height[[i]])),
+               c(base[[i]], rev(base[[i]])),
+               col = col[i], border=border[i], lty=lty, lwd=lwd)
+      
+      if(drawRect){
+        # plot IQR
+        lines( at[c( i, i)], c(lower[i], upper[i]) ,lwd=lwd, lty=lty)
+        
+        # plot 50% KI box
+        rect( at[i]-boxwidth/2, q1[i], at[i]+boxwidth/2, q3[i], col=rectCol)
+        
+        # plot median point
+        points( at[i], med[i], pch=pchMed, col=colMed )
+      }
+    }
+    
+  }
+  else {
+    if(!add){
+      plot.window(xlim = ylim, ylim = xlim,bty=axis.bty)
+      if(plot.axes){
+        if(plot.ann){
+          axis(2)
+          axis(1,at = at, label=label )
+        }else{
+          axis(2,labels=F)
+          axis(1,at = at, labels=F )
+        }
+      }
+    }
+    
+    if(axis.box){ box() }
+    for(i in 1:n) {
+      # plot left/right density curve
+      polygon( c(base[[i]], rev(base[[i]])),
+               c(at[i]-height[[i]], rev(at[i]+height[[i]])),
+               col = col[i], border=border[i], lty=lty, lwd=lwd)
+      
+      if(drawRect){
+        # plot IQR
+        lines( c(lower[i], upper[i]), at[c(i,i)] ,lwd=lwd, lty=lty)
+        
+        # plot 50% KI box
+        rect( q1[i], at[i]-boxwidth/2, q3[i], at[i]+boxwidth/2,  col=rectCol)
+        
+        # plot median point
+        points( med[i], at[i], pch=pchMed, col=colMed )
+      }
+    }
+  }
+  invisible (list( upper=upper, lower=lower, median=med, q1=q1, q3=q3))
+}
 #################SET COLORS#################
 ddtog.col<-"#f4a582"
 ddsep.col<-"#ca0020"
@@ -558,34 +737,37 @@ legend("topright",c("Assembled Together", "Assembled Separately"),
 mtext("Total Number of Reads",1,outer=T,cex=0.75,line=-52)#-29 for R
 
 par(mar=c(2,3,2,1))
-hist(bo.cov$AvgCovTotal,col=alpha(sdtog.col,0.5),axes=F,xlab="",ylab="",main="",
-     xlim=c(0,20080),ylim=c(0,150000),breaks=seq(0,21000,1000),border=alpha(sdtog.col,0.5))
-hist(o.cov$AvgCovTotal, col=alpha(sdsep.col,0.5), add=T,breaks=seq(0,21000,1000),density=20)
+hist(log(bo.cov$AvgCovTotal),col=alpha(sdtog.col,0.5),axes=F,xlab="",ylab="",main="",
+     xlim=c(0,10),ylim=c(0,80000),breaks=seq(0,10,0.5),border=alpha(sdtog.col,0.5))
+hist(log(o.cov$AvgCovTotal), col=alpha(sdsep.col,0.5), add=T,
+     breaks=seq(0,10,0.5),density=20)
 axis(1,pos=0)
 axis(2,pos=0,las=1)
 mtext("Number of Loci",2,outer=F,line=2.5,cex=0.75)
 par(mar=c(2,2,2,2))
-hist(bd.cov$AvgCovTotal, col=alpha(ddtog.col,0.5),main="",axes=F,ylab="",xlab="",
-     xlim=c(0,2450),ylim=c(0,150000),breaks=seq(0,2600,150),border=alpha(ddtog.col,0.5))
-hist(d.cov$AvgCovTotal, col=alpha(ddsep.col,0.5), add=T,breaks=seq(0,2600,150),density=20)
+hist(log(bd.cov$AvgCovTotal), col=alpha(ddtog.col,0.5),main="",axes=F,ylab="",xlab="",
+     xlim=c(0,10),ylim=c(0,80000),breaks=seq(0,10,0.5),border=alpha(ddtog.col,0.5))
+hist(log(d.cov$AvgCovTotal), col=alpha(ddsep.col,0.5), add=T,
+     breaks=seq(0,10,0.5),density=20)
 axis(1,pos=0)
 axis(2,pos=0,las=1)
-mtext("Average Number of Reads Per Individual Per SNP",1,outer=T,line=-27,cex=0.75)#-15 for R
+mtext("ln(Average Number of Reads Per Individual Per SNP)",1,outer=T,line=-26,cex=0.75)#-15 for R
 
 par(mar=c(2,3,2,1))
-hist(bo.cov$AvgCovRatio,col=alpha(sdtog.col,0.5),main="",axes=F,
-     xlab="",ylab="",breaks=seq(0,600,35),ylim=c(0,150000),xlim=c(0,565),border=alpha(sdtog.col,0.5))
-hist(o.cov$AvgCovRatio, col=alpha(sdsep.col,0.5), add=T,breaks=seq(0,600,35),density=20)
+hist(log(bo.cov$AvgCovRatio),col=alpha(sdtog.col,0.5),main="",axes=F,
+     xlab="",ylab="",breaks=seq(-5,5,0.5),ylim=c(0,30000),xlim=c(-5,5),border=alpha(sdtog.col,0.5))
+hist(log(o.cov$AvgCovRatio), col=alpha(sdsep.col,0.5), add=T,
+     breaks=seq(-5,5.5,0.5),density=20)
 axis(1,pos=0)
 axis(2,pos=-5,las=1)
 mtext("Number of Loci",2,outer=F,line=2.5,cex=0.75)
 par(mar=c(2,2,2,2))
-hist(bd.cov$AvgCovRatio, col=alpha(ddtog.col,0.5),main="",axes=F,
-     ylab="",xlab="",breaks=seq(0,2000,125),ylim=c(0,150000),xlim=c(0,2000),border=alpha(ddtog.col,0.5))
-hist(d.cov$AvgCovRatio, col=alpha(ddsep.col,0.5), add=T,breaks=seq(0,2000,125),density=20)
+hist(log(bd.cov$AvgCovRatio), col=alpha(ddtog.col,0.5),main="",axes=F,
+     ylab="",xlab="",breaks=seq(-4,6,0.5),ylim=c(0,30000),xlim=c(-2,6),border=alpha(ddtog.col,0.5))
+hist(log(d.cov$AvgCovRatio), col=alpha(ddsep.col,0.5), add=T,breaks=seq(-4,6,0.5),density=20)
 axis(1,pos=0)
 axis(2,pos=-2,las=1)
-mtext("Average Number of Reads in Ref/Avg Number of Reads in Alt",1,outer=T,cex=0.75)
+mtext("ln(Average Number of Reads in Ref/Avg Number of Reads in Alt)",1,outer=T,cex=0.75)
 dev.off()
 
 ###
@@ -874,16 +1056,17 @@ drad.test<-sample(d.ind,120)
 drad.tes.fst<-do.call("rbind", apply(both, 1, fst.one.vcf,group1=drad.test[1:60],group2=drad.test[61:120],cov.thresh=0.2))
 
 ##############################60 sdRAD and 60 ddRAD##################################
-#d.ind.sub<-sample(d.ind,60,replace=F)
-#d.share.sub<-d.share[,colnames(d.share) %in% c(locus.info,d.ind.sub)]
-#write.table(d.share,"drad.60ind.vcf",sep='\t',quote=F,row.names=F,col.names=T)
-#sub.fsts.both<-do.call("rbind",apply(both.sub,1,fst.one.vcf,group1=c(locus.info,o.ind),group2=colnames(d.share.sub),cov.thresh=0.5))
-#sub.fsts.both$SNP<-paste(sub.fsts.both$Chrom,as.numeric(as.character(sub.fsts.both$Pos)),sep=".")
-#write.table(sub.fsts.both,"sub.fsts.both.txt",sep='\t',col.names=T,row.names=F,quote=F)
-#sub.od.fst<-do.call("rbind",apply(o.share,1,fst.two.vcf,vcf2=d.share,match.index="SNP",cov.thresh=0.5))
-#sub.od.fst$SNP<-paste(sub.od.fst$Chrom,as.numeric(as.character(sub.od.fst$Pos)),sep=".")
-#write.table(sub.od.fst,"sub.od.fst.txt",sep='\t',col.names=T,row.names=F,quote=F)
-d.share.sub<-read.table("drad.60ind.vcf",sep='\t',header=T)
+# d.ind.sub<-sample(d.ind,60,replace=F)
+#write.table(d.ind.sub,"d.ind.sub60.txt",col.names = FALSE,row.names=FALSE,quote=FALSE)
+# d.share.sub<-d.share[,colnames(d.share) %in% c(locus.info,d.ind.sub)]
+# write.table(d.share.sub,"drad.60ind.vcf",sep='\t',quote=F,row.names=F,col.names=T)
+# sub.fsts.both<-do.call("rbind",apply(both,1,fst.one.vcf,group1=c(locus.info,o.ind),group2=colnames(d.share.sub),cov.thresh=0.5))
+# sub.fsts.both$SNP<-paste(sub.fsts.both$Chrom,as.numeric(as.character(sub.fsts.both$Pos)),sep=".")
+# write.table(sub.fsts.both,"sub.fsts.both.txt",sep='\t',col.names=T,row.names=F,quote=F)
+# sub.od.fst<-do.call("rbind",apply(o.share,1,fst.two.vcf,vcf2=d.share.sub,match.index="SNP",cov.thresh=0.5))
+# sub.od.fst$SNP<-paste(sub.od.fst$Chrom,as.numeric(as.character(sub.od.fst$Pos)),sep=".")
+# write.table(sub.od.fst,"sub.od.fst.txt",sep='\t',col.names=T,row.names=F,quote=F)
+d.share.sub<-read.table("drad.60ind.vcf",sep='\t',header=F)
 sub.od.fst<-read.table("sub.od.fst.txt",sep='\t',header=T)
 sub.fsts.both<-read.table("sub.fsts.both.txt",sep='\t',header=T)
 
@@ -1216,7 +1399,7 @@ dev.off()
 
 
 ######FIG 3 VIOPLOTS FSTS #######
-sep.dat<-data.frame(Fst=c(od.fst[!is.na(od.fst$Fst),"Fst"],
+fst.dat<-data.frame(Fst=c(od.fst[!is.na(od.fst$Fst),"Fst"],
                           od.fst[!is.na(od.fst$Fst) & od.fst$SNP %in% cov.pass,"Fst"],
                           sub.od.fst[!is.na(sub.od.fst$Fst),"Fst"],
                           sub.od.fst[!is.na(sub.od.fst$Fst) & sub.od.fst$SNP %in% cov.pass,"Fst"],
@@ -1276,31 +1459,123 @@ sep.dat<-data.frame(Fst=c(od.fst[!is.na(od.fst$Fst),"Fst"],
                             rep("FST",length(sub.fsts.both[!is.na(sub.fsts.both$Fst) & sub.fsts.both$SNP %in% sep.cov.pass,"Fst"])),
                             rep("NDT",length(dsub.fsts.both[!is.na(dsub.fsts.both$Fst),"Fst"])),
                             rep("FDT",length(dsub.fsts.both[!is.na(dsub.fsts.both$Fst) & dsub.fsts.both$SNP %in% sep.cov.pass,"Fst"]))))
-
-
-
-ggplot2.violinplot(data=sep.dat,xName='Analysis',yName='Fst',groupName='Filtered',faceting=TRUE)
-
-
+write.table(fst.dat,"fig3.fstdat.txt",col.names=T,row.names=F,quote=F,sep='\t')
+fst.dat<-read.table("fig3.fstdat.txt",header=T,sep='\t')
 fills<-c("NAS"=ddsdsep.col,"FAS"="white","NSS"=ddsdsep.col,
          "FSS"="white","NDS"=ddsep.col,"FDS"= "white",
-         "NAT"=ddsdtog.col,"FAT"="lightgrey","NST"=ddsdtog.col,
-         "FST"="lightgrey","NDT"=ddtog.col,"FDT"="lightgrey")
+         "NAT"=ddsdtog.col,"FAT"="white","NST"=ddsdtog.col,
+         "FST"="white","NDT"=ddtog.col,"FDT"="white")
 borders<-c("NAS"=ddsdsep.col,"FAS"=ddsdsep.col,"NSS"=ddsdsep.col,
            "FSS"=ddsdsep.col,"NDS"=ddsep.col,"FDS"= ddsep.col,
            "NAT"=ddsdtog.col,"FAT"=ddsdtog.col,"NST"=ddsdtog.col,
            "FST"=ddsdtog.col,"NDT"=ddtog.col,"FDT"=ddtog.col)
 
-sep.vp<-ggplot(sep.dat, aes(x=Filtered,y=Fst,fill=Group,color=Group)) + 
-  geom_violin() +
-  labs(title="",x="",y=expression(italic(F[ST]))) +
-  theme(panel.grid.major=element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.background = element_blank())
+png("Fig3.vioplot.png",height=6,width=7,units="in",res=300)
+par(mfrow=c(2,3),oma=c(1,3,3,9),mar=c(1,0.1,1,0.1))
+v1<-spf.vioplot(fst.dat[fst.dat$Group=="NAS","Fst"],
+            fst.dat[fst.dat$Group=="FAS","Fst"],colMed="black",ylim=c(0,1),
+            col=fills[1:2],border=borders[1:2],plot.axes=F,axis.box=F,lwd=2)
+axis(2,las=1,at=seq(0,1,0.5),hadj=0.7)
+v2<-spf.vioplot(fst.dat[fst.dat$Group=="NSS","Fst"],
+            fst.dat[fst.dat$Group=="FSS","Fst"],colMed="black",ylim=c(0,1),
+            col=fills[3:4],border=borders[3:4],plot.axes=F,axis.box=F,lwd=2)
+v3<-spf.vioplot(fst.dat[fst.dat$Group=="NDS","Fst"],
+            fst.dat[fst.dat$Group=="FDS","Fst"],colMed="black",ylim=c(0,1),
+            col=fills[5:6],border=borders[5:6],plot.axes=F,axis.box=F,lwd=2)
+v4<-spf.vioplot(fst.dat[fst.dat$Group=="NAT","Fst"],
+            fst.dat[fst.dat$Group=="FAT","Fst"],colMed="black",ylim=c(-1.5,1),
+            col=fills[7:8],border=borders[7:8],plot.axes=F,axis.box=F,lwd=2)
+axis(2,las=1,at=seq(-1.5,1.5,1),hadj=0.7)
+mtext(expression(italic(F[ST])),2,outer=T,line=1.5,lwd=2,cex=0.75)
+v5<-spf.vioplot(fst.dat[fst.dat$Group=="NST","Fst"],
+            fst.dat[fst.dat$Group=="FST","Fst"],colMed="black",ylim=c(-1.5,1),
+            col=fills[9:10],border=borders[9:10],plot.axes=F,axis.box=F,lwd=2)
+v6<-spf.vioplot(fst.dat[fst.dat$Group=="NDT","Fst"],
+            fst.dat[fst.dat$Group=="FDT","Fst"],colMed="black",ylim=c(-1.5,1),
+            col=fills[11:12],border=borders[11:12],plot.axes=F,axis.box=F,lwd=2)
 
-sep.vp + facet_grid(Together ~ Analysis) +
-  scale_color_manual(values=borders) +
-  scale_fill_manual(values=fills) 
+par(mfrow=c(1, 1), oma=rep(0, 4), mar=rep(0, 4), new=TRUE)
+plot(0:1, 0:1, type="n", xlab="", ylab="", axes=FALSE)
+l<-legend(0.9,0.7,c("Both\nSeparate","Both\nTogether","ddRAD\nSeparate","ddRAD\nTogether","Filtered","Not Filtered"),
+       pt.bg = c(borders[c(1,7,5,12)],"black","white"),y.intersp=1.25,
+       col=c(borders[c(1,7,5,12)],"black","black"),pch=c(15,15,15,15,15,22),bty='n',xpd=T,cex=0.75)
+
+rect(0.04,0.95,0.28,1,col="lightgrey",border="lightgrey")
+text(x = 0.16,y=0.975,"60 sdRAD, 384 ddRAD",cex=0.75)
+
+rect(0.32,0.95,0.56,1,col="lightgrey",border="lightgrey")
+text(x = 0.44,y=0.975,"60 sdRAD, 60 ddRAD",cex=0.75)
+
+rect(0.59,0.95,0.83,1,col="lightgrey",border="lightgrey")
+text(x = 0.7,y=0.975,"60 ddRAD, 60 ddRAD",cex=0.75)
+
+rect(0.84,0.95,0.89,0.51,col="lightgrey",border="lightgrey")
+text(x=0.865,y=0.75,"Analyzed Separately",cex=0.75,srt=270)
+
+rect(0.84,0.45,0.89,0.025,col="lightgrey",border="lightgrey")
+text(x=0.865,y=0.25,"Analyzed Together",cex=0.75,srt=270)
+dev.off()
+
+
+png("Fig3.vioplot_log.png",height=6,width=7,units="in",res=300)
+par(mfrow=c(2,3),oma=c(1,4,3,9),mar=c(1,0.1,1,0.1))
+v1<-spf.vioplot(fst.dat[fst.dat$Group=="NAS","logFst"],
+                fst.dat[fst.dat$Group=="FAS","logFst"],colMed="black",ylim=c(2.3,2.36),
+                col=fills[1:2],border=borders[1:2],plot.axes=F,axis.box=F,lwd=2)
+axis(2,las=1,at=seq(2.3,2.36,0.02),hadj=0.7)
+v2<-spf.vioplot(fst.dat[fst.dat$Group=="NSS","logFst"],
+                fst.dat[fst.dat$Group=="FSS","logFst"],colMed="black",ylim=c(2.3,2.36),
+                col=fills[3:4],border=borders[3:4],plot.axes=F,axis.box=F,lwd=2)
+v3<-spf.vioplot(fst.dat[fst.dat$Group=="NDS","logFst"],
+                fst.dat[fst.dat$Group=="FDS","logFst"],colMed="black",ylim=c(2.3,2.36),
+                col=fills[5:6],border=borders[5:6],plot.axes=F,axis.box=F,lwd=2)
+v4<-spf.vioplot(fst.dat[fst.dat$Group=="NAT","logFst"],
+                fst.dat[fst.dat$Group=="FAT","logFst"],colMed="black",ylim=c(2.1,2.4),
+                col=fills[7:8],border=borders[7:8],plot.axes=F,axis.box=F,lwd=2)
+axis(2,las=1,at=seq(2.1,2.6,0.2),hadj=0.7)
+mtext(expression(log~"("~italic(F[ST])~"+10)"),2,outer=T,line=2,lwd=2,cex=0.75)
+v5<-spf.vioplot(fst.dat[fst.dat$Group=="NST","logFst"],
+                fst.dat[fst.dat$Group=="FST","logFst"],colMed="black",ylim=c(2.1,2.4),
+                col=fills[9:10],border=borders[9:10],plot.axes=F,axis.box=F,lwd=2)
+v6<-spf.vioplot(fst.dat[fst.dat$Group=="NDT","logFst"],
+                fst.dat[fst.dat$Group=="FDT","logFst"],colMed="black",ylim=c(2.1,2.4),
+                col=fills[11:12],border=borders[11:12],plot.axes=F,axis.box=F,lwd=2)
+
+par(mfrow=c(1, 1), oma=rep(0, 4), mar=rep(0, 4), new=TRUE)
+plot(0:1, 0:1, type="n", xlab="", ylab="", axes=FALSE)
+l<-legend(0.9,0.7,c("Both\nSeparate","Both\nTogether","ddRAD\nSeparate","ddRAD\nTogether","Filtered","Not Filtered"),
+          pt.bg = c(borders[c(1,7,5,12)],"black","white"),y.intersp=1.25,
+          col=c(borders[c(1,7,5,12)],"black","black"),pch=c(15,15,15,15,15,22),bty='n',xpd=T,cex=0.75)
+
+rect(0.04,0.95,0.28,1,col="lightgrey",border="lightgrey")
+text(x = 0.16,y=0.975,"60 sdRAD, 384 ddRAD",cex=0.75)
+
+rect(0.32,0.95,0.56,1,col="lightgrey",border="lightgrey")
+text(x = 0.44,y=0.975,"60 sdRAD, 60 ddRAD",cex=0.75)
+
+rect(0.59,0.95,0.83,1,col="lightgrey",border="lightgrey")
+text(x = 0.7,y=0.975,"60 ddRAD, 60 ddRAD",cex=0.75)
+
+rect(0.84,0.95,0.89,0.51,col="lightgrey",border="lightgrey")
+text(x=0.865,y=0.75,"Analyzed Separately",cex=0.75,srt=270)
+
+rect(0.84,0.45,0.89,0.025,col="lightgrey",border="lightgrey")
+text(x=0.865,y=0.25,"Analyzed Together",cex=0.75,srt=270)
+dev.off()
+
+#DON'T USE GGPLOT, IT'S A PITA
+# sep.vp<-ggplot(sep.dat, aes(x=Filtered,y=Fst,fill=Group,color=Group)) + 
+#   geom_violin() +
+#   labs(title="",x="",y=expression(italic(F[ST]))) +
+#   theme(panel.grid.major=element_blank(),
+#         panel.grid.minor = element_blank(),
+#         panel.background = element_blank(),
+#         axis.text.x = element_blank(),
+#         axis.ticks.x = element_blank())
+# 
+# sep.vp + facet_grid(Together ~ Analysis) +
+#   scale_color_manual(values=borders) +
+#   scale_fill_manual(values=fills) 
 
 ### Fst analysis
 
@@ -1537,6 +1812,63 @@ legend("top",c("sex-biased viability selection","sexual selection",
 mtext("Linkage Group",1,outer=T,cex=0.75)
 dev.off()
 
+
+####Vioplot SCA
+png("Fig4.vioplot.png",height=6,width=7,units="in",res=300)
+par(mfrow=c(2,1),oma=c(1,4,3,4),mar=c(1,0.1,1,0.1))
+v1<-spf.vioplot(both.viasel[!is.na(both.viasel$Fst),"Fst"],
+                drad.viasel[!is.na(drad.viasel$Fst),"Fst"],
+                orad.viasel[!is.na(orad.viasel$Fst),"Fst"],
+                colMed="black",col="white",ylim=c(0,0.5),
+                border=c(ddsdtog.col,ddsep.col,sdsep.col),plot.axes=F,axis.box=F,lwd=2)
+points(jitter(rep(1, length(both.viasel[both.viasel$Chi.p.adj <=0.05,"Fst"])),2),
+       both.viasel[both.viasel$Chi.p.adj <=0.05,"Fst"],
+       col=alpha(viasel.col,0.3),pch=19,cex=0.75)
+points(jitter(rep(2, length(drad.viasel[drad.viasel$Chi.p.adj <=0.05,"Fst"])),2),
+       drad.viasel[drad.viasel$Chi.p.adj <=0.05,"Fst"],
+       col=alpha(viasel.col,0.3),pch=19,cex=0.75)
+points(jitter(rep(3, length(orad.viasel[orad.viasel$Chi.p.adj <=0.05,"Fst"])),2),
+       orad.viasel[orad.viasel$Chi.p.adj <=0.05,"Fst"],
+       col=alpha(viasel.col,0.3),pch=19,cex=0.75)
+axis(2,las=1,at=seq(0,.5,0.25),hadj=0.7,cex.axis=0.75)
+v2<-spf.vioplot(both.sexsel[!is.na(both.sexsel$Fst),"Fst"],
+                drad.sexsel[!is.na(drad.sexsel$Fst),"Fst"],
+                c(-100,-100),ylim=c(0,0.5),
+                colMed=c("black","black","black"),col="white",
+                border=c(ddsdtog.col,ddsep.col,"white"),plot.axes=F,axis.box=F,lwd=2)
+points(jitter(rep(1, length(both.sexsel[both.sexsel$Chi.p.adj <=0.05,"Fst"])),2),
+       both.sexsel[both.sexsel$Chi.p.adj <=0.05,"Fst"],
+       col=alpha(sexsel.col,0.3),pch=19,cex=0.75)
+points(jitter(rep(2, length(drad.sexsel[drad.sexsel$Chi.p.adj <=0.05,"Fst"])),2),
+       drad.sexsel[drad.sexsel$Chi.p.adj <=0.05,"Fst"],
+       col=alpha(sexsel.col,0.3),pch=19,cex=0.75)
+axis(2,las=1,at=seq(0,0.5,0.25),hadj=0.7,cex.axis=0.75)
+mtext(expression(italic(F[ST])),2,outer=T,line=2,lwd=2,cex=0.75)
+
+l<-legend(2.5,0.44,c("Both Together","ddRAD Separate","sdRAD Separate",
+                    "Viability Selection\nOutliers","Sexual Selection\nOutliers"),
+          pt.bg = c("white","white","white",alpha(viasel.col,0.3),alpha(sexsel.col,0.3)),
+          col=c(ddsdtog.col,ddsep.col,sdsep.col,viasel.col,sexsel.col),
+          y.intersp=1.25,pt.lwd=c(2,2,2,1,1),pch=c(22,22,22,21,21),bty='n',xpd=T,cex=0.75)
+
+par(mfrow=c(1, 1), oma=rep(0, 4), mar=rep(0, 4), new=TRUE)
+plot(0:1, 0:1, type="n", xlab="", ylab="", axes=FALSE)
+rect(0.13,0.95,0.37,1,col="lightgrey",border="lightgrey")
+text(x = 0.24,y=0.975,"ddRAD and sdRAD",cex=0.75)
+
+rect(0.39,0.95,0.63,1,col="lightgrey",border="lightgrey")
+text(x = 0.50,y=0.975,"ddRAD",cex=0.75)
+
+rect(0.65,0.95,0.89,1,col="lightgrey",border="lightgrey")
+text(x = 0.77,y=0.975,"sdRAD",cex=0.75)
+
+rect(0.90,0.95,0.95,0.51,col="lightgrey",border="lightgrey")
+text(x=0.925,y=0.75,"Male vs Female",cex=0.75,srt=270)
+
+rect(0.90,0.45,0.95,0.025,col="lightgrey",border="lightgrey")
+text(x=0.925,y=0.25,"Mothers vs Females",cex=0.75,srt=270)
+dev.off()
+
 ##### COVERAGE HEATMAP #####
 #as per reviewer 1's suggestion
 
@@ -1589,7 +1921,7 @@ dimnames(both.covmat)<-bin.names #rows, = sdRAD
 dimnames(both.covmat)[2]<-bin.names
 
 
-colors<-c("blue","yellow","red")
+colors<-c("black","grey")
 pal<-colorRampPalette(colors)
 ncol=80
 cols<-pal(ncol)
@@ -1605,7 +1937,7 @@ bot.cov.lv<-levelplot(as.matrix(both.covmat[2:7,2:7]),col.regions=cols,alpha.reg
                       main="Analyzed Together")
 print(bot.cov.lv)
 #plot them together
-png("coverage_heatmaps.png",height=6,width=11,units="in",res=300)
+png("coverage_heatmaps_grey.png",height=6,width=11,units="in",res=300)
 print(sep.cov.lv,split=c(1,1,2,1),more=TRUE)
 lattice::trellis.focus("legend", side="right", clipp.off=TRUE, highlight=FALSE)
 grid::grid.text(expression(italic(F)[ST]), 0.2, 0, hjust=0.5, vjust=1.2)
@@ -1616,6 +1948,21 @@ lattice::trellis.focus("legend", side="right", clipp.off=TRUE, highlight=FALSE)
 grid::grid.text(expression(italic(F)[ST]), 0.2, 0, hjust=0.5, vjust=1.2)
 trellis.unfocus()
 dev.off()
+
+###### PCA #####
+
+both.gt<-extract.gt.vcf(both)
+rownames(both.gt)<-paste(both.gt$`#CHROM`,
+                         both.gt$ID,as.numeric(as.character(both.gt$POS)),sep=".")
+both.gt<-both.gt[,4:ncol(both.gt)]
+both.gt[both.gt=="./."]<-NA
+both.gt[both.gt=="1/0"]<-"0/1"
+both.gt<-t(both.gt)
+both.gt<-apply(both.gt,2,function(x) { as.numeric(as.factor(x)) })
+rownames(both.gt)<-colnames(both)[9:ncol(both)-1]
+both.cca<-cca(both.gt,na.action=na.exclude)
+
+
 ##############################DRAD DIFFERENT PLATES##################################
 
 #d.cov<-do.call("rbind",apply(drad,1,vcf.cov.loc,subset=d.ind))
