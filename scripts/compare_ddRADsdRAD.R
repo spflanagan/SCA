@@ -1950,19 +1950,110 @@ trellis.unfocus()
 dev.off()
 
 ###### PCA #####
+library(pcadapt)
+both.pcadapt<-read.pcadapt("both.sub.vcf",type="vcfR")
+both.pca<-pcadapt(both.pcadapt,K=20)
+pops<-gsub("\\w+_(\\w{3})\\d+\\w?([[:punct:]].*)?","\\1",colnames(both)[10:(ncol(both)-1)])
+type<-gsub("(\\w+)_(\\w{3})\\d+\\w?([[:punct:]].*)?","\\1",colnames(both)[10:(ncol(both)-1)])
+type[type=="orad"]<-sdtog.col
+type[type=="sample"]<-ddtog.col
+pops[pops=="FEM"]<-15
+pops[pops=="PRM" | pops=="NPM"]<-16
+pops[pops=="OFF"]<-17
+plot(both.pca,option="scores",pop=pops)
+plot(both.pca,option="scores",pop=type)
+plot(both.pca,option="qqplot")
+both.props<-round((both.pca$singular.values/sum(both.pca$singular.values))*100,2)
 
-both.gt<-extract.gt.vcf(both)
-rownames(both.gt)<-paste(both.gt$`#CHROM`,
-                         both.gt$ID,as.numeric(as.character(both.gt$POS)),sep=".")
-both.gt<-both.gt[,4:ncol(both.gt)]
-both.gt[both.gt=="./."]<-NA
-both.gt[both.gt=="1/0"]<-"0/1"
-both.gt<-t(both.gt)
-both.gt<-apply(both.gt,2,function(x) { as.numeric(as.factor(x)) })
-rownames(both.gt)<-colnames(both)[9:ncol(both)-1]
-both.cca<-cca(both.gt,na.action=na.exclude)
+##write the vcf file for the merged ddrad and sdrad separate
+od.vcf<-merge(orad,drad,"SNP")
+od.vcf$ID.x<-paste(od.vcf$`#CHROM.x`,as.numeric(as.character(od.vcf$ID.y)),
+                   as.numeric(as.character(od.vcf$POS.y)),sep=".")
+od.vcf<-od.vcf[,!(colnames(od.vcf) %in% 
+                    c("#CHROM.y","POS.y","ID.y","REF.y","ALT.y",
+                      "QUAL.y","FILTER.y","INFO.y","FORMAT.y","SNP"))]
+colnames(od.vcf)[1:9]<-c("#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT")
+od.vcf<-od.vcf[!duplicated(od.vcf$ID),]
+write.table(od.vcf,"merged.sep.vcf",sep='\t',
+            col.names=TRUE,row.names=FALSE,quote=FALSE)
+#do pcadapt on these
+merge.pcadapt<-read.pcadapt("merged.sep.vcf",type="vcfR")
+merge.pca<-pcadapt(merge.pcadapt,K=20)
 
+od.pops<-gsub("\\w+_(\\w{3})\\d+\\w?([[:punct:]].*)?","\\1",colnames(od.vcf)[10:ncol(od.vcf)])
+od.type<-gsub("(\\w+)_(\\w{3})\\d+\\w?([[:punct:]].*)?","\\1",colnames(od.vcf)[10:ncol(od.vcf)])
+od.type[od.type=="orad"]<-sdsep.col
+od.type[od.type=="sample"]<-ddsep.col
+od.pops[od.pops=="FEM"]<-15
+od.pops[od.pops=="PRM" | od.pops=="NPM"]<-16
+od.pops[od.pops=="OFF"]<-17
+plot(merge.pca,option="scores",pop=od.pops) 
+plot(merge.pca,option="scores",pop=od.type)
+od.props<-round((merge.pca$singular.values/sum(merge.pca$singular.values))*100,2)
 
+#Plot them together
+png("sca.pca.png",height=5,width=8,units="in",res=300)
+par(mfrow=c(1,2),oma=c(2,2,2,1),mar=c(2,2,2,1))
+plot(both.pca$scores[,1],both.pca$scores[,2],axes=F,
+     pch=as.numeric(pops),col=alpha(type,0.75),cex=1.5,ylab="",xlab="",
+     xlim=c(-0.05,0.15))
+axis(1,at=seq(-0.2,0.2,0.05),las=1)
+mtext(paste("PC1 (",both.props[1],"%)",sep=""),1,line = 2)
+axis(2,at=seq(-0.2,0.2,0.1),las=1,hadj = 0.6)
+mtext(paste("PC2 (",both.props[2],"%)",sep=""),2,line = 2.1)
+
+plot(merge.pca$scores[,1],merge.pca$scores[,2],axes=F,
+     col=alpha(od.type,0.75),pch=as.numeric(od.pops),cex=1.5,
+     xlim=c(-0.2,0.1),ylim=c(-0.1,0.45),xlab="",ylab="")
+axis(1,at=seq(-0.25,0.15,0.1))
+mtext(paste("PC1 (",od.props[1],"%)",sep=""),1,line = 2)
+axis(2,at=seq(-0.15,0.5,0.2),las=1,hadj=0.7)
+mtext(paste("PC2 (",od.props[2],"%)",sep=""),2,line = 2.1)
+
+par(mfrow=c(1, 1), oma=rep(0, 4), mar=rep(0, 4), new=TRUE)
+plot(0:1, 0:1, type="n", xlab="", ylab="", axes=FALSE)
+legend("top",c("sdRAD Together","ddRAD Together","sdRAD Alone","ddRAD Alone",
+               "Females","Males","Offspring"),
+       pch=c(rep(18,4),15,16,17),bty='n',ncol=4,pt.cex=1.5,
+       col=c(alpha(sdtog.col,0.75),alpha(ddtog.col,0.75),alpha(sdsep.col,0.75),
+             alpha(ddsep.col,0.75),rep(alpha("darkgrey",0.75),3)))
+dev.off()
+
+##### ALLELE FREQUENCY SPECTRA #####
+ddsep.afs<-do.call(rbind,apply(drad,1,calc.afs.vcf))
+sdsep.afs<-do.call(rbind,apply(orad,1,calc.afs.vcf))
+ddtog.afs<-do.call(rbind,apply(both[,c(locus.info,d.ind)],1,calc.afs.vcf))
+sdtog.afs<-do.call(rbind,apply(both[,c(locus.info,o.ind)],1,calc.afs.vcf))
+
+ddtog.afs<-do.call(rbind,ddtog.afs)
+sdtog.afs<-do.call(rbind,sdtog.afs)
+
+#PLOT HISTOGRAMS OF AFS
+png("joint_afs.png",height=5,width=8,units="in",res=300)
+par(mfrow=c(1,2),oma=c(1,1,1,1),mar=c(2,2,2,2))
+par(mar=c(2,3,2,1))
+hist(sdtog.afs$RefFreq, col=alpha(sdtog.col,0.5), breaks=seq(0,1,0.05),ylim=c(0,40000),
+     main="sdRAD-seq",axes=F,xlim=c(0,1),border=alpha(sdtog.col,0.5))
+hist(sdsep.afs$RefFreq,col=alpha(sdsep.col,0.5), add=T,breaks=seq(0,1,0.05),density=20)
+legend("topleft",c("Assembled Together", "Assembled Separately"),
+       fill=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)),bty='n',
+       density=c(NA,20),border=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)))
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+
+par(mar=c(2,2,2,2))
+hist(ddtog.afs$RefFreq, col=alpha(ddtog.col,0.5), ylim=c(0,10000),
+     breaks=seq(0,1,0.05),border=alpha(ddtog.col,0.5),
+     main="ddRAD-seq",axes=F)
+hist(ddsep.afs$RefFreq,col=alpha(ddsep.col,0.5), add=T,breaks=seq(0,1,0.05),density=20)
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+legend("topleft",c("Assembled Together", "Assembled Separately"),
+       fill=c(alpha(ddtog.col,0.5),alpha(ddsep.col,0.5)),bty='n',density = c(NA,20),
+       border=c(alpha(ddtog.col,0.5),alpha(ddsep.col,0.5)))
+mtext("Reference Allele Frequency",1,outer=T,line=-1)
+mtext("Number of SNPs",2,outer = T)
+dev.off()
 ##############################DRAD DIFFERENT PLATES##################################
 
 #d.cov<-do.call("rbind",apply(drad,1,vcf.cov.loc,subset=d.ind))
