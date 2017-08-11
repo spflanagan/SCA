@@ -2057,7 +2057,72 @@ dev.off()
 
 
 ####### GBSTOOLS ########
-gbstools.vcf<-parse.vcf("both.lrt.vcf")
+both.gbst<-parse.vcf("both.lrt.vcf")
+orad.gbst<-parse.vcf("orad.lrt.vcf")
+drad.gbst<-parse.vcf("drad.lrt.vcf")
+both.gbst$SNP<-paste(both.gbst$`#CHROM`,both.gbst$POS,sep=".")
+orad.gbst$SNP<-paste(orad.gbst$`#CHROM`,orad.gbst$POS,sep=".")
+drad.gbst$SNP<-paste(drad.gbst$`#CHROM`,drad.gbst$POS,sep=".")
+
+dropout.count.mean<-function(lrt.vcf,ind.rows){
+  vcf.dcs<-apply(lrt.vcf,1,function(snp.row){
+    dcs<-unlist(lapply(snp.row[ind.rows],function(x){
+      dc<-unlist(strsplit(x,":"))
+      dc<-dc[[length(dc)]]
+      return(dc)
+    }))
+    if(length(unique(dcs))==1 & unique(dcs)[1]==".") { rsm<-NA } else{
+      dcs<-dcs[dcs!="."]
+      rsm<-mean(as.numeric(dcs))
+    }
+    return(rsm)
+  })
+  return(vcf.dcs)
+}
+
+orad.dcs<-dropout.count.mean(orad.gbst[orad.gbst$SNP %in% od.loci$SNP,],o.ind)
+drad.dcs<-dropout.count.mean(drad.gbst[drad.gbst$SNP %in% od.loci$SNP,],d.ind)
+
+bo.dcs<-dropout.count.mean(both.gbst,o.ind)
+bd.dcs<-dropout.count.mean(both.gbst,d.ind)
+
+par(mfrow=c(1,2),oma=c(1,1,1,1),mar=c(2,2,2,2))
+par(mar=c(2,3,2,1))
+hist(bo.dcs, col=alpha(sdtog.col,0.5), breaks=seq(-0.025,1.925,0.05),ylim=c(0,30000),
+     main="",axes=F,xlim=c(0,2),border=alpha(sdtog.col,0.5))
+hist(bd.dcs,col=ddtog.col, add=T,seq(-0.025,1.925,0.05),density=20)
+legend("top",c("sdRAD-seq Assembled Together", "ddRAD-seq Assembled Together"),
+       fill=c(alpha(sdtog.col,0.5),alpha(ddtog.col,0.5)),bty='n',
+       density=c(NA,20),border=c(alpha(sdtog.col,0.5),alpha(ddtog.col,0.5)))
+axis(1,pos=0)
+axis(2,pos=-0.025,las=1)
+
+par(mar=c(2,2,2,2))
+hist(orad.dcs, col=alpha(sdsep.col,0.5), ylim=c(0,12000),
+     breaks=seq(-0.025,1.925,0.05),border=alpha(sdsep.col,0.5),xlim=c(0,2),
+     main="",axes=F)
+hist(drad.dcs,col=alpha(ddsep.col,0.5), add=T,breaks=seq(-0.025,1.925,0.05),density=20)
+axis(1,pos=0)
+axis(2,pos=-0.025,las=1)
+legend("top",c("sdRAD-seq Assembled Separately", "ddRAD-seq Assembled Separately"),
+       fill=c(alpha(sdsep.col,0.5),alpha(ddsep.col,0.5)),bty='n',density = c(NA,20),
+       border=c(alpha(sdsep.col,0.5),alpha(ddsep.col,0.5)))
+mtext("Mean Dropout Allele Counts",1,outer=T,line=-1)
+mtext("Number of SNPs",2,outer = T)
+
+##Look at Ref/Alt relative to allele freqs.
+#need the allele freqs
+drad.afs<-do.call(rbind,apply(drad[drad$SNP %in% od.loci$SNP,],1,calc.afs.vcf))
+drad.afs$SNP<-paste(drad.afs$Chrom,as.numeric(as.character(drad.afs$Pos)),sep=".")
+orad.afs<-do.call(rbind,apply(orad[orad$SNP %in% od.loci$SNP,],1,calc.afs.vcf))
+orad.afs$SNP<-paste(orad.afs$Chrom,as.numeric(as.character(orad.afs$Pos)),sep=".")
+dbot.afs<-do.call(rbind,apply(both[,c(locus.info,d.ind)],1,calc.afs.vcf))
+dbot.afs$SNP<-paste(dbot.afs$Chrom,as.numeric(as.character(dbot.afs$Pos)),sep=".")
+obot.afs<-do.call(rbind,apply(both[,c(locus.info,o.ind)],1,calc.afs.vcf))
+obot.afs$SNP<-paste(obot.afs$Chrom,as.numeric(as.character(obot.afs$Pos)),sep=".")
+
+#compare to coverage
+dsep.ra<-merge(drad.afs,d.cov,by="SNP")
 
 
 ##############################DRAD DIFFERENT PLATES##################################
