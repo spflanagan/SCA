@@ -2054,6 +2054,12 @@ legend("topleft",c("Assembled Together", "Assembled Separately"),
 mtext("Reference Allele Frequency",1,outer=T,line=-1)
 mtext("Number of SNPs",2,outer = T)
 dev.off()
+
+
+####### GBSTOOLS ########
+gbstools.vcf<-parse.vcf("both.lrt.vcf")
+
+
 ##############################DRAD DIFFERENT PLATES##################################
 
 #d.cov<-do.call("rbind",apply(drad,1,vcf.cov.loc,subset=d.ind))
