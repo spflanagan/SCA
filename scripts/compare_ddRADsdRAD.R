@@ -504,6 +504,7 @@ spf.vioplot <- function(x,...,range=1.5,h=NULL,ylim=NULL,names=NULL, horizontal=
   invisible (list( upper=upper, lower=lower, median=med, q1=q1, q3=q3))
 }
 #################SET COLORS#################
+library(scales)
 ddtog.col<-"#f4a582"
 ddsep.col<-"#ca0020"
 sdtog.col<-"#92c5de"
@@ -2122,9 +2123,82 @@ obot.afs<-do.call(rbind,apply(both[,c(locus.info,o.ind)],1,calc.afs.vcf))
 obot.afs$SNP<-paste(obot.afs$Chrom,as.numeric(as.character(obot.afs$Pos)),sep=".")
 
 #compare to coverage
-dsep.ra<-merge(drad.afs,d.cov,by="SNP")
+dsep.ra<-merge(drad.afs,d.cov,by="SNP")                                   #neg: more ref than alt
+dsep.ra$FreqRefDiff<-(dsep.ra$RefFreq/dsep.ra$AltFreq)-dsep.ra$AvgCovRatio #pos: more alt than ref
+osep.ra<-merge(orad.afs,o.cov,by="SNP")
+osep.ra$FreqRefDiff<-(osep.ra$RefFreq/osep.ra$AltFreq)-osep.ra$AvgCovRatio
+dbot.ra<-merge(dbot.afs,bd.cov,by="SNP")
+dbot.ra$FreqRefDiff<-(dbot.ra$RefFreq/dbot.ra$AltFreq)-dbot.ra$AvgCovRatio
+dbot.ra$FreqRefDiff[dbot.ra$AltFreq==0]<-1-dbot.ra$AvgCovRatio[dbot.ra$AltFreq==0]
+obot.ra<-merge(obot.afs,bo.cov,by="SNP")
+obot.ra$FreqRefDiff<-(obot.ra$RefFreq/obot.ra$AltFreq)-obot.ra$AvgCovRatio
+obot.ra$FreqRefDiff[obot.ra$AltFreq==0]<-1-obot.ra$AvgCovRatio[obot.ra$AltFreq==0]
+
+#violinplots
+par(mfrow=c(2,4),oma=c(2,2,1,1),mar=c(1,2,1,0.1))
+spf.vioplot(bo.dcs[!is.na(bo.dcs)], col=sdtog.col,plot.axes=FALSE,ylim=c(0,1.5))
+axis(2,at=seq(0,2,0.5),las=1,hadj=0.5)
+mtext("Mean Dropout Allele Counts",2,cex=0.75,line=2)
+spf.vioplot(bd.dcs[!is.na(bd.dcs)],col=ddtog.col,plot.axes=FALSE,ylim=c(0,1.5))
+#axis(2,las=1,at=seq(0,1.5,0.5),hadj=0.5)
+spf.vioplot(orad.dcs[!is.na(orad.dcs)], col=sdsep.col,plot.axes = FALSE,ylim=c(0,1.5))
+#axis(2,las=1,at=seq(0,1.2,0.5),hadj=0.5)
+spf.vioplot(drad.dcs[!is.na(drad.dcs)],col=ddsep.col,plot.axes=FALSE,ylim=c(0,1.5))
+#axis(2,at=seq(0,1,0.5),las=1,hadj=0.5)
+
+spf.vioplot(obot.ra$FreqRefDiff,col=sdtog.col,plot.axes = FALSE,ylim=c(-300,20))
+axis(2,at=seq(-300,20,20),las=1,hadj=0.5)
+mtext("sdRAD-seq\nAnalyzed Together",1,outer=FALSE,cex=0.75,line=1)
+mtext("Difference Between Allele Frequency\nand Coverage Alt/Ref Ratios",2,cex=0.75,line=1.8)
+spf.vioplot(dbot.ra$FreqRefDiff,col=ddtog.col,plot.axes = FALSE,ylim=c(-300,20))
+#axis(2,at=seq(-300,50,50),las=1,hadj=0.75)
+mtext("ddRAD-seq\nAnalyzed Together",1,outer=FALSE,cex=0.75,line=1)
+spf.vioplot(osep.ra$FreqRefDiff,col=sdsep.col,plot.axes = FALSE,ylim=c(-300,20))
+#axis(2,at=seq(-40,20,10),las=1,hadj=0.6)
+mtext("sdRAD-seq\nAnalyzed Separately",1,outer=FALSE,cex=0.75,line=1)
+spf.vioplot(dsep.ra$FreqRefDiff,col=ddsep.col,plot.axes = FALSE,ylim=c(-300,20))
+#axis(2,at=seq(-40,20,10),las=1,hadj=0.5)
+mtext("ddRAD-seq\nAnalyzed Separately",1,outer=FALSE,cex=0.75,line=1)
+
+#stats tests
+both.ra<-merge(obot.ra,dbot.ra,by="SNP")
+wilcox.test(both.ra$FreqRefDiff.x,both.ra$FreqRefDiff.y,paired=T) #p = 0.06704
+sep.ra<-merge(osep.ra,dsep.ra,by="SNP")
+wilcox.test(sep.ra$FreqRefDiff.x,sep.ra$FreqRefDiff.y,paired=T)#p=0.0008286
+#unpaired
+wilcox.test(obot.ra$FreqRefDiff,dbot.ra$FreqRefDiff) #p=0.03602
+wilcox.test(osep.ra$FreqRefDiff,dsep.ra$FreqRefDiff) #p=0.002723
+
+#are they different between analysis methods
+wilcox.test(obot.ra$FreqRefDiff,osep.ra$FreqRefDiff) #p=0.5415
+wilcox.test(dbot.ra$FreqRefDiff,dsep.ra$FreqRefDiff) #p=0.1964
+
+#gbstools
+wilcox.test(orad.dcs,drad.dcs) #p < 2.2E-16
+wilcox.test(bo.dcs,bd.dcs) #p<2.2E-16
+
+#between analysis methods
+wilcox.test(orad.dcs,bo.dcs) #p =2.172E-12
+wilcox.test(drad.dcs,bd.dcs) #p<2.2E-16
 
 
+ratio.comp<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(osep.ra)),rep("ddRAD",nrow(dsep.ra)),
+                                   rep("sdRAD",nrow(obot.ra)),rep("ddRAD",nrow(dbot.ra))), 
+                     Assembly=c(rep("Alone",nrow(osep.ra)),rep("Alone",nrow(dsep.ra)),
+                                rep("Together",nrow(obot.ra)),rep("Together",nrow(dbot.ra))),
+                     RatioDiff=c(osep.ra$FreqRefDiff,dsep.ra$FreqRefDiff,
+                                   obot.ra$FreqRefDiff,dbot.ra$FreqRefDiff))
+
+dcs.comp<-data.frame(LibraryPrep=c(rep("sdRAD",length(orad.dcs)),rep("ddRAD",length(drad.dcs)),
+                                     rep("sdRAD",length(bo.dcs)),rep("ddRAD",length(bd.dcs))), 
+                       Assembly=c(rep("Alone",length(orad.dcs)),rep("Alone",length(drad.dcs)),
+                                  rep("Together",length(bo.dcs)),rep("Together",length(bd.dcs))),
+                       DropCount=c(orad.dcs,drad.dcs,bo.dcs,bd.dcs))
+
+summary(aov(ratio.comp$RatioDiff~ratio.comp$LibraryPrep*ratio.comp$Assembly))
+TukeyHSD(aov(ratio.comp$RatioDiff~ratio.comp$LibraryPrep*ratio.comp$Assembly))
+summary(aov(dcs.comp$DropCount~dcs.comp$LibraryPrep*dcs.comp$Assembly))
+TukeyHSD(aov(dcs.comp$DropCount~dcs.comp$LibraryPrep*dcs.comp$Assembly))
 ##############################DRAD DIFFERENT PLATES##################################
 
 #d.cov<-do.call("rbind",apply(drad,1,vcf.cov.loc,subset=d.ind))
