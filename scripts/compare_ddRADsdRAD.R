@@ -6,6 +6,7 @@
 rm(list=ls())
 library(ggplot2)
 library(sm)
+library(scales)
 library(devtools)
 install_github("spflanagan/gwscaR")
 library(gwscaR)
@@ -525,18 +526,6 @@ viasel.col<-"goldenrod"
 #write.table(drad.sub,"drad.sub.vcf",quote=F,sep="\t",col.names = T,row.names=F)
 #orad.sub<-choose.one.snp(orad)
 #write.table(orad.sub,"orad.sub.vcf",quote=F,sep="\t",col.names = T,row.names=F)
-drad<-parse.vcf("drad.sub.vcf")
-orad<-parse.vcf("orad.sub.vcf")
-both<-parse.vcf("both.sub.vcf")
-drad$SNP<-paste(drad$`#CHROM`,as.numeric(drad$POS),sep=".")
-orad$SNP<-paste(orad$`#CHROM`,as.numeric(orad$POS),sep=".")
-both$SNP<-paste(both$`#CHROM`,as.numeric(both$POS),sep=".")
-locus.info<-c("#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT","SNP")
-o.ind<-grep("orad",colnames(both),value=T)
-d.ind<-grep("sample",colnames(both),value=T)
-
-
-
 #plink subset files - don't use
 #dsub<-read.delim("drad.subset.raw",sep=" ")
 #dmap<-read.delim("drad.map",header=F)
@@ -551,6 +540,17 @@ d.ind<-grep("sample",colnames(both),value=T)
 #colnames(omap)<-c("Chrom","oLocus","dist","Pos","SNP")
 #colnames(dmap)<-c("Chrom","dLocus","dist","Pos","SNP")
 #colnames(bmap)<-c("Chrom","Locus","dist","Pos","SNP")
+drad<-parse.vcf("drad.sub.vcf")
+orad<-parse.vcf("orad.sub.vcf")
+both<-parse.vcf("both.sub.vcf")
+drad$SNP<-paste(drad$`#CHROM`,as.numeric(drad$POS),sep=".")
+orad$SNP<-paste(orad$`#CHROM`,as.numeric(orad$POS),sep=".")
+both$SNP<-paste(both$`#CHROM`,as.numeric(both$POS),sep=".")
+locus.info<-c("#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT","SNP")
+o.ind<-grep("orad",colnames(both),value=T)
+d.ind<-grep("sample",colnames(both),value=T)
+
+
 #################ANALYSIS#################
 ##ran these already--read in files##
 #bo.cov<-do.call("rbind",apply(both,1,vcf.cov.loc,subset=o.ind))
@@ -597,313 +597,16 @@ bd.cov<-bd.cov[bd.cov$SNP %in% both$SNP & bd.cov$SNP %in% drad$SNP,]
 o.cov<-o.cov[o.cov$SNP %in% orad$SNP,]
 d.cov<-d.cov[d.cov$SNP %in% drad$SNP,]
 loc.cov<-loc.cov[loc.cov$SNP %in% orad$SNP & loc.cov$SNP %in% drad$SNP,]
-####Average Coverage####
-#compare sd vs dd
-lc.comp<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(o.cov)),rep("ddRAD",nrow(d.cov)),
-    rep("sdRAD",nrow(bo.cov)),rep("ddRAD",nrow(bd.cov))), 
-  Assembly=c(rep("Alone",nrow(o.cov)),rep("Alone",nrow(d.cov)),
-             rep("Together",nrow(bo.cov)),rep("Together",nrow(bd.cov))),
-  AvgCovRatio=c(o.cov$AvgCovRatio,d.cov$AvgCovRatio,bo.cov$AvgCovRatio,bd.cov$AvgCovRatio),
-  AvgCovTotal=c(o.cov$AvgCovTotal,d.cov$AvgCovTotal,bo.cov$AvgCovTotal,bd.cov$AvgCovTotal))
-#NumReadsPerInd=c(oc$NumReadsAlone,dc$NumReadsAlone,oc$NumReadsTogether,dc$NumReadsTogether)
-
-#total coverage
-summary(aov(log(lc.comp$AvgCovTotal)~lc.comp$LibraryPrep*lc.comp$Assembly))
-TukeyHSD(aov(log(lc.comp$AvgCovTotal)~lc.comp$LibraryPrep*lc.comp$Assembly))#use this!
-summary(lm(log(lc.comp$AvgCovTotal)~lc.comp$LibraryPrep*lc.comp$Assembly))
-boxplot(log(lc.comp$AvgCovTotal)~lc.comp$LibraryPrep*lc.comp$Assembly)
-#ref/alt ratio
-summary(aov(lc.comp$AvgCovRatio~lc.comp$LibraryPrep*lc.comp$Assembly))
-TukeyHSD(aov(log(lc.comp$AvgCovRatio+1)~lc.comp$LibraryPrep*lc.comp$Assembly))#use this!
-summary(lm(lc.comp$AvgCovRatio~lc.comp$LibraryPrep*lc.comp$Assembly))
-boxplot(log(lc.comp$AvgCovRatio+1)~lc.comp$LibraryPrep*lc.comp$Assembly)
-
-####PLOT: Coverage comparison boxplot####
-jpeg("CoverageComparisonBoxplot.jpeg",height=7,width=7,units="in",res=300)
-par(mfrow=c(2,1),oma=c(1,2,1,1),mar=c(2,2,2,2))
-boxplot(log(lc.comp$AvgCovRatio+1)~lc.comp$LibraryPrep*lc.comp$Assembly,names=F,
-        xaxt='n',col=c("cadetblue","coral1"))
-axis(1,at=c(1.5,3.5),labels=c("Alone","Together"))
-mtext("log(Avg Ratio Num Reads\nRef/Alt)",2,outer=F,line=2)
-legend("topleft",c("sdRAD","ddRAD"),col=c("cadetblue","coral1"),pch=15,bty='n')
-boxplot(log(lc.comp$AvgCovTotal+1)~lc.comp$LibraryPrep*lc.comp$Assembly,names=F,
-        xaxt='n',col=c("cadetblue","coral1"))
-mtext("log(Avg Num Reads\nPer Individual Per Locus)",2,outer=F,line=2)
-axis(1,at=c(1.5,3.5),labels=c("Alone","Together"))
-dev.off()
-
-####Coverage by individual--assembled in one####
-##Generate the dataset##
-#o.icov<-as.data.frame(do.call("rbind",apply(both[,o.ind],2,vcf.cov.ind)))
-#o.icov$Method<-rep("oRAD",nrow(o.icov))
-#d.icov<-as.data.frame(do.call("rbind",apply(both[,d.ind],2,vcf.cov.ind)))
-#d.icov$Method<-rep("dRAD",nrow(d.icov))
-#ind.cov<-as.data.frame(rbind(o.icov,d.icov))
-#ind.cov$NumReads<-as.numeric(ind.cov$AvgCovTot)*as.numeric(ind.cov$NumPresent)
-#ic<-as.data.frame(apply(ind.cov,2,as.numeric))
-#rownames(ic)<-rownames(ind.cov)
-#ic$Method<-as.factor(ind.cov$Method)
-##Coverage by individual--assembled separately
-#orad.icov<-as.data.frame(do.call("rbind",apply(orad[,10:ncol(orad)],2,vcf.cov.ind)))
-#oic<-apply(orad.icov,2,as.numeric)
-#rownames(oic)<-rownames(orad.icov)
-#drad.icov<-as.data.frame(do.call("rbind",apply(drad[,10:ncol(drad)],2,vcf.cov.ind)))
-#dic<-apply(drad.icov,2,as.numeric)
-#rownames(dic)<-rownames(drad.icov)
-##write these to file so I can easily pick back up later
-#write.table(oic,"orad_coverage.csv",quote=T,row.names=T,col.names=T,sep='\t')
-#write.table(dic,"drad_coverage.csv",quote=T,row.names=T,col.names=T,sep='\t')
-#write.table(ic,"both_coverage.csv",quote=T,row.names=T,col.name=T,sep='\t')
-oic<-read.delim("orad_coverage.csv")
-dic<-read.delim("drad_coverage.csv")
-ic<-read.delim("both_coverage.csv")
-#subset
-o.icov<-as.data.frame(do.call("rbind",apply(both.sub[,o.ind],2,vcf.cov.ind)))
-o.icov$Method<-rep("oRAD",nrow(o.icov))
-d.icov<-as.data.frame(do.call("rbind",apply(both.sub[,d.ind],2,vcf.cov.ind)))
-d.icov$Method<-rep("dRAD",nrow(d.icov))
-ind.cov<-as.data.frame(rbind(o.icov,d.icov))
-ind.cov$NumReads<-as.numeric(ind.cov$AvgCovTot)*as.numeric(ind.cov$NumPresent)
-ic<-as.data.frame(apply(ind.cov,2,as.numeric))
-rownames(ic)<-rownames(ind.cov)
-ic$Method<-as.factor(ind.cov$Method)
-#Coverage by individual--assembled separately
-orad.icov<-as.data.frame(do.call("rbind",apply(orad.sub[,10:ncol(orad.sub)],2,vcf.cov.ind)))
-oic<-apply(orad.icov,2,as.numeric)
-rownames(oic)<-rownames(orad.icov)
-drad.icov<-as.data.frame(do.call("rbind",apply(drad.sub[,10:ncol(drad.sub)],2,vcf.cov.ind)))
-dic<-apply(drad.icov,2,as.numeric)
-rownames(dic)<-rownames(drad.icov)
-#write these to file so I can easily pick back up later
-write.table(oic,"orad_coverage_subset.csv",quote=T,row.names=T,col.names=T,sep='\t')
-write.table(dic,"drad_coverage_subset.csv",quote=T,row.names=T,col.names=T,sep='\t')
-write.table(ic,"both_coverage_subset.csv",quote=T,row.names=T,col.name=T,sep='\t')
-
-oic<-read.csv("orad_coverage_subset.csv",row.names=1,header=T,sep='\t')
-dic<-read.csv("drad_coverage_subset.csv",row.names=1,header=T,sep='\t')
-ic<-read.csv("both_coverage_subset.csv",row.names=1,header=T,sep='\t')
-
-ic.o<-ic[rownames(ic) %in% rownames(oic),]
-ic.d<-ic[rownames(ic) %in% rownames(dic),]
-
-mo<-merge(ic.o,oic,by=0)
-md<-merge(ic.d,dic,by=0)
-oc<-data.frame(NumReadsTogether=mo$NumReads.x,NumReadsAlone=mo$NumReads.y,row.names=mo$Row.names)
-dc<-data.frame(NumReadsTogether=md$NumReads.x,NumReadsAlone=md$NumReads.y,row.names=md$Row.names)
-t.test(oc$NumReadsTogether,oc$NumReadsAlone,paired=T,alternative="less")
-t.test(dc$NumReadsTogether,dc$NumReadsAlone,paired=T,alternative="greater")
-wilcox.test(oc$NumReadsTogether,oc$NumReadsAlone,paired=T,alternative="less")
-wilcox.test(dc$NumReadsTogether,dc$NumReadsAlone,paired=T,alternative="greater")
-oic<-as.data.frame(oic)
-dic<-as.data.frame(dic)
-oic<-oic[o.ind,]#they had SNP as a row
-dic<-dic[d.ind,]
-ind.cov<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(oic)),rep("ddRAD",nrow(dic)),
-    rep("sdRAD",nrow(oic)),rep("ddRAD",nrow(dic))), 
-  Assembly=c(rep("Alone",nrow(oic)),rep("Alone",nrow(dic)),
-    rep("Together",nrow(ic))),
-  NumReads=c(oic$NumReads,dic$NumReads,ic$NumReads),
-  NumMissing=c(oic$NumMissing,dic$NumMissing,ic$NumMissing),
-  NumPresent=c(oic$NumPresent,dic$NumPresent,ic$NumPresent))
-
-summary(lm(log(ind.cov$NumReads)~ind.cov$LibraryPrep*ind.cov$Assembly))
-summary(glm(log(ind.cov$NumReads)~ind.cov$LibraryPrep*ind.cov$Assembly))
-summary(glm(cbind(ind.cov$NumMissing,ind.cov$NumPresent)~ind.cov$LibraryPrep*ind.cov$Assembly,family=binomial))
-summary(aov(log(ind.cov$NumReads)~ind.cov$LibraryPrep*ind.cov$Assembly))
-TukeyHSD(aov(log(ind.cov$NumReads)~ind.cov$LibraryPrep*ind.cov$Assembly))
-
-####PLOT: Fig 1. Coverage Assembly Method Comp####
-jpeg("CoverageAssemblyMethodComp_Subset_rev.jpeg",height=10.5,width=8,units="in",res=300)
-par(mfrow=c(3,2),oma=c(1,1,1,1),mar=c(2,2,2,2))
-par(mar=c(2,3,2,1))
-hist(oc$NumReadsTogether, col=alpha(sdtog.col,0.5), ylim=c(0,150), breaks=seq(0,3500000,250000),
-     main="sdRAD-seq",axes=F,xlim=c(0,3500000),border=alpha(sdtog.col,0.5))
-hist(oc$NumReadsAlone,col=alpha(sdsep.col,0.5), add=T,breaks=seq(0,3500000,250000),density=20)
-legend("topright",c("Assembled Together", "Assembled Separately"),
-       fill=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)),bty='n',
-       density=c(NA,20),border=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)))
-axis(1,pos=0)
-axis(2,pos=0,las=1)
-mtext("Number of Individuals",2.5,outer=F,line=2,cex=0.75)
-par(mar=c(2,2,2,2))
-hist(dc$NumReadsTogether, col=alpha(ddtog.col,0.5), ylim=c(0,150), 
-     breaks=seq(0,1500000,100000),border=alpha(ddtog.col,0.5),
-     main="ddRAD-seq",axes=F)
-hist(dc$NumReadsAlone,col=alpha(ddsep.col,0.5), add=T,breaks=seq(0,1500000,100000),density=20)
-axis(1,pos=0)
-axis(2,pos=0,las=1)
-legend("topright",c("Assembled Together", "Assembled Separately"),
-       fill=c(alpha(ddtog.col,0.5),alpha(ddsep.col,0.5)),bty='n',density = c(NA,20),
-       border=c(alpha(ddtog.col,0.5),alpha(ddsep.col,0.5)))
-mtext("Total Number of Reads",1,outer=T,cex=0.75,line=-52)#-29 for R
-
-par(mar=c(2,3,2,1))
-hist(log(bo.cov$AvgCovTotal),col=alpha(sdtog.col,0.5),axes=F,xlab="",ylab="",main="",
-     xlim=c(0,10),ylim=c(0,80000),breaks=seq(0,10,0.5),border=alpha(sdtog.col,0.5))
-hist(log(o.cov$AvgCovTotal), col=alpha(sdsep.col,0.5), add=T,
-     breaks=seq(0,10,0.5),density=20)
-axis(1,pos=0)
-axis(2,pos=0,las=1)
-mtext("Number of Loci",2,outer=F,line=2.5,cex=0.75)
-par(mar=c(2,2,2,2))
-hist(log(bd.cov$AvgCovTotal), col=alpha(ddtog.col,0.5),main="",axes=F,ylab="",xlab="",
-     xlim=c(0,10),ylim=c(0,80000),breaks=seq(0,10,0.5),border=alpha(ddtog.col,0.5))
-hist(log(d.cov$AvgCovTotal), col=alpha(ddsep.col,0.5), add=T,
-     breaks=seq(0,10,0.5),density=20)
-axis(1,pos=0)
-axis(2,pos=0,las=1)
-mtext("ln(Average Number of Reads Per Individual Per SNP)",1,outer=T,line=-26,cex=0.75)#-15 for R
-
-par(mar=c(2,3,2,1))
-hist(log(bo.cov$AvgCovRatio),col=alpha(sdtog.col,0.5),main="",axes=F,
-     xlab="",ylab="",breaks=seq(-5,5,0.5),ylim=c(0,30000),xlim=c(-5,5),border=alpha(sdtog.col,0.5))
-hist(log(o.cov$AvgCovRatio), col=alpha(sdsep.col,0.5), add=T,
-     breaks=seq(-5,5.5,0.5),density=20)
-axis(1,pos=0)
-axis(2,pos=-5,las=1)
-mtext("Number of Loci",2,outer=F,line=2.5,cex=0.75)
-par(mar=c(2,2,2,2))
-hist(log(bd.cov$AvgCovRatio), col=alpha(ddtog.col,0.5),main="",axes=F,
-     ylab="",xlab="",breaks=seq(-4,6,0.5),ylim=c(0,30000),xlim=c(-2,6),border=alpha(ddtog.col,0.5))
-hist(log(d.cov$AvgCovRatio), col=alpha(ddsep.col,0.5), add=T,breaks=seq(-4,6,0.5),density=20)
-axis(1,pos=0)
-axis(2,pos=-2,las=1)
-mtext("ln(Average Number of Reads in Ref/Avg Number of Reads in Alt)",1,outer=T,cex=0.75)
-dev.off()
-
-###
-jpeg("CoverageAssemblyMethodComp_Subset_rev_small.jpeg",height=10.5,width=8,units="in",res=300)
-par(mfrow=c(3,2),oma=c(1,1,1,1),mar=c(2,2,2,2))
-par(mar=c(2,3,2,1))
-hist(oc$NumReadsTogether, col=alpha(sdtog.col,0.5), ylim=c(0,50),
-     breaks=seq(0,3500000,25000),border=alpha(sdtog.col,0.5),
-     main="sdRAD-seq",axes=F,xlim=c(0,3500000))
-hist(oc$NumReadsAlone,colalpha(sdsep.col,0.5), add=T,breaks=seq(0,3500000,25000),density=20)
-axis(1,pos=0)
-axis(2,pos=0,las=1)
-mtext("Number of Individuals",2.5,outer=F,line=2,cex=0.75)
-par(mar=c(2,2,2,2))
-hist(dc$NumReadsTogether, col=alpha(ddtog.col,0.5), ylim=c(0,50), 
-     breaks=seq(0,1500000,10000),border=alpha(ddtog.col,0.5),
-     main="ddRAD-seq",axes=F)
-hist(dc$NumReadsAlone,col=alpha(ddsep.col,0.5), add=T,breaks=seq(0,1500000,10000),density=20)
-axis(1,pos=0)
-axis(2,pos=0,las=1)
-legend("topright",c("Assembled Together", "Assembled Separately"),
-       fill=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)),bty='n',
-       density=c(NA,20),border=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)))
-mtext("Total Number of Reads",1,outer=T,cex=0.75,line=-52)#-29 for R
-
-par(mar=c(2,3,2,1))
-hist(bo.cov$AvgCovTotal,col=alpha(sdtog.col,0.5),axes=F,xlab="",ylab="",main="",
-     xlim=c(0,20080),ylim=c(0,150000),breaks=seq(0,21000,100),border=alpha(sdtog.col,0.5))
-hist(o.cov$AvgCovTotal, col=alpha(sdsep.col,0.5), add=T,breaks=seq(0,21000,100),density=20)
-axis(1,pos=0)
-axis(2,pos=0,las=1)
-mtext("Number of Loci",2,outer=F,line=2.5,cex=0.75)
-par(mar=c(2,2,2,2))
-hist(bd.cov$AvgCovTotal, col=alpha(ddtog.col,0.5),main="",axes=F,ylab="",xlab="",
-     xlim=c(0,2450),ylim=c(0,150000),breaks=seq(0,2600,15),border=alpha(ddtog.col,0.5))
-hist(d.cov$AvgCovTotal, col=alpha(ddsep.col,0.5), add=T,breaks=seq(0,2600,15),density=20)
-axis(1,pos=0)
-axis(2,pos=0,las=1)
-mtext("Average Number of Reads Per Individual Per SNP",1,outer=T,line=-27,cex=0.75)#-15 for R
-
-par(mar=c(2,3,2,1))
-hist(bo.cov$AvgCovRatio,col=alpha(sdtog.col,0.5),main="",axes=F,
-     xlab="",ylab="",breaks=seq(0,600,3.5),ylim=c(0,50000),xlim=c(0,565),border=alpha(sdtog.col,0.5))
-hist(o.cov$AvgCovRatio, col=alpha(sdsep.col,0.5), add=T,breaks=seq(0,600,3.5),density=20)
-axis(1,pos=0)
-axis(2,pos=-5,las=1)
-mtext("Number of Loci",2,outer=F,line=2.5,cex=0.75)
-par(mar=c(2,2,2,2))
-hist(bd.cov$AvgCovRatio, col=alpha(ddtog.col,0.5),main="",axes=F,
-     ylab="",xlab="",breaks=seq(0,2000,12.5),ylim=c(0,50000),xlim=c(0,2000),border=alpha(ddtog.col,0.5))
-hist(d.cov$AvgCovRatio, col=alpha(ddsep.col,0.5), add=T,breaks=seq(0,2000,12.5),density=20)
-axis(1,pos=0)
-axis(2,pos=-2,las=1)
-mtext("Average Number of Reads in Ref/Avg Number of Reads in Alt",1,outer=T,cex=0.75)
-dev.off()
-####Variance in coverage####
-#assembled separately
-hist(log(o.cov$CovVariance),col=alpha("cadetblue",0.5))
-hist(log(d.cov$CovVariance),col=alpha("coral1",0.5),add=T)
-boxplot(log(o.cov$CovVariance+1),log(d.cov$CovVariance+1),col=c("cadetblue","coral1"),
-        names=c("sdRAD","ddRAD"),ylab="Variance in Coverage",ylim=c(0,22))
-text(x=c(1,2),y=c(21,21),c("250425","69109"))
-wilcox.test(log(o.cov$CovVariance+1),log(d.cov$CovVariance+1),"greater")
-
-d.sub<-d.cov[sample(nrow(d.cov),30000,replace=F),]
-o.sub<-o.cov[sample(nrow(o.cov),30000,replace=F),]
-wilcox.test(log(o.sub$CovVariance+1),log(d.sub$CovVariance+1),"greater")
-boxplot(log(o.sub$CovVariance+1),log(d.sub$CovVariance+1),col=c("cadetblue","coral1"),
-        names=c("sdRAD","ddRAD"),ylab="Variance in Coverage")
-
-#assembled together
-wilcox.test(bo.cov$CovVariance,bd.cov$CovVariance,paired=T,"less")
-
-
-###Heterozygosity
-#assembled separately
-hist(o.cov$PropHet,col=alpha("cadetblue",0.5))
-hist(d.cov$PropHet,col=alpha("coral1",0.5),add=T)
-boxplot(o.cov$PropHet,d.cov$PropHet,col=c("cadetblue","coral1"),
-        names=c("sdRAD","ddRAD"),ylab="Proportion Heterozygous")
-text(x=c(1,2),y=c(21,21),c("250425","69109"))
-wilcox.test(o.cov$PropHet,d.cov$PropHet,"less")
-
-#what about in 30 males 30 females from ddRAD and the sdRAD?
-d.mal<-colnames(drad)[grep("PRM",colnames(drad))]
-d.fem<-colnames(drad)[grep("FEM",colnames(drad))]
-dm.sub<-sample(d.mal,30)
-df.sub<-sample(d.fem,30)
-d.sub<-cbind(drad[,1:9],drad[,dm.sub],drad[,df.sub])
-ds.cov<-do.call("rbind",apply(d.sub,1,vcf.cov.loc,subset=c(dm.sub,df.sub)))
-
-wilcox.test(o.cov$PropHet,ds.cov$PropHet,"less")
-wilcox.test(o.cov$AvgCovRatio,ds.cov$AvgCovRatio,"less")
-wilcox.test(o.cov$CovVariance,ds.cov$CovVariance,"greater")
-
-#assembled together
-wilcox.test(bo.cov$PropHet,bd.cov$PropHet,paired=T,"less")
-
-##The real analysis
-lcv.comp<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(o.cov)),rep("ddRAD",nrow(d.cov)),
-                                  rep("sdRAD",nrow(bo.cov)),rep("ddRAD",nrow(bd.cov))), 
-                    Assembly=c(rep("Alone",nrow(o.cov)),rep("Alone",nrow(d.cov)),
-                               rep("Together",nrow(bo.cov)),rep("Together",nrow(bd.cov))),
-                    CovVariance=c(o.cov$CovVariance,d.cov$CovVariance,bo.cov$CovVariance,bd.cov$CovVariance),
-                    PropHet=c(o.cov$PropHet,d.cov$PropHet,bo.cov$PropHet,bd.cov$PropHet))
-
-summary(aov(log(lcv.comp$CovVariance+1)~lcv.comp$LibraryPrep*lcv.comp$Assembly))
-TukeyHSD(aov(log(lcv.comp$CovVariance+1)~lcv.comp$LibraryPrep*lcv.comp$Assembly))
-summary(aov(lcv.comp$PropHet~lcv.comp$LibraryPrep*lcv.comp$Assembly))
-TukeyHSD(aov(lcv.comp$PropHet~lcv.comp$LibraryPrep*lcv.comp$Assembly))
-
-####PLOT: Fig 2. Variance in Coverage####
-jpeg("VarianceInCov.jpeg",height=8.5,width=7,units="in",res=300)
-par(mfrow=c(2,1),oma=c(1,2,1,1),mar=c(2,2,2,2))
-boxplot(log(lcv.comp$CovVariance+1)~lcv.comp$LibraryPrep*lcv.comp$Assembly,col=c(ddsep.col,sdsep.col,ddtog.col,sdtog.col),
-        names=F,xaxt='n',ylim=c(0,18))
-axis(1,at=c(1.5,3.5),c("Alone","Together"))
-mtext("ln(Variance in Coverage)",2,outer=F,line=2)
-legend("top",ncol=2,c("ddRAD Alone","sdRAD Alone","ddRAD Together", "sdRAD Together"),
-       pch=15,col=c(ddsep.col,sdsep.col,ddtog.col,sdtog.col),bty='n')
-boxplot(lcv.comp$PropHet~lcv.comp$LibraryPrep*lcv.comp$Assembly,col=c(ddsep.col,sdsep.col,ddtog.col,sdtog.col),
-        names=F,xaxt='n')
-mtext("Proportion Heterozygotes",2,outer=F,line=2)
-axis(1,at=c(1.5,3.5),c("Alone","Together"))
-dev.off()
 
 ###########################LOOKING FOR THE SAME LOCI#################################
 #sdRAD-ddRAD
 od.loci<-merge(orad[,locus.info],drad[,locus.info],"SNP")
 #od.loci<-merge(orad.sub[,locus.info],drad.sub[,locus.info],"SNP")
 dim(od.loci[(od.loci$REF.x != od.loci$REF.y & od.loci$REF.x != od.loci$ALT.y) |
-               (od.loci$REF.x != od.loci$REF.y & od.loci$REF.y != od.loci$ALT.x),])
-    
-               dim(od.loci[(od.loci$REF.x != od.loci$REF.y & od.loci$ALT.x != od.loci$ALT.y &
-                  od.loci$REF.x != od.loci$ALT.y & od.loci$REF.y != od.loci$ALT.x) ,])
+              (od.loci$REF.x != od.loci$REF.y & od.loci$REF.y != od.loci$ALT.x),])
+
+dim(od.loci[(od.loci$REF.x != od.loci$REF.y & od.loci$ALT.x != od.loci$ALT.y &
+               od.loci$REF.x != od.loci$ALT.y & od.loci$REF.y != od.loci$ALT.x) ,])
 od.cov<-merge(o.cov,d.cov,"SNP")
 
 wilcox.test(od.cov$PropHet.x,od.cov$PropHet.y,paired=T,"less")
@@ -950,6 +653,466 @@ dim(sdb.loci[(sdb.loci$REF.x != sdb.loci$REF.y & sdb.loci$REF.x != sdb.loci$REF
                (sdb.loci$ALT != sdb.loci$REF.y & sdb.loci$ALT != sdb.loci$REF.x
                 & sdb.loci$ALT != sdb.loci$ALT.y & sdb.loci$ALT.x != sdb.loci$ALT) ,])
 
+##############COVERAGE ANALYSIS##################
+####Average Coverage####
+#compare sd vs dd
+lc.comp<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(o.cov)),rep("ddRAD",nrow(d.cov)),
+    rep("sdRAD",nrow(bo.cov)),rep("ddRAD",nrow(bd.cov))), 
+  Assembly=c(rep("Alone",nrow(o.cov)),rep("Alone",nrow(d.cov)),
+             rep("Together",nrow(bo.cov)),rep("Together",nrow(bd.cov))),
+  AvgCovRatio=c(o.cov$AvgCovRatio,d.cov$AvgCovRatio,bo.cov$AvgCovRatio,bd.cov$AvgCovRatio),
+  AvgCovTotal=c(o.cov$AvgCovTotal,d.cov$AvgCovTotal,bo.cov$AvgCovTotal,bd.cov$AvgCovTotal))
+#NumReadsPerInd=c(oc$NumReadsAlone,dc$NumReadsAlone,oc$NumReadsTogether,dc$NumReadsTogether)
+
+#total coverage
+summary(aov(log(lc.comp$AvgCovTotal)~lc.comp$LibraryPrep*lc.comp$Assembly))
+TukeyHSD(aov(log(lc.comp$AvgCovTotal)~lc.comp$LibraryPrep*lc.comp$Assembly))#use this!
+summary(lm(log(lc.comp$AvgCovTotal)~lc.comp$LibraryPrep*lc.comp$Assembly))
+boxplot(log(lc.comp$AvgCovTotal)~lc.comp$LibraryPrep*lc.comp$Assembly)
+
+
+####PLOT: Coverage comparison boxplot
+#jpeg("CoverageComparisonBoxplot.jpeg",height=7,width=7,units="in",res=300)
+par(mfrow=c(2,1),oma=c(1,2,1,1),mar=c(2,2,2,2))
+boxplot(log(lc.comp$AvgCovRatio+1)~lc.comp$LibraryPrep*lc.comp$Assembly,names=F,
+        xaxt='n',col=c("cadetblue","coral1"))
+axis(1,at=c(1.5,3.5),labels=c("Alone","Together"))
+mtext("log(Avg Ratio Num Reads\nRef/Alt)",2,outer=F,line=2)
+legend("topleft",c("sdRAD","ddRAD"),col=c("cadetblue","coral1"),pch=15,bty='n')
+boxplot(log(lc.comp$AvgCovTotal+1)~lc.comp$LibraryPrep*lc.comp$Assembly,names=F,
+        xaxt='n',col=c("cadetblue","coral1"))
+mtext("log(Avg Num Reads\nPer Individual Per Locus)",2,outer=F,line=2)
+axis(1,at=c(1.5,3.5),labels=c("Alone","Together"))
+#dev.off()
+
+####Coverage by individual--assembled in one####
+##Generate the dataset##
+#o.icov<-as.data.frame(do.call("rbind",apply(both[,o.ind],2,vcf.cov.ind)))
+#o.icov$Method<-rep("oRAD",nrow(o.icov))
+#d.icov<-as.data.frame(do.call("rbind",apply(both[,d.ind],2,vcf.cov.ind)))
+#d.icov$Method<-rep("dRAD",nrow(d.icov))
+#ind.cov<-as.data.frame(rbind(o.icov,d.icov))
+#ind.cov$NumReads<-as.numeric(ind.cov$AvgCovTot)*as.numeric(ind.cov$NumPresent)
+#ic<-as.data.frame(apply(ind.cov,2,as.numeric))
+#rownames(ic)<-rownames(ind.cov)
+#ic$Method<-as.factor(ind.cov$Method)
+##Coverage by individual--assembled separately
+#orad.icov<-as.data.frame(do.call("rbind",apply(orad[,10:ncol(orad)],2,vcf.cov.ind)))
+#oic<-apply(orad.icov,2,as.numeric)
+#rownames(oic)<-rownames(orad.icov)
+#drad.icov<-as.data.frame(do.call("rbind",apply(drad[,10:ncol(drad)],2,vcf.cov.ind)))
+#dic<-apply(drad.icov,2,as.numeric)
+#rownames(dic)<-rownames(drad.icov)
+##write these to file so I can easily pick back up later
+#write.table(oic,"orad_coverage.csv",quote=T,row.names=T,col.names=T,sep='\t')
+#write.table(dic,"drad_coverage.csv",quote=T,row.names=T,col.names=T,sep='\t')
+#write.table(ic,"both_coverage.csv",quote=T,row.names=T,col.name=T,sep='\t')
+#oic<-read.delim("orad_coverage.csv")
+#dic<-read.delim("drad_coverage.csv")
+#ic<-read.delim("both_coverage.csv")
+# #subset
+# o.icov<-as.data.frame(do.call("rbind",apply(both.sub[,o.ind],2,vcf.cov.ind)))
+# o.icov$Method<-rep("oRAD",nrow(o.icov))
+# d.icov<-as.data.frame(do.call("rbind",apply(both.sub[,d.ind],2,vcf.cov.ind)))
+# d.icov$Method<-rep("dRAD",nrow(d.icov))
+# ind.cov<-as.data.frame(rbind(o.icov,d.icov))
+# ind.cov$NumReads<-as.numeric(ind.cov$AvgCovTot)*as.numeric(ind.cov$NumPresent)
+# ic<-as.data.frame(apply(ind.cov,2,as.numeric))
+# rownames(ic)<-rownames(ind.cov)
+# ic$Method<-as.factor(ind.cov$Method)
+# #Coverage by individual--assembled separately
+# orad.icov<-as.data.frame(do.call("rbind",apply(orad.sub[,10:ncol(orad.sub)],2,vcf.cov.ind)))
+# oic<-apply(orad.icov,2,as.numeric)
+# rownames(oic)<-rownames(orad.icov)
+# drad.icov<-as.data.frame(do.call("rbind",apply(drad.sub[,10:ncol(drad.sub)],2,vcf.cov.ind)))
+# dic<-apply(drad.icov,2,as.numeric)
+# rownames(dic)<-rownames(drad.icov)
+# #write these to file so I can easily pick back up later
+# write.table(oic,"orad_coverage_subset.csv",quote=T,row.names=T,col.names=T,sep='\t')
+# write.table(dic,"drad_coverage_subset.csv",quote=T,row.names=T,col.names=T,sep='\t')
+# write.table(ic,"both_coverage_subset.csv",quote=T,row.names=T,col.name=T,sep='\t')
+
+oic<-read.csv("orad_coverage_subset.csv",row.names=1,header=T,sep='\t')
+dic<-read.csv("drad_coverage_subset.csv",row.names=1,header=T,sep='\t')
+ic<-read.csv("both_coverage_subset.csv",row.names=1,header=T,sep='\t')
+
+ic.o<-ic[rownames(ic) %in% rownames(oic),]
+ic.d<-ic[rownames(ic) %in% rownames(dic),]
+
+mo<-merge(ic.o,oic,by=0)
+md<-merge(ic.d,dic,by=0)
+oc<-data.frame(NumReadsTogether=mo$NumReads.x,NumReadsAlone=mo$NumReads.y,row.names=mo$Row.names)
+dc<-data.frame(NumReadsTogether=md$NumReads.x,NumReadsAlone=md$NumReads.y,row.names=md$Row.names)
+t.test(oc$NumReadsTogether,oc$NumReadsAlone,paired=T,alternative="less")
+t.test(dc$NumReadsTogether,dc$NumReadsAlone,paired=T,alternative="greater")
+wilcox.test(oc$NumReadsTogether,oc$NumReadsAlone,paired=T,alternative="less")
+wilcox.test(dc$NumReadsTogether,dc$NumReadsAlone,paired=T,alternative="greater")
+oic<-as.data.frame(oic)
+dic<-as.data.frame(dic)
+oic<-oic[o.ind,]#they had SNP as a row
+dic<-dic[d.ind,]
+ind.cov<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(oic)),rep("ddRAD",nrow(dic)),
+    rep("sdRAD",nrow(oic)),rep("ddRAD",nrow(dic))), 
+  Assembly=c(rep("Alone",nrow(oic)),rep("Alone",nrow(dic)),
+    rep("Together",nrow(ic))),
+  NumReads=c(oic$NumReads,dic$NumReads,ic$NumReads),
+  NumMissing=c(oic$NumMissing,dic$NumMissing,ic$NumMissing),
+  NumPresent=c(oic$NumPresent,dic$NumPresent,ic$NumPresent))
+
+summary(lm(log(ind.cov$NumReads)~ind.cov$LibraryPrep*ind.cov$Assembly))
+summary(glm(log(ind.cov$NumReads)~ind.cov$LibraryPrep*ind.cov$Assembly))
+summary(glm(cbind(ind.cov$NumMissing,ind.cov$NumPresent)~ind.cov$LibraryPrep*ind.cov$Assembly,family=binomial))
+summary(aov(log(ind.cov$NumReads)~ind.cov$LibraryPrep*ind.cov$Assembly))
+TukeyHSD(aov(log(ind.cov$NumReads)~ind.cov$LibraryPrep*ind.cov$Assembly))
+
+####PLOT: Fig 1. Coverage Assembly Method Comp####
+jpeg("CoverageComparisons.jpeg",height=8,width=8,units="in",res=300)
+par(mfrow=c(2,2),oma=c(1,1,1,1),mar=c(2,2,2,2))
+par(mar=c(2,3,2,1))
+hist(oc$NumReadsTogether, col=alpha(sdtog.col,0.5), ylim=c(0,150), breaks=seq(0,3500000,250000),
+     main="sdRAD-seq",axes=F,xlim=c(0,3500000),border=alpha(sdtog.col,0.5))
+hist(oc$NumReadsAlone,col=alpha(sdsep.col,0.5), add=T,breaks=seq(0,3500000,250000),density=20)
+legend("topright",c("Analyzed Together", "Analyzed Separately"),
+       fill=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)),bty='n',
+       density=c(NA,20),border=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)))
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+mtext("Number of Individuals",2.5,outer=F,line=2,cex=0.75)
+par(mar=c(2,2,2,2))
+hist(dc$NumReadsTogether, col=alpha(ddtog.col,0.5), ylim=c(0,150), 
+     breaks=seq(0,1500000,100000),border=alpha(ddtog.col,0.5),
+     main="ddRAD-seq",axes=F)
+hist(dc$NumReadsAlone,col=alpha(ddsep.col,0.5), add=T,breaks=seq(0,1500000,100000),density=20)
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+legend("topright",c("Analyzed Together", "Analyzed Separately"),
+       fill=c(alpha(ddtog.col,0.5),alpha(ddsep.col,0.5)),bty='n',density = c(NA,20),
+       border=c(alpha(ddtog.col,0.5),alpha(ddsep.col,0.5)))
+mtext("Total Number of Reads",1,outer=T,cex=0.9,line=-23)#-29 for R
+
+par(mar=c(2,3,2,1))
+hist(log(bo.cov$AvgCovTotal),col=alpha(sdtog.col,0.5),axes=F,xlab="",ylab="",main="",
+     xlim=c(0,10),ylim=c(0,80000),breaks=seq(0,10,0.5),border=alpha(sdtog.col,0.5))
+hist(log(o.cov$AvgCovTotal), col=alpha(sdsep.col,0.5), add=T,
+     breaks=seq(0,10,0.5),density=20)
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+mtext("Number of Loci",2,outer=F,line=2.5,cex=0.75)
+par(mar=c(2,2,2,2))
+hist(log(bd.cov$AvgCovTotal), col=alpha(ddtog.col,0.5),main="",axes=F,ylab="",xlab="",
+     xlim=c(0,10),ylim=c(0,80000),breaks=seq(0,10,0.5),border=alpha(ddtog.col,0.5))
+hist(log(d.cov$AvgCovTotal), col=alpha(ddsep.col,0.5), add=T,
+     breaks=seq(0,10,0.5),density=20)
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+mtext("ln(Average Number of Reads Per Individual Per SNP)",1,outer=T,line=-.5,cex=0.9)#-15 for R
+
+dev.off()
+
+#violin plots?
+spf.vioplot(log(bo.cov$AvgCovTotal),col=sdtog.col)
+spf.vioplot(log(o.cov$AvgCovTotal),col=sdsep.col)
+spf.vioplot(log(bd.cov$AvgCovTotal),col=ddtog.col)
+spf.vioplot(log(d.cov$AvgCovTotal),col=ddsep.col)
+
+###################POLYMORPHIC RESTRICTION SITES########################
+####Variance in coverage####
+#assembled separately
+hist(log(o.cov$CovVariance),col=alpha("cadetblue",0.5))
+hist(log(d.cov$CovVariance),col=alpha("coral1",0.5),add=T)
+boxplot(log(o.cov$CovVariance+1),log(d.cov$CovVariance+1),col=c("cadetblue","coral1"),
+        names=c("sdRAD","ddRAD"),ylab="Variance in Coverage",ylim=c(0,22))
+text(x=c(1,2),y=c(21,21),c("250425","69109"))
+wilcox.test(log(o.cov$CovVariance+1),log(d.cov$CovVariance+1),"greater")
+
+d.sub<-d.cov[sample(nrow(d.cov),30000,replace=F),]
+o.sub<-o.cov[sample(nrow(o.cov),30000,replace=F),]
+wilcox.test(log(o.sub$CovVariance+1),log(d.sub$CovVariance+1),"greater")
+boxplot(log(o.sub$CovVariance+1),log(d.sub$CovVariance+1),col=c("cadetblue","coral1"),
+        names=c("sdRAD","ddRAD"),ylab="Variance in Coverage")
+
+#assembled together
+wilcox.test(bo.cov$CovVariance,bd.cov$CovVariance,paired=T,"less")
+
+
+#####Heterozygosity#####
+#assembled separately
+hist(o.cov$PropHet,col=alpha("cadetblue",0.5))
+hist(d.cov$PropHet,col=alpha("coral1",0.5),add=T)
+boxplot(o.cov$PropHet,d.cov$PropHet,col=c("cadetblue","coral1"),
+        names=c("sdRAD","ddRAD"),ylab="Proportion Heterozygous")
+text(x=c(1,2),y=c(21,21),c("250425","69109"))
+wilcox.test(o.cov$PropHet,d.cov$PropHet,"less")
+
+#what about in 30 males 30 females from ddRAD and the sdRAD?
+d.mal<-colnames(drad)[grep("PRM",colnames(drad))]
+d.fem<-colnames(drad)[grep("FEM",colnames(drad))]
+dm.sub<-sample(d.mal,30)
+df.sub<-sample(d.fem,30)
+d.sub<-cbind(drad[,1:9],drad[,dm.sub],drad[,df.sub])
+ds.cov<-do.call("rbind",apply(d.sub,1,vcf.cov.loc,subset=c(dm.sub,df.sub)))
+
+wilcox.test(o.cov$PropHet,ds.cov$PropHet,"less")
+wilcox.test(o.cov$AvgCovRatio,ds.cov$AvgCovRatio,"less")
+wilcox.test(o.cov$CovVariance,ds.cov$CovVariance,"greater")
+
+#assembled together
+wilcox.test(bo.cov$PropHet,bd.cov$PropHet,paired=T,"less")
+
+##The real analysis
+lcv.comp<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(o.cov)),rep("ddRAD",nrow(d.cov)),
+                                  rep("sdRAD",nrow(bo.cov)),rep("ddRAD",nrow(bd.cov))), 
+                    Assembly=c(rep("Alone",nrow(o.cov)),rep("Alone",nrow(d.cov)),
+                               rep("Together",nrow(bo.cov)),rep("Together",nrow(bd.cov))),
+                    CovVariance=c(o.cov$CovVariance,d.cov$CovVariance,bo.cov$CovVariance,bd.cov$CovVariance),
+                    PropHet=c(o.cov$PropHet,d.cov$PropHet,bo.cov$PropHet,bd.cov$PropHet))
+
+summary(aov(log(lcv.comp$CovVariance+1)~lcv.comp$LibraryPrep*lcv.comp$Assembly))
+TukeyHSD(aov(log(lcv.comp$CovVariance+1)~lcv.comp$LibraryPrep*lcv.comp$Assembly))
+summary(aov(lcv.comp$PropHet~lcv.comp$LibraryPrep*lcv.comp$Assembly))
+TukeyHSD(aov(lcv.comp$PropHet~lcv.comp$LibraryPrep*lcv.comp$Assembly))
+
+#boxplot
+par(mfrow=c(2,1),oma=c(1,2,1,1),mar=c(2,2,2,2))
+boxplot(log(lcv.comp$CovVariance+1)~lcv.comp$LibraryPrep*lcv.comp$Assembly,col=c(ddsep.col,sdsep.col,ddtog.col,sdtog.col),
+        names=F,xaxt='n',ylim=c(0,18))
+axis(1,at=c(1.5,3.5),c("Alone","Together"))
+mtext("ln(Variance in Coverage)",2,outer=F,line=2)
+legend("top",ncol=2,c("ddRAD Alone","sdRAD Alone","ddRAD Together", "sdRAD Together"),
+       pch=15,col=c(ddsep.col,sdsep.col,ddtog.col,sdtog.col),bty='n')
+boxplot(lcv.comp$PropHet~lcv.comp$LibraryPrep*lcv.comp$Assembly,col=c(ddsep.col,sdsep.col,ddtog.col,sdtog.col),
+        names=F,xaxt='n')
+mtext("Proportion Heterozygotes",2,outer=F,line=2)
+axis(1,at=c(1.5,3.5),c("Alone","Together"))
+
+##### Allelic imbalance #####
+#need the allele freqs
+drad.afs<-do.call(rbind,apply(drad[drad$SNP %in% od.loci$SNP,],1,calc.afs.vcf))
+drad.afs$SNP<-paste(drad.afs$Chrom,as.numeric(as.character(drad.afs$Pos)),sep=".")
+orad.afs<-do.call(rbind,apply(orad[orad$SNP %in% od.loci$SNP,],1,calc.afs.vcf))
+orad.afs$SNP<-paste(orad.afs$Chrom,as.numeric(as.character(orad.afs$Pos)),sep=".")
+dbot.afs<-do.call(rbind,apply(both[,c(locus.info,d.ind)],1,calc.afs.vcf))
+dbot.afs$SNP<-paste(dbot.afs$Chrom,as.numeric(as.character(dbot.afs$Pos)),sep=".")
+obot.afs<-do.call(rbind,apply(both[,c(locus.info,o.ind)],1,calc.afs.vcf))
+obot.afs$SNP<-paste(obot.afs$Chrom,as.numeric(as.character(obot.afs$Pos)),sep=".")
+
+#compare to coverage
+dsep.ra<-merge(drad.afs,d.cov,by="SNP")                                   #neg: more ref than alt
+dsep.ra$FreqRefDiff<-(dsep.ra$RefFreq/dsep.ra$AltFreq)-dsep.ra$AvgCovRatio #pos: more alt than ref
+osep.ra<-merge(orad.afs,o.cov,by="SNP")
+osep.ra$FreqRefDiff<-(osep.ra$RefFreq/osep.ra$AltFreq)-osep.ra$AvgCovRatio
+dbot.ra<-merge(dbot.afs,bd.cov,by="SNP")
+dbot.ra$FreqRefDiff<-(dbot.ra$RefFreq/dbot.ra$AltFreq)-dbot.ra$AvgCovRatio
+dbot.ra$FreqRefDiff[dbot.ra$AltFreq==0]<-1-dbot.ra$AvgCovRatio[dbot.ra$AltFreq==0]
+obot.ra<-merge(obot.afs,bo.cov,by="SNP")
+obot.ra$FreqRefDiff<-(obot.ra$RefFreq/obot.ra$AltFreq)-obot.ra$AvgCovRatio
+obot.ra$FreqRefDiff[obot.ra$AltFreq==0]<-1-obot.ra$AvgCovRatio[obot.ra$AltFreq==0]
+
+
+#stats tests
+both.ra<-merge(obot.ra,dbot.ra,by="SNP")
+wilcox.test(both.ra$FreqRefDiff.x,both.ra$FreqRefDiff.y,paired=T) #p = 0.06704
+sep.ra<-merge(osep.ra,dsep.ra,by="SNP")
+wilcox.test(sep.ra$FreqRefDiff.x,sep.ra$FreqRefDiff.y,paired=T)#p=0.0008286
+#unpaired
+wilcox.test(obot.ra$FreqRefDiff,dbot.ra$FreqRefDiff) #p=0.03602
+wilcox.test(osep.ra$FreqRefDiff,dsep.ra$FreqRefDiff) #p=0.002723
+
+#are they different between analysis methods
+wilcox.test(obot.ra$FreqRefDiff,osep.ra$FreqRefDiff) #p=0.5415
+wilcox.test(dbot.ra$FreqRefDiff,dsep.ra$FreqRefDiff) #p=0.1964
+ratio.comp<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(osep.ra)),rep("ddRAD",nrow(dsep.ra)),
+                                     rep("sdRAD",nrow(obot.ra)),rep("ddRAD",nrow(dbot.ra))), 
+                       Assembly=c(rep("Alone",nrow(osep.ra)),rep("Alone",nrow(dsep.ra)),
+                                  rep("Together",nrow(obot.ra)),rep("Together",nrow(dbot.ra))),
+                       RatioDiff=c(osep.ra$FreqRefDiff,dsep.ra$FreqRefDiff,
+                                   obot.ra$FreqRefDiff,dbot.ra$FreqRefDiff))
+summary(aov(ratio.comp$RatioDiff~ratio.comp$LibraryPrep*ratio.comp$Assembly))
+TukeyHSD(aov(ratio.comp$RatioDiff~ratio.comp$LibraryPrep*ratio.comp$Assembly))
+
+####### gbstools ########
+both.gbst<-parse.vcf("both.lrt.vcf")
+orad.gbst<-parse.vcf("orad.lrt.vcf")
+drad.gbst<-parse.vcf("drad.lrt.vcf")
+both.gbst$SNP<-paste(both.gbst$`#CHROM`,both.gbst$POS,sep=".")
+orad.gbst$SNP<-paste(orad.gbst$`#CHROM`,orad.gbst$POS,sep=".")
+drad.gbst$SNP<-paste(drad.gbst$`#CHROM`,drad.gbst$POS,sep=".")
+
+dropout.count.mean<-function(lrt.vcf,ind.rows){
+  vcf.dcs<-apply(lrt.vcf,1,function(snp.row){
+    dcs<-unlist(lapply(snp.row[ind.rows],function(x){
+      dc<-unlist(strsplit(x,":"))
+      dc<-dc[[length(dc)]]
+      return(dc)
+    }))
+    if(length(unique(dcs))==1 & unique(dcs)[1]==".") { rsm<-NA } else{
+      dcs<-dcs[dcs!="."]
+      rsm<-mean(as.numeric(dcs))
+    }
+    return(rsm)
+  })
+  return(vcf.dcs)
+}
+
+orad.dcs<-dropout.count.mean(orad.gbst[orad.gbst$SNP %in% od.loci$SNP,],o.ind)
+drad.dcs<-dropout.count.mean(drad.gbst[drad.gbst$SNP %in% od.loci$SNP,],d.ind)
+
+bo.dcs<-dropout.count.mean(both.gbst,o.ind)
+bd.dcs<-dropout.count.mean(both.gbst,d.ind)
+
+par(mfrow=c(1,2),oma=c(1,1,1,1),mar=c(2,2,2,2))
+par(mar=c(2,3,2,1))
+hist(bo.dcs, col=alpha(sdtog.col,0.5), breaks=seq(-0.025,1.925,0.05),ylim=c(0,30000),
+     main="",axes=F,xlim=c(0,2),border=alpha(sdtog.col,0.5))
+hist(bd.dcs,col=ddtog.col, add=T,seq(-0.025,1.925,0.05),density=20)
+legend("top",c("sdRAD-seq Assembled Together", "ddRAD-seq Assembled Together"),
+       fill=c(alpha(sdtog.col,0.5),alpha(ddtog.col,0.5)),bty='n',
+       density=c(NA,20),border=c(alpha(sdtog.col,0.5),alpha(ddtog.col,0.5)))
+axis(1,pos=0)
+axis(2,pos=-0.025,las=1)
+
+par(mar=c(2,2,2,2))
+hist(orad.dcs, col=alpha(sdsep.col,0.5), ylim=c(0,12000),
+     breaks=seq(-0.025,1.925,0.05),border=alpha(sdsep.col,0.5),xlim=c(0,2),
+     main="",axes=F)
+hist(drad.dcs,col=alpha(ddsep.col,0.5), add=T,breaks=seq(-0.025,1.925,0.05),density=20)
+axis(1,pos=0)
+axis(2,pos=-0.025,las=1)
+legend("top",c("sdRAD-seq Assembled Separately", "ddRAD-seq Assembled Separately"),
+       fill=c(alpha(sdsep.col,0.5),alpha(ddsep.col,0.5)),bty='n',density = c(NA,20),
+       border=c(alpha(sdsep.col,0.5),alpha(ddsep.col,0.5)))
+mtext("Mean Dropout Allele Counts",1,outer=T,line=-1)
+mtext("Number of SNPs",2,outer = T)
+
+
+#stats
+wilcox.test(orad.dcs,drad.dcs) #p < 2.2E-16
+wilcox.test(bo.dcs,bd.dcs) #p<2.2E-16
+
+#between analysis methods
+wilcox.test(orad.dcs,bo.dcs) #p =2.172E-12
+wilcox.test(drad.dcs,bd.dcs) #p<2.2E-16
+
+dcs.comp<-data.frame(LibraryPrep=c(rep("sdRAD",length(orad.dcs)),rep("ddRAD",length(drad.dcs)),
+                                   rep("sdRAD",length(bo.dcs)),rep("ddRAD",length(bd.dcs))), 
+                     Assembly=c(rep("Alone",length(orad.dcs)),rep("Alone",length(drad.dcs)),
+                                rep("Together",length(bo.dcs)),rep("Together",length(bd.dcs))),
+                     DropCount=c(orad.dcs,drad.dcs,bo.dcs,bd.dcs))
+summary(aov(dcs.comp$DropCount~dcs.comp$LibraryPrep*dcs.comp$Assembly))
+TukeyHSD(aov(dcs.comp$DropCount~dcs.comp$LibraryPrep*dcs.comp$Assembly))
+
+
+####PLOT: Fig 2. Polymorphic Restriction Sites####
+jpeg("PolymorphicRestrictionSites.jpeg",height=10,width=7,units="in",res=300)
+par(mfrow=c(4,4),oma=c(2,2,1,1),mar=c(1,2,1,0.1))
+#prop het
+spf.vioplot(o.cov$PropHet,col=sdtog.col,plot.axes = FALSE,ylim=c(0,1))
+axis(2,las=1,hadj=0.5,tck=-0.025)
+mtext("Proportion Heterozygotes",2,outer=F,line=2,cex=0.75)
+spf.vioplot(d.cov$PropHet,col=ddtog.col,plot.axes = FALSE,ylim=c(0,1))
+spf.vioplot(bo.cov$PropHet,col=sdsep.col,plot.axes = FALSE,ylim=c(0,1))
+spf.vioplot(bd.cov$PropHet,col=ddsep.col,plot.axes = FALSE,ylim=c(0,1))
+
+#variance in coverage
+spf.vioplot(log(o.cov$CovVariance+1),col=sdtog.col,plot.axes = FALSE,ylim=c(0,20))
+axis(2,las=1,hadj=0.5,tck=-0.025)
+mtext("ln(Variance in Coverage",2,outer=F,line=2,cex=0.75,tck=-0.025)
+spf.vioplot(log(d.cov$CovVariance+1),col=ddtog.col,plot.axes = FALSE,ylim=c(0,20))
+spf.vioplot(log(o.sub$CovVariance+1),col=sdsep.col,plot.axes = FALSE,ylim=c(0,20))
+spf.vioplot(log(d.sub$CovVariance+1),col=ddsep.col,plot.axes = FALSE,ylim=c(0,20))
+
+#allelic imbalance
+spf.vioplot(obot.ra$FreqRefDiff,col=sdtog.col,plot.axes = FALSE,ylim=c(-300,20))
+axis(2,at=seq(-300,20,40),las=1,hadj=0.5,tck=-0.025)
+mtext("Difference Between Allele Frequency\nand Coverage Alt/Ref Ratios",2,cex=0.75,line=1.8)
+spf.vioplot(dbot.ra$FreqRefDiff,col=ddtog.col,plot.axes = FALSE,ylim=c(-300,20))
+spf.vioplot(osep.ra$FreqRefDiff,col=sdsep.col,plot.axes = FALSE,ylim=c(-300,20))
+spf.vioplot(dsep.ra$FreqRefDiff,col=ddsep.col,plot.axes = FALSE,ylim=c(-300,20))
+
+#gbstools
+spf.vioplot(bo.dcs[!is.na(bo.dcs)], col=sdtog.col,plot.axes=FALSE,ylim=c(0,1.5))
+axis(2,at=seq(0,2,0.5),las=1,hadj=0.5,tck=-0.025)
+mtext("Mean Dropout Allele Counts",2,cex=0.75,line=2)
+mtext("sdRAD-seq\nAnalyzed Together",1,outer=FALSE,cex=0.75,line=1)
+spf.vioplot(bd.dcs[!is.na(bd.dcs)],col=ddtog.col,plot.axes=FALSE,ylim=c(0,1.5))
+mtext("ddRAD-seq\nAnalyzed Together",1,outer=FALSE,cex=0.75,line=1)
+spf.vioplot(orad.dcs[!is.na(orad.dcs)], col=sdsep.col,plot.axes = FALSE,ylim=c(0,1.5))
+mtext("sdRAD-seq\nAnalyzed Separately",1,outer=FALSE,cex=0.75,line=1)
+spf.vioplot(drad.dcs[!is.na(drad.dcs)],col=ddsep.col,plot.axes=FALSE,ylim=c(0,1.5))
+mtext("ddRAD-seq\nAnalyzed Separately",1,outer=FALSE,cex=0.75,line=1)
+dev.off()
+
+###### PCA #####
+library(pcadapt)
+both.pcadapt<-read.pcadapt("both.sub.vcf",type="vcfR")
+both.pca<-pcadapt(both.pcadapt,K=20)
+pops<-gsub("\\w+_(\\w{3})\\d+\\w?([[:punct:]].*)?","\\1",colnames(both)[10:(ncol(both)-1)])
+type<-gsub("(\\w+)_(\\w{3})\\d+\\w?([[:punct:]].*)?","\\1",colnames(both)[10:(ncol(both)-1)])
+type[type=="orad"]<-sdtog.col
+type[type=="sample"]<-ddtog.col
+pops[pops=="FEM"]<-15
+pops[pops=="PRM" | pops=="NPM"]<-16
+pops[pops=="OFF"]<-17
+plot(both.pca,option="scores",pop=pops)
+plot(both.pca,option="scores",pop=type)
+plot(both.pca,option="qqplot")
+both.props<-round((both.pca$singular.values/sum(both.pca$singular.values))*100,2)
+
+##write the vcf file for the merged ddrad and sdrad separate
+od.vcf<-merge(orad,drad,"SNP")
+od.vcf$ID.x<-paste(od.vcf$`#CHROM.x`,as.numeric(as.character(od.vcf$ID.y)),
+                   as.numeric(as.character(od.vcf$POS.y)),sep=".")
+od.vcf<-od.vcf[,!(colnames(od.vcf) %in% 
+                    c("#CHROM.y","POS.y","ID.y","REF.y","ALT.y",
+                      "QUAL.y","FILTER.y","INFO.y","FORMAT.y","SNP"))]
+colnames(od.vcf)[1:9]<-c("#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT")
+od.vcf<-od.vcf[!duplicated(od.vcf$ID),]
+write.table(od.vcf,"merged.sep.vcf",sep='\t',
+            col.names=TRUE,row.names=FALSE,quote=FALSE)
+#do pcadapt on these
+merge.pcadapt<-read.pcadapt("merged.sep.vcf",type="vcfR")
+merge.pca<-pcadapt(merge.pcadapt,K=20)
+
+od.pops<-gsub("\\w+_(\\w{3})\\d+\\w?([[:punct:]].*)?","\\1",colnames(od.vcf)[10:ncol(od.vcf)])
+od.type<-gsub("(\\w+)_(\\w{3})\\d+\\w?([[:punct:]].*)?","\\1",colnames(od.vcf)[10:ncol(od.vcf)])
+od.type[od.type=="orad"]<-sdsep.col
+od.type[od.type=="sample"]<-ddsep.col
+od.pops[od.pops=="FEM"]<-15
+od.pops[od.pops=="PRM" | od.pops=="NPM"]<-16
+od.pops[od.pops=="OFF"]<-17
+plot(merge.pca,option="scores",pop=od.pops) 
+plot(merge.pca,option="scores",pop=od.type)
+od.props<-round((merge.pca$singular.values/sum(merge.pca$singular.values))*100,2)
+
+#Plot them together
+png("sca.pca.png",height=5,width=8,units="in",res=300)
+par(mfrow=c(1,2),oma=c(2,2,2,1),mar=c(2,2,2,1))
+plot(both.pca$scores[,1],both.pca$scores[,2],axes=F,
+     pch=as.numeric(pops),col=alpha(type,0.75),cex=1.5,ylab="",xlab="",
+     xlim=c(-0.05,0.15))
+axis(1,at=seq(-0.2,0.2,0.05),las=1)
+mtext(paste("PC1 (",both.props[1],"%)",sep=""),1,line = 2)
+axis(2,at=seq(-0.2,0.2,0.1),las=1,hadj = 0.6)
+mtext(paste("PC2 (",both.props[2],"%)",sep=""),2,line = 2.1)
+
+plot(merge.pca$scores[,1],merge.pca$scores[,2],axes=F,
+     col=alpha(od.type,0.75),pch=as.numeric(od.pops),cex=1.5,
+     xlim=c(-0.2,0.1),ylim=c(-0.1,0.45),xlab="",ylab="")
+axis(1,at=seq(-0.25,0.15,0.1))
+mtext(paste("PC1 (",od.props[1],"%)",sep=""),1,line = 2)
+axis(2,at=seq(-0.15,0.5,0.2),las=1,hadj=0.7)
+mtext(paste("PC2 (",od.props[2],"%)",sep=""),2,line = 2.1)
+
+par(mfrow=c(1, 1), oma=rep(0, 4), mar=rep(0, 4), new=TRUE)
+plot(0:1, 0:1, type="n", xlab="", ylab="", axes=FALSE)
+legend("top",c("sdRAD Together","ddRAD Together","sdRAD Alone","ddRAD Alone",
+               "Females","Males","Offspring"),
+       pch=c(rep(18,4),15,16,17),bty='n',ncol=4,pt.cex=1.5,
+       col=c(alpha(sdtog.col,0.75),alpha(ddtog.col,0.75),alpha(sdsep.col,0.75),
+             alpha(ddsep.col,0.75),rep(alpha("darkgrey",0.75),3)))
+dev.off()
+
+
 #########################FSTS FROM INDEPENDENT ANALYSES##############################
 pop1<-colnames(orad)[10:ncol(orad)]
 pop2<-colnames(drad)[10:ncol(drad)]
@@ -991,71 +1154,6 @@ summary(od.both.fst[od.both.fst$SNP %in% cov.pass,"Fst"])
 #sub.fsts.both$SNP<-paste(sub.fsts.both$Chrom,as.numeric(as.character(sub.fsts.both$Pos)),sep=".")
 #write.table(sub.fsts.both,"sub.fsts.both.txt",sep='\t',col.names=T,row.names=F,quote=F)
 
-####PLOT: Fig 3. sd-ddRAD Fsts####
-lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
-       "LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
-       "LG22")
-lgn<-seq(1,22)
-scaffs<-levels(as.factor(od.fst[,"Chrom"]))
-scaffs[1:22]<-lgs
-####OLD PLOTS####
-jpeg("sd-dd_Fst_subset.jpeg",height=10,width=7.5,units="in",res=300)
-par(mfrow=c(4,1),mar=c(2,2,2,2),oma=c(1,2,1,1))
-##Separate
-od<-fst.plot(od.fst[!is.na(od.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
-  fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
-  groups=as.factor(scaffs[scaffs %in% levels(factor(od.fst$Chrom[!is.na(od.fst$Fst)]))]))
-last<-0
-for(i in 1:length(lgs)){
-  text(x=mean(od[od$Chrom ==lgs[i],"Pos"]),y=-0.05,
-       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
-  last<-max(od[od$Chrom ==lgs[i],"Pos"])
-}
-mtext("sdRAD-ddRAD Analyzed Separately",3,cex=0.75)
-odc<-fst.plot(od.fst[!is.na(od.fst$Fst) & od.fst$SNP %in% cov.pass,],ci.dat=c(-10,10),sig.col=c("black","black"), 
-             fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
-             groups=as.factor(scaffs[scaffs %in% levels(factor(od.fst$Chrom[!is.na(od.fst$Fst)& od.fst$SNP %in% cov.pass]))]))
-last<-0
-for(i in 1:length(lgs)){
-  text(x=mean(odc[odc$Chrom ==lgs[i],"Pos"]),y=-0.05,
-       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
-  last<-max(odc[odc$Chrom ==lgs[i],"Pos"])
-}
-mtext("sdRAD-ddRAD Analyzed Separately, Coverage Filter",3,cex=0.75)
-
-##Together
-odb<-fst.plot(od.both.fst[!is.na(od.both.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
-              fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
-              groups=as.factor(scaffs[scaffs %in% levels(factor(od.both.fst[!is.na(od.both.fst$Fst),"Chrom"]))]))
-odb$Pos<-as.numeric(as.character(odb$Pos))
-last<-0
-for(i in 1:length(lgs)){
-  text(x=mean(odb[odb$Chrom ==lgs[i],"Pos"],na.rm=T),y=-0.05,
-       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
-  last<-max(odb[odb$Chrom ==lgs[i],"Pos"],na.rm = T)
-}
-mtext("sdRAD-ddRAD Analyzed Together",3,cex=0.75)
-odbc<-fst.plot(od.both.fst[!is.na(od.both.fst$Fst) & od.both.fst$SNP %in% sep.cov.pass,],
-  ci.dat=c(-10,10),sig.col=c("black","black"), y.lim=c(0,1),
-  fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,
-  groups=as.factor(scaffs[scaffs %in% 
-    levels(factor(od.both.fst[!is.na(od.both.fst$Fst) & od.both.fst$SNP %in% sep.cov.pass,"Chrom"]))]))
-odbc$Pos<-as.numeric(as.character(odbc$Pos))
-last<-0
-for(i in 1:length(lgs)){
-  text(x=mean(odbc[odbc$Chrom ==lgs[i],"Pos"],na.rm=T),y=-0.05,
-       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
-  last<-max(odbc[odbc$Chrom ==lgs[i],"Pos"],na.rm = T)
-}
-mtext("sdRAD-ddRAD Analyzed Together, Coverage Filter",3,cex=0.75)
-mtext(expression(italic(F)[ST]),2,outer=T,cex=0.75)
-dev.off()
-
-gwsca<-read.delim("gwsca_fsts_both.txt")
-
-drad.test<-sample(d.ind,120)
-drad.tes.fst<-do.call("rbind", apply(both, 1, fst.one.vcf,group1=drad.test[1:60],group2=drad.test[61:120],cov.thresh=0.2))
-
 ##############################60 sdRAD and 60 ddRAD##################################
 # d.ind.sub<-sample(d.ind,60,replace=F)
 #write.table(d.ind.sub,"d.ind.sub60.txt",col.names = FALSE,row.names=FALSE,quote=FALSE)
@@ -1070,59 +1168,6 @@ drad.tes.fst<-do.call("rbind", apply(both, 1, fst.one.vcf,group1=drad.test[1:60]
 d.share.sub<-read.table("drad.60ind.vcf",sep='\t',header=F)
 sub.od.fst<-read.table("sub.od.fst.txt",sep='\t',header=T)
 sub.fsts.both<-read.table("sub.fsts.both.txt",sep='\t',header=T)
-
-####old plots####
-png("fsts_60ddrad60sdrad.png",height=10,width=7.5,units="in",res=300)
-par(mfrow=c(4,1),mar=c(2,2,2,2),oma=c(1,2,1,1))
-##Separate
-od<-fst.plot(sub.od.fst[!is.na(sub.od.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
-             fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
-             groups=as.factor(scaffs[scaffs %in% levels(factor(sub.od.fst$Chrom[!is.na(sub.od.fst$Fst)]))]))
-last<-0
-for(i in 1:length(lgs)){
-  text(x=mean(od[od$Chrom ==lgs[i],"Pos"]),y=-0.05,
-       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
-  last<-max(od[od$Chrom ==lgs[i],"Pos"])
-}
-mtext("sdRAD-ddRAD Analyzed Separately",3,cex=0.75)
-odc<-fst.plot(sub.od.fst[!is.na(sub.od.fst$Fst) & sub.od.fst$SNP %in% cov.pass,],ci.dat=c(-10,10),sig.col=c("black","black"), 
-              fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
-              groups=as.factor(scaffs[scaffs %in% levels(factor(sub.od.fst$Chrom[!is.na(sub.od.fst$Fst)& sub.od.fst$SNP %in% cov.pass]))]))
-last<-0
-for(i in 1:length(lgs)){
-  text(x=mean(odc[odc$Chrom ==lgs[i],"Pos"]),y=-0.05,
-       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
-  last<-max(odc[odc$Chrom ==lgs[i],"Pos"])
-}
-mtext("sdRAD-ddRAD Analyzed Separately, Coverage Filter",3,cex=0.75)
-
-##Together
-odb<-fst.plot(sub.fsts.both[!is.na(sub.fsts.both$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
-              fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
-              groups=as.factor(scaffs[scaffs %in% levels(factor(sub.fsts.both[!is.na(sub.fsts.both$Fst),"Chrom"]))]))
-odb$Pos<-as.numeric(as.character(odb$Pos))
-last<-0
-for(i in 1:length(lgs)){
-  text(x=mean(odb[odb$Chrom ==lgs[i],"Pos"],na.rm=T),y=-0.05,
-       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
-  last<-max(odb[odb$Chrom ==lgs[i],"Pos"],na.rm = T)
-}
-mtext("sdRAD-ddRAD Analyzed Together",3,cex=0.75)
-odbc<-fst.plot(sub.fsts.both[!is.na(sub.fsts.both$Fst) & sub.fsts.both$SNP %in% sep.cov.pass,],
-               ci.dat=c(-10,10),sig.col=c("black","black"), y.lim=c(0,1),
-               fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,
-               groups=as.factor(scaffs[scaffs %in% 
-                                         levels(factor(sub.fsts.both[!is.na(sub.fsts.both$Fst) & sub.fsts.both$SNP %in% sep.cov.pass,"Chrom"]))]))
-odbc$Pos<-as.numeric(as.character(odbc$Pos))
-last<-0
-for(i in 1:length(lgs)){
-  text(x=mean(odbc[odbc$Chrom ==lgs[i],"Pos"],na.rm=T),y=-0.05,
-       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
-  last<-max(odbc[odbc$Chrom ==lgs[i],"Pos"],na.rm = T)
-}
-mtext("sdRAD-ddRAD Analyzed Together, Coverage Filter",3,cex=0.75)
-mtext(expression(italic(F)[ST]),2,outer=T,cex=0.75)
-dev.off()
 
 #Look at coverage in subset
 d60.cov<-do.call("rbind",apply(d.share.sub,1,vcf.cov.loc,subset=d.ind.sub))
@@ -1198,6 +1243,14 @@ dev.off()
 
 
 ####PLOT: Fig 3NEW. Sample size on Fsts between sd and dd RAD####
+##some useful things
+lgs<-c("LG1","LG2","LG3","LG4","LG5","LG6","LG7","LG8","LG9","LG10","LG11",
+       "LG12","LG13","LG14","LG15","LG16","LG17","LG18","LG19","LG20","LG21",
+       "LG22")
+lgn<-seq(1,22)
+scaffs<-levels(as.factor(od.fst[,"Chrom"]))
+scaffs[1:22]<-lgs
+###
 png("All3Fsts.png",height=7,width=15,units="in",res=300)
 pdf("All3Fsts.pdf",height=7,width=15)
 par(mfrow=c(4,3),mar=c(2,1,1,0.01),oma=c(1,3,1,0.5))
@@ -1607,6 +1660,86 @@ fst.aov.dat<-data.frame(Fst=c(a.od$Fst,sd.od$Fst,dd.od$Fst,a.odb$Fst,sd.odb$Fst,
 fst.ss.aov<-aov(Fst~SampleSize*Analysis,dat=fst.aov.dat[fst.aov.dat$Comparison == "sd-dd",])
 fst.cp.aov<-aov(Fst~Comparison*Analysis,dat=fst.aov.dat)
 
+##### COVERAGE HEATMAP #####
+#as per reviewer 1's suggestion
+
+#bin coverage
+cov.bins<-data.frame(minCov=c(1,3,5,10,20,30,50),
+                     maxCov=c(3,5,10,20,30,50,1000000000),
+                     binCov=c(1,2,3,4,5,6,7))
+bin.names<-list(c("1-3","3-5","5-10","10-20","20-30","30-50","50+"))
+
+# function to get the matrix of mean Fsts
+get.cov.mat<-function(cov.fst.df,cov.bins, bin.names){
+  sdBin<-NULL
+  ddBin<-NULL
+  for(i in 1:nrow(cov.fst.df)){
+    sdb<-cov.bins[cov.bins$minCov <= cov.fst.df[i,"sdTotCov"] & 
+                    cov.bins$maxCov>cov.fst.df[i,"sdTotCov"],"binCov"]
+    ddb<-cov.bins[cov.bins$minCov <= cov.fst.df[i,"ddTotCov"] & 
+                    cov.bins$maxCov>cov.fst.df[i,"ddTotCov"],"binCov"]
+    if(length(sdb)>1){ print(i) }
+    if(length(ddb)>1){ print(i) }
+    sdBin<-c(sdBin,sdb)
+    ddBin<-c(ddBin,ddb)
+  }
+  cov.fst.df$sdBin<-sdBin
+  cov.fst.df$ddBin<-ddBin
+  covmap<-matrix(nrow=nrow(cov.bins),ncol=nrow(cov.bins))
+  for(i in 1:nrow(cov.bins)){
+    for(ii in 1:nrow(cov.bins)){
+      mfst<-mean(cov.fst.df$Fst[cov.fst.df$sdBin==cov.bins$binCov[i] & 
+                                  cov.fst.df$ddBin==cov.bins$binCov[ii] ],na.rm = T)
+      covmap[i,ii]<-mfst
+    }
+  }
+  return(as.matrix(covmap))
+}
+#df with sdTotCov, ddTotCov, Fst
+od.covmap<-data.frame(SNP=loc.cov$SNP,sdTotCov=loc.cov$AvgCovTotal.x,ddTotCov=loc.cov$AvgCovTotal.y)
+od.covmap<-merge(od.fst,od.covmap, by="SNP",all = FALSE) #10420
+od.covmat<-get.cov.mat(od.covmap,cov.bins,bin.names)
+dimnames(od.covmat)<-bin.names
+dimnames(od.covmat)[2]<-bin.names
+
+#same but with analysis of both
+both.od.cov<-merge(bo.cov,bd.cov,by="SNP")#11031
+both.covmap<-data.frame(SNP=both.od.cov$SNP,sdTotCov=both.od.cov$AvgCovTotal.x,
+                        ddTotCov=both.od.cov$AvgCovTotal.y)
+both.covmap<-merge(od.both.fst,both.covmap,by="SNP",all=FALSE)#11059
+both.covmat<-get.cov.mat(both.covmap,cov.bins,bin.names)
+dimnames(both.covmat)<-bin.names #rows, = sdRAD
+dimnames(both.covmat)[2]<-bin.names
+
+
+colors<-c("black","grey")
+pal<-colorRampPalette(colors)
+ncol=80
+cols<-pal(ncol)
+
+sep.cov.lv<-levelplot(as.matrix(od.covmat[2:7,2:7]),col.regions=cols,alpha.regions=0.7,
+                      scales = list(x=list(rot=90),tck = 0),
+                      xlab="sdRAD Coverage",ylab="ddRAD Coverage",
+                      main="Analyzed Separately")
+print(sep.cov.lv)
+bot.cov.lv<-levelplot(as.matrix(both.covmat[2:7,2:7]),col.regions=cols,alpha.regions=0.7,
+                      scales = list(x=list(rot=90),tck = 0),
+                      xlab="sdRAD Coverage",ylab="ddRAD Coverage",
+                      main="Analyzed Together")
+print(bot.cov.lv)
+#plot them together
+png("coverage_heatmaps_grey.png",height=6,width=11,units="in",res=300)
+print(sep.cov.lv,split=c(1,1,2,1),more=TRUE)
+lattice::trellis.focus("legend", side="right", clipp.off=TRUE, highlight=FALSE)
+grid::grid.text(expression(italic(F)[ST]), 0.2, 0, hjust=0.5, vjust=1.2)
+trellis.unfocus()
+
+print(bot.cov.lv,split=c(2,1,2,1),more=FALSE)
+lattice::trellis.focus("legend", side="right", clipp.off=TRUE, highlight=FALSE)
+grid::grid.text(expression(italic(F)[ST]), 0.2, 0, hjust=0.5, vjust=1.2)
+trellis.unfocus()
+dev.off()
+
 ##############################SCA##################################
 #BOTH
 both.sexsel<-read.table("both.sexsel.txt",header=T,sep='\t')
@@ -1870,155 +2003,6 @@ rect(0.90,0.45,0.95,0.025,col="lightgrey",border="lightgrey")
 text(x=0.925,y=0.25,"Mothers vs Females",cex=0.75,srt=270)
 dev.off()
 
-##### COVERAGE HEATMAP #####
-#as per reviewer 1's suggestion
-
-#bin coverage
-cov.bins<-data.frame(minCov=c(1,3,5,10,20,30,50),
-                     maxCov=c(3,5,10,20,30,50,1000000000),
-                     binCov=c(1,2,3,4,5,6,7))
-bin.names<-list(c("1-3","3-5","5-10","10-20","20-30","30-50","50+"))
-
-# function to get the matrix of mean Fsts
-get.cov.mat<-function(cov.fst.df,cov.bins, bin.names){
-  sdBin<-NULL
-  ddBin<-NULL
-  for(i in 1:nrow(cov.fst.df)){
-    sdb<-cov.bins[cov.bins$minCov <= cov.fst.df[i,"sdTotCov"] & 
-                      cov.bins$maxCov>cov.fst.df[i,"sdTotCov"],"binCov"]
-    ddb<-cov.bins[cov.bins$minCov <= cov.fst.df[i,"ddTotCov"] & 
-                    cov.bins$maxCov>cov.fst.df[i,"ddTotCov"],"binCov"]
-    if(length(sdb)>1){ print(i) }
-    if(length(ddb)>1){ print(i) }
-    sdBin<-c(sdBin,sdb)
-    ddBin<-c(ddBin,ddb)
-  }
-  cov.fst.df$sdBin<-sdBin
-  cov.fst.df$ddBin<-ddBin
-  covmap<-matrix(nrow=nrow(cov.bins),ncol=nrow(cov.bins))
-  for(i in 1:nrow(cov.bins)){
-    for(ii in 1:nrow(cov.bins)){
-      mfst<-mean(cov.fst.df$Fst[cov.fst.df$sdBin==cov.bins$binCov[i] & 
-                                  cov.fst.df$ddBin==cov.bins$binCov[ii] ],na.rm = T)
-      covmap[i,ii]<-mfst
-    }
-  }
-  return(as.matrix(covmap))
-}
-#df with sdTotCov, ddTotCov, Fst
-od.covmap<-data.frame(SNP=loc.cov$SNP,sdTotCov=loc.cov$AvgCovTotal.x,ddTotCov=loc.cov$AvgCovTotal.y)
-od.covmap<-merge(od.fst,od.covmap, by="SNP",all = FALSE) #10420
-od.covmat<-get.cov.mat(od.covmap,cov.bins,bin.names)
-dimnames(od.covmat)<-bin.names
-dimnames(od.covmat)[2]<-bin.names
-
-#same but with analysis of both
-both.od.cov<-merge(bo.cov,bd.cov,by="SNP")#11031
-both.covmap<-data.frame(SNP=both.od.cov$SNP,sdTotCov=both.od.cov$AvgCovTotal.x,
-                        ddTotCov=both.od.cov$AvgCovTotal.y)
-both.covmap<-merge(od.both.fst,both.covmap,by="SNP",all=FALSE)#11059
-both.covmat<-get.cov.mat(both.covmap,cov.bins,bin.names)
-dimnames(both.covmat)<-bin.names #rows, = sdRAD
-dimnames(both.covmat)[2]<-bin.names
-
-
-colors<-c("black","grey")
-pal<-colorRampPalette(colors)
-ncol=80
-cols<-pal(ncol)
-
-sep.cov.lv<-levelplot(as.matrix(od.covmat[2:7,2:7]),col.regions=cols,alpha.regions=0.7,
-                     scales = list(x=list(rot=90),tck = 0),
-                     xlab="sdRAD Coverage",ylab="ddRAD Coverage",
-                     main="Analyzed Separately")
-print(sep.cov.lv)
-bot.cov.lv<-levelplot(as.matrix(both.covmat[2:7,2:7]),col.regions=cols,alpha.regions=0.7,
-                      scales = list(x=list(rot=90),tck = 0),
-                      xlab="sdRAD Coverage",ylab="ddRAD Coverage",
-                      main="Analyzed Together")
-print(bot.cov.lv)
-#plot them together
-png("coverage_heatmaps_grey.png",height=6,width=11,units="in",res=300)
-print(sep.cov.lv,split=c(1,1,2,1),more=TRUE)
-lattice::trellis.focus("legend", side="right", clipp.off=TRUE, highlight=FALSE)
-grid::grid.text(expression(italic(F)[ST]), 0.2, 0, hjust=0.5, vjust=1.2)
-trellis.unfocus()
-
-print(bot.cov.lv,split=c(2,1,2,1),more=FALSE)
-lattice::trellis.focus("legend", side="right", clipp.off=TRUE, highlight=FALSE)
-grid::grid.text(expression(italic(F)[ST]), 0.2, 0, hjust=0.5, vjust=1.2)
-trellis.unfocus()
-dev.off()
-
-###### PCA #####
-library(pcadapt)
-both.pcadapt<-read.pcadapt("both.sub.vcf",type="vcfR")
-both.pca<-pcadapt(both.pcadapt,K=20)
-pops<-gsub("\\w+_(\\w{3})\\d+\\w?([[:punct:]].*)?","\\1",colnames(both)[10:(ncol(both)-1)])
-type<-gsub("(\\w+)_(\\w{3})\\d+\\w?([[:punct:]].*)?","\\1",colnames(both)[10:(ncol(both)-1)])
-type[type=="orad"]<-sdtog.col
-type[type=="sample"]<-ddtog.col
-pops[pops=="FEM"]<-15
-pops[pops=="PRM" | pops=="NPM"]<-16
-pops[pops=="OFF"]<-17
-plot(both.pca,option="scores",pop=pops)
-plot(both.pca,option="scores",pop=type)
-plot(both.pca,option="qqplot")
-both.props<-round((both.pca$singular.values/sum(both.pca$singular.values))*100,2)
-
-##write the vcf file for the merged ddrad and sdrad separate
-od.vcf<-merge(orad,drad,"SNP")
-od.vcf$ID.x<-paste(od.vcf$`#CHROM.x`,as.numeric(as.character(od.vcf$ID.y)),
-                   as.numeric(as.character(od.vcf$POS.y)),sep=".")
-od.vcf<-od.vcf[,!(colnames(od.vcf) %in% 
-                    c("#CHROM.y","POS.y","ID.y","REF.y","ALT.y",
-                      "QUAL.y","FILTER.y","INFO.y","FORMAT.y","SNP"))]
-colnames(od.vcf)[1:9]<-c("#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT")
-od.vcf<-od.vcf[!duplicated(od.vcf$ID),]
-write.table(od.vcf,"merged.sep.vcf",sep='\t',
-            col.names=TRUE,row.names=FALSE,quote=FALSE)
-#do pcadapt on these
-merge.pcadapt<-read.pcadapt("merged.sep.vcf",type="vcfR")
-merge.pca<-pcadapt(merge.pcadapt,K=20)
-
-od.pops<-gsub("\\w+_(\\w{3})\\d+\\w?([[:punct:]].*)?","\\1",colnames(od.vcf)[10:ncol(od.vcf)])
-od.type<-gsub("(\\w+)_(\\w{3})\\d+\\w?([[:punct:]].*)?","\\1",colnames(od.vcf)[10:ncol(od.vcf)])
-od.type[od.type=="orad"]<-sdsep.col
-od.type[od.type=="sample"]<-ddsep.col
-od.pops[od.pops=="FEM"]<-15
-od.pops[od.pops=="PRM" | od.pops=="NPM"]<-16
-od.pops[od.pops=="OFF"]<-17
-plot(merge.pca,option="scores",pop=od.pops) 
-plot(merge.pca,option="scores",pop=od.type)
-od.props<-round((merge.pca$singular.values/sum(merge.pca$singular.values))*100,2)
-
-#Plot them together
-png("sca.pca.png",height=5,width=8,units="in",res=300)
-par(mfrow=c(1,2),oma=c(2,2,2,1),mar=c(2,2,2,1))
-plot(both.pca$scores[,1],both.pca$scores[,2],axes=F,
-     pch=as.numeric(pops),col=alpha(type,0.75),cex=1.5,ylab="",xlab="",
-     xlim=c(-0.05,0.15))
-axis(1,at=seq(-0.2,0.2,0.05),las=1)
-mtext(paste("PC1 (",both.props[1],"%)",sep=""),1,line = 2)
-axis(2,at=seq(-0.2,0.2,0.1),las=1,hadj = 0.6)
-mtext(paste("PC2 (",both.props[2],"%)",sep=""),2,line = 2.1)
-
-plot(merge.pca$scores[,1],merge.pca$scores[,2],axes=F,
-     col=alpha(od.type,0.75),pch=as.numeric(od.pops),cex=1.5,
-     xlim=c(-0.2,0.1),ylim=c(-0.1,0.45),xlab="",ylab="")
-axis(1,at=seq(-0.25,0.15,0.1))
-mtext(paste("PC1 (",od.props[1],"%)",sep=""),1,line = 2)
-axis(2,at=seq(-0.15,0.5,0.2),las=1,hadj=0.7)
-mtext(paste("PC2 (",od.props[2],"%)",sep=""),2,line = 2.1)
-
-par(mfrow=c(1, 1), oma=rep(0, 4), mar=rep(0, 4), new=TRUE)
-plot(0:1, 0:1, type="n", xlab="", ylab="", axes=FALSE)
-legend("top",c("sdRAD Together","ddRAD Together","sdRAD Alone","ddRAD Alone",
-               "Females","Males","Offspring"),
-       pch=c(rep(18,4),15,16,17),bty='n',ncol=4,pt.cex=1.5,
-       col=c(alpha(sdtog.col,0.75),alpha(ddtog.col,0.75),alpha(sdsep.col,0.75),
-             alpha(ddsep.col,0.75),rep(alpha("darkgrey",0.75),3)))
-dev.off()
 
 ##### ALLELE FREQUENCY SPECTRA #####
 ddsep.afs<-do.call(rbind,apply(drad,1,calc.afs.vcf))
@@ -2026,30 +2010,28 @@ sdsep.afs<-do.call(rbind,apply(orad,1,calc.afs.vcf))
 ddtog.afs<-do.call(rbind,apply(both[,c(locus.info,d.ind)],1,calc.afs.vcf))
 sdtog.afs<-do.call(rbind,apply(both[,c(locus.info,o.ind)],1,calc.afs.vcf))
 
-ddtog.afs<-do.call(rbind,ddtog.afs)
-sdtog.afs<-do.call(rbind,sdtog.afs)
 
 #PLOT HISTOGRAMS OF AFS
 png("joint_afs.png",height=5,width=8,units="in",res=300)
 par(mfrow=c(1,2),oma=c(1,1,1,1),mar=c(2,2,2,2))
 par(mar=c(2,3,2,1))
-hist(sdtog.afs$RefFreq, col=alpha(sdtog.col,0.5), breaks=seq(0,1,0.05),ylim=c(0,40000),
+hist(sdtog.afs$RefFreq, col=alpha(sdtog.col,0.5), breaks=seq(-0.025,1.025,0.05),ylim=c(0,40000),
      main="sdRAD-seq",axes=F,xlim=c(0,1),border=alpha(sdtog.col,0.5))
-hist(sdsep.afs$RefFreq,col=alpha(sdsep.col,0.5), add=T,breaks=seq(0,1,0.05),density=20)
-legend("topleft",c("Assembled Together", "Assembled Separately"),
+hist(sdsep.afs$RefFreq,col=alpha(sdsep.col,0.5), add=T,breaks=seq(-0.025,1.025,0.05),density=20)
+legend("topleft",c("Analyzed Together", "Analyzed Separately"),
        fill=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)),bty='n',
        density=c(NA,20),border=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)))
-axis(1,pos=0)
-axis(2,pos=0,las=1)
+axis(1,pos=0,at=seq(-0.2,1.2,0.2))
+axis(2,las=1,hadj=0.75)
 
 par(mar=c(2,2,2,2))
 hist(ddtog.afs$RefFreq, col=alpha(ddtog.col,0.5), ylim=c(0,10000),
-     breaks=seq(0,1,0.05),border=alpha(ddtog.col,0.5),
+     breaks=seq(-0.025,1.025,0.05),border=alpha(ddtog.col,0.5),
      main="ddRAD-seq",axes=F)
-hist(ddsep.afs$RefFreq,col=alpha(ddsep.col,0.5), add=T,breaks=seq(0,1,0.05),density=20)
-axis(1,pos=0)
-axis(2,pos=0,las=1)
-legend("topleft",c("Assembled Together", "Assembled Separately"),
+hist(ddsep.afs$RefFreq,col=alpha(ddsep.col,0.5), add=T,breaks=seq(-0.025,1.025,0.05),density=20)
+axis(1,pos=0,at=seq(-0.2,1.2,0.2))
+axis(2,las=1,hadj=0.75)
+legend("topleft",c("Analyzed Together", "Analyzed Separately"),
        fill=c(alpha(ddtog.col,0.5),alpha(ddsep.col,0.5)),bty='n',density = c(NA,20),
        border=c(alpha(ddtog.col,0.5),alpha(ddsep.col,0.5)))
 mtext("Reference Allele Frequency",1,outer=T,line=-1)
@@ -2057,148 +2039,6 @@ mtext("Number of SNPs",2,outer = T)
 dev.off()
 
 
-####### GBSTOOLS ########
-both.gbst<-parse.vcf("both.lrt.vcf")
-orad.gbst<-parse.vcf("orad.lrt.vcf")
-drad.gbst<-parse.vcf("drad.lrt.vcf")
-both.gbst$SNP<-paste(both.gbst$`#CHROM`,both.gbst$POS,sep=".")
-orad.gbst$SNP<-paste(orad.gbst$`#CHROM`,orad.gbst$POS,sep=".")
-drad.gbst$SNP<-paste(drad.gbst$`#CHROM`,drad.gbst$POS,sep=".")
-
-dropout.count.mean<-function(lrt.vcf,ind.rows){
-  vcf.dcs<-apply(lrt.vcf,1,function(snp.row){
-    dcs<-unlist(lapply(snp.row[ind.rows],function(x){
-      dc<-unlist(strsplit(x,":"))
-      dc<-dc[[length(dc)]]
-      return(dc)
-    }))
-    if(length(unique(dcs))==1 & unique(dcs)[1]==".") { rsm<-NA } else{
-      dcs<-dcs[dcs!="."]
-      rsm<-mean(as.numeric(dcs))
-    }
-    return(rsm)
-  })
-  return(vcf.dcs)
-}
-
-orad.dcs<-dropout.count.mean(orad.gbst[orad.gbst$SNP %in% od.loci$SNP,],o.ind)
-drad.dcs<-dropout.count.mean(drad.gbst[drad.gbst$SNP %in% od.loci$SNP,],d.ind)
-
-bo.dcs<-dropout.count.mean(both.gbst,o.ind)
-bd.dcs<-dropout.count.mean(both.gbst,d.ind)
-
-par(mfrow=c(1,2),oma=c(1,1,1,1),mar=c(2,2,2,2))
-par(mar=c(2,3,2,1))
-hist(bo.dcs, col=alpha(sdtog.col,0.5), breaks=seq(-0.025,1.925,0.05),ylim=c(0,30000),
-     main="",axes=F,xlim=c(0,2),border=alpha(sdtog.col,0.5))
-hist(bd.dcs,col=ddtog.col, add=T,seq(-0.025,1.925,0.05),density=20)
-legend("top",c("sdRAD-seq Assembled Together", "ddRAD-seq Assembled Together"),
-       fill=c(alpha(sdtog.col,0.5),alpha(ddtog.col,0.5)),bty='n',
-       density=c(NA,20),border=c(alpha(sdtog.col,0.5),alpha(ddtog.col,0.5)))
-axis(1,pos=0)
-axis(2,pos=-0.025,las=1)
-
-par(mar=c(2,2,2,2))
-hist(orad.dcs, col=alpha(sdsep.col,0.5), ylim=c(0,12000),
-     breaks=seq(-0.025,1.925,0.05),border=alpha(sdsep.col,0.5),xlim=c(0,2),
-     main="",axes=F)
-hist(drad.dcs,col=alpha(ddsep.col,0.5), add=T,breaks=seq(-0.025,1.925,0.05),density=20)
-axis(1,pos=0)
-axis(2,pos=-0.025,las=1)
-legend("top",c("sdRAD-seq Assembled Separately", "ddRAD-seq Assembled Separately"),
-       fill=c(alpha(sdsep.col,0.5),alpha(ddsep.col,0.5)),bty='n',density = c(NA,20),
-       border=c(alpha(sdsep.col,0.5),alpha(ddsep.col,0.5)))
-mtext("Mean Dropout Allele Counts",1,outer=T,line=-1)
-mtext("Number of SNPs",2,outer = T)
-
-##Look at Ref/Alt relative to allele freqs.
-#need the allele freqs
-drad.afs<-do.call(rbind,apply(drad[drad$SNP %in% od.loci$SNP,],1,calc.afs.vcf))
-drad.afs$SNP<-paste(drad.afs$Chrom,as.numeric(as.character(drad.afs$Pos)),sep=".")
-orad.afs<-do.call(rbind,apply(orad[orad$SNP %in% od.loci$SNP,],1,calc.afs.vcf))
-orad.afs$SNP<-paste(orad.afs$Chrom,as.numeric(as.character(orad.afs$Pos)),sep=".")
-dbot.afs<-do.call(rbind,apply(both[,c(locus.info,d.ind)],1,calc.afs.vcf))
-dbot.afs$SNP<-paste(dbot.afs$Chrom,as.numeric(as.character(dbot.afs$Pos)),sep=".")
-obot.afs<-do.call(rbind,apply(both[,c(locus.info,o.ind)],1,calc.afs.vcf))
-obot.afs$SNP<-paste(obot.afs$Chrom,as.numeric(as.character(obot.afs$Pos)),sep=".")
-
-#compare to coverage
-dsep.ra<-merge(drad.afs,d.cov,by="SNP")                                   #neg: more ref than alt
-dsep.ra$FreqRefDiff<-(dsep.ra$RefFreq/dsep.ra$AltFreq)-dsep.ra$AvgCovRatio #pos: more alt than ref
-osep.ra<-merge(orad.afs,o.cov,by="SNP")
-osep.ra$FreqRefDiff<-(osep.ra$RefFreq/osep.ra$AltFreq)-osep.ra$AvgCovRatio
-dbot.ra<-merge(dbot.afs,bd.cov,by="SNP")
-dbot.ra$FreqRefDiff<-(dbot.ra$RefFreq/dbot.ra$AltFreq)-dbot.ra$AvgCovRatio
-dbot.ra$FreqRefDiff[dbot.ra$AltFreq==0]<-1-dbot.ra$AvgCovRatio[dbot.ra$AltFreq==0]
-obot.ra<-merge(obot.afs,bo.cov,by="SNP")
-obot.ra$FreqRefDiff<-(obot.ra$RefFreq/obot.ra$AltFreq)-obot.ra$AvgCovRatio
-obot.ra$FreqRefDiff[obot.ra$AltFreq==0]<-1-obot.ra$AvgCovRatio[obot.ra$AltFreq==0]
-
-#violinplots
-par(mfrow=c(2,4),oma=c(2,2,1,1),mar=c(1,2,1,0.1))
-spf.vioplot(bo.dcs[!is.na(bo.dcs)], col=sdtog.col,plot.axes=FALSE,ylim=c(0,1.5))
-axis(2,at=seq(0,2,0.5),las=1,hadj=0.5)
-mtext("Mean Dropout Allele Counts",2,cex=0.75,line=2)
-spf.vioplot(bd.dcs[!is.na(bd.dcs)],col=ddtog.col,plot.axes=FALSE,ylim=c(0,1.5))
-#axis(2,las=1,at=seq(0,1.5,0.5),hadj=0.5)
-spf.vioplot(orad.dcs[!is.na(orad.dcs)], col=sdsep.col,plot.axes = FALSE,ylim=c(0,1.5))
-#axis(2,las=1,at=seq(0,1.2,0.5),hadj=0.5)
-spf.vioplot(drad.dcs[!is.na(drad.dcs)],col=ddsep.col,plot.axes=FALSE,ylim=c(0,1.5))
-#axis(2,at=seq(0,1,0.5),las=1,hadj=0.5)
-
-spf.vioplot(obot.ra$FreqRefDiff,col=sdtog.col,plot.axes = FALSE,ylim=c(-300,20))
-axis(2,at=seq(-300,20,20),las=1,hadj=0.5)
-mtext("sdRAD-seq\nAnalyzed Together",1,outer=FALSE,cex=0.75,line=1)
-mtext("Difference Between Allele Frequency\nand Coverage Alt/Ref Ratios",2,cex=0.75,line=1.8)
-spf.vioplot(dbot.ra$FreqRefDiff,col=ddtog.col,plot.axes = FALSE,ylim=c(-300,20))
-#axis(2,at=seq(-300,50,50),las=1,hadj=0.75)
-mtext("ddRAD-seq\nAnalyzed Together",1,outer=FALSE,cex=0.75,line=1)
-spf.vioplot(osep.ra$FreqRefDiff,col=sdsep.col,plot.axes = FALSE,ylim=c(-300,20))
-#axis(2,at=seq(-40,20,10),las=1,hadj=0.6)
-mtext("sdRAD-seq\nAnalyzed Separately",1,outer=FALSE,cex=0.75,line=1)
-spf.vioplot(dsep.ra$FreqRefDiff,col=ddsep.col,plot.axes = FALSE,ylim=c(-300,20))
-#axis(2,at=seq(-40,20,10),las=1,hadj=0.5)
-mtext("ddRAD-seq\nAnalyzed Separately",1,outer=FALSE,cex=0.75,line=1)
-
-#stats tests
-both.ra<-merge(obot.ra,dbot.ra,by="SNP")
-wilcox.test(both.ra$FreqRefDiff.x,both.ra$FreqRefDiff.y,paired=T) #p = 0.06704
-sep.ra<-merge(osep.ra,dsep.ra,by="SNP")
-wilcox.test(sep.ra$FreqRefDiff.x,sep.ra$FreqRefDiff.y,paired=T)#p=0.0008286
-#unpaired
-wilcox.test(obot.ra$FreqRefDiff,dbot.ra$FreqRefDiff) #p=0.03602
-wilcox.test(osep.ra$FreqRefDiff,dsep.ra$FreqRefDiff) #p=0.002723
-
-#are they different between analysis methods
-wilcox.test(obot.ra$FreqRefDiff,osep.ra$FreqRefDiff) #p=0.5415
-wilcox.test(dbot.ra$FreqRefDiff,dsep.ra$FreqRefDiff) #p=0.1964
-
-#gbstools
-wilcox.test(orad.dcs,drad.dcs) #p < 2.2E-16
-wilcox.test(bo.dcs,bd.dcs) #p<2.2E-16
-
-#between analysis methods
-wilcox.test(orad.dcs,bo.dcs) #p =2.172E-12
-wilcox.test(drad.dcs,bd.dcs) #p<2.2E-16
-
-
-ratio.comp<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(osep.ra)),rep("ddRAD",nrow(dsep.ra)),
-                                   rep("sdRAD",nrow(obot.ra)),rep("ddRAD",nrow(dbot.ra))), 
-                     Assembly=c(rep("Alone",nrow(osep.ra)),rep("Alone",nrow(dsep.ra)),
-                                rep("Together",nrow(obot.ra)),rep("Together",nrow(dbot.ra))),
-                     RatioDiff=c(osep.ra$FreqRefDiff,dsep.ra$FreqRefDiff,
-                                   obot.ra$FreqRefDiff,dbot.ra$FreqRefDiff))
-
-dcs.comp<-data.frame(LibraryPrep=c(rep("sdRAD",length(orad.dcs)),rep("ddRAD",length(drad.dcs)),
-                                     rep("sdRAD",length(bo.dcs)),rep("ddRAD",length(bd.dcs))), 
-                       Assembly=c(rep("Alone",length(orad.dcs)),rep("Alone",length(drad.dcs)),
-                                  rep("Together",length(bo.dcs)),rep("Together",length(bd.dcs))),
-                       DropCount=c(orad.dcs,drad.dcs,bo.dcs,bd.dcs))
-
-summary(aov(ratio.comp$RatioDiff~ratio.comp$LibraryPrep*ratio.comp$Assembly))
-TukeyHSD(aov(ratio.comp$RatioDiff~ratio.comp$LibraryPrep*ratio.comp$Assembly))
-summary(aov(dcs.comp$DropCount~dcs.comp$LibraryPrep*dcs.comp$Assembly))
-TukeyHSD(aov(dcs.comp$DropCount~dcs.comp$LibraryPrep*dcs.comp$Assembly))
 ##############################DRAD DIFFERENT PLATES##################################
 
 #d.cov<-do.call("rbind",apply(drad,1,vcf.cov.loc,subset=d.ind))
@@ -2247,6 +2087,174 @@ legend("top",ncol=2,levels(factor(dcomp$Plate)),col=alpha(as.numeric(as.factor(l
 
 summary(aov(dcomp$PropMissing~dcomp$Plate))
 TukeyHSD(aov(dcomp$PropMissing~dcomp$Plate))
+
+##################################OLD PLOTS###########################################
+#coverage -- super skinny bars
+
+###
+jpeg("CoverageAssemblyMethodComp_Subset_rev_small.jpeg",height=10.5,width=8,units="in",res=300)
+par(mfrow=c(3,2),oma=c(1,1,1,1),mar=c(2,2,2,2))
+par(mar=c(2,3,2,1))
+hist(oc$NumReadsTogether, col=alpha(sdtog.col,0.5), ylim=c(0,50),
+     breaks=seq(0,3500000,25000),border=alpha(sdtog.col,0.5),
+     main="sdRAD-seq",axes=F,xlim=c(0,3500000))
+hist(oc$NumReadsAlone,colalpha(sdsep.col,0.5), add=T,breaks=seq(0,3500000,25000),density=20)
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+mtext("Number of Individuals",2.5,outer=F,line=2,cex=0.75)
+par(mar=c(2,2,2,2))
+hist(dc$NumReadsTogether, col=alpha(ddtog.col,0.5), ylim=c(0,50), 
+     breaks=seq(0,1500000,10000),border=alpha(ddtog.col,0.5),
+     main="ddRAD-seq",axes=F)
+hist(dc$NumReadsAlone,col=alpha(ddsep.col,0.5), add=T,breaks=seq(0,1500000,10000),density=20)
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+legend("topright",c("Assembled Together", "Assembled Separately"),
+       fill=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)),bty='n',
+       density=c(NA,20),border=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)))
+mtext("Total Number of Reads",1,outer=T,cex=0.75,line=-52)#-29 for R
+
+par(mar=c(2,3,2,1))
+hist(bo.cov$AvgCovTotal,col=alpha(sdtog.col,0.5),axes=F,xlab="",ylab="",main="",
+     xlim=c(0,20080),ylim=c(0,150000),breaks=seq(0,21000,100),border=alpha(sdtog.col,0.5))
+hist(o.cov$AvgCovTotal, col=alpha(sdsep.col,0.5), add=T,breaks=seq(0,21000,100),density=20)
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+mtext("Number of Loci",2,outer=F,line=2.5,cex=0.75)
+par(mar=c(2,2,2,2))
+hist(bd.cov$AvgCovTotal, col=alpha(ddtog.col,0.5),main="",axes=F,ylab="",xlab="",
+     xlim=c(0,2450),ylim=c(0,150000),breaks=seq(0,2600,15),border=alpha(ddtog.col,0.5))
+hist(d.cov$AvgCovTotal, col=alpha(ddsep.col,0.5), add=T,breaks=seq(0,2600,15),density=20)
+axis(1,pos=0)
+axis(2,pos=0,las=1)
+mtext("Average Number of Reads Per Individual Per SNP",1,outer=T,line=-27,cex=0.75)#-15 for R
+
+par(mar=c(2,3,2,1))
+hist(bo.cov$AvgCovRatio,col=alpha(sdtog.col,0.5),main="",axes=F,
+     xlab="",ylab="",breaks=seq(0,600,3.5),ylim=c(0,50000),xlim=c(0,565),border=alpha(sdtog.col,0.5))
+hist(o.cov$AvgCovRatio, col=alpha(sdsep.col,0.5), add=T,breaks=seq(0,600,3.5),density=20)
+axis(1,pos=0)
+axis(2,pos=-5,las=1)
+mtext("Number of Loci",2,outer=F,line=2.5,cex=0.75)
+par(mar=c(2,2,2,2))
+hist(bd.cov$AvgCovRatio, col=alpha(ddtog.col,0.5),main="",axes=F,
+     ylab="",xlab="",breaks=seq(0,2000,12.5),ylim=c(0,50000),xlim=c(0,2000),border=alpha(ddtog.col,0.5))
+hist(d.cov$AvgCovRatio, col=alpha(ddsep.col,0.5), add=T,breaks=seq(0,2000,12.5),density=20)
+axis(1,pos=0)
+axis(2,pos=-2,las=1)
+mtext("Average Number of Reads in Ref/Avg Number of Reads in Alt",1,outer=T,cex=0.75)
+dev.off()
+
+####Fsts - sdRAD vs ddRAD
+jpeg("sd-dd_Fst_subset.jpeg",height=10,width=7.5,units="in",res=300)
+par(mfrow=c(4,1),mar=c(2,2,2,2),oma=c(1,2,1,1))
+##Separate
+od<-fst.plot(od.fst[!is.na(od.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
+             fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
+             groups=as.factor(scaffs[scaffs %in% levels(factor(od.fst$Chrom[!is.na(od.fst$Fst)]))]))
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(od[od$Chrom ==lgs[i],"Pos"]),y=-0.05,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(od[od$Chrom ==lgs[i],"Pos"])
+}
+mtext("sdRAD-ddRAD Analyzed Separately",3,cex=0.75)
+odc<-fst.plot(od.fst[!is.na(od.fst$Fst) & od.fst$SNP %in% cov.pass,],ci.dat=c(-10,10),sig.col=c("black","black"), 
+              fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
+              groups=as.factor(scaffs[scaffs %in% levels(factor(od.fst$Chrom[!is.na(od.fst$Fst)& od.fst$SNP %in% cov.pass]))]))
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(odc[odc$Chrom ==lgs[i],"Pos"]),y=-0.05,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(odc[odc$Chrom ==lgs[i],"Pos"])
+}
+mtext("sdRAD-ddRAD Analyzed Separately, Coverage Filter",3,cex=0.75)
+
+##Together
+odb<-fst.plot(od.both.fst[!is.na(od.both.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
+              fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
+              groups=as.factor(scaffs[scaffs %in% levels(factor(od.both.fst[!is.na(od.both.fst$Fst),"Chrom"]))]))
+odb$Pos<-as.numeric(as.character(odb$Pos))
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(odb[odb$Chrom ==lgs[i],"Pos"],na.rm=T),y=-0.05,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(odb[odb$Chrom ==lgs[i],"Pos"],na.rm = T)
+}
+mtext("sdRAD-ddRAD Analyzed Together",3,cex=0.75)
+odbc<-fst.plot(od.both.fst[!is.na(od.both.fst$Fst) & od.both.fst$SNP %in% sep.cov.pass,],
+               ci.dat=c(-10,10),sig.col=c("black","black"), y.lim=c(0,1),
+               fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,
+               groups=as.factor(scaffs[scaffs %in% 
+                                         levels(factor(od.both.fst[!is.na(od.both.fst$Fst) & od.both.fst$SNP %in% sep.cov.pass,"Chrom"]))]))
+odbc$Pos<-as.numeric(as.character(odbc$Pos))
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(odbc[odbc$Chrom ==lgs[i],"Pos"],na.rm=T),y=-0.05,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(odbc[odbc$Chrom ==lgs[i],"Pos"],na.rm = T)
+}
+mtext("sdRAD-ddRAD Analyzed Together, Coverage Filter",3,cex=0.75)
+mtext(expression(italic(F)[ST]),2,outer=T,cex=0.75)
+dev.off()
+
+gwsca<-read.delim("gwsca_fsts_both.txt")
+
+drad.test<-sample(d.ind,120)
+drad.tes.fst<-do.call("rbind", apply(both, 1, fst.one.vcf,group1=drad.test[1:60],group2=drad.test[61:120],cov.thresh=0.2))
+
+####60 ddRAD and 60 sdRAD
+png("fsts_60ddrad60sdrad.png",height=10,width=7.5,units="in",res=300)
+par(mfrow=c(4,1),mar=c(2,2,2,2),oma=c(1,2,1,1))
+##Separate
+od<-fst.plot(sub.od.fst[!is.na(sub.od.fst$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
+             fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
+             groups=as.factor(scaffs[scaffs %in% levels(factor(sub.od.fst$Chrom[!is.na(sub.od.fst$Fst)]))]))
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(od[od$Chrom ==lgs[i],"Pos"]),y=-0.05,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(od[od$Chrom ==lgs[i],"Pos"])
+}
+mtext("sdRAD-ddRAD Analyzed Separately",3,cex=0.75)
+odc<-fst.plot(sub.od.fst[!is.na(sub.od.fst$Fst) & sub.od.fst$SNP %in% cov.pass,],ci.dat=c(-10,10),sig.col=c("black","black"), 
+              fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
+              groups=as.factor(scaffs[scaffs %in% levels(factor(sub.od.fst$Chrom[!is.na(sub.od.fst$Fst)& sub.od.fst$SNP %in% cov.pass]))]))
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(odc[odc$Chrom ==lgs[i],"Pos"]),y=-0.05,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(odc[odc$Chrom ==lgs[i],"Pos"])
+}
+mtext("sdRAD-ddRAD Analyzed Separately, Coverage Filter",3,cex=0.75)
+
+##Together
+odb<-fst.plot(sub.fsts.both[!is.na(sub.fsts.both$Fst),],ci.dat=c(-10,10),sig.col=c("black","black"), 
+              fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,y.lim=c(0,1),
+              groups=as.factor(scaffs[scaffs %in% levels(factor(sub.fsts.both[!is.na(sub.fsts.both$Fst),"Chrom"]))]))
+odb$Pos<-as.numeric(as.character(odb$Pos))
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(odb[odb$Chrom ==lgs[i],"Pos"],na.rm=T),y=-0.05,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(odb[odb$Chrom ==lgs[i],"Pos"],na.rm = T)
+}
+mtext("sdRAD-ddRAD Analyzed Together",3,cex=0.75)
+odbc<-fst.plot(sub.fsts.both[!is.na(sub.fsts.both$Fst) & sub.fsts.both$SNP %in% sep.cov.pass,],
+               ci.dat=c(-10,10),sig.col=c("black","black"), y.lim=c(0,1),
+               fst.name="Fst",chrom.name="Chrom",bp.name="Pos",axis.size=1,
+               groups=as.factor(scaffs[scaffs %in% 
+                                         levels(factor(sub.fsts.both[!is.na(sub.fsts.both$Fst) & sub.fsts.both$SNP %in% sep.cov.pass,"Chrom"]))]))
+odbc$Pos<-as.numeric(as.character(odbc$Pos))
+last<-0
+for(i in 1:length(lgs)){
+  text(x=mean(odbc[odbc$Chrom ==lgs[i],"Pos"],na.rm=T),y=-0.05,
+       labels=lgn[i], adj=1, xpd=TRUE,srt=90,cex=1)
+  last<-max(odbc[odbc$Chrom ==lgs[i],"Pos"],na.rm = T)
+}
+mtext("sdRAD-ddRAD Analyzed Together, Coverage Filter",3,cex=0.75)
+mtext(expression(italic(F)[ST]),2,outer=T,cex=0.75)
+dev.off()
 
 ###############################ALLELE FREQUENCIES#####################################
 bd.afs<-do.call("rbind",apply(both[,c(locus.info,d.ind)],1,calc.afs.vcf))
