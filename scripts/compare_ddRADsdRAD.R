@@ -2039,6 +2039,35 @@ mtext("Number of SNPs",2,outer = T)
 dev.off()
 
 
+#####################################SAMTOOLS########################################
+sta.vcf<-parse.vcf("sta.subset.recode.vcf") #60 and 60 analyzed together in samtools
+#filter based on mean DP
+THRESH<-360 #avg 3 per ind (120 inds)
+sta.df.vcf<-do.call(rbind,apply(sta.vcf,1,function(vcf.row){
+  dp<-as.numeric(gsub("DP=(\\d+).*","\\1",vcf.row["INFO"]))
+  if(dp >= THRESH){
+    return(vcf.row)
+  }
+}))
+sta.dd.ind<-colnames(sta.df.vcf)[10:69]
+sta.sd.ind<-colnames(sta.df.vcf)[70:129]
+
+sta.fst<-do.call(rbind,apply(sta.df.vcf,1,fst.one.vcf,group1=sta.dd.ind,group2=sta.sd.ind))
+
+#filter based on quality scores
+sta.qual.vcf<-apply(sta.df.vcf,1,function(vcf.row){
+  new.inds<-unlist(lapply(vcf.row[10:length(vcf.row)],function(x){
+    qual<-as.numeric(unlist(strsplit(as.character(x),":"))[3])
+    if(qual >= 30){
+      return(x)
+    } else {
+      return("./.")
+    }
+  }))
+  return(c(vcf.row[1:9],new.inds))
+})
+sta.qual.fst<-do.call(rbind,apply(sta.qual.vcf,1,fst.one.vcf,group1=sta.dd.ind,group2=sta.sd.ind))
+
 ##############################DRAD DIFFERENT PLATES##################################
 
 #d.cov<-do.call("rbind",apply(drad,1,vcf.cov.loc,subset=d.ind))
