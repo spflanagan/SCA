@@ -2064,9 +2064,19 @@ sta.qual.vcf<-apply(sta.df.vcf,1,function(vcf.row){
       return("./.")
     }
   }))
-  return(c(vcf.row[1:9],new.inds))
+  return(as.vector(c(vcf.row[1:9],new.inds)))
 })
+sta.qual.vcf<-as.data.frame(t(sta.qual.vcf))
+colnames(sta.qual.vcf)<-colnames(sta.df.vcf)
 sta.qual.fst<-do.call(rbind,apply(sta.qual.vcf,1,fst.one.vcf,group1=sta.dd.ind,group2=sta.sd.ind))
+
+sta.fst$Pos<-as.numeric(as.character(sta.fst$Pos))
+sta.qual.fst$Pos<-as.numeric(as.character(sta.qual.fst$Pos))
+par(mfrow=c(2,1),oma=c(1,1,1,1),mar=c(1,1,1,1))
+dp<-fst.plot(sta.fst,fst.name = "Fst",chrom.name = "Chrom",bp.name = "Pos",
+             axis.size = 1,pch = 19,scaffs.to.plot = lgs,y.lim = c(0,1))
+qt<-fst.plot(sta.qual.fst[!is.na(sta.qual.fst$Fst),],fst.name = "Fst",chrom.name = "Chrom",bp.name = "Pos",
+                 axis.size = 1,pch = 19)
 
 ##############################DRAD DIFFERENT PLATES##################################
 
