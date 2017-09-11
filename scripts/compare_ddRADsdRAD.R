@@ -2136,14 +2136,14 @@ colnames(sto.qual.vcf)<-colnames(sto.df.vcf)[colnames(sto.df.vcf) != "SNP"]
 sts.qual.vcf<-combine.vcfs(as.data.frame(std.qual.vcf),as.data.frame(sto.qual.vcf)
                       ,"sts.qual.combined.vcf")
 sts.qual.fst<-do.call(rbind,apply(sts.qual.vcf,1,fst.one.vcf,group1=sta.dd.ind,group2=sta.sd.ind))
-
+sts.qual.fst<-sts.qual.fst[!is.na(sts.qual.fst$Fst),]
 #coverage calcs
 
 spf.vioplot(sta.fst$Fst,sta.qual.fst$Fst,sts.fst$Fst, sts.qual.fst$Fst,
             colMed="black",ylim=c(-1.5,1),
              col=c(ddsdtog.col,alpha(ddsdtog.col,0.5),
                    ddsdsep.col,alpha(ddsdsep.col,0.5)),
-            border=borders[11:12],plot.axes=F,axis.box=F,lwd=2)
+            plot.axes=F,axis.box=F,lwd=2)
 
 ##############################DRAD DIFFERENT PLATES##################################
 
