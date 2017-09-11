@@ -2096,18 +2096,18 @@ sto.df.vcf<-do.call(rbind,apply(sto.vcf,1,function(vcf.row){
     return(vcf.row)
   }
 }))#232101
+sto.df.vcf<-as.data.frame(sto.df.vcf)
+sto.df.vcf$SNP<-paste(sto.df.vcf$`#CHROM`,sto.df.vcf$POS,sep=".")
+std.df.vcf<-as.data.frame(std.df.vcf)
+std.df.vcf$SNP<-paste(std.df.vcf$`#CHROM`,std.df.vcf$POS,sep=".")
 
 sts.vcf<-combine.vcfs(as.data.frame(std.df.vcf),as.data.frame(sto.df.vcf)
-                      ,"samtools.combined.vcf")#53057
-sto.df.vcf<-as.data.frame(sto.df.vcf)
-sto.df.vcf$SNP<-paste(sto.df.vcf$`#CHROM`,sto.df.vcf$POS)
-std.df.vcf<-as.data.frame(std.df.vcf)
-std.df.vcf$SNP<-paste(std.df.vcf$`#CHROM`,std.df.vcf$POS)
-sts.fst<-do.call(rbind,apply(std.df.vcf,1,fst.two.vcf,vcf2=sto.df.vcf,match.index="SNP"))
+                      ,"sts.combined.vcf")#53057
+sts.fst<-do.call(rbind,apply(sts.vcf,1,fst.one.vcf,group1=sta.dd.ind,group2=sta.sd.ind))
 
 #filter based on quality scores
 std.qual.vcf<-apply(std.df.vcf,1,function(vcf.row){
-  new.inds<-unlist(lapply(vcf.row[10:length(vcf.row)],function(x){
+  new.inds<-unlist(lapply(vcf.row[sta.dd.ind],function(x){
     qual<-as.numeric(unlist(strsplit(as.character(x),":"))[3])
     if(qual >= 30){
       return(x)
@@ -2118,9 +2118,9 @@ std.qual.vcf<-apply(std.df.vcf,1,function(vcf.row){
   return(as.vector(c(vcf.row[1:9],new.inds)))
 })
 std.qual.vcf<-as.data.frame(t(std.qual.vcf))
-colnames(std.qual.vcf)<-colnames(std.df.vcf)
+colnames(std.qual.vcf)<-colnames(std.df.vcf)[colnames(std.df.vcf) != "SNP"]
 sto.qual.vcf<-apply(sto.df.vcf,1,function(vcf.row){
-  new.inds<-unlist(lapply(vcf.row[10:length(vcf.row)],function(x){
+  new.inds<-unlist(lapply(vcf.row[sta.sd.ind],function(x){
     qual<-as.numeric(unlist(strsplit(as.character(x),":"))[3])
     if(qual >= 30){
       return(x)
@@ -2131,15 +2131,19 @@ sto.qual.vcf<-apply(sto.df.vcf,1,function(vcf.row){
   return(as.vector(c(vcf.row[1:9],new.inds)))
 })
 sto.qual.vcf<-as.data.frame(t(sto.qual.vcf))
-colnames(sto.qual.vcf)<-colnames(sto.df.vcf)
+colnames(sto.qual.vcf)<-colnames(sto.df.vcf)[colnames(sto.df.vcf) != "SNP"]
 
-sts.qual.vcf<-combine.vcfs(as.data.frame(std.df.vcf),as.data.frame(sto.df.vcf)
-                      ,"samtools.qual.combined.vcf")
+sts.qual.vcf<-combine.vcfs(as.data.frame(std.qual.vcf),as.data.frame(sto.qual.vcf)
+                      ,"sts.qual.combined.vcf")
 sts.qual.fst<-do.call(rbind,apply(sts.qual.vcf,1,fst.one.vcf,group1=sta.dd.ind,group2=sta.sd.ind))
 
-spf.vioplot(fst.dat[fst.dat$Group=="NDT","Fst"],
-             fst.dat[fst.dat$Group=="FDT","Fst"],colMed="black",ylim=c(-1.5,1),
-             col=fills[11:12],border=borders[11:12],plot.axes=F,axis.box=F,lwd=2)
+#coverage calcs
+
+spf.vioplot(sta.fst$Fst,sta.qual.fst$Fst,sts.fst$Fst, sts.qual.fst$Fst,
+            colMed="black",ylim=c(-1.5,1),
+             col=c(ddsdtog.col,alpha(ddsdtog.col,0.5),
+                   ddsdsep.col,alpha(ddsdsep.col,0.5)),
+            border=borders[11:12],plot.axes=F,axis.box=F,lwd=2)
 
 ##############################DRAD DIFFERENT PLATES##################################
 
