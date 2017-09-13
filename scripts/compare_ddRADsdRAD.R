@@ -422,13 +422,13 @@ spf.vioplot <- function(x,...,range=1.5,h=NULL,ylim=NULL,names=NULL, horizontal=
   }
   # setup colors and borders
   if(length(col) < n){
-    col<-rep(col,n-length(col))
+    col<-c(col,rep(col,n-length(col)))
   }
   if(length(border)<n){
-    border<-rep(border,n-length(border))
+    border<-c(border,rep(border,n-length(border)))
   }
   if(length(colMed)<n){
-    colMed<-rep(colMed,n-length(colMed))
+    colMed<-c(colMed,rep(colMed,n-length(colMed)))
   }
   boxwidth <- 0.05 * wex
   
@@ -825,10 +825,10 @@ boxplot(log(o.cov$CovVariance+1),log(d.cov$CovVariance+1),col=c("cadetblue","cor
 text(x=c(1,2),y=c(21,21),c("250425","69109"))
 wilcox.test(log(o.cov$CovVariance+1),log(d.cov$CovVariance+1),"greater")
 
-d.sub<-d.cov[sample(nrow(d.cov),30000,replace=F),]
-o.sub<-o.cov[sample(nrow(o.cov),30000,replace=F),]
-wilcox.test(log(o.sub$CovVariance+1),log(d.sub$CovVariance+1),"greater")
-boxplot(log(o.sub$CovVariance+1),log(d.sub$CovVariance+1),col=c("cadetblue","coral1"),
+dcov.sub<-d.cov[sample(nrow(d.cov),30000,replace=F),]
+ocov.sub<-o.cov[sample(nrow(o.cov),30000,replace=F),]
+wilcox.test(log(ocov.sub$CovVariance+1),log(dcov.sub$CovVariance+1),"greater")
+boxplot(log(ocov.sub$CovVariance+1),log(dcov.sub$CovVariance+1),col=c("cadetblue","coral1"),
         names=c("sdRAD","ddRAD"),ylab="Variance in Coverage")
 
 #assembled together
@@ -845,16 +845,16 @@ text(x=c(1,2),y=c(21,21),c("250425","69109"))
 wilcox.test(o.cov$PropHet,d.cov$PropHet,"less")
 
 #what about in 30 males 30 females from ddRAD and the sdRAD?
-d.mal<-colnames(drad)[grep("PRM",colnames(drad))]
-d.fem<-colnames(drad)[grep("FEM",colnames(drad))]
-dm.sub<-sample(d.mal,30)
-df.sub<-sample(d.fem,30)
-d.sub<-cbind(drad[,1:9],drad[,dm.sub],drad[,df.sub])
-ds.cov<-do.call("rbind",apply(d.sub,1,vcf.cov.loc,subset=c(dm.sub,df.sub)))
-
-wilcox.test(o.cov$PropHet,ds.cov$PropHet,"less")
-wilcox.test(o.cov$AvgCovRatio,ds.cov$AvgCovRatio,"less")
-wilcox.test(o.cov$CovVariance,ds.cov$CovVariance,"greater")
+# d.mal<-colnames(drad)[grep("PRM",colnames(drad))]
+# d.fem<-colnames(drad)[grep("FEM",colnames(drad))]
+# dm.sub<-sample(d.mal,30)
+# df.sub<-sample(d.fem,30)
+# d.sub<-cbind(drad[,1:9],drad[,dm.sub],drad[,df.sub])
+# ds.cov<-do.call("rbind",apply(d.sub,1,vcf.cov.loc,subset=c(dm.sub,df.sub)))
+# 
+# wilcox.test(o.cov$PropHet,ds.cov$PropHet,"less")
+# wilcox.test(o.cov$AvgCovRatio,ds.cov$AvgCovRatio,"less")
+# wilcox.test(o.cov$CovVariance,ds.cov$CovVariance,"greater")
 
 #assembled together
 wilcox.test(bo.cov$PropHet,bd.cov$PropHet,paired=T,"less")
@@ -1006,39 +1006,39 @@ TukeyHSD(aov(dcs.comp$DropCount~dcs.comp$LibraryPrep*dcs.comp$Assembly))
 jpeg("PolymorphicRestrictionSites.jpeg",height=10,width=7,units="in",res=300)
 par(mfrow=c(4,4),oma=c(2,2,1,1),mar=c(1,2,1,0.1))
 #prop het
-spf.vioplot(o.cov$PropHet,col=sdtog.col,plot.axes = FALSE,ylim=c(0,1))
+spf.vioplot(o.cov$PropHet,col=sdtog.col,border=sdtog.col,plot.axes = FALSE,ylim=c(0,1))
 axis(2,las=1,hadj=0.5,tck=-0.025)
 mtext("Proportion Heterozygotes",2,outer=F,line=2,cex=0.75)
-spf.vioplot(d.cov$PropHet,col=ddtog.col,plot.axes = FALSE,ylim=c(0,1))
-spf.vioplot(bo.cov$PropHet,col=sdsep.col,plot.axes = FALSE,ylim=c(0,1))
-spf.vioplot(bd.cov$PropHet,col=ddsep.col,plot.axes = FALSE,ylim=c(0,1))
+spf.vioplot(d.cov$PropHet,col=ddtog.col,border=ddtog.col,plot.axes = FALSE,ylim=c(0,1))
+spf.vioplot(bo.cov$PropHet,col=sdsep.col,border=sdsep.col,plot.axes = FALSE,ylim=c(0,1))
+spf.vioplot(bd.cov$PropHet,col=ddsep.col,border=ddsep.col,plot.axes = FALSE,ylim=c(0,1))
 
 #variance in coverage
-spf.vioplot(log(o.cov$CovVariance+1),col=sdtog.col,plot.axes = FALSE,ylim=c(0,20))
+spf.vioplot(log(o.cov$CovVariance+1),col=sdtog.col,border=sdtog.col,plot.axes = FALSE,ylim=c(0,20))
 axis(2,las=1,hadj=0.5,tck=-0.025)
-mtext("ln(Variance in Coverage",2,outer=F,line=2,cex=0.75,tck=-0.025)
-spf.vioplot(log(d.cov$CovVariance+1),col=ddtog.col,plot.axes = FALSE,ylim=c(0,20))
-spf.vioplot(log(o.sub$CovVariance+1),col=sdsep.col,plot.axes = FALSE,ylim=c(0,20))
-spf.vioplot(log(d.sub$CovVariance+1),col=ddsep.col,plot.axes = FALSE,ylim=c(0,20))
+mtext("ln(Variance in Coverage)",2,outer=F,line=2,cex=0.75,tck=-0.025)
+spf.vioplot(log(d.cov$CovVariance+1),col=ddtog.col,border=ddtog.col,plot.axes = FALSE,ylim=c(0,20))
+spf.vioplot(log(ocov.sub$CovVariance+1),col=sdsep.col,border=sdsep.col,plot.axes = FALSE,ylim=c(0,20))
+spf.vioplot(log(dcov.sub$CovVariance+1),col=ddsep.col,border=ddsep.col,plot.axes = FALSE,ylim=c(0,20))
 
 #allelic imbalance
-spf.vioplot(obot.ra$FreqRefDiff,col=sdtog.col,plot.axes = FALSE,ylim=c(-300,20))
+spf.vioplot(obot.ra$FreqRefDiff,col=sdtog.col,border=sdtog.col,plot.axes = FALSE,ylim=c(-300,20))
 axis(2,at=seq(-300,20,40),las=1,hadj=0.5,tck=-0.025)
 mtext("Difference Between Allele Frequency\nand Coverage Alt/Ref Ratios",2,cex=0.75,line=1.8)
-spf.vioplot(dbot.ra$FreqRefDiff,col=ddtog.col,plot.axes = FALSE,ylim=c(-300,20))
-spf.vioplot(osep.ra$FreqRefDiff,col=sdsep.col,plot.axes = FALSE,ylim=c(-300,20))
-spf.vioplot(dsep.ra$FreqRefDiff,col=ddsep.col,plot.axes = FALSE,ylim=c(-300,20))
+spf.vioplot(dbot.ra$FreqRefDiff,col=ddtog.col,border=ddtog.col,plot.axes = FALSE,ylim=c(-300,20))
+spf.vioplot(osep.ra$FreqRefDiff,col=sdsep.col,border=sdsep.col,plot.axes = FALSE,ylim=c(-300,20))
+spf.vioplot(dsep.ra$FreqRefDiff,col=ddsep.col,border=ddsep.col,plot.axes = FALSE,ylim=c(-300,20))
 
 #gbstools
-spf.vioplot(bo.dcs[!is.na(bo.dcs)], col=sdtog.col,plot.axes=FALSE,ylim=c(0,1.5))
+spf.vioplot(bo.dcs[!is.na(bo.dcs)], col=sdtog.col,border=sdtog.col,plot.axes=FALSE,ylim=c(0,1.5))
 axis(2,at=seq(0,2,0.5),las=1,hadj=0.5,tck=-0.025)
 mtext("Mean Dropout Allele Counts",2,cex=0.75,line=2)
 mtext("sdRAD-seq\nAnalyzed Together",1,outer=FALSE,cex=0.75,line=1)
-spf.vioplot(bd.dcs[!is.na(bd.dcs)],col=ddtog.col,plot.axes=FALSE,ylim=c(0,1.5))
+spf.vioplot(bd.dcs[!is.na(bd.dcs)],col=ddtog.col,border=ddtog.col,plot.axes=FALSE,ylim=c(0,1.5))
 mtext("ddRAD-seq\nAnalyzed Together",1,outer=FALSE,cex=0.75,line=1)
-spf.vioplot(orad.dcs[!is.na(orad.dcs)], col=sdsep.col,plot.axes = FALSE,ylim=c(0,1.5))
+spf.vioplot(orad.dcs[!is.na(orad.dcs)], col=sdsep.col,border=sdsep.col,plot.axes = FALSE,ylim=c(0,1.5))
 mtext("sdRAD-seq\nAnalyzed Separately",1,outer=FALSE,cex=0.75,line=1)
-spf.vioplot(drad.dcs[!is.na(drad.dcs)],col=ddsep.col,plot.axes=FALSE,ylim=c(0,1.5))
+spf.vioplot(drad.dcs[!is.na(drad.dcs)],col=ddsep.col,border=ddsep.col,plot.axes=FALSE,ylim=c(0,1.5))
 mtext("ddRAD-seq\nAnalyzed Separately",1,outer=FALSE,cex=0.75,line=1)
 dev.off()
 
@@ -1070,9 +1070,9 @@ od.vcf<-od.vcf[!duplicated(od.vcf$ID),]
 write.table(od.vcf,"merged.sep.vcf",sep='\t',
             col.names=TRUE,row.names=FALSE,quote=FALSE)
 #do pcadapt on these
+od.vcf<-parse.vcf("merged.sep.vcf")
 merge.pcadapt<-read.pcadapt("merged.sep.vcf",type="vcfR")
 merge.pca<-pcadapt(merge.pcadapt,K=20)
-
 od.pops<-gsub("\\w+_(\\w{3})\\d+\\w?([[:punct:]].*)?","\\1",colnames(od.vcf)[10:ncol(od.vcf)])
 od.type<-gsub("(\\w+)_(\\w{3})\\d+\\w?([[:punct:]].*)?","\\1",colnames(od.vcf)[10:ncol(od.vcf)])
 od.type[od.type=="orad"]<-sdsep.col
@@ -1105,7 +1105,7 @@ mtext(paste("PC2 (",od.props[2],"%)",sep=""),2,line = 2.1)
 
 par(mfrow=c(1, 1), oma=rep(0, 4), mar=rep(0, 4), new=TRUE)
 plot(0:1, 0:1, type="n", xlab="", ylab="", axes=FALSE)
-legend("top",c("sdRAD Together","ddRAD Together","sdRAD Alone","ddRAD Alone",
+legend("top",c("sdRAD Together","ddRAD Together","sdRAD Separately","ddRAD Separately",
                "Females","Males","Offspring"),
        pch=c(rep(18,4),15,16,17),bty='n',ncol=4,pt.cex=1.5,
        col=c(alpha(sdtog.col,0.75),alpha(ddtog.col,0.75),alpha(sdsep.col,0.75),
@@ -1660,9 +1660,44 @@ fst.aov.dat<-data.frame(Fst=c(a.od$Fst,sd.od$Fst,dd.od$Fst,a.odb$Fst,sd.odb$Fst,
 fst.ss.aov<-aov(Fst~SampleSize*Analysis,dat=fst.aov.dat[fst.aov.dat$Comparison == "sd-dd",])
 fst.cp.aov<-aov(Fst~Comparison*Analysis,dat=fst.aov.dat)
 
+##### ALLELE FREQUENCY SPECTRA #####
+ddsep.afs<-do.call(rbind,apply(drad,1,calc.afs.vcf))
+sdsep.afs<-do.call(rbind,apply(orad,1,calc.afs.vcf))
+ddtog.afs<-do.call(rbind,apply(both[,c(locus.info,d.ind)],1,calc.afs.vcf))
+sdtog.afs<-do.call(rbind,apply(both[,c(locus.info,o.ind)],1,calc.afs.vcf))
+
+
+#PLOT HISTOGRAMS OF AFS
+png("joint_afs.png",height=5,width=8,units="in",res=300)
+par(mfrow=c(1,2),oma=c(1,1,1,1),mar=c(2,2,2,2))
+par(mar=c(2,3,2,1))
+hist(sdtog.afs$RefFreq, col=alpha(sdtog.col,0.5), breaks=seq(-0.025,1.025,0.05),ylim=c(0,40000),
+     main="sdRAD-seq",axes=F,xlim=c(0,1),border=alpha(sdtog.col,0.5))
+hist(sdsep.afs$RefFreq,col=alpha(sdsep.col,0.5), add=T,breaks=seq(-0.025,1.025,0.05),density=20)
+legend("topleft",c("Analyzed Together", "Analyzed Separately"),
+       fill=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)),bty='n',
+       density=c(NA,20),border=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)))
+axis(1,pos=0,at=seq(-0.2,1.2,0.2))
+axis(2,las=1,hadj=0.75)
+
+par(mar=c(2,2,2,2))
+hist(ddtog.afs$RefFreq, col=alpha(ddtog.col,0.5), ylim=c(0,10000),
+     breaks=seq(-0.025,1.025,0.05),border=alpha(ddtog.col,0.5),
+     main="ddRAD-seq",axes=F)
+hist(ddsep.afs$RefFreq,col=alpha(ddsep.col,0.5), add=T,breaks=seq(-0.025,1.025,0.05),density=20)
+axis(1,pos=0,at=seq(-0.2,1.2,0.2))
+axis(2,las=1,hadj=0.75)
+legend("topleft",c("Analyzed Together", "Analyzed Separately"),
+       fill=c(alpha(ddtog.col,0.5),alpha(ddsep.col,0.5)),bty='n',density = c(NA,20),
+       border=c(alpha(ddtog.col,0.5),alpha(ddsep.col,0.5)))
+mtext("Reference Allele Frequency",1,outer=T,line=-1)
+mtext("Number of SNPs",2,outer = T)
+dev.off()
+
+
 ##### COVERAGE HEATMAP #####
 #as per reviewer 1's suggestion
-
+library(lattice)
 #bin coverage
 cov.bins<-data.frame(minCov=c(1,3,5,10,20,30,50),
                      maxCov=c(3,5,10,20,30,50,1000000000),
@@ -1729,12 +1764,12 @@ bot.cov.lv<-levelplot(as.matrix(both.covmat[2:7,2:7]),col.regions=cols,alpha.reg
 print(bot.cov.lv)
 #plot them together
 png("coverage_heatmaps_grey.png",height=6,width=11,units="in",res=300)
-print(sep.cov.lv,split=c(1,1,2,1),more=TRUE)
+print(bot.cov.lv,split=c(1,1,2,1),more=TRUE)
 lattice::trellis.focus("legend", side="right", clipp.off=TRUE, highlight=FALSE)
 grid::grid.text(expression(italic(F)[ST]), 0.2, 0, hjust=0.5, vjust=1.2)
 trellis.unfocus()
 
-print(bot.cov.lv,split=c(2,1,2,1),more=FALSE)
+print(sep.cov.lv,split=c(2,1,2,1),more=FALSE)
 lattice::trellis.focus("legend", side="right", clipp.off=TRUE, highlight=FALSE)
 grid::grid.text(expression(italic(F)[ST]), 0.2, 0, hjust=0.5, vjust=1.2)
 trellis.unfocus()
@@ -2004,39 +2039,6 @@ text(x=0.925,y=0.25,"Mothers vs Females",cex=0.75,srt=270)
 dev.off()
 
 
-##### ALLELE FREQUENCY SPECTRA #####
-ddsep.afs<-do.call(rbind,apply(drad,1,calc.afs.vcf))
-sdsep.afs<-do.call(rbind,apply(orad,1,calc.afs.vcf))
-ddtog.afs<-do.call(rbind,apply(both[,c(locus.info,d.ind)],1,calc.afs.vcf))
-sdtog.afs<-do.call(rbind,apply(both[,c(locus.info,o.ind)],1,calc.afs.vcf))
-
-
-#PLOT HISTOGRAMS OF AFS
-png("joint_afs.png",height=5,width=8,units="in",res=300)
-par(mfrow=c(1,2),oma=c(1,1,1,1),mar=c(2,2,2,2))
-par(mar=c(2,3,2,1))
-hist(sdtog.afs$RefFreq, col=alpha(sdtog.col,0.5), breaks=seq(-0.025,1.025,0.05),ylim=c(0,40000),
-     main="sdRAD-seq",axes=F,xlim=c(0,1),border=alpha(sdtog.col,0.5))
-hist(sdsep.afs$RefFreq,col=alpha(sdsep.col,0.5), add=T,breaks=seq(-0.025,1.025,0.05),density=20)
-legend("topleft",c("Analyzed Together", "Analyzed Separately"),
-       fill=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)),bty='n',
-       density=c(NA,20),border=c(alpha(sdtog.col,0.5),alpha(sdsep.col,0.5)))
-axis(1,pos=0,at=seq(-0.2,1.2,0.2))
-axis(2,las=1,hadj=0.75)
-
-par(mar=c(2,2,2,2))
-hist(ddtog.afs$RefFreq, col=alpha(ddtog.col,0.5), ylim=c(0,10000),
-     breaks=seq(-0.025,1.025,0.05),border=alpha(ddtog.col,0.5),
-     main="ddRAD-seq",axes=F)
-hist(ddsep.afs$RefFreq,col=alpha(ddsep.col,0.5), add=T,breaks=seq(-0.025,1.025,0.05),density=20)
-axis(1,pos=0,at=seq(-0.2,1.2,0.2))
-axis(2,las=1,hadj=0.75)
-legend("topleft",c("Analyzed Together", "Analyzed Separately"),
-       fill=c(alpha(ddtog.col,0.5),alpha(ddsep.col,0.5)),bty='n',density = c(NA,20),
-       border=c(alpha(ddtog.col,0.5),alpha(ddsep.col,0.5)))
-mtext("Reference Allele Frequency",1,outer=T,line=-1)
-mtext("Number of SNPs",2,outer = T)
-dev.off()
 
 
 #####################################SAMTOOLS########################################
@@ -2138,12 +2140,125 @@ sts.qual.vcf<-combine.vcfs(as.data.frame(std.qual.vcf),as.data.frame(sto.qual.vc
 sts.qual.fst<-do.call(rbind,apply(sts.qual.vcf,1,fst.one.vcf,group1=sta.dd.ind,group2=sta.sd.ind))
 sts.qual.fst<-sts.qual.fst[!is.na(sts.qual.fst$Fst),]
 #coverage calcs
+#analyzed separately
+#these don't have coverage in each individual, just dps
+#so this will be different than stacks analysis
+#DP in INFO is the total depth for genotyped individuals
+samtools.coverage<-function(vcf,subset=NULL){
+  if(is.null(subset)){
+    subset<-colnames(vcf)[10:ncol(vcf)]
+  }
+  vcf.cov<-do.call("rbind",apply(vcf,1,function(vcf.row){
+    #get coverage stats
+    dp<-gsub("DP=(\\d+);.*","\\1",vcf.row["INFO"])
+    rpb<-strsplit(gsub(".*;RPB=(.*;)[A-Z].*","\\1",vcf.row["INFO"]),";")[[1]][1]
+    dp4<-strsplit(gsub(".*;DP4=(\\d+,\\d+,\\d+,\\d+);.*","\\1",vcf.row["INFO"]),",")
+    ref.cov<-as.numeric(dp4[[1]][1])+as.numeric(dp4[[1]][2])
+    alt.cov<-as.numeric(dp4[[1]][3])+as.numeric(dp4[[1]][4])
+    cov<-unlist(lapply(vcf.row[subset],function(x){
+      c<-strsplit(as.character(x),split=":")[[1]][1]
+      return(c)
+    }))
+    numgt<-length(cov[cov %in% c("0/0","0/1","1/0","1/1")])
+    missing<-length(cov[cov %in% c("./.","")])
+    hets<-length(cov[cov %in% c("0/1","1/0")])
+    ref.freq<-length(grep("0",cov))/numgt
+    alt.freq<-length(grep("1",cov))/numgt
+    
+    return(data.frame(Chrom=vcf.row[1],Pos=vcf.row["POS"],
+                      DP=dp,RPB=rpb,NumGenotyped=numgt,
+                      NumMissing=missing,NumHets=hets,
+                      RefCov=ref.cov,AltCov=alt.cov,
+                      RefFreq=ref.freq,AltFreq=alt.freq))
+  }))
+  return(vcf.cov)
+}
+
+sto.cov<-samtools.coverage(sto.df.vcf)
+std.cov<-samtools.coverage(std.df.vcf)
+stad.cov<-samtools.coverage(sta.df.vcf,subset=sta.dd.ind)
+stao.cov<-samtools.coverage(sta.df.vcf,subset=sta.sd.ind)
+#standardize DP to num individuals
+sto.cov$RelDP<-as.numeric(as.character(sto.cov$DP))/sto.cov$NumGenotyped
+std.cov$RelDP<-as.numeric(as.character(std.cov$DP))/std.cov$NumGenotyped
+stao.cov$RelDP<-as.numeric(as.character(stao.cov$DP))/120
+stad.cov$RelDP<-as.numeric(as.character(stad.cov$DP))/120
+
+#compare to coverage
+#neg: more ref than alt
+#pos: more alt than ref
+sto.cov$AllelicImbalance<-(sto.cov$RefFreq/sto.cov$AltFreq)-(sto.cov$RefCov/sto.cov$AltCov)
+sto.cov$AllelicImbalance[sto.cov$AltFreq==0]<-1-
+  (sto.cov$RefCov[sto.cov$AltFreq==0]/sto.cov$AltCov[sto.cov$AltFreq==0])
+std.cov$AllelicImbalance<-(std.cov$RefFreq/std.cov$AltFreq)-(std.cov$RefCov/std.cov$AltCov)
+std.cov$AllelicImbalance[std.cov$AltFreq==0]<-1-
+  (std.cov$RefCov[std.cov$AltFreq==0]/std.cov$AltCov[std.cov$AltFreq==0])
+stad.cov$AllelicImbalance<-(stad.cov$RefFreq/stad.cov$AltFreq)-(stad.cov$RefCov/stad.cov$AltCov)
+stad.cov$AllelicImbalance[stad.cov$AltFreq==0]<-1-
+  (stad.cov$RefCov[stad.cov$AltFreq==0]/stad.cov$AltCov[stad.cov$AltFreq==0])
+stao.cov$AllelicImbalance<-(stao.cov$RefFreq/stao.cov$AltFreq)-(stao.cov$RefCov/stao.cov$AltCov)
+stao.cov$AllelicImbalance[stao.cov$AltFreq==0]<-1-
+  (stao.cov$RefCov[stao.cov$AltFreq==0]/stao.cov$AltCov[stao.cov$AltFreq==0])
+
+#PLOTS
+png("samtools.png",height=7,width=7,units="in",res=300)
+par(mfrow=c(3,1),oma=c(2,2,2,2),mar=c(2,2,2,2))
+spf.vioplot(as.numeric(as.character(stad.cov$RelDP)),
+            as.numeric(as.character(stao.cov$RelDP)),
+            as.numeric(as.character(std.cov$RelDP)),
+            as.numeric(as.character(sto.cov$RelDP)),
+            colMed="black",border=c(ddtog.col,sdtog.col,ddsep.col,sdsep.col),
+            col=c(ddtog.col,sdtog.col,ddsep.col,sdsep.col),
+            plot.axes=F,axis.box=F,lwd=2)
+axis(1,lwd = 0,at=1:4,labels = c("ddRAD Together","sdRAD Together",
+                                 "ddRAD Separate","sdRAD Separate"))
+axis(2,pos=0.5,las=1)
+mtext("Average Coverage Depth\nPer Locus Per Individual",2,line=1.5,cex=0.75)
+
+ai.vio<-spf.vioplot(stad.cov$AllelicImbalance,stao.cov$AllelicImbalance,
+            std.cov$AllelicImbalance, sto.cov$AllelicImbalance,
+            colMed="black",border=c(ddtog.col,sdtog.col,ddsep.col,sdsep.col),
+            col=c(ddtog.col,sdtog.col,ddsep.col,sdsep.col),
+            plot.axes=F,axis.box=F,lwd=2)
+axis(1,lwd = 0,at=1:4,labels = c("ddRAD Together","sdRAD Together",
+                 "ddRAD Separate","sdRAD Separate"))
+axis(2,pos=0.5,las=1)
+mtext("Allelic Imbalance",2,line=2,cex=0.75)
 
 spf.vioplot(sta.fst$Fst,sta.qual.fst$Fst,sts.fst$Fst, sts.qual.fst$Fst,
-            colMed="black",ylim=c(-1.5,1),
-             col=c(ddsdtog.col,alpha(ddsdtog.col,0.5),
-                   ddsdsep.col,alpha(ddsdsep.col,0.5)),
+            colMed="black",
+            border=c(ddsdtog.col,ddsdtog.col,ddsdsep.col,ddsdsep.col),
+             col=c(ddsdtog.col,"white",
+                   ddsdsep.col,"white"),
             plot.axes=F,axis.box=F,lwd=2)
+axis(1,lwd=0,at=1:4,labels=c("Analyzed Together","Analyzed Together\nQuality Filter",
+                    "Analyzed Separately","Analyzed Separately\nQuality Filter"))
+axis(2,pos=0.5,las=1)
+mtext(expression(italic(F)[ST]),2,line=2,cex=0.75)
+dev.off()
+
+#stats
+st.comp<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(sto.cov)),rep("ddRAD",nrow(std.cov)),
+                                     rep("sdRAD",nrow(stao.cov)),rep("ddRAD",nrow(stad.cov))), 
+                       Assembly=c(rep("Alone",nrow(sto.cov)),rep("Alone",nrow(std.cov)),
+                                  rep("Together",nrow(stao.cov)),rep("Together",nrow(stad.cov))),
+                       AllelicImbalance=c(sto.cov$AllelicImbalance,std.cov$AllelicImbalance,
+                                   stao.cov$AllelicImbalance,stad.cov$AllelicImbalance),
+                    DP=c(sto.cov$RelDP,std.cov$RelDP,stao.cov$RelDP,stad.cov$RelDP))
+summary(aov(st.comp$DP~st.comp$LibraryPrep*st.comp$Assembly))
+TukeyHSD(aov(st.comp$DP~st.comp$LibraryPrep*st.comp$Assembly))
+
+summary(aov(st.comp$AllelicImbalance~st.comp$LibraryPrep*st.comp$Assembly))
+TukeyHSD(aov(st.comp$AllelicImbalance~st.comp$LibraryPrep*st.comp$Assembly))
+
+st.fst.comp<-data.frame(LibraryPrep=c(rep("nofilter",nrow(sts.fst)),rep("filter",nrow(sts.qual.fst)),
+                                  rep("nofilter",nrow(sta.fst)),rep("filter",nrow(sta.qual.fst))), 
+                    Assembly=c(rep("Alone",nrow(sts.fst)),rep("Alone",nrow(sts.qual.fst)),
+                               rep("Together",nrow(sta.fst)),rep("Together",nrow(sta.qual.fst))),
+                    Fst=c(sts.fst$Fst,sts.qual.fst$Fst,
+                                       sta.fst$Fst,sta.qual.fst$Fst))
+summary(aov(st.fst.comp$Fst~st.fst.comp$LibraryPrep*st.fst.comp$Assembly))
+TukeyHSD(aov(st.fst.comp$Fst~st.fst.comp$LibraryPrep*st.fst.comp$Assembly))
 
 ##############################DRAD DIFFERENT PLATES##################################
 
