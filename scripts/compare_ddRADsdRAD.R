@@ -930,6 +930,55 @@ ratio.comp<-data.frame(LibraryPrep=c(rep("sdRAD",nrow(osep.ra)),rep("ddRAD",nrow
 summary(aov(ratio.comp$RatioDiff~ratio.comp$LibraryPrep*ratio.comp$Assembly))
 TukeyHSD(aov(ratio.comp$RatioDiff~ratio.comp$LibraryPrep*ratio.comp$Assembly))
 
+###Using only hets
+calc.refalt.hets<-function(vcf){
+  hets<-apply(vcf,1,function(vcf.row){
+    info<-vcf.row[1:9]
+    hets<-c(grep("1/0",vcf.row),grep("0/1",vcf.row))
+    cnts<-do.call(rbind,lapply(vcf.row[hets],function(x){
+      gt<-strsplit(as.character(x),":")[[1]][1]
+      c<-strsplit(as.character(x),split=":")[[1]][3]
+      if(gt %in% c("0/1","1/0")){
+        alleles<-unlist(strsplit(gt,"/"))
+        acnts<-unlist(strsplit(c,","))
+        refcnt<-as.numeric(as.character(acnts[which(alleles == "0")]))
+        altcnt<-as.numeric(as.character(acnts[which(alleles == "1")]))
+        return(data.frame(RefCount=refcnt,AltCount=altcnt))
+      }else{
+        return(data.frame(RefCount=NA,AltCount=NA))
+      }
+    }))
+    cnt.ratio<-sum(cnts[,1])/(sum(cnts[,1])+sum(cnts[,2]))
+    return(cnt.ratio)
+  })
+  return(hets)
+}
+drad.hets<-calc.refalt.hets(drad)
+orad.hets<-calc.refalt.hets(orad)
+dbot.hets<-calc.refalt.hets(both[,c(locus.info,d.ind)])
+obot.hets<-calc.refalt.hets(both[,c(locus.info,o.ind)])
+#plot
+png("HetsOnlyAllelicImbalance.png",height=5,width=7,units="in",res=300)
+par(mfrow=c(1,4),oma=c(2,3,1,1),mar=c(1,2,1,0.1))
+spf.vioplot(obot.hets[!is.na(obot.hets)],col=sdtog.col,border=sdtog.col,plot.axes = FALSE,ylim=c(0,1))
+axis(2,las=1,hadj=0.5,tck=-0.025)
+text(1,1,bquote(~mu == .(mean(obot.hets[!is.na(obot.hets)]))))
+mtext("Proportion Reference Allele Reads in Heterozygotes",2,outer=F,line=2,cex=0.75)
+mtext("sdRAD-seq\nAnalyzed Together",1,cex=0.75)
+mtext("Reference-\nskewed",2,las=2,at=38,cex=0.75,line=0.01)
+mtext("Alternative-\nskewed",2,las=2.2,at=1.5,cex=0.75,line=0.01)
+spf.vioplot(dbot.hets[!is.na(dbot.hets)],col=ddtog.col,border=ddtog.col,plot.axes = FALSE,ylim=c(0,1))
+text(1,1,bquote(~mu == .(mean(dbot.hets[!is.na(dbot.hets)]))))
+mtext("ddRAD-seq\nAnalyzed Together",1,cex=0.75)
+spf.vioplot(orad.hets[!is.na(orad.hets)],col=sdsep.col,border=sdsep.col,plot.axes = FALSE,ylim=c(0,1))
+text(1,1,bquote(~mu == .(mean(orad.hets[!is.na(orad.hets)]))))
+mtext("sdRAD-seq\nAnalyzed Separately",1,cex=0.75)
+spf.vioplot(drad.hets[!is.na(drad.hets)],col=ddsep.col,border=ddsep.col,plot.axes = FALSE,ylim=c(0,1))
+text(1,1,bquote(~mu == .(mean(drad.hets[!is.na(drad.hets)]))))
+mtext("ddRAD-seq\nAnalyzed Separately",1,cex=0.75)
+
+dev.off()
+
 ####### gbstools ########
 both.gbst<-parse.vcf("both.lrt.vcf")
 orad.gbst<-parse.vcf("orad.lrt.vcf")
