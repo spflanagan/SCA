@@ -1272,18 +1272,27 @@ wilcox.test(d60.cov$PropHet,o.cov$PropHet)
 d60.hets<-calc.refalt.hets(drad[,c(locus.info,d.ind.sub)])
 bd60.hets<-calc.refalt.hets(both[,c(locus.info,d.ind.sub)])
 
+#gbstools
+bd60.gbst<-parse.vcf("both.dsub60.lrt.vcf")
+d60.gbst<-parse.vcf("drad60.lrt.vcf")
+bd60.gbst$SNP<-paste(bd60.gbst$`#CHROM`,bd60.gbst$POS,sep=".")
+d60.gbst$SNP<-paste(d60.gbst$`#CHROM`,d60.gbst$POS,sep=".")
+bd60.dcs<-dropout.count.mean(bd60.gbst,d.ind.sub)
+d60.dcs<-dropout.count.mean(d60.gbst,d.ind.sub)
+
+
 covTable60<-data.frame(sdRADSep=c(tab.stats(o.cov$AvgCovTotal),tab.stats(o.cov$CovVariance),
                                 tab.stats(o.cov$PropHet),
                                 tab.stats(orad.hets),tab.stats(orad.dcs[!is.na(orad.dcs)])),
                      ddRADSep=c(tab.stats(d60.cov$AvgCovTotal),tab.stats(d60.cov$CovVariance),
                                 tab.stats(d60.cov$PropHet),tab.stats(d60.hets),
-                                tab.stats(drad.dcs[!is.na(drad.dcs)])),
+                                tab.stats(d60.dcs[!is.na(d60.dcs)])),
                      sdRADTog=c(tab.stats(bo.cov$AvgCovTotal),tab.stats(bo.cov$CovVariance),
                                 tab.stats(bo.cov$PropHet),tab.stats(obot.hets),
                                 tab.stats(bo.dcs[!is.na(bo.dcs)])),
                      ddRADTog=c(tab.stats(bd60.cov$AvgCovTotal),tab.stats(bd60.cov$CovVariance),
                                 tab.stats(bd60.cov$PropHet),tab.stats(bd60.hets),
-                                tab.stats(bd.dcs[!is.na(bd.dcs)])),
+                                tab.stats(bd60.dcs[!is.na(bd60.dcs)])),
                      stringsAsFactors = FALSE)
 rownames(covTable60)<-c("AvgCovPerLocus","CovVar","PropHet","HetRefProp","GBStools")
 write.table(covTable60,"Stacks60CovTable.txt",row.names = TRUE,col.names=T,sep='\t',quote=F)
@@ -2352,19 +2361,33 @@ st.fst.comp<-data.frame(LibraryPrep=c(rep("nofilter",nrow(sts.fst)),rep("filter"
                                        sta.fst$Fst,sta.qual.fst$Fst))
 summary(aov(st.fst.comp$Fst~st.fst.comp$LibraryPrep*st.fst.comp$Assembly))
 TukeyHSD(aov(st.fst.comp$Fst~st.fst.comp$LibraryPrep*st.fst.comp$Assembly))
+
+#### samtools: gbstools ####
+#gbstools
+sto.gbst<-parse.vcf("sto.lrt.vcf")
+std.gbst<-parse.vcf("std.lrt.vcf")
+sta.gbst<-parse.vcf("sta.lrt.vcf")
+sto.gbst$SNP<-paste(sto.gbst$`#CHROM`,sto.gbst$POS,sep=".")
+std.gbst$SNP<-paste(std.gbst$`#CHROM`,std.gbst$POS,sep=".")
+sta.gbst$SNP<-paste(sta.gbst$`#CHROM`,sta.gbst$POS,sep=".")
+sto.dcs<-dropout.count.mean(sto.gbst,colnames(sto.gbst[10:69]))
+std.dcs<-dropout.count.mean(std.gbst,colnames(std.gbst[10:69]))
+stad.dcs<-dropout.count.mean(sta.gbst,colnames(sta.gbst[10:69]))
+stao.dcs<-dropout.count.mean(sta.gbst,colnames(sta.gbst[70:129]))
+
  #### samtools: create a table ####
 STcovTable<-data.frame(sdRADSep=c(tab.stats(sto.cov$RelDP),"-",
                                 tab.stats(sto.cov$PropHet),
-                                tab.stats(sto.cov$AllelicImbalance),"-"),
+                                tab.stats(sto.cov$AllelicImbalance),tab.stats(sto.dcs[!is.na(sto.dcs)])),
                      ddRADSep=c(tab.stats(std.cov$RelDP),"-",
                                 tab.stats(std.cov$PropHet),tab.stats(std.cov$AllelicImbalance),
-                                "-"),
+                                tab.stats(std.dcs[!is.na(std.dcs)])),
                      sdRADTog=c(tab.stats(stao.cov$RelDP),"-",
                                 tab.stats(stao.cov$PropHet),tab.stats(stao.cov$AllelicImbalance),
-                                "-"),
+                                tab.stats(stao.dcs[!is.na(stao.dcs)])),
                      ddRADTog=c(tab.stats(stad.cov$RelDP),"-",
                                 tab.stats(stad.cov$PropHet),tab.stats(stad.cov$AllelicImbalance),
-                                "-"),
+                                tab.stats(stad.dcs[!is.na(stad.dcs)])),
                      stringsAsFactors = FALSE)
 rownames(STcovTable)<-c("AvgCovPerLocus","CovVar","PropHet","HetRefProp","GBStools")
 write.table(STcovTable,"STcovTable.txt",sep='\t',quote=F,col.names = T,row.names = T)
