@@ -27,3 +27,16 @@ python2.7 ~/Programs/gbstools/bin/polymorphism_test.py -i drad.sub.vcf -o drad.l
 
 #and orad
 python2.7 ~/Programs/gbstools/bin/polymorphism_test.py -i orad.sub.vcf -o orad.lrt.vcf
+
+#and the subsets
+python2.7 ~/Programs/gbstools/bin/polymorphism_test.py -i drad.60ind.vcf -o drad60.lrt.vcf
+python2.7 ~/Programs/gbstools/bin/polymorphism_test.py -i both.dsub60.vcf -o both.dsub60.lrt.vcf
+
+# and samtools
+python2.7 ~/Programs/gbstools/bin/polymorphism_test.py -i sto.subset.recode.vcf -o sto.lrt.vcf
+python2.7 ~/Programs/gbstools/bin/polymorphism_test.py -i std.subset.recode.vcf -o std.lrt.vcf
+python2.7 ~/Programs/gbstools/bin/polymorphism_test.py -i sta.subset.recode.vcf -o sta.lrt.vcf
+
+python2.7 ~/Programs/gbstools/bin/polymorphism_test.py -i sto.subset.recode.vcf -o sto.lrtdp.vcf --dpmode
+python2.7 ~/Programs/gbstools/bin/polymorphism_test.py -i std.subset.recode.vcf -o std.lrt.vcf
+python2.7 ~/Programs/gbstools/bin/polymorphism_test.py -i sta.subset.recode.vcf -o sta.lrt.vcf
