@@ -119,13 +119,13 @@ samtools.coverage<-function(vcf,subset=NULL){
   return(vcf.cov)
 }
 #generating stats for tables
-tab.stats<-function(x){
+tab.stats<-function(x,nround=2){
   m<-mean(x[!is.na(x)])
   v<-var(x[!is.na(x)])
   l<-min(x[!is.na(x)])
   u<-max(x[!is.na(x)])
   #o<-bquote(.(round(m,2))~','~.(round(v,2))~'('~.(round(l,2))~'-'~.(round(u,2))~')')
-  o<-paste((round(m,2)),',',(round(v,2))," (",(round(l,2)),'-',(round(u,2)),')',sep="")
+  o<-paste((round(m,nround)),',',(round(v,nround))," (",(round(l,nround)),'-',(round(u,nround)),')',sep="")
   return(o)
 }
 #################SET COLORS#################
@@ -701,15 +701,15 @@ dev.off()
 
 covTable<-data.frame(sdRADSep=c(tab.stats(o.cov$AvgCovTotal),tab.stats(o.cov$CovVariance),
                                 tab.stats(o.cov$PropHet),
-                                tab.stats(orad.hets),tab.stats(orad.dcs[!is.na(orad.dcs)])),
+                                tab.stats(orad.hets,4),tab.stats(orad.dcs[!is.na(orad.dcs)])),
                      ddRADSep=c(tab.stats(d.cov$AvgCovTotal),tab.stats(d.cov$CovVariance),
-                                tab.stats(d.cov$PropHet),tab.stats(drad.hets),
+                                tab.stats(d.cov$PropHet),tab.stats(drad.hets,4),
                                 tab.stats(drad.dcs[!is.na(drad.dcs)])),
                      sdRADTog=c(tab.stats(bo.cov$AvgCovTotal),tab.stats(bo.cov$CovVariance),
-                                tab.stats(bo.cov$PropHet),tab.stats(obot.hets),
+                                tab.stats(bo.cov$PropHet),tab.stats(obot.hets,4),
                                 tab.stats(bo.dcs[!is.na(bo.dcs)])),
                      ddRADTog=c(tab.stats(bd.cov$AvgCovTotal),tab.stats(bd.cov$CovVariance),
-                                tab.stats(bd.cov$PropHet),tab.stats(dbot.hets),
+                                tab.stats(bd.cov$PropHet),tab.stats(dbot.hets,4),
                                 tab.stats(bd.dcs[!is.na(bd.dcs)])),
                      stringsAsFactors = FALSE)
 rownames(covTable)<-c("AvgCovPerLocus","CovVar","PropHet","HetRefProp","GBStools")
@@ -969,7 +969,7 @@ scaffs<-levels(as.factor(od.fst[,"Chrom"]))
 scaffs[1:22]<-lgs
 ###
 png("All3Fsts.png",height=7,width=15,units="in",res=300)
-pdf("All3Fsts.pdf",height=7,width=15)
+#pdf("All3Fsts.pdf",height=7,width=15)
 par(mfrow=c(4,3),mar=c(1,1,1,0.01),oma=c(1,2,3,2))
 ##ROW 1: Separate
 ####All sdRAD vs all ddRAD
@@ -1126,9 +1126,9 @@ outer.legend("top",pch=19,col=c(ddsdsep.col,ddsdtog.col,ddsep.col,ddtog.col),box
 par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), 
     mar=c(0, 0, 0, 0), new=TRUE)
 plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
-text(x=1.011,y=0.675,"Analyzed Separately",srt=270,xpd=T,cex=1.25)
+text(x=1.04,y=0.675,"Analyzed Separately",srt=270,xpd=T,cex=1.25)
 text(x=1.04,y=0.175,"Analyzed Separately,\nCoverage Filter",srt=270,xpd=T,cex=1.25)
-text(x=1.011,y=-0.3,"Analyzed Together",srt=270,xpd=T,cex=1.25)
+text(x=1.04,y=-0.3,"Analyzed Together",srt=270,xpd=T,cex=1.25)
 text(x=1.04,y=-0.8,"Analyzed Together,\nCoverage Filter",srt=270,xpd=T,cex=1.25)
 
 dev.off()
@@ -1208,31 +1208,31 @@ borders<-c("NAS"=ddsdsep.col,"FAS"=ddsdsep.col,"NSS"=ddsdsep.col,
 
 png("Fig3.vioplot.png",height=6,width=7,units="in",res=300)
 par(mfrow=c(2,3),oma=c(1,3,3,9),mar=c(1,0.1,1,0.1))
-v1<-spf.vioplot(fst.dat[fst.dat$Group=="NAS","Fst"],
+v1<-gwsca.vioplot(fst.dat[fst.dat$Group=="NAS","Fst"],ylim=c(-1,1),
             fst.dat[fst.dat$Group=="FAS","Fst"],colMed="black",#ylim=c(0,1),
             col=fills[1:2],border=borders[1:2],plot.axes=F,axis.box=F,lwd=2)
-axis(2,las=1,at=seq(0,1,0.5),hadj=0.7)
-v2<-spf.vioplot(fst.dat[fst.dat$Group=="NSS","Fst"],
+axis(2,las=1,at=seq(-1.5,1.5,1),hadj=0.7)
+v2<-gwsca.vioplot(fst.dat[fst.dat$Group=="NSS","Fst"],ylim=c(-1,1),
             fst.dat[fst.dat$Group=="FSS","Fst"],colMed="black",#ylim=c(0,1),
             col=fills[3:4],border=borders[3:4],plot.axes=F,axis.box=F,lwd=2)
-v3<-spf.vioplot(fst.dat[fst.dat$Group=="NDS","Fst"],
-            fst.dat[fst.dat$Group=="FDS","Fst"],colMed="black",ylim=c(0,1),
+v3<-gwsca.vioplot(fst.dat[fst.dat$Group=="NDS","Fst"],ylim=c(-1,1),
+            fst.dat[fst.dat$Group=="FDS","Fst"],colMed="black",
             col=fills[5:6],border=borders[5:6],plot.axes=F,axis.box=F,lwd=2)
-v4<-spf.vioplot(fst.dat[fst.dat$Group=="NAT","Fst"],
+v4<-gwsca.vioplot(fst.dat[fst.dat$Group=="NAT","Fst"],
             fst.dat[fst.dat$Group=="FAT","Fst"],colMed="black",ylim=c(-1.5,1),
             col=fills[7:8],border=borders[7:8],plot.axes=F,axis.box=F,lwd=2)
 axis(2,las=1,at=seq(-1.5,1.5,1),hadj=0.7)
 mtext(expression(italic(F[ST])),2,outer=T,line=1.5,lwd=2,cex=0.75)
-v5<-spf.vioplot(fst.dat[fst.dat$Group=="NST","Fst"],
+v5<-gwsca.vioplot(fst.dat[fst.dat$Group=="NST","Fst"],
             fst.dat[fst.dat$Group=="FST","Fst"],colMed="black",ylim=c(-1.5,1),
             col=fills[9:10],border=borders[9:10],plot.axes=F,axis.box=F,lwd=2)
-v6<-spf.vioplot(fst.dat[fst.dat$Group=="NDT","Fst"],
+v6<-gwsca.vioplot(fst.dat[fst.dat$Group=="NDT","Fst"],
             fst.dat[fst.dat$Group=="FDT","Fst"],colMed="black",ylim=c(-1.5,1),
             col=fills[11:12],border=borders[11:12],plot.axes=F,axis.box=F,lwd=2)
 
 par(mfrow=c(1, 1), oma=rep(0, 4), mar=rep(0, 4), new=TRUE)
 plot(0:1, 0:1, type="n", xlab="", ylab="", axes=FALSE)
-l<-legend(0.9,0.7,c("Both\nSeparate","Both\nTogether","ddRAD\nSeparate","ddRAD\nTogether","Filtered","Not Filtered"),
+l<-legend(0.9,0.7,c("Both\nSeparate","Both\nTogether","ddRAD\nSeparate","ddRAD\nTogether","Not Filtered","Filtered"),
        pt.bg = c(borders[c(1,7,5,12)],"black","white"),y.intersp=1.25,
        col=c(borders[c(1,7,5,12)],"black","black"),pch=c(15,15,15,15,15,22),bty='n',xpd=T,cex=0.75)
 
@@ -1279,7 +1279,7 @@ v6<-spf.vioplot(fst.dat[fst.dat$Group=="NDT","logFst"],
 
 par(mfrow=c(1, 1), oma=rep(0, 4), mar=rep(0, 4), new=TRUE)
 plot(0:1, 0:1, type="n", xlab="", ylab="", axes=FALSE)
-l<-legend(0.9,0.7,c("Both\nSeparate","Both\nTogether","ddRAD\nSeparate","ddRAD\nTogether","Filtered","Not Filtered"),
+l<-legend(0.9,0.7,c("Both\nSeparate","Both\nTogether","ddRAD\nSeparate","ddRAD\nTogether","Not Filtered","Filtered"),
           pt.bg = c(borders[c(1,7,5,12)],"black","white"),y.intersp=1.25,
           col=c(borders[c(1,7,5,12)],"black","black"),pch=c(15,15,15,15,15,22),bty='n',xpd=T,cex=0.75)
 
@@ -1828,16 +1828,16 @@ stao.cov$PropHet<-as.numeric(as.character(stao.cov$NumHets))/stao.cov$NumGenotyp
 #compare to coverage
 #neg: more ref than alt
 #pos: more alt than ref
-sto.cov$AllelicImbalance<-sto.cov$RefFreq-(sto.cov$RefCov/sto.cov$DP)
+sto.cov$AllelicImbalance<-sto.cov$RefFreq-(sto.cov$RefCov/as.numeric(as.character(sto.cov$DP)))
 # sto.cov$AllelicImbalance[sto.cov$AltFreq==0]<-1-
 #   (sto.cov$RefCov[sto.cov$AltFreq==0]/sto.cov$AltCov[sto.cov$AltFreq==0])
-std.cov$AllelicImbalance<-(std.cov$RefFreq)-(std.cov$RefCov/std.cov$DP)
+std.cov$AllelicImbalance<-(std.cov$RefFreq)-(std.cov$RefCov/as.numeric(as.character(std.cov$DP)))
 # std.cov$AllelicImbalance[std.cov$AltFreq==0]<-1-
 #   (std.cov$RefCov[std.cov$AltFreq==0]/std.cov$AltCov[std.cov$AltFreq==0])
-stad.cov$AllelicImbalance<-(stad.cov$RefFreq)-(stad.cov$RefCov/stad.cov$DP)
+stad.cov$AllelicImbalance<-(stad.cov$RefFreq)-(stad.cov$RefCov/as.numeric(as.character(stad.cov$DP)))
 # stad.cov$AllelicImbalance[stad.cov$AltFreq==0]<-1-
 #   (stad.cov$RefCov[stad.cov$AltFreq==0]/stad.cov$AltCov[stad.cov$AltFreq==0])
-stao.cov$AllelicImbalance<-(stao.cov$RefFreq)-(stao.cov$RefCov/stao.cov$DP)
+stao.cov$AllelicImbalance<-(stao.cov$RefFreq)-(stao.cov$RefCov/as.numeric(as.character(stao.cov$DP)))
 # stao.cov$AllelicImbalance[stao.cov$AltFreq==0]<-1-
 #   (stao.cov$RefCov[stao.cov$AltFreq==0]/stao.cov$AltCov[stao.cov$AltFreq==0])
 
@@ -1940,6 +1940,9 @@ STcovTable<-data.frame(sdRADSep=c(tab.stats(sto.cov$RelDP),"-",
 rownames(STcovTable)<-c("AvgCovPerLocus","CovVar","PropHet","HetRefProp","GBStools",
                         "Fst","FilteredFst")
 write.table(STcovTable,"STcovTable.txt",sep='\t',quote=F,col.names = T,row.names = T)
+
+
+
 ##############################DRAD DIFFERENT PLATES##################################
 
 #d.cov<-do.call("rbind",apply(drad,1,vcf.cov.loc,subset=d.ind))
