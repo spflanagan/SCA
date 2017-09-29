@@ -119,13 +119,17 @@ samtools.coverage<-function(vcf,subset=NULL){
   return(vcf.cov)
 }
 #generating stats for tables
-tab.stats<-function(x,nround=2){
+tab.stats<-function(x,nround=2,std=FALSE){
   m<-mean(x[!is.na(x)])
-  v<-var(x[!is.na(x)])
+  if(std==FALSE){
+    v<-var(x[!is.na(x)])
+  } else{
+    v<-sd(x[!is.na(x)])
+  }
   l<-min(x[!is.na(x)])
   u<-max(x[!is.na(x)])
   #o<-bquote(.(round(m,2))~','~.(round(v,2))~'('~.(round(l,2))~'-'~.(round(u,2))~')')
-  o<-paste((round(m,nround)),',',(round(v,nround))," (",(round(l,nround)),'-',(round(u,nround)),')',sep="")
+  o<-paste((round(m,nround)),' (',(round(v,nround)),") [",(round(l,nround)),'-',(round(u,nround)),']',sep="")
   return(o)
 }
 #################SET COLORS#################
@@ -699,21 +703,26 @@ dev.off()
 
 #### CREATE A TABLE ####
 
-covTable<-data.frame(sdRADSep=c(tab.stats(o.cov$AvgCovTotal),tab.stats(o.cov$CovVariance),
-                                tab.stats(o.cov$PropHet),
-                                tab.stats(orad.hets,4),tab.stats(orad.dcs[!is.na(orad.dcs)])),
-                     ddRADSep=c(tab.stats(d.cov$AvgCovTotal),tab.stats(d.cov$CovVariance),
-                                tab.stats(d.cov$PropHet),tab.stats(drad.hets,4),
-                                tab.stats(drad.dcs[!is.na(drad.dcs)])),
-                     sdRADTog=c(tab.stats(bo.cov$AvgCovTotal),tab.stats(bo.cov$CovVariance),
-                                tab.stats(bo.cov$PropHet),tab.stats(obot.hets,4),
-                                tab.stats(bo.dcs[!is.na(bo.dcs)])),
-                     ddRADTog=c(tab.stats(bd.cov$AvgCovTotal),tab.stats(bd.cov$CovVariance),
-                                tab.stats(bd.cov$PropHet),tab.stats(dbot.hets,4),
-                                tab.stats(bd.dcs[!is.na(bd.dcs)])),
+covTable<-data.frame(sdRADSep=c(tab.stats(o.cov$AvgCovTotal,std=TRUE),
+                                tab.stats(sqrt(o.cov$CovVariance),std=TRUE),
+                                tab.stats(o.cov$PropHet,std=TRUE),
+                                tab.stats(orad.hets,4,std=TRUE),
+                                tab.stats(orad.dcs[!is.na(orad.dcs)],std=TRUE)),
+                     ddRADSep=c(tab.stats(d.cov$AvgCovTotal,std=TRUE),
+                                tab.stats(sqrt(d.cov$CovVariance),std=TRUE),
+                                tab.stats(d.cov$PropHet,std=TRUE),tab.stats(drad.hets,4,std=TRUE),
+                                tab.stats(drad.dcs[!is.na(drad.dcs)],std=TRUE)),
+                     sdRADTog=c(tab.stats(bo.cov$AvgCovTotal,std=TRUE),
+                                tab.stats(sqrt(bo.cov$CovVariance),std=TRUE),
+                                tab.stats(bo.cov$PropHet,std=TRUE),tab.stats(obot.hets,4,std=TRUE),
+                                tab.stats(bo.dcs[!is.na(bo.dcs)],std=TRUE)),
+                     ddRADTog=c(tab.stats(bd.cov$AvgCovTotal,std=TRUE),
+                                tab.stats(sqrt(bd.cov$CovVariance),std=TRUE),
+                                tab.stats(bd.cov$PropHet,std=TRUE),tab.stats(dbot.hets,4,std=TRUE),
+                                tab.stats(bd.dcs[!is.na(bd.dcs)],std=TRUE)),
                      stringsAsFactors = FALSE)
 rownames(covTable)<-c("AvgCovPerLocus","CovVar","PropHet","HetRefProp","GBStools")
-write.table(covTable,"StacksCovTable.txt",row.names = TRUE,col.names=T,sep='\t',quote=F)
+write.table(covTable,"StacksCovTableSD.txt",row.names = TRUE,col.names=T,sep='\t',quote=F)
 ###### PCA #####
 library(pcadapt)
 both.pcadapt<-read.pcadapt("both.sub.vcf",type="vcfR")
