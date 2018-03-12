@@ -44,7 +44,7 @@ void help_message()
 	cout << "\n\t\tHelp Menu for ParentageSim\n";
 	cout << "\nThis model creates unlinked SNPs for parents and generates a CERVUS input file for their offspring\n";
 	cout << "\nFemales mate with one male but males can mate multiply\n";
-	cout << "-b:\tBase for output file names (gsim_)\n";
+	cout << "-o:\tOutput file name (simulated_genotypes.txt)\n";
 	cout << "-F:\tnumber of females (50)\n";
 	cout << "-M:\tnumber of males (50)\n";
 	cout << "-S:\tnumber of SNPs (10)\n";
