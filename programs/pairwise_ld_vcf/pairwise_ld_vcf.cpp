@@ -273,10 +273,10 @@ int main()
 	vector<locus_info> vcf_dat;
 //	vector<ld_info> ld;
 
-	vcf_name = "../../results/stacks/batch_1.adults_MAF1.recode.vcf";
-	out_name = "../../results/genome_paper/ld_info_adults_maf1.txt";
-	matrix_name = "../../results/genome_paper/ld_matrix_adults_maf1_lg1.txt";
-	string any_matrix_base = "../../results/genome_paper/ld_matrix_adults_maf1_";
+	vcf_name = "../../../popgen/fwsw_results/p4.upd.vcf";
+	out_name = "../../../popgen/fwsw_results/p4_ld_info.txt";
+	matrix_name = "../../../popgen/fwsw_results/p4_ld_matrix.txt";
+	string any_matrix_base = "../../../popgen/fwsw_results/ld/p4_ld_matrix_";
 
 	vcf.open(vcf_name);
 	FileTest(vcf, vcf_name);

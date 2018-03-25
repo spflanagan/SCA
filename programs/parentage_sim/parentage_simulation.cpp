@@ -57,8 +57,11 @@ int main(int argc, char*argv[])
 {
 	int i, ii, iii, num_snps, num_males, num_females, mate, max_num_mates, fecundity, num_encounters, num_offspring;
 	vector<individual> males, females;
-	string output_name = "simulated_genotypes.txt";
-	ofstream output;
+	string genotype_name = "simulated_genotypes.txt";
+	string offspring_name = "simulated_offspring.txt";
+	string candmoms_name = "simulated_candidate_mothers.txt";
+	string canddads_name = "simulated_candidate_fathers.txt";
+	ofstream genotypes,offspring,cand_males,cand_females;
 
 	//default settings
 	num_snps = 10;
@@ -89,7 +92,7 @@ int main(int argc, char*argv[])
 				tempstring2 = argv[i+ 1];
 				i++;
 				if (tempstring1 == "-o")
-					output_name = tempstring2;
+					genotype_name = tempstring2;
 				if (tempstring1 == "-M")
 					num_males = atoi(tempstring2.c_str());
 				if (tempstring1 == "-F")
@@ -115,12 +118,21 @@ int main(int argc, char*argv[])
 		females.push_back(individual());
 		females[i].initialize(num_snps);
 	}
+	offspring_name = genotype_name + "_offspring.txt"; 
+	candmoms_name = genotype_name + "_candidate_mothers.txt";
+	canddads_name = genotype_name + "_candidate_fathers.txt";
+	genotype_name = genotype_name + "_genotypes.txt";
+	
 
 	//mating
-	output.open(output_name);
-	output << "ID\tMom\tDad";
+	genotypes.open(genotype_name);
+	genotypes << "ID\tMom\tDad";
+	offspring.open(offspring_name);
+	offspring << "OffspringID\tKnownParent1ID\tKnownParent2ID";
+	cand_females.open(candmoms_name);
+	cand_males.open(canddads_name);
 	for (i = 0; i < num_snps; i++)
-		output << "\tA" << i << "\tB" << i;
+		genotypes << "\tA" << i << "\tB" << i;
 	num_offspring = 0;
 	cout << "\nCommencing mating";
 	for (i = 0; i < num_females; i++)
@@ -133,19 +145,22 @@ int main(int argc, char*argv[])
 			{
 				for (iii = 0; iii < fecundity; iii++)//females mate with one male
 				{									//males can mate multiply
-					output << '\n' << "OFFSPRING" << num_offspring << "\tFEM" << i << "\tMAL" << mate;
+					genotypes << '\n' << "OFFSPRING" << num_offspring << "\tFEM" << i << "\tMAL" << mate;
+					offspring << '\n' << "OFFSPRING" << num_offspring << "\tFEM" << i << "\tMAL" << mate;
+					cand_females << "FEM" << i << '\n';
+					cand_males << "MAL" << mate << '\n';
 					for (ii = 0; ii < num_snps; ii++)
 					{//should really just output this. 
 					 //from the mom
 						if (genrand() < 0.5)
-							output << '\t' << females[i].maternal[ii];
+							genotypes << '\t' << females[i].maternal[ii];
 						else
-							output << '\t' << females[i].paternal[ii];
+							genotypes << '\t' << females[i].paternal[ii];
 						//from the dad
 						if (genrand() < 0.5)
-							output << '\t' << males[i].maternal[ii];
+							genotypes << '\t' << males[i].maternal[ii];
 						else
-							output << '\t' << males[i].paternal[ii];
+							genotypes  << '\t' << males[i].paternal[ii];
 					}
 					num_offspring++;
 					if (num_offspring % 100 == 0)
@@ -157,7 +172,10 @@ int main(int argc, char*argv[])
 			num_encounters++;
 		}
 	}
-	output.close();
+	genotypes.close();
+	offspring.close();
+	cand_females.close();
+	cand_males.close();
 
 	cout << "\nSimulation completed.\n" << std::flush;
 	return 0;

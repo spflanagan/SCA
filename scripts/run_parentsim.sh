@@ -31,7 +31,7 @@ do
 	do
 		for jj in ${NFEM}
 		do
-			./parentsim -S ${j} -F ${jj} -M ${jj} -o ../../results/parentsim_S${j}F${jj}_${i}.txt
+			./parentsim -S ${j} -F ${jj} -M ${jj} -o ../../results/parentsim/parentsim_S${j}F${jj}_${i}
 		done
 	done
 done >> ../../parentsim_${DATE}.log 2>&1 &
