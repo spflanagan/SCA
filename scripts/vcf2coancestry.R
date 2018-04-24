@@ -15,7 +15,8 @@ source("../../gwscaR/R/gwscaR_popgen.R")
 vcf<-parse.vcf("drad.sub.vcf")
 
 out.name<-"coancestry_afs.txt"
-vcf2coancestry<-function(vcf,out.name="coancestry_afs.txt"){
+#Allele frequency data
+vcf2coanAF<-function(vcf,out.name="coancestry_afs.txt"){
   co.afs<-do.call(rbind,apply(vcf,1,function(vcf.row,out.name){
     af<-calc.afs.vcf(vcf.row)
     snp.name<-paste(af$Chrom,trimws(af$Pos),sep=".")
@@ -29,5 +30,22 @@ vcf2coancestry<-function(vcf,out.name="coancestry_afs.txt"){
   return(co.afs)
 }
 
-co.afs<-vcf2coancestry(vcf)
-co.afs<-vcf2coancestry(full.vcf)
+co.afs<-vcf2coanAF(vcf)
+co.afs<-vcf2coanAF(full.vcf)
+
+#Genotype data
+out.name<-"coancestry_gty.txt"
+gts<-extract.gt.vcf(vcf)
+co.gt<-do.call(cbind,apply(gts,1,function(gt){
+  snp.name<-paste(gt["#CHROM"],trimws(gt["POS"]),sep=".")
+  rname<-paste(snp.name,gt["REF"],sep="_")
+  aname<-paste(snp.name,gt["ALT"],sep="_")
+  g<-do.call(rbind,lapply(gt[10:length(gt)],function(x) {
+    strsplit(as.character(x),"/")[[1]]}))
+  g[g=="0"]<-rname
+  g[g=="1"]<-aname
+  g[g=="."]<-0
+  return(as.data.frame(g))
+}))
+
+write.table(co.gt,out.name,row.names=TRUE,col.names=FALSE,quote=FALSE,sep='\t')
