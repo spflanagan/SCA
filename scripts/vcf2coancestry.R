@@ -14,6 +14,7 @@ source("../../gwscaR/R/gwscaR_popgen.R")
 
 vcf<-parse.vcf("drad.sub.vcf")
 vcf$`#CHROM`<-gsub("[A-z]+_?(\\d+)","\\1",vcf$`#CHROM`)
+vcf$ID<-seq(1,2*nrow(vcf),2)
 
 colnames(vcf)[10:ncol(vcf)]<-gsub("sample_(\\w\\w)\\w(\\d.*)_align","\\1_\\2",colnames(vcf[10:ncol(vcf)]))
 
@@ -22,11 +23,13 @@ out.name<-"coancestry_afs.txt"
 vcf2coanAF<-function(vcf,out.name="coancestry_afs.txt"){
   co.afs<-do.call(rbind,apply(vcf,1,function(vcf.row,out.name){
     af<-calc.afs.vcf(vcf.row)
-    snp.name<-vcf.row["ID"]
-    co.af<-cbind(af$RefFreq,af$AltFreq)
-    colnames(co.af)<-c(paste(snp.name,"0",sep=""),paste(snp.name,"1",sep=""))
+    bases<-c("A","C","G","T")
+    rname<-which(bases==vcf.row[["REF"]])
+    aname<-which(bases==vcf.row[["ALT"]])
+    co.af<-cbind(round(af$RefFreq,4),round(af$AltFreq,4))
+    colnames(co.af)<-c(rname,aname)
     suppressWarnings(write.table(co.af,out.name,sep='\t',append = TRUE,quote=FALSE,row.names = FALSE,col.names = TRUE))
-    row.names(co.af)<-snp.name
+    row.names(co.af)<-vcf.row["ID"]
     colnames(co.af)<-NULL
     return(data.frame(co.af))
   },out.name=out.name))
@@ -40,9 +43,9 @@ co.afs<-vcf2coanAF(vcf)
 out.name<-"coancestry_gty.txt"
 gts<-extract.gt.vcf(vcf)
 co.gt<-do.call(cbind,apply(gts,1,function(gt){
-  snp.name<-gt["ID"]
-  rname<-paste(snp.name,"0",sep="")
-  aname<-paste(snp.name,"1",sep="")
+  bases<-c("A","C","G","T")
+  rname<-which(bases==vcf.row[["REF"]])
+  aname<-which(bases==vcf.row[["ALT"]])
   g<-do.call(rbind,lapply(gt[10:length(gt)],function(x) {
     strsplit(as.character(x),"/")[[1]]}))
   #print(rname)
