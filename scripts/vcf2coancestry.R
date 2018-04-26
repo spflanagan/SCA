@@ -14,7 +14,6 @@ source("../../gwscaR/R/gwscaR_popgen.R")
 
 vcf<-parse.vcf("drad.sub.vcf")
 vcf$`#CHROM`<-gsub("[A-z]+_?(\\d+)","\\1",vcf$`#CHROM`)
-vcf$ID<-seq(1,2*nrow(vcf),2)
 
 colnames(vcf)[10:ncol(vcf)]<-gsub("sample_(\\w\\w)\\w(\\d.*)_align","\\1_\\2",colnames(vcf[10:ncol(vcf)]))
 
