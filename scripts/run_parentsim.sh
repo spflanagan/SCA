@@ -6,8 +6,8 @@
 
 ###---SET THESE PARAMETERS---###
 NUMREPS=10
-SNPS="10 50 100 150 200 300 400 800 1600"
-NFEM="50 100 500 2500"
+SNPS="50 100 150 200 300 400 800 1600"
+NFEM="50 100 500"
 
 DATE=`date +%Y%m%d`
 
@@ -31,7 +31,7 @@ do
 	do
 		for jj in ${NFEM}
 		do
-			./parentsim -S ${j} -F ${jj} -M ${jj} -o ../../results/parentsim/parentsim_S${j}F${jj}_${i}
+			./parentsim -S ${j} -F ${jj} -M ${jj} -o parentsim_S${j}F${jj}_${i} -d B:\\ubuntushare\\SCA\\results\\parentsim\\ -r ../../results/parentsim/
 		done
 	done
 done >> ../../parentsim_${DATE}.log 2>&1 &

@@ -40,18 +40,23 @@ co.afs<-vcf2coanAF(vcf)
 
 #Genotype data
 out.name<-"coancestry_gty.txt"
-gts<-extract.gt.vcf(vcf)
-co.gt<-do.call(cbind,apply(gts,1,function(gt){
-  bases<-c("A","C","G","T")
-  rname<-which(bases==vcf.row[["REF"]])
-  aname<-which(bases==vcf.row[["ALT"]])
-  g<-do.call(rbind,lapply(gt[10:length(gt)],function(x) {
-    strsplit(as.character(x),"/")[[1]]}))
-  #print(rname)
-  g[g=="0"]<-rname
-  g[g=="1"]<-aname
-  g[g=="."]<-0
-  return(as.data.frame(g))
-}))
+vcf2coanGT<-function(vcf,out.name="coancestry_gty.txt"){
+  gts<-extract.gt.vcf(vcf)
+  co.gt<-do.call(cbind,apply(gts,1,function(gt){
+    bases<-c("A","C","G","T")
+    rname<-which(bases==gt[["REF"]])
+    aname<-which(bases==gt[["ALT"]])
+    g<-do.call(rbind,lapply(gt[10:length(gt)],function(x) {
+      strsplit(as.character(x),"/")[[1]]}))
+    #print(rname)
+    g[g=="0"]<-rname
+    g[g=="1"]<-aname
+    g[g=="."]<-0
+    return(as.data.frame(g))
+  }))
+  
+  write.table(co.gt,out.name,row.names=TRUE,col.names=FALSE,quote=FALSE,sep='\t')
+  return(co.gt)
+}
 
-write.table(co.gt,out.name,row.names=TRUE,col.names=FALSE,quote=FALSE,sep='\t')
+co.gt<-vcf2coanGT(vcf)
