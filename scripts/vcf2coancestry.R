@@ -13,11 +13,25 @@ source("../../gwscaR/R/gwscaR_fsts.R")
 source("../../gwscaR/R/gwscaR_popgen.R")
 
 vcf<-parse.vcf("drad.sub.vcf")
-vcf$`#CHROM`<-gsub("[A-z]+_?(\\d+)","\\1",vcf$`#CHROM`)
 
+#calculate missingness at each locus
+gts<-extract.gt.vcf(vcf)
+prop.miss<-apply(gts[,10:ncol(gts)],1,function(gt){
+  n<-length(gt[gt=="./."])
+  prop.missing<-n/length(gt)
+  return(prop.missing)
+})
+
+vcf<-vcf[which(prop.miss<=0.3),]
+vcf$`#CHROM`<-gsub("[A-z]+_?(\\d+)","\\1",vcf$`#CHROM`)
 colnames(vcf)[10:ncol(vcf)]<-gsub("sample_(\\w\\w)\\w(\\d.*)_align","\\1_\\2",colnames(vcf[10:ncol(vcf)]))
 
-out.name<-"coancestry_afs.txt"
+write.table(vcf,"relatedness/drad_miss3.vcf",col.names=TRUE,row.names=FALSE,quote=FALSE,sep='\t')
+
+#Error file
+static.error<-data.frame(rep(0.3,nrow(vcf)),rep(0.04,nrow(vcf)),rep(0.2,nrow(vcf)))
+write.table(static.error,"relatedness/coancestry_err.txt",sep='\t',col.names=FALSE,row.names = FALSE,quote=FALSE)
+
 #Allele frequency data
 vcf2coanAF<-function(vcf,out.name="coancestry_afs.txt"){
   co.afs<-do.call(rbind,apply(vcf,1,function(vcf.row,out.name){
@@ -35,11 +49,9 @@ vcf2coanAF<-function(vcf,out.name="coancestry_afs.txt"){
   return(co.afs)
 }
 
-co.afs<-vcf2coanAF(vcf)
-#co.afs<-vcf2coanAF(full.vcf)
+co.afs<-vcf2coanAF(vcf,"relatedness/coancestry_afs.txt")
 
 #Genotype data
-out.name<-"coancestry_gty.txt"
 vcf2coanGT<-function(vcf,out.name="coancestry_gty.txt"){
   gts<-extract.gt.vcf(vcf)
   co.gt<-do.call(cbind,apply(gts,1,function(gt){
@@ -59,4 +71,5 @@ vcf2coanGT<-function(vcf,out.name="coancestry_gty.txt"){
   return(co.gt)
 }
 
-co.gt<-vcf2coanGT(vcf)
+co.gt<-vcf2coanGT(vcf,"relatedness/coancestry_gty.txt")
+

@@ -90,7 +90,7 @@ int main()
 	ifstream vcf;
 	ofstream gen_file;
 
-	vcf_name = "../../results/stacks/populations_MAF5/batch_1.vcf";
+	vcf_name = "../../results/relatedness/drad_miss3.vcf";//"../../results/stacks/populations_MAF5/batch_1.vcf";
 	gen_name = "../../results/parentage_biallelic/snp_genotypes.txt";
 
 	//read it once to get a list of locus IDs
