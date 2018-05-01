@@ -14,25 +14,24 @@ using namespace std;
 class individual
 {
 public:
-	vector<char> maternal;
-	vector<char> paternal;
+	vector<int> maternal;
+	vector<int> paternal;
 	int mom, dad, num_mates;
 
 	individual()
 	{
-		maternal = paternal = vector<char>();
+		maternal = paternal = vector<int>();
 		mom = dad = num_mates = int();
 	}
 
-	void initialize(int num_snps)
+	void initialize(vector<vector<int>>& alleles)
 	{
 		int j;
-		char alleles[4] = { 'A', 'C', 'T', 'G' };
 
-		for (j = 0; j < num_snps; j++)
+		for (j = 0; j < alleles.size(); j++)
 		{
-			maternal.push_back(alleles[randnum(4)]);
-			paternal.push_back(alleles[randnum(4)]);
+			maternal.push_back(alleles[j][randnum(alleles[j].size())]);
+			paternal.push_back(alleles[j][randnum(alleles[j].size())]);
 		}
 		num_mates = 0;
 	}
@@ -46,7 +45,8 @@ void help_message()
 	cout << "-o:\tOutput file name (simulated_genotypes.txt)\n";
 	cout << "-F:\tnumber of females (50)\n";
 	cout << "-M:\tnumber of males (50)\n";
-	cout << "-S:\tnumber of SNPs (10)\n";
+	cout << "-S:\tnumber of SNPs per locus (1)\n";
+	cout << "-L:\tnumber of loci (10)\n";
 	cout << "-m:\tmaximum number of mates per male (5)\n";
 	cout << "-f:\tfecundity, aka number of offspring produced per mating (4)\n";
 	cout << "-d:\tdirectory for output -- this is the full path to include in .crv file and should correspond to the relative directory\n";
@@ -56,7 +56,7 @@ void help_message()
 
 int main(int argc, char*argv[])
 {
-	int i, ii, iii, num_snps, num_males, num_females, mate, max_num_mates, fecundity, num_encounters, num_offspring;
+	int i, ii, iii, num_snps,num_loci, num_males, num_females, mate, max_num_mates, fecundity, num_encounters, num_offspring;
 	double prop_moms_sampled = 0.05;
 	vector<individual> males, females;
 	string base_name = "simulated";
@@ -64,12 +64,13 @@ int main(int argc, char*argv[])
 	ofstream genotypes,offspring,cand_males,cand_females,crv;
 
 	//default settings
-	num_snps = 10;
+	num_snps = 3;
+	num_loci = 10;
 	num_males = 50;
 	num_females = 50;
 	max_num_mates = 5;
 	fecundity = 4;
-	dir = "../../results";
+	dir = "../../results/";
 	rel_dir = "../../results/";
 	//read in parameters
 	string tempstring1, tempstring2;
@@ -105,6 +106,8 @@ int main(int argc, char*argv[])
 					fecundity = atoi(tempstring2.c_str());
 				if (tempstring1 == "-S")
 					num_snps = atoi(tempstring2.c_str());
+				if (tempstring1 == "-L")
+					num_loci = atoi(tempstring2.c_str());
 				if (tempstring1 == "-d")
 					dir = tempstring2;
 				if (tempstring1 == "-r")
@@ -113,12 +116,23 @@ int main(int argc, char*argv[])
 		}
 	}
 	
-
+	//initialize loci
+	vector<vector<int>> alleles;
+	for (i = 0; i < num_loci; i++)
+	{
+		alleles.push_back(vector<int>());
+		int nsnps = randnum(num_snps) + 1;
+		while (nsnps < 1) nsnps = randnum(num_snps); //sanity check
+		for (ii = 0; ii < pow(2,nsnps); ii++)
+		{
+			alleles[i].push_back(ii+1);
+		}
+	}
 	//initialize adults
 	genotype_name = rel_dir + base_name + "_genotypes.txt";
 	genotypes.open(genotype_name);
 	genotypes << "ID\tMom\tDad";
-	for (i = 0; i < num_snps; i++)
+	for (i = 0; i < num_loci; i++)
 		genotypes << "\tA" << i << "\tB" << i;
 	candmoms_name = rel_dir + base_name + "_candidate_mothers.txt";
 	canddads_name = rel_dir + base_name + "_candidate_fathers.txt";
@@ -127,10 +141,10 @@ int main(int argc, char*argv[])
 	for (i = 0; i < num_males; i++)
 	{
 		males.push_back(individual());
-		males[i].initialize(num_snps);
+		males[i].initialize(alleles);
 		cand_males << "MAL" << i << '\n';
 		genotypes << '\n' << "MAL" << i << "\tNA\tNA";
-		for (ii = 0; ii < num_snps; ii++)
+		for (ii = 0; ii < num_loci; ii++)
 		{
 			genotypes << '\t' << males[i].maternal[ii] << '\t' << males[i].paternal[ii];;
 		}
@@ -138,10 +152,10 @@ int main(int argc, char*argv[])
 	for (i = 0; i < num_females; i++)
 	{
 		females.push_back(individual());
-		females[i].initialize(num_snps);
+		females[i].initialize(alleles);
 		cand_females << "FEM" << i << '\n';
 		genotypes << '\n' << "FEM" << i << "\tNA\tNA";
-		for (ii = 0; ii < num_snps; ii++) 
+		for (ii = 0; ii < num_loci; ii++) 
 		{
 			genotypes << '\t' << females[i].maternal[ii] << '\t' << females[i].paternal[ii];;
 		}
@@ -167,7 +181,7 @@ int main(int argc, char*argv[])
 					genotypes << '\n' << "OFFSPRING" << num_offspring << "\tFEM" << i << "\tMAL" << mate;
 					offspring << '\n' << "OFFSPRING" << num_offspring << "\tFEM" << i << "\tMAL" << mate;
 					
-					for (ii = 0; ii < num_snps; ii++)
+					for (ii = 0; ii < num_loci; ii++)
 					{//should really just output this. 
 					 //from the mom
 						if (genrand() < 0.5)
@@ -203,13 +217,13 @@ int main(int argc, char*argv[])
 	crv << "\n[Registration]\nUserName =\nUserCompany =\nCode =\n";
 	crv << "\n[FileInfo]\nFileName=" << dir << base_name << ".crv" << "\nFileType = .crv\nCreationDate = 4 / 26 / 2018 3:48 : 48 PM\n";//I could do this better but it takes work
 	crv << "\n[GenotypeFile]\nFileName=" << dir << base_name << "_genotypes.txt" << "\nHeaderRow = 1\nReadLocusNames = 1\nFirstAlleleColumnNumber = 4\nIDColumnNumber = 1\nNLoci = " <<
-		num_snps << "\nPropLociTyped = 1\nColumnsPerLocus = 2\nSexColumn = 0\nUnknownSexLabel =\n";
+		num_loci << "\nPropLociTyped = 1\nColumnsPerLocus = 2\nSexColumn = 0\nUnknownSexLabel =\n";
 	crv << "\n[CodecFile]\nFileName=\nHeaderRow = 1\nUseSameCodingForAllLoci = 1\nGenotypeFileName = " << dir << base_name << "_genotypes.txt\n";
 	crv << "\n[AlleleFrequencySummaryFile]\nFileName=" << dir << base_name << "_afs.txt\nDoHardyWeinberg = 1\nHWMinExpectedFrequency = 5\nUseYatesCorrection = 1\nUseBonferroniCorrection = 1\nDoNullAllele = 1\n";
 	crv << "\n[AlleleFrequencyDataFile]\nFileName=" << dir << base_name << ".alf\nHeaderRow = 1\n";
 	crv << "\n[SimulationParameters]\nAnalysisType = Maternity\nNOffspring = 10000\nNCandidateMales = 0\nPropCandidateMalesSampled = 0\nNCandidateFemales = " <<
 		num_females << "\nPropCandidateFemalesSampled = " << prop_moms_sampled << "\nPropLociTyped = 1\nPropLociMistyped = 0.01\nMinTypedLoci = " <<
-		num_snps << "\nCriticalStatisticName = LOD\nTruncateAtZero = 0\nRelaxedConfidence = 90\nStrictConfidence = 95\nSimulateInbreeding = 0\nParentRelatedness = 0" <<
+		num_loci << "\nCriticalStatisticName = LOD\nTruncateAtZero = 0\nRelaxedConfidence = 90\nStrictConfidence = 95\nSimulateInbreeding = 0\nParentRelatedness = 0" <<
 		"\nInbreedingRate = 0\nAlwaysTestSelfing = 0\nSimulateFemaleRelatives = 0\nFemalePropRelatives = 0\nFemaleRelatedTo = Offspring\nFemaleRelatedness = 0\n" <<
 		"SimulateMaleRelatives = 0\nMalePropRelatives = 0\nMaleRelatedTo = Offspring\nMaleRelatedness = 0\nUseCorrectedLikelihoods = 1\nUseMistypingRateAsLikelihoodErrorRate = 1\nLikelihoodErrorRate = 0.01\n";
 	crv << "\n[SimulationSummaryFile]\nFileName=" << dir << base_name << "_sim.txt\n";
@@ -218,8 +232,8 @@ int main(int argc, char*argv[])
 		"NCategories = 0\nMinStatistic = 0\nMaxStatistic = 0\n";
 	crv << "\n[PreviousSimulationDataFile]\nFileName =\n";
 	crv << "\n[ParentageParameters]\nAnalysisType = Maternity\nUseSimulationParameters = 1\nCalculateConfidenceLevels = 1\nAlwaysTestSelfing = 0\nMinTypedLoci = " <<
-		num_snps << "\nUseCorrectedLikelihoods = 1\nUseMistypingRateAsLikelihoodErrorRate = 0\nLikelihoodErrorRate = 0.01\nCriticalStatisticName = LOD\nTruncateAtZero = 0\n";
-	crv << "\n[OffspringFile]\nFileName=" << dir << base_name << "_offspring.txt\nHeaderRow = 1\nOffspringIDColumnNumber = 1\nIncludesKnownParents = 0\nKnownParentIDColumnNumber = 0\n" <<
+		num_loci << "\nUseCorrectedLikelihoods = 1\nUseMistypingRateAsLikelihoodErrorRate = 0\nLikelihoodErrorRate = 0.01\nCriticalStatisticName = LOD\nTruncateAtZero = 0\n";
+	crv << "\n[OffspringFile]\nFileName=" << dir << base_name << "_offspring.txt\nHeaderRow = 1\nOffspringIDColumnNumber = 1\nIncludesKnownParents = 1\nKnownParentIDColumnNumber = 3\n" <<
 		"IncludesCandidateParents = 0\nCandidateParentIDColumnNumber = 0\n";
 	crv << "\n[CandidateFemaleFile]\nFileName=" << dir << base_name << "_candidate_mothers.txt\nHeaderRow = 0\nCandidateParentFormat = One column for all offspring\n" <<
 		"OffspringIDColumnNumber = 0\nCandidateParentIDColumnNumber = 1\n";

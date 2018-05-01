@@ -6,8 +6,9 @@
 
 ###---SET THESE PARAMETERS---###
 NUMREPS=10
-SNPS="50 100 150 200 300 400 800 1600"
+LOCS="50 100 150 200 300 400 800 1600"
 NFEM="50 100 500"
+NSNP="1 4"
 
 DATE=`date +%Y%m%d`
 
@@ -20,18 +21,21 @@ cd $PROGDIR
 
 ### --- RUN THE PARAMETER COMBINATIONS --- ###
 echo "Running ${NUMREPS} reps of the parentage simulation program"
-echo "Testing parameters ${SNPS} and ${NFEM}"
+echo "Testing parameters ${LOCS} loci, ${NSNP} SNPs per locus, and ${NFEM} females"
 echo "The program will run in the background."
 echo "Check the status with htop or by looking at parentsim_${DATE}.log"
 
 
 for i in `seq 1 $NUMREPS`
 do
-	for j in ${SNPS}
+	for j in ${LOCS}
 	do
 		for jj in ${NFEM}
 		do
-			./parentsim -S ${j} -F ${jj} -M ${jj} -o parentsim_S${j}F${jj}_${i} -d B:\\ubuntushare\\SCA\\results\\parentsim\\ -r ../../results/parentsim/
+			for jjj in ${NSNP}
+			do
+				./parentsim -L ${j} -S ${jjj} -F ${jj} -M ${jj} -o parentsim_L${j}S${jjj}F${jj}_${i} -d B:\\ubuntushare\\SCA\\results\\parentsim\\ -r ../../results/parentsim/
+			done
 		done
 	done
 done >> ../../parentsim_${DATE}.log 2>&1 &
