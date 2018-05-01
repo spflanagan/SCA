@@ -10,34 +10,34 @@ setwd("E:/ubuntushare/SCA/results/")
 ##############################################################################
 #####CERVUS ANALYSIS
 ##############################################################################
-stats.files<-c(paste("parentage",
-	list.files(path="parentage",pattern="\\d+.maternity.txt"),sep="/"),
-	paste("parentage_biallelic",
-	list.files(path="parentage_biallelic",pattern="\\d+.maternity.txt"),
-	sep="/"))
+stats.files<-c(list.files(path="parentage",pattern="\\d+.maternity.txt",full.names=TRUE),
+	list.files(path="parentage_biallelic",pattern="\\d+.maternity.txt",full.names=TRUE))
 
-stats<-data.frame(NumLoci=numeric(),ConfidenceLevel=numeric(), Delta=numeric(),
-	NumAssignments=numeric(), AssignmentRate=numeric(),
-	MarkerType=character(),stringsAsFactors=F)
-for(i in 1: length(stats.files)){
-	dat<- readLines(stats.files[i])
-	num.loci<-gsub("\\w+/gen(\\d+)_\\d+.maternity.txt","\\1",stats.files[i])
-	marker<-gsub("(\\w+)/gen\\d+_\\d+.maternity.txt","\\1",stats.files[i])
-	start<-match("Mother given known father:", dat)
-	#pull out info for strict only
-	info<-unlist(strsplit(dat[(start+4)],"\\s+"))
-	info<-unlist(strsplit(gsub("[()%]","",info),"[[:space:]]"))
-	stats[i,]<-cbind(as.numeric(num.loci),as.numeric(info[2]),
-		as.numeric(info[3]),as.numeric(info[4]), as.numeric(info[6]),
-		marker)
-	rownames(stats)[i]<-as.character(stats.files[i])
+cervus_analysis<-function(stats.files,pattern){
+  stats<-data.frame(NumLoci=numeric(),ConfidenceLevel=numeric(), Delta=numeric(),
+  	NumAssignments=numeric(), AssignmentRate=numeric(),
+  	MarkerType=character(),stringsAsFactors=FALSE)
+  for(i in 1: length(stats.files)){
+  	dat<- readLines(stats.files[i])
+  	num.loci<-gsub(paste(patt,"(\\d+)_\\d+.maternity.txt",sep=""),"\\1",stats.files[i])
+  	dir<-gsub("(.*)/.*\\d+_\\d+.maternity.txt","\\1",stats.files[i])
+  	start<-match("Mother given known father:", dat)
+  	#pull out info for strict only
+  	info<-unlist(strsplit(dat[(start+4)],"\\s+"))
+  	info<-unlist(strsplit(gsub("[()%]","",info),"[[:space:]]"))
+  	stats[i,]<-cbind(as.numeric(num.loci),as.numeric(info[2]),
+  		as.numeric(info[3]),as.numeric(info[4]), as.numeric(info[6]),dir)
+  	rownames(stats)[i]<-as.character(stats.files[i])
+  }
+  return(stats)
 }
 
-r.hap<-tapply(as.numeric(stats[stats$MarkerType=="parentage","AssignmentRate"]),
-	 as.factor(stats[stats$MarkerType=="parentage","NumLoci"]),mean)
-r.snp<-tapply(as.numeric(stats[stats$MarkerType=="parentage_biallelic",
-	"AssignmentRate"]),as.factor(stats[
-	stats$MarkerType=="parentage_biallelic","NumLoci"]),mean)
+
+stats<-cervus_analysis(stats.files,"./dradPruned")
+
+r<-as.list(by(stats,stats$MarkerType,function(stat){
+  rt<-tapply(as.numeric(stats[,"AssignmentRate"]),as.factor(stats[,"NumLoci"]),mean)
+}))
 
 #####PLOT CERVUS INFO
 png("CervusStats.png",height=5,width=10,res=300, units="in")

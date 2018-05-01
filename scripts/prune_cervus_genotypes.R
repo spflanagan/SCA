@@ -54,6 +54,26 @@ hwe.test<-function(df){#must be a df with two columns
 	return(cbind(locus.name,chi.result))
 }#end hwe.test function
 
+prune.haps<-function(df, prop){
+  num<-apply(df,1,function(locus){ n<-length(which(locus=="-")) })
+  keep<-which(num <= round(prop*(ncol(df)-2)))
+  new.df<-data.frame(df[keep,])
+  return(new.df)
+}
+
+#sample
+rep_cervus<-function(nloci,nreps,gens,out.prefix="gen"){#used pruned for haplotypes, gen.keep for SNPs
+  for(i in 1:nreps){ #do nreps replicates of each set
+    for(j in 1:length(nloci)){
+      cols<-sample(seq(2,ncol(gens)-2,2),nloci[j],replace=F)
+      cols<-c(cols,cols+1)
+      write.table(gens[,c(1,sort(cols))],
+                  paste(out.prefix,nloci[j],"_",i,".txt",sep=""),
+                  quote=F,col.names=T,row.names=F,sep="\t")
+    }
+  }
+}
+
 #############################THE ACTUAL WORK################################
 setwd("B://ubuntushare//SCA//results//parentage_biallelic")
 #large file
@@ -82,18 +102,7 @@ pruned<-prune.loci(gen.keep, 0.01)
 write.table(pruned,"PolymorphicIn99PercIndsHWE.txt", quote=F,sep="\t",row.names=F)
 pruned<-read.table("PolymorphicIn99PercIndsHWE.txt")
 
-#sample
-rep_cervus<-function(nloci,nreps,gens,out.prefix="gen"){#used pruned for haplotypes, gen.keep for SNPs
-  for(i in 1:nreps){ #do nreps replicates of each set
-    for(j in 1:length(nloci)){
-      cols<-sample(seq(2,ncol(gens),2),nloci[j],replace=F)
-      cols<-c(cols,cols+1)
-      write.table(gens[,c(1,sort(cols))],
-                  paste(out.prefix,nloci[j],"_",i,".txt",sep=""),
-                  quote=F,col.names=T,row.names=F,sep="\t")
-    }
-  }
-}
+
 
 c<-rep_cervus(nloci=c(50,100,150,300,200,400,800,1600),nreps=10,gens=gen.keep,out.prefix = "dradPruned")
 write.table(gen.keep$ID[grep("FE",gen.keep$ID)],"candidate_moms.txt",quote=FALSE,row.names=FALSE,col.names=FALSE)
@@ -107,6 +116,66 @@ for(i in 1:length(off)){
 }
 write.table(offs,"offspring.txt",col.names=FALSE,row.names=FALSE,quote=FALSE,sep='\t')
 
+#############################HAPLOTYPES################################
+setwd("B://ubuntushare//SCA//results//parentage")
+
+#convert haplotypes to cervus format
+haps<-read.delim("stacks/batch_1.haplotypes.tsv")
+haps.miss<-prune.haps(haps,0.3)
+haps.keep<-do.call(cbind,apply(haps.miss,1,function(hap){
+  ids<-as.character(hap["Catalog.ID"])
+  idsb<-paste(ids,"b",sep="")
+  idsa<-paste(ids,"a",sep="")
+  cnt<-hap["Cnt"]
+  hap<-unlist(lapply(hap[3:length(hap)],as.character))
+  hap[hap=="-"]<-"0/0"
+  hap[grep("/",hap,invert=TRUE)]<-unlist(lapply(hap[grep("/",hap,invert = TRUE)],function(h){
+    newh<-paste(h,h,sep="/")
+  }))
+  hap[grep("\\w+/\\w+/\\w+",hap)]<-"0/0" #remove any with multiple haplotypes (wtf?)
+  gts<-as.data.frame(do.call(rbind,strsplit(hap,"/")))
+  rownames(gts)<-names(hap)[3:length(hap)]
+  colnames(gts)<-c(idsa,idsb)
+  return(gts)
+}))
+colnames(haps.keep)<-gsub("\\s+","",colnames(haps.keep))
+#remove consensus sequences
+hkeep<-apply(haps.keep,2,function(x) !any(x=="consensus"))
+haplotypes<-haps.keep[,hkeep==TRUE]
+write.csv(haps.keep,"hap_genotypes.txt",row.names=TRUE,col.names=TRUE)
+#large file
+haplotypes<-read.csv("hap_genotypes.txt",row.names = 1,header = TRUE)
+
+#remove any found in less than 90% of individuals
+hap90<-prune.loci(haplotypes,0.1)
+write.table(hap90,"HapsPolymorphicIn90.txt", quote=F,sep="\t",row.names=F)
+#remove those loci not in hardy weinberg equilibrium
+hwe<-data.frame()
+for(x in seq(1,(ncol(hap90)-2),2)){
+  hwe<-rbind(hwe,hwe.test(hap90[,c(x,(x+1))]))
+}
+keep.loci<-hwe[as.numeric(as.character(hwe$chi.result))>0.05,]
+keep.names<-unlist(lapply(as.list(keep.loci$locus.name),function(x){
+  names<-c(paste(x,"a",sep=""),paste(x,"b",sep=""))
+  return(names) }))
+hap.keep<-hap90[,colnames(hap90) %in% keep.names]
+
+hap.keep$ID<-rownames(hap.keep)
+hap.keep$sex<-gsub("sample_(\\w{3}).*","\\1",rownames(hap.keep))
+hap.keep<-hap.keep[,c("ID","sex",keep.names)]
+
+c<-rep_cervus(nloci=c(50,100,150,300,200,400,800,1600),nreps=10,gens=hap.keep,out.prefix = "dradPrunedHaps")
+write.table(hap.keep$ID[grep("FEM",hap.keep$ID)],
+            "candidate_moms.txt",quote=FALSE,row.names=FALSE,col.names=FALSE)
+off<-hap.keep$ID[grep("OFF",hap.keep$ID)]
+dad<-hap.keep$ID[grep("PRM",hap.keep$ID)]
+offs<-data.frame(offspring=off,KnownParent=NA,stringsAsFactors = FALSE)
+for(i in 1:length(off)){
+  d<-which(dadn==offn[i])
+  if(length(d)==0){ offs[i,2]<-"" 
+  }else { offs[i,2]<-as.character(dad[d]) }
+}
+write.table(offs,"offspring.txt",col.names=FALSE,row.names=FALSE,quote=FALSE,sep='\t')
 #######################PREVIOUS PRUNING
 #prune to remove non-polymorphic loci
 #<-apply(hapgen,2,function(x){ length(which(x=="consensus")) })
