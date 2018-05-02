@@ -6,8 +6,8 @@
 
 rm(list=ls())
 #############################FUNCTIONS#####################################
-prune.loci<-function(df, prop){
-	num<-apply(df,2,function(x){ length(which(x=='0')) })
+prune.loci<-function(df, prop,blanks='0'){
+	num<-apply(df,2,function(x){ length(which(x==blanks)) })
 	keep<-num[num <= round(prop*nrow(df))]
 	new.df<-data.frame(df[,colnames(df) %in% names(keep)])
 	return(new.df)
@@ -54,12 +54,6 @@ hwe.test<-function(df){#must be a df with two columns
 	return(cbind(locus.name,chi.result))
 }#end hwe.test function
 
-prune.haps<-function(df, prop){
-  num<-apply(df,1,function(locus){ n<-length(which(locus=="-")) })
-  keep<-which(num <= round(prop*(ncol(df)-2)))
-  new.df<-data.frame(df[keep,])
-  return(new.df)
-}
 
 #sample
 rep_cervus<-function(nloci,nreps,gens,out.prefix="gen"){#used pruned for haplotypes, gen.keep for SNPs
@@ -120,7 +114,7 @@ write.table(offs,"offspring.txt",col.names=FALSE,row.names=FALSE,quote=FALSE,sep
 setwd("B://ubuntushare//SCA//results//parentage")
 
 #convert haplotypes to cervus format
-haps<-read.delim("stacks/batch_1.haplotypes.tsv")
+haps<-read.delim("../stacks/batch_1.haplotypes.tsv")
 haps.miss<-prune.haps(haps,0.3)
 haps.keep<-do.call(cbind,apply(haps.miss,1,function(hap){
   ids<-as.character(hap["Catalog.ID"])
@@ -129,20 +123,21 @@ haps.keep<-do.call(cbind,apply(haps.miss,1,function(hap){
   cnt<-hap["Cnt"]
   hap<-unlist(lapply(hap[3:length(hap)],as.character))
   hap[hap=="-"]<-"0/0"
+  hap[is.na(hap)]<-"0/0"
   hap[grep("/",hap,invert=TRUE)]<-unlist(lapply(hap[grep("/",hap,invert = TRUE)],function(h){
     newh<-paste(h,h,sep="/")
   }))
   hap[grep("\\w+/\\w+/\\w+",hap)]<-"0/0" #remove any with multiple haplotypes (wtf?)
   gts<-as.data.frame(do.call(rbind,strsplit(hap,"/")))
-  rownames(gts)<-names(hap)[3:length(hap)]
   colnames(gts)<-c(idsa,idsb)
   return(gts)
 }))
 colnames(haps.keep)<-gsub("\\s+","",colnames(haps.keep))
+rownames(haps.keep)<-colnames(haps.miss)[3:length(haps.miss)]
 #remove consensus sequences
 hkeep<-apply(haps.keep,2,function(x) !any(x=="consensus"))
 haplotypes<-haps.keep[,hkeep==TRUE]
-write.csv(haps.keep,"hap_genotypes.txt",row.names=TRUE,col.names=TRUE)
+write.csv(haplotypes,"hap_genotypes.txt",row.names=TRUE,col.names=TRUE)
 #large file
 haplotypes<-read.csv("hap_genotypes.txt",row.names = 1,header = TRUE)
 
@@ -163,6 +158,7 @@ hap.keep<-hap90[,colnames(hap90) %in% keep.names]
 hap.keep$ID<-rownames(hap.keep)
 hap.keep$sex<-gsub("sample_(\\w{3}).*","\\1",rownames(hap.keep))
 hap.keep<-hap.keep[,c("ID","sex",keep.names)]
+write.table(hap.keep,"dradPrunedHaps.txt",col.names=TRUE,row.names=TRUE,sep='\t',quote=FALSE)
 
 c<-rep_cervus(nloci=c(50,100,150,300,200,400,800,1600),nreps=10,gens=hap.keep,out.prefix = "dradPrunedHaps")
 write.table(hap.keep$ID[grep("FEM",hap.keep$ID)],
@@ -176,6 +172,14 @@ for(i in 1:length(off)){
   }else { offs[i,2]<-as.character(dad[d]) }
 }
 write.table(offs,"offspring.txt",col.names=FALSE,row.names=FALSE,quote=FALSE,sep='\t')
+
+#generate pairwise combos for band sharing
+for(i in 1:length(rownames(hap.keep))){
+  for(j in 1:length(rownames(hap.keep))){
+    write.table(cbind(rownames(hap.keep)[c(i,j)]),"../relatedness/pairwise.combinations.txt",
+                sep='\t',quote=FALSE,col.names = FALSE,row.names = FALSE,append = TRUE)
+  }
+}
 #######################PREVIOUS PRUNING
 #prune to remove non-polymorphic loci
 #<-apply(hapgen,2,function(x){ length(which(x=="consensus")) })

@@ -142,9 +142,9 @@ int main()
 	bool found,vcf;
 	string empty_char;
 	
-	pairs_name = "../../results/parentage/pairwise.combinations.txt";
-	output_name = "../../results/relatedness/PolymorphicIn99PercIndsHWE.allcombos.bandsharing.txt";
-	kinship_name = "../../results/parentage/PolymorphicIn99PercIndsHWE.txt";
+	pairs_name = "../../results/relatedness/pairwise.combinations.txt";
+	output_name = "../../results/relatedness/dradPrunedHaps.allcombos.bandsharing.txt";
+	kinship_name = "../../results/parentage/dradPrunedHaps.txt";
 	vcf = false;
 
 	if (vcf)
