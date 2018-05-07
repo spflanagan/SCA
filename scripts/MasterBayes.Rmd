@@ -177,7 +177,7 @@ PdP<-PdataPed(formula=list(res1,res2),data=PipefishP,USdam=TRUE)
 ```
 
 ```{r}
-model1<-MCMCped(PdP=PdP, GdP=GdP, verbose=FALSE)
+model1<-MCMCped(PdP=PdP, GdP=GdP, verbose=FALSE,burnin=10000)
 
 plot(model1$E1)
 plot(model1$E2)
@@ -186,8 +186,10 @@ plot(model1$USdam)
 autocorr(model1$E1)
 ```
 
+The trace for E2 looks a bit wonky and USdam doesn't seem to be converging. What now? Trying setting more informative priors?
+
 ```{r}
 pP<-priorPed(USdam=list(mu=log(5), sigma=0.5))#set an informative prior
-model2<-MCMCped(PdP=PdP,GdP=GdP,pP=pP,tP=tunePed(USsire=0.1),verbose=FALSE)
+model2<-MCMCped(PdP=PdP,GdP=GdP,pP=pP,tP=tunePed(USdam=0.1),verbose=FALSE,burnin=10000,nitt = 30000)
 plot(model2$USdam)
-
+```

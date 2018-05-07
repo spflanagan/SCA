@@ -21,14 +21,15 @@ First I need to get the genomic data in the correct format.
 And create ped and map files so that I can easily prune the loci
 
 ```{r}
-gt<-read.delim("relatedness/coancestry_gty.txt",sep=sep,header=FALSE)
-ped<-data.frame(FamID=LifeHistData$ID,IndID=LifeHistData$ID,PatID=0,
+gt<-read.delim("relatedness/coancestry_gty.txt",sep='\t',header=FALSE)
+ped<-data.frame(FamID=as.character(LifeHistData$ID),IndID=as.character(LifeHistData$ID),PatID=0,
                 MatID=0,Sex=LifeHistData$Sex,Phenotype=-9,
                 gt[,2:ncol(gt)],stringsAsFactors = FALSE)
 ped[grep("OF",ped[,1]),1]<-gsub("OF_(\\d+)(-\\d+)?","\\1",ped[grep("OF",ped[,1]),1])
 ped[grep("PR",ped[,1]),1]<-gsub("PR_(\\d+)","\\1",ped[grep("PR",ped[,1]),1])
-ped[ped[,3]=="086-23",1]<-"08623"
-ped[ped[,3]=="086R",1]<-"086"
+ped[ped[,1]=="086-23",1]<-"08623"
+ped[ped[,1]=="086R",1]<-"086"
+ped[,3]<-ped[,1]
 write.table(ped,"sequoia/GenoM.ped",sep='\t',row.names=FALSE,col.names=FALSE,quote=FALSE)
 #create map file
 vcf<-read.table("relatedness/drad_miss3.vcf",header=TRUE)
@@ -36,7 +37,8 @@ map<-data.frame(vcf$CHROM,vcf$ID,NA,vcf$POS)
 write.table(map,"sequoia/GenoM.map",sep='\t',row.names=FALSE,col.names=FALSE,quote=FALSE)
 ```
 
-`plink --file C:\Users\sflan\Documents\GitHub\SCA\results\sequoia\GenoM --maf 0.4 --indep 50 5 2 --allow-extra-chr --make-founders --recode --out C:\Users\sflan\Documents\GitHub\SCA\results\sequoia\PrunedGenoM`
+`plink --file C:\Users\sflan\Documents\GitHub\SCA\results\sequoia\GenoM --maf 0.4 --indep 50 5 2 --allow-extra-chr --make-founders --recodeA --out C:\Users\sflan\Documents\GitHub\SCA\results\sequoia\PrunedGenoM` for raw input or
+`plink --file C:\Users\sflan\Documents\GitHub\SCA\results\sequoia\GenoM --maf 0.4 --indep 50 5 2 --allow-extra-chr --make-founders --recode --out C:\Users\sflan\Documents\GitHub\SCA\results\sequoia\PrunedGenoM` for ped input
 
 This resulted in 2312 loci
 
@@ -85,20 +87,22 @@ ped2sequoia<-function(gt.name,sep='\t'){
 }
 GenoM_ped<-ped2sequoia("sequoia/PrunedGenoM.ped",sep=' ')
 summary(SnpStats(GenoM_ped))
+
+GenoM_ped<-GenoConvert(InFile = "sequoia/PrunedGenoM.raw")
 ```
 
 
 Then I need to generate the life history data
 
 ```{r}
-sex<-gsub(".*(\\w{2})_.*","\\1",rownames(GenoM))
+sex<-gsub(".*(\\w{2})_.*","\\1",rownames(GenoM_ped))
 sex[sex=="FE"]<-as.numeric(1)
 sex[sex%in%c("NP","PR")]<-as.numeric(2)
 sex[sex=="OF"]<-NA
 BY<-sex
 BY[BY %in% c("1","2")]<-1
 BY[is.na(BY)]<-2
-LifeHistData<-data.frame(ID=rownames(GenoM),Sex=as.numeric(sex),BY=as.numeric(BY))
+LifeHistData<-data.frame(ID=rownames(GenoM_ped),Sex=as.numeric(sex),BY=as.numeric(BY))
 ```
 
 
@@ -109,7 +113,7 @@ Now I'm ready to run sequoia. `MaxSibIter` performs sibship clustering and is ti
 
 ```{r}
 seq<-sequoia(GenoM,LifeHistData,MaxSibIter=0,MaxSibshipSize = 200)
-seq_ped<-sequoia(GenoM_ped,LifeHistData,MaxSibIter=0,MaxSibshipSize = 200,Tassign = 0)
+seq_ped<-sequoia(GenoM_ped,LifeHistData,MaxSibIter=0,MaxSibshipSize = 200,Tassign = 0,MaxMismatch = 150)
 ```
 
 For some reason these fail to assign parentage.
