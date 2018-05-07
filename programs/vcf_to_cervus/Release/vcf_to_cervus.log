@@ -1,9 +1,8 @@
 ﻿  vcf_to_cervus.cpp
-vcf_to_cervus.cpp(147): warning C4018: '<': signed/unsigned mismatch
-vcf_to_cervus.cpp(149): warning C4018: '<': signed/unsigned mismatch
-vcf_to_cervus.cpp(152): warning C4018: '<': signed/unsigned mismatch
+c:\users\sflan\documents\github\sca\programs\vcf_to_cervus\vcf_to_cervus.cpp(147): warning C4018: '<': signed/unsigned mismatch
+c:\users\sflan\documents\github\sca\programs\vcf_to_cervus\vcf_to_cervus.cpp(149): warning C4018: '<': signed/unsigned mismatch
+c:\users\sflan\documents\github\sca\programs\vcf_to_cervus\vcf_to_cervus.cpp(152): warning C4018: '<': signed/unsigned mismatch
   Generating code
-  All 487 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  All 456 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
-  vcf_to_cervus.vcxproj -> B:\ubuntushare\SCA\programs\vcf_to_cervus\Release\vcf_to_cervus.exe
-  vcf_to_cervus.vcxproj -> B:\ubuntushare\SCA\programs\vcf_to_cervus\Release\vcf_to_cervus.pdb (Full PDB)
+  vcf_to_cervus.vcxproj -> C:\Users\sflan\Documents\GitHub\SCA\programs\vcf_to_cervus\Release\vcf_to_cervus.exe

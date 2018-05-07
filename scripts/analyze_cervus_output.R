@@ -5,21 +5,21 @@
 #of loci
 
 rm(list=ls())
-setwd("E:/ubuntushare/SCA/results/")
+#setwd("E:/ubuntushare/SCA/results/")
+setwd("GitHub/SCA/results")
 
 ##############################################################################
 #####CERVUS ANALYSIS
 ##############################################################################
-stats.files<-c(list.files(path="parentage",pattern="\\d+.maternity.txt",full.names=TRUE),
-	list.files(path="parentage_biallelic",pattern="\\d+.maternity.txt",full.names=TRUE))
 
+##### FUNCTIONS #####
 cervus_analysis<-function(stats.files,pattern){
   stats<-data.frame(NumLoci=numeric(),ConfidenceLevel=numeric(), Delta=numeric(),
   	NumAssignments=numeric(), AssignmentRate=numeric(),
   	MarkerType=character(),stringsAsFactors=FALSE)
   for(i in 1: length(stats.files)){
   	dat<- readLines(stats.files[i])
-  	num.loci<-gsub(paste(patt,"(\\d+)_\\d+.maternity.txt",sep=""),"\\1",stats.files[i])
+  	num.loci<-as.numeric(gsub(pattern,"\\1",stats.files[i]))
   	dir<-gsub("(.*)/.*\\d+_\\d+.maternity.txt","\\1",stats.files[i])
   	start<-match("Mother given known father:", dat)
   	#pull out info for strict only
@@ -32,62 +32,107 @@ cervus_analysis<-function(stats.files,pattern){
   return(stats)
 }
 
+plot_delta<-function(stats,cols,borders,leg.loc){
+  plot(c(1.5,16.5),c(min(as.numeric(stats$Delta)),max(as.numeric(stats$Delta))),type='n',axes=FALSE,xlab="",ylab="")
+  abline(h=0,lty=2,col="darkgrey")
+  boxplot(as.numeric(stats$Delta)~stats$MarkerType*as.numeric(stats$NumLoci),
+          col=cols,notch=FALSE,add=TRUE,
+          border=borders,las=1,
+          ylab="",xlab="",xaxt='n')
+  axis(1,at=seq(1.5,length(sort(as.numeric(unique(stats$NumLoci))))*2+0.5,2),
+       labels=sort(as.numeric(unique(stats$NumLoci))),las=2)
+  mtext(expression(Critical~Delta),2,outer=F, line=2)
+  
+  legend(leg.loc,c("Haplotypes","SNPs"),pt.bg=cols,
+         bty='n',pch=22,col=borders)
+}
+plot_assignmentRate<-function(stats,cols,haps.name,snps.name,r){
+  plot(as.numeric(stats[stats$MarkerType==haps.name,"NumLoci"])-10, 
+       as.numeric(stats[stats$MarkerType==haps.name,"AssignmentRate"]),
+       xaxt='n',las=1,col=cols[1],ylab="",xlab="", pch=19,ylim=c(0,100),
+       xlim=c(min(as.numeric(stats$NumLoci)),max(as.numeric(stats$NumLoci))))
+  points(as.numeric(stats[stats$MarkerType==snps.name,"NumLoci"])+10, 
+         as.numeric(stats[stats$MarkerType==snps.name,"AssignmentRate"]),
+         col=cols[2],pch=15)
+  axis(1, at=sort(as.numeric(unique(stats$NumLoci))),las=2)
+  pts<-mapply(function(means,jig,cols){
+    pts<-data.frame(x=as.numeric(names(means)),y=means)
+    pts$xmin<-pts$x+jig-35
+    pts$xmax<-pts$x+jig+35
+    apply(pts,1,function(pt,color){
+      lines(x=c(pt["xmin"],pt["xmax"]),y=rep(pt["y"],2),lwd=2,col=color)
+    },color=cols)
+    return(data.frame(pts))
+  },means=r,jig=c(-10,10),cols=cols)
+  mtext("Assignment Rate (%)",2,outer=F,line=2)
+}
 
-stats<-cervus_analysis(stats.files,"./dradPruned")
+#####PLOT CERVUS INFO #####
+
+stats.files<-c(list.files(path="parentage",pattern="\\d+.maternity.txt",full.names=TRUE),
+               list.files(path="parentage_biallelic",pattern="\\d+.maternity.txt",full.names=TRUE))
+
+stats<-cervus_analysis(stats.files,".*/[A-z]+(\\d+)_\\d+.maternity.txt")
 
 r<-as.list(by(stats,stats$MarkerType,function(stat){
-  rt<-tapply(as.numeric(stats[,"AssignmentRate"]),as.factor(stats[,"NumLoci"]),mean)
+  rt<-tapply(as.numeric(stat[,"AssignmentRate"]),as.factor(stat[,"NumLoci"]),mean,na.rm=TRUE)
 }))
-
-#####PLOT CERVUS INFO
 png("CervusStats.png",height=5,width=10,res=300, units="in")
 par(mfrow=c(1,2),oma=c(1,1,1,1),mar=c(3,3,1,0.2))
-boxplot(as.numeric(stats$Delta)~stats$MarkerType*as.numeric(stats$NumLoci),
-	col=c("slategray1","steelblue"),notch=T,
-	border=c("slategray3","steelblue4"),las=1,
-	ylab="",xlab="",xaxt='n')
-axis(1,at=seq(1.5,16.5,2),labels=c(50,100,150,200,300,400,800,1600),las=2)
-#text(seq(0.8,7.8,1), par("usr")[1]-0.65, 
-#	labels=c(50,100,150,200,300,400,800,1600), 
-#	srt=35, pos=1, xpd=TRUE,tck=0.1)
-mtext("LOD Cutoff",2,outer=F, line=2)
-legend("topright",c("Haplotypes","SNPs"),pt.bg=c("slategray1","steelblue"),
-	bty='n',pch=22,col=c("slategray3","steelblue4"))
-plot(stats[stats$MarkerType=="parentage","NumLoci"]-10, 
-	stats[stats$MarkerType=="parentage","AssignmentRate"],
-	 xaxt='n',las=1,col="slategray3",ylab="",xlab="", pch=19)
-points(stats[stats$MarkerType=="parentage_biallelic","NumLoci"]+10, 
-	stats[stats$MarkerType=="parentage_biallelic","AssignmentRate"],
-	col="steelblue4",pch=15)
-axis(1, at=c(50,100,150,200,300,400,800,1600),las=2)
-lines(x=c(5,75),y=c(r.hap[1],r.hap[1]),lwd=2,col="slategray3")
-lines(x=c(25,95),y=c(r.snp[1],r.snp[1]),lwd=2,col="steelblue4")
-lines(x=c(55,125),y=c(r.hap[2],r.hap[2]),lwd=2,col="slategray3")
-lines(x=c(75,145),y=c(r.snp[2],r.snp[2]),lwd=2,col="steelblue4")
-lines(x=c(105,175),y=c(r.hap[3],r.hap[3]),lwd=2,col="slategray3")
-lines(x=c(125,195),y=c(r.snp[3],r.snp[3]),lwd=2,col="steelblue4")
-lines(x=c(155,225),y=c(r.hap[4],r.hap[4]),lwd=2,col="slategray3")
-lines(x=c(175,245),y=c(r.snp[4],r.snp[4]),lwd=2,col="steelblue4")
-lines(x=c(255,325),y=c(r.hap[5],r.hap[5]),lwd=2,col="slategray3")
-lines(x=c(275,345),y=c(r.snp[5],r.snp[5]),lwd=2,col="steelblue4")
-lines(x=c(355,425),y=c(r.hap[6],r.hap[6]),lwd=2,col="slategray3")
-lines(x=c(375,445),y=c(r.snp[6],r.snp[6]),lwd=2,col="steelblue4")
-lines(x=c(755,825),y=c(r.hap[7],r.hap[7]),lwd=2,col="slategray3")
-lines(x=c(775,845),y=c(r.snp[7],r.snp[7]),lwd=2,col="steelblue4")
-lines(x=c(1555,1625),y=c(r.hap[8],r.hap[8]),lwd=2,col="slategray3")
-lines(x=c(1575,1645),y=c(r.snp[8],r.snp[8]),lwd=2,col="steelblue4")
+plot_delta(stats,cols=c("slategray1","steelblue"),borders=c("slategray3","steelblue4"),"bottomleft")
+plot_assignmentRate(stats,cols=c("slategray3","steelblue4"),haps.name="parentage",snps.name="parentage_biallelic",r=r)
 legend("bottomright",c("Haplotypes","SNPs"),col=c("slategray4","steelblue4"),
 	pch=c(19,22),lwd=2,lty=c(1,1),bty='n')
-mtext("Assignment Rate (%)",2,outer=F,line=2)
 mtext("Number of Loci", 1,outer=T)
 dev.off()
 
+##### SIMULATION OUTPUT #####
+sim.files<-list.files(path="parentsim",pattern="_par.txt",full.names=TRUE)
+
+sims<-cervus_analysis(sim.files,".*L(\\d+).*")
+sims$MarkerType<-as.numeric(gsub(".*S(\\d+).*","\\1",sims$MarkerType))
+sims$NumFemales<-as.numeric(gsub(".*F(\\d+).*","\\1",rownames(sims)))
+
+r<-as.list(by(sims,sims$MarkerType,function(stat){
+  rts<-by(stat,stat[,"NumFemales"],function(st){
+    rt<-tapply(as.numeric(st[,"AssignmentRate"]),as.factor(st[,"NumLoci"]),mean,na.rm=TRUE)
+  })
+  
+}))
+
+par(mfrow=c(3,2),oma=c(1,1,1,1),mar=c(3,3,2,0.2))
+#50 females
+plot_delta(sims[sims$NumFemales==50 & !is.na(sims$Delta),],cols=c("slategray1","steelblue"),
+           borders=c("slategray3","steelblue4"),"bottomleft")
+plot_assignmentRate(sims[sims$NumFemales==50& !is.na(sims$Delta),],cols=c("slategray3","steelblue4"),
+                    haps.name="4",snps.name="1",r=c(r[[2]][1],r[[1]][1]))
+legend("bottomright",c("Haplotypes","SNPs"),col=c("slategray4","steelblue4"),
+       pch=c(19,22),lwd=2,lty=c(1,1),bty='n')
+mtext("50 females",3,outer=TRUE,line=-0.5)
+#100 females
+plot_delta(sims[sims$NumFemales==100 & !is.na(sims$Delta),],cols=c("slategray1","steelblue"),
+           borders=c("slategray3","steelblue4"),"bottomleft")
+plot_assignmentRate(sims[sims$NumFemales==100& !is.na(sims$Delta),],cols=c("slategray3","steelblue4"),
+                    haps.name="4",snps.name="1",r=c(r[[2]][2],r[[1]][2]))
+legend("bottomright",c("Haplotypes","SNPs"),col=c("slategray4","steelblue4"),
+       pch=c(19,22),lwd=2,lty=c(1,1),bty='n')
+mtext("100 females",3,outer=TRUE,line=-14.5)
+#500 females
+plot_delta(sims[sims$NumFemales==500 & !is.na(sims$Delta),],cols=c("slategray1","steelblue"),
+           borders=c("slategray3","steelblue4"),"topleft")
+plot_assignmentRate(sims[sims$NumFemales==500& !is.na(sims$Delta),],cols=c("slategray3","steelblue4"),
+                    haps.name="4",snps.name="1",r=c(r[[2]][3],r[[1]][3]))
+legend("bottomright",c("Haplotypes","SNPs"),col=c("slategray4","steelblue4"),
+       pch=c(19,22),lwd=2,lty=c(1,1),bty='n')
+mtext("Number of Loci", 1,outer=T)
+mtext("500 females",3,outer=TRUE,line=-29)
+
 #####CHECK ALLELE FREQS
 setwd("parentage_biallelic")
-af.files<-list.files(pattern="\\d+.allelefreqs.txt")#or _allelefreqs
+af.files<-list.files(pattern="\\d+.afs.txt")#or _allelefreqs
 af.dat<-list()
 for(i in 1:length(af.files)){
-	nloci<-as.numeric(gsub("gen(\\d+)_\\d+.allelefreqs.txt","\\1",af.files[i]))
+	nloci<-as.numeric(gsub("dradPruned(\\d+)_\\d+.afs.txt","\\1",af.files[i]))
 	af<-read.table(af.files[i],skip=10,header=T,nrows=nloci)
 	af.dat[[i]]<-as.data.frame(af)
 }
@@ -96,35 +141,36 @@ afsum<-data.frame(do.call("rbind",
 colnames(afsum)<-c("MeanK","MeanObsHet")
 rownames(afsum)<-af.files
 afsum$NumLoci<-as.numeric(
-	gsub("gen(\\d+)_\\d+.allelefreqs.txt","\\1",rownames(afsum)))
-afsum$setID<-gsub("gen\\d+_(\\d+).allelefreqs.txt","\\1",rownames(afsum))
+	gsub("dradPruned(\\d+)_\\d+.afs.txt","\\1",rownames(afsum)))
+afsum$setID<-gsub("dradPruned\\d+_(\\d+).afs.txt","\\1",rownames(afsum))
 plot(afsum$NumLoci, afsum$MeanObsHet, xaxt='n',las=1,
 	ylab="",xlab="",type='n',ylim=c(0,0.26))
 text(labels=afsum$setID,x=afsum$NumLoci,y=afsum$MeanObsHet)
-text(labels=stats$setID,x=stats$NumLoci,y=stats$AssignmentRate/100,col="blue")
+text(labels=stats$setID,x=stats$NumLoci,y=as.numeric(stats$AssignmentRate)/100,col="blue")
 axis(1, at=c(50,100,150,200,300,400,800,1600),las=2)
 
 nalleles<-data.frame(do.call("rbind",
 	lapply(af.dat,function(x){ summary(x$k) })))
 rownames(nalleles)<-af.files
 nalleles$NumLoci<-as.numeric(
-	gsub("gen(\\d+)_\\d+.allelefreqs.txt","\\1",rownames(nalleles)))
-nalleles$setID<-gsub("gen\\d+_(\\d+).allelefreqs.txt","\\1",rownames(nalleles))
+	gsub("dradPruned(\\d+)_\\d+.afs.txt","\\1",rownames(nalleles)))
+nalleles$setID<-gsub("dradPruned\\d+_(\\d+).afs.txt","\\1",rownames(nalleles))
 tapply(nalleles$Mean,nalleles$NumLoci,summary)
 
 obshet<-data.frame(do.call("rbind",
 	lapply(af.dat,function(x){ summary(x$HObs) })))
 rownames(obshet)<-af.files
 obshet$NumLoci<-as.numeric(
-	gsub("gen(\\d+)_\\d+.allelefreqs.txt","\\1",rownames(obshet)))
-obshet$setID<-gsub("gen\\d+_(\\d+)_allelefreqs.txt","\\1",rownames(obshet))
+	gsub("dradPruned(\\d+)_\\d+.afs.txt","\\1",rownames(obshet)))
+obshet$setID<-gsub("dradPruned\\d+_(\\d+)_afs.txt","\\1",rownames(obshet))
 tapply(obshet$Mean,obshet$NumLoci,summary)
 
 #####FULL DATASET
-full.af<-read.table("PolymorphicIn99PercIndsHWE.allelefreqs.txt",
+setwd("../")
+full.af<-read.table("parentage/dradPrunedHaps_afs.txt",
 	skip=10,header=T,nrows=124)#1642 for haplotypes
 
-full.dat<-read.table("PolymorphicIn99PercIndsHWE.txt",header=T)
+full.dat<-read.table("parentage/dradPrunedHaps.txt",header=T)
 ids<-as.character(full.dat$ID)
 pairs<-data.frame(id1=character(),id2=character())
 for(i in 1:(length(ids)-1)){
@@ -132,10 +178,10 @@ for(i in 1:(length(ids)-1)){
 	idb<-ids[(i+1):length(ids)]
 	pairs<-rbind(pairs,cbind(ida,idb))
 }
-write.table(pairs,"pairwise.combinations.txt",col.names=F,row.names=F,
+write.table(pairs,"relatedness/pairwise.combinations.txt",col.names=F,row.names=F,
 	quote=F,sep='\t')
 
-gen.keep<-read.table("../parentage_biallelic/PolymorphicIn90PercIndsHWE.txt",header=T)
+gen.keep<-read.table("parentage_biallelic/PolymorphicIn90PercIndsHWE.txt",header=T)
 
 obs.het<-NULL
 sequence<-seq(2,ncol(gen.keep),2)
@@ -146,7 +192,7 @@ for(i in 1:length(sequence)){
 	obs.het<-c(obs.het, (hets/nrow(loc)))
 }
 ##############################################################################
-####OTHER ANALYSES
+####OTHER ANALYSES  parentsim_L400S1F500_2.crv
 ##############################################################################
 setwd("../parentage")
 hap.maternity.files<-list.files(pattern="\\d+_maternity.csv")
@@ -157,19 +203,19 @@ for(i in 1:length(hap.maternity.files)){
 		what="character")
 	sig<-dat[dat$"Trio confidence"=="*",]
 	sig<-sig[,c("Offspring ID", "Candidate mother ID")]
-	sig$NumLoci<-gsub("gen(\\d+)_\\d+.maternity.csv","\\1",
+	sig$NumLoci<-gsub("[A-z]+(\\d+)_\\d+.maternity.csv","\\1",
 		hap.maternity.files[i])
 	hap.maternity.dat<-rbind(hap.maternity.dat, sig)
 }
 hap.mat.split<-split(hap.maternity.dat, 
 	factor(hap.maternity.dat$"Candidate mother ID"))
 hap.summ.dat<- do.call("rbind", lapply(hap.mat.split,function(x){ 
-	sum<-summary(factor(x$"Offspring ID")) 
+	sum<-table(factor(x$"Offspring ID")) 
 	min.loc<-unlist(lapply(split(x,factor(x$"Offspring ID")),
 		function(x){ min(as.numeric(x$NumLoci)) }))
 	max.loc<-unlist(lapply(split(x,factor(x$"Offspring ID")),
 		function(x){ max(as.numeric(x$NumLoci)) }))
-	y<-data.frame(MomID=levels(factor(x[,2])),OffID=names(sum),
+	y<-data.frame(MomID=levels(factor(x[,"Candidate mother ID"])),OffID=names(sum),
 		NumAssignments=sum,MinLoci=min.loc, MaxLoci=max.loc)
 	rownames(y)<-NULL
 	return(y)
@@ -182,7 +228,7 @@ hap.mat.loc<-split(hap.maternity.dat, factor(hap.maternity.dat$NumLoci))
 hap.mat.loc.sum<-lapply(hap.mat.loc,function(ldf){ 
 	df<-split(ldf,factor(ldf$"Candidate mother ID"))
 	do.call("rbind", lapply(df, function(x){
-		sum<-summary(factor(x$"Offspring ID")) 
+		sum<-table(factor(x$"Offspring ID")) 
 		min.loc<-unlist(lapply(split(x,factor(x$"Offspring ID")),
 			function(x){ min(as.numeric(x$NumLoci)) }))
 		max.loc<-unlist(lapply(split(x,factor(x$"Offspring ID")),
@@ -202,19 +248,19 @@ for(i in 1:length(snp.maternity.files)){
 		what="character")
 	sig<-dat[dat$"Trio confidence"=="*",]
 	sig<-sig[,c("Offspring ID", "Candidate mother ID")]
-	sig$NumLoci<-gsub("gen(\\d+)_\\d+.maternity.csv","\\1",snp.maternity.files[i])
+	sig$NumLoci<-gsub("[A-z]+(\\d+)_\\d+.maternity.csv","\\1",snp.maternity.files[i])
 	snp.maternity.dat<-rbind(snp.maternity.dat, sig)
 }
 snp.mat.split<-split(snp.maternity.dat, 
 	factor(snp.maternity.dat$"Candidate mother ID"))
 snp.summ.dat<- do.call("rbind", lapply(snp.mat.split,function(x){ 
-	sum<-summary(factor(x$"Offspring ID")) 
+	sum<-table(factor(x$"Offspring ID")) 
 	min.loc<-unlist(lapply(split(x,factor(x$"Offspring ID")),
 		function(x){ min(as.numeric(x$NumLoci)) }))
 	max.loc<-unlist(lapply(split(x,factor(x$"Offspring ID")),
 		function(x){ max(as.numeric(x$NumLoci)) }))
 	y<-data.frame(MomID=levels(factor(x[,2])),OffID=names(sum),
-		NumAssignments=sum,MinLoci=min.loc, MaxLoci=max.loc)
+		NumAssignments=sum,MinLoci=min.loc, MaxLoci=max.loc,stringsAsFactors = FALSE)
 	rownames(y)<-NULL
 	return(y)
 }))
@@ -227,7 +273,7 @@ snp.mat.loc<-split(snp.maternity.dat, factor(snp.maternity.dat$NumLoci))
 snp.mat.loc.sum<-lapply(snp.mat.loc,function(ldf){ 
 	df<-split(ldf,factor(ldf$"Candidate mother ID"))
 	do.call("rbind", lapply(df, function(x){
-		sum<-summary(factor(x$"Offspring ID")) 
+		sum<-table(factor(x$"Offspring ID")) 
 		min.loc<-unlist(lapply(split(x,factor(x$"Offspring ID")),
 			function(x){ min(as.numeric(x$NumLoci)) }))
 		max.loc<-unlist(lapply(split(x,factor(x$"Offspring ID")),
@@ -243,11 +289,11 @@ snp.mat.loc.sum<-lapply(snp.mat.loc,function(ldf){
 ###I'm not really using this.
 png("CervusMaternitySummary.png",height=5,width=7,units="in",res=300)
 par(mfrow=c(2,3), mar=c(2,2,2,2),oma=c(2,2,2,2))
-hist(snp.mat.loc.sum$`100`$NumAssignments, breaks=seq(0,11,0.5),
-	xaxt='n',yaxt='n',main="",xlab="",ylab="",xlim=c(0,11),ylim=c(0,35),
+hist(snp.mat.loc.sum$`100`$NumAssignments.Freq, breaks=seq(0,11,0.5),
+	xaxt='n',yaxt='n',main="",xlab="",ylab="",xlim=c(0,11),ylim=c(0,130),
 	col=alpha("steelblue4",0.5),border="steelblue4")
-hist(hap.mat.loc.sum$`100`$NumAssignments, breaks=seq(0,11,0.5),
-	xaxt='n',yaxt='n',main="",xlab="",ylab="",xlim=c(0,11),ylim=c(0,35),
+hist(hap.mat.loc.sum$`100`$NumAssignments.Freq, breaks=seq(0,11,0.5),
+	xaxt='n',yaxt='n',main="",xlab="",ylab="",xlim=c(0,11),ylim=c(0,130),
 	col=alpha("slategray4",0.5),border="slategray4",add=T)
 legend("top",c("100 Loci"),bty='n')
 mtext("Frequency", 2, outer=F,line=2,cex=0.75)

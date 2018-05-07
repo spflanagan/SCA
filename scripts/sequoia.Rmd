@@ -1,0 +1,63 @@
+---
+title: "Sequoia"
+author: "Sarah P. Flanagan"
+date: "May 7, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(root.dir="C:/Users/Sarah/Documents")
+```
+```{r}
+library(sequoia)
+```
+
+## Setup
+
+First I need to get the genomic data in the correct format. 
+
+```{r}
+gt<-read.delim("Research/parentage/coancestry_gty.txt",header=FALSE)
+coan2sequoia<-function(gt.name,sep='\t'){
+  gt<-read.delim(gt.name,sep=sep,header=FALSE)
+  GenoM<-as.matrix(do.call(cbind,lapply(seq(2,ncol(gt),2),function(coln,gt){
+    dat<-gt[,c(coln,coln+1)]
+    ref<-names(which.max(table(apply(dat,2,factor))))
+    out<-apply(dat,1,function(ind,ref){
+      if(ind[1]==ind[2]){
+        if(ind[2]==ref){ out<-2 }
+        if(ind[2]==0){ out<--9 }
+        if(ind[2]!=ref & ind[2] != 0 ){ out<-0 }
+      }else{
+        out<-1
+      }
+      return(out)
+    },ref)
+  },gt)))
+  rownames(GenoM)<-gt[,1]
+  return(GenoM)
+}
+GenoM<-coan2sequoia("Research/parentage/gty_spaces.txt")
+```
+
+
+Then I need to generate the life history data
+
+```{r}
+sex<-gsub(".*(\\w{2})_.*","\\1",rownames(GenoM))
+sex[sex=="FE"]<-as.numeric(1)
+sex[sex%in%c("NP","PR")]<-as.numeric(2)
+sex[sex=="OF"]<-NA
+BY<-sex
+BY[BY %in% c("1","2")]<-1
+BY[is.na(BY)]<-2
+LifeHistData<-data.frame(ID=rownames(GenoM),Sex=as.numeric(sex),BY=as.numeric(BY))
+```
+
+## Run Sequoia
+
+Now I'm ready to run sequoia
+
+```{r}
+seq<-sequoia(GenoM,LifeHistData)
+```

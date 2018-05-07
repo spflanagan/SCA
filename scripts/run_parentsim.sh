@@ -34,7 +34,7 @@ do
 		do
 			for jjj in ${NSNP}
 			do
-				./parentsim -L ${j} -S ${jjj} -F ${jj} -M ${jj} -o parentsim_L${j}S${jjj}F${jj}_${i} -d B:\\ubuntushare\\SCA\\results\\parentsim\\ -r ../../results/parentsim/
+				./parentsim -L ${j} -S ${jjj} -F ${jj} -M ${jj} -o parentsim_L${j}S${jjj}F${jj}_${i} -d C:\\Users\\sflan\\Documents\\GitHub\\SCA\\results\\parentsim\\ -r ../../results/parentsim/
 			done
 		done
 	done

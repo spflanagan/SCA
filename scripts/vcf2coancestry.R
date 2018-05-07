@@ -73,3 +73,7 @@ vcf2coanGT<-function(vcf,out.name="coancestry_gty.txt"){
 
 co.gt<-vcf2coanGT(vcf,"relatedness/coancestry_gty.txt")
 
+#COLONY
+vcf<-vcf[which(prop.miss<=0.025),]
+marker.types<-rbind(vcf$ID,rep(0,length(vcf$ID)),rep(0.2,length(vcf$ID)),rep(0.04,length(vcf$ID)))
+write.table(marker.types,"colony/marker.types1489.txt",col.names=FALSE,row.names=FALSE,sep='\t',quote=FALSE)

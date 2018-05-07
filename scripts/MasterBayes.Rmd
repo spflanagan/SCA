@@ -1,0 +1,193 @@
+---
+title: "Master Bayes"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+# Example data
+
+First I'm going to step through the worked example to get an understanding for how to specify the data. Then I can apply it to my own data.
+
+```{r}
+library(MasterBayes)
+data("WarblerG")#genotypes
+data("WarblerP")#phenotypes
+```
+
+The genetic data has one row per individual, the first column with IDs, followed by two columns per locus.
+
+The phenotypic data has ID in the first column, a binary offspring columns, sex column, territory, lat, long, and status columns. These last four could presumably be whatever we choose (e.g. pregmale to match pregnant males to their offspring).
+
+## Phenotypic predictors
+
+The first one defines whether moms and offspring are in the same territory - to assign known maternity.
+
+```{r}
+res1<-expression(varPed(x="terr",gender="Female",relational="OFFSPRING",restrict="=="))
+```
+
+The `relational="OFFSPRING"` means that the females are compared to offspring with regard to variable `terr`, and that they must match exactly (`restrict="=="`).
+
+```{r}
+res2<-expression(varPed(x="offspring",gender=NULL,relational=FALSE,restrict=0))
+```
+
+This removes individuals born in 1999 as being parents because they are offspring. More specifically, this excludes individuals with a 1 in the variable `offspring`, irrespective of their sex (`gender=NULL`).
+
+Then we need to define variables:
+
+```{r}
+var1<-expression(varPed(x=c("lat","long"),gender="Male",relational="OFFSPRING"))
+```
+
+With no `restrict` statement, all males are potential fathers and since there is no V at the end of `OFFSPRING`, this variable is the Euclidean distance between offspring and fathers in two dimensions.
+
+Now we associate this with the data:
+```{r}
+PdP<-PdataPed(formula=list(res1,res2,var1),data=WarblerP,USsire=TRUE)
+```
+
+`USsires=TRUE` means that the function will consider unsampled males -- the equivalent for females is `USdams=TRUE`. 
+
+```{r}
+GdP<-GdataPed(G=WarblerG,categories=NULL)
+```
+This function stores the genotype data in the appropriate format. By not specifying `categories` this assumes that all loci have the same error rates.
+
+
+## Initial paramaterisation
+
+`startPed` objects are optional and specify the starting parameterisation for the model. Parameters include the pedigree (P), genotyeps(G), base population allele frequencies (A), genotyping error rates (E1 and E2), unsampled male (USsire) and female (USdam) population sizes, and most important are teh parameters of the multinomial log-linear model (beta). 
+
+People commonly integrate out any uncertainty due to genotyping error prior to the parentage analysis using `estG=FALSE`, and then you specify error rates and allele frequencies. Allele frequencies can be taken from genotype data using `extractA()` when `estG=TRUE`.
+
+## CERVUS-style Master Bayes
+
+```{r}
+sP<-startPed(estG=FALSE,E1=0.005,E2=0.005,A=extractA(WarblerG),estUSsire=FALSE,USsire = 10) #default Wang's model
+#stage 1 - only using genetic data, not distance data
+PdPCervus<-PdataPed(formula = list(res1,res2),data=WarblerP,USsire=TRUE)
+model1<-MCMCped(PdP=PdPCervus,GdP=GdP,sP=sP,verbose=FALSE)
+
+#extract mode of marginal distribution of parental pairs
+ped1<-modeP(model1$P,threshold = 0)
+#The posterior distribution can be calculated analytically
+ped2<-MLE.ped(getXlist(PdPCervus,GdP),USsire=TRUE,nUSsire=10)
+#find the discrepancies between MCMC and ML
+discrepancies<-which(ped1$P[,3][1:10]!=ped2$P[,3][3:12])
+```
+Step 2 is to estimate $\beta$ without genetic data because the pedigree is treated as known.
+```{r}
+sP<-startPed(estP=FALSE,ped=ped2$P,estUSsire=FALSE)
+model2<-MCMCped(PdP=PdP,sP=sP,verbose = FALSE)
+MLElat<-MLE.beta(getXlist(PdP),ped2$P)
+sqrt(MLElat$C) #ML estimate
+ ped3<-modeP(model1$P, threshold=0.9)#paternity assignments with prob > 0.9: biased towards zero
+```
+
+## Full probability estimation
+
+Because the two-step method produced biased estimates, we should use both genetic and phenotypic/distance data simultaneously.
+
+```{r}
+sP<-startPed(estG=FALSE, A=extractA(WarblerG), E1=0.005, E2=0.005,estUSsire=FALSE, USsire=10) #but we have to keep these errors as known
+model3<-MCMCped(PdP=PdP, GdP=GdP, sP=sP, verbose=FALSE)
+plot(model3$beta)
+summary(model3$beta)
+```
+
+We can also relax the assumption that the number of unsampled males is 10:
+```{r}
+sP<-startPed(estG=FALSE,A=extractA(WarblerG),E1=0.005,E2=0.005) #approximates genotyping error
+model4<-MCMCped(PdP=PdP,GdP=GdP,sP=sP,verbose=FALSE)
+summary(model4) #the empirical mean estimate is 30 (50% quantile), which is unreasonably large
+```
+
+We fit Nielsen's 2001 model (the one with two probabilities, one for unsampled and one for sampled):
+```{r}
+MLEUSsire<-MLE.popsize(getXlist(PdP,GdP,E1=1e-10,E2=1e-10),USsire=TRUE,USdam = FALSE)
+MLEUSsire$nUS #mean is 102, even larger! 
+#this is because of gentoyping error
+MLEUSsire2<-MLE.popsize(getXlist(PdP, GdP, E1=1e-10, E2=0.01),USsire=TRUE, USdam=FALSE)
+MLEUSsire2$nUS #34
+```
+
+## Do a better job of estimating genotyping error
+
+but note that this is computationally demanding. 
+```{r}
+model5<-MCMCped(PdP=PdP, GdP=GdP, verbose=FALSE)
+#lots of autocorrelation
+autocorr(model5$E1)
+#need to run the chain for longer, but already clear that the earlier estimates were wrong
+pP<-priorPed(USsire = list(mu=log(5),sigma=0.5))
+model6<-MCMCped(PdP=PdP,GdP = GdP,pP=pP,tP=tunePed(USsire = 1),verbose=FALSE)
+```
+
+You can also simulate data, and there are more model options (none of which seem all that relevant). 
+
+# S. scovelli data
+
+My genotype data are already in the correct format because of coancestry. 
+```{r}
+knitr::opts_knit$set(root.dir = "C:/Users/sflan/Documents/GitHub/SCA/results/MasterBayes/")
+```
+```{r}
+PipefishG<-read.delim("../relatedness/coancestry_gty.txt",sep="\t",header=FALSE)
+colnames(PipefishG)[1]<-"id"
+GdP<-GdataPed(G=PipefishG,categories=NULL)
+```
+
+What phenotypic data are needed? ID, offspring, sex, famID
+
+```{r,eval=FALSE}
+PipefishP<-data.frame(id=PipefishG[,1],offspring=gsub("(\\w{2}).*","\\1",PipefishG[,1]),sex=gsub("(\\w{2}).*","\\1",PipefishG[,1]), famID=PipefishG[,1],stringsAsFactors = FALSE)
+ #fix offspring column
+PipefishP$offspring[PipefishP$offspring == "OF"]<-1
+PipefishP$offspring[PipefishP$offspring != "1"]<-0
+#fix sex column
+PipefishP$sex[PipefishP$sex=="OF"]<-NA
+PipefishP$sex[PipefishP$sex=="FE"]<-"Female"
+PipefishP$sex[PipefishP$sex %in% c("NP","PR")]<-"Male"
+#fix famID
+PipefishP$famID<-gsub("\\w{2}_(\\d+)","\\1",PipefishP$famID)
+PipefishP$famID[PipefishP$offspring==1]<-gsub("(\\d+)(-\\d+)?","\\1",PipefishP$famID[PipefishP$offspring==1])
+PipefishP$famID[PipefishP$sex=="Female"]<-NA
+PipefishP$famID[PipefishP$famID=="086-23"]<-"08623"
+PipefishP$famID[PipefishP$famID=="086R"]<-"086"
+PipefishP$famID[grep("NP",PipefishP$id)]<-NA
+#change classes
+PipefishP$id<-as.character(PipefishP$id)
+PipefishP$offspring<-as.numeric(as.character(PipefishP$offspring))
+
+write.table(PipefishP,"PipefishP.txt",sep='\t',col.names = TRUE,row.names = FALSE,quote=FALSE)
+```
+```{r}
+PipefishP<-read.delim("PipefishP.txt",header=TRUE)
+```
+
+
+We can specify known fathers and include unsampled mothers (`USdam=TRUE`). But we'll probably want to estimate USdam. How many things can we simultaneously estimate??
+
+```{r}
+res1<-expression(varPed(x="famID",gender="Male",relational="OFFSPRING",restrict="=="))#offspring match to males
+res2<-expression(varPed(x="offspring",gender=NULL,relational=FALSE,restrict=0)) #remove offspring from parental pop
+PdP<-PdataPed(formula=list(res1,res2),data=PipefishP,USdam=TRUE)
+```
+
+```{r}
+model1<-MCMCped(PdP=PdP, GdP=GdP, verbose=FALSE)
+
+plot(model1$E1)
+plot(model1$E2)
+plot(model1$USdam)
+
+autocorr(model1$E1)
+```
+
+```{r}
+pP<-priorPed(USdam=list(mu=log(5), sigma=0.5))#set an informative prior
+model2<-MCMCped(PdP=PdP,GdP=GdP,pP=pP,tP=tunePed(USsire=0.1),verbose=FALSE)
+plot(model2$USdam)
+

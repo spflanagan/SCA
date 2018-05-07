@@ -71,7 +71,8 @@ rep_cervus<-function(nloci,nreps,gens,out.prefix="gen"){#used pruned for haploty
 #############################THE ACTUAL WORK################################
 setwd("B://ubuntushare//SCA//results//parentage_biallelic")
 #large file
-genotypes<-read.delim("snp_genotypes.txt")
+genotypes<-read.delim("snp_genotypes_batch_1.txt")
+#genotypes<-read.delim("snp_genotypes.txt")
 #genotypes<-read.delim("genotypes99_10loci.txt")
 
 
@@ -96,8 +97,8 @@ pruned<-prune.loci(gen.keep, 0.01)
 write.table(pruned,"PolymorphicIn99PercIndsHWE.txt", quote=F,sep="\t",row.names=F)
 pruned<-read.table("PolymorphicIn99PercIndsHWE.txt")
 
-
-
+#For CERVUS
+s<-rep_cervus(nloci=2000,nreps=1,gens=gen.keep,out.prefix = "dradPruned")
 c<-rep_cervus(nloci=c(50,100,150,300,200,400,800,1600),nreps=10,gens=gen.keep,out.prefix = "dradPruned")
 write.table(gen.keep$ID[grep("FE",gen.keep$ID)],"candidate_moms.txt",quote=FALSE,row.names=FALSE,col.names=FALSE)
 off<-gen.keep$ID[grep("OF",gen.keep$ID)]
@@ -160,6 +161,8 @@ hap.keep$sex<-gsub("sample_(\\w{3}).*","\\1",rownames(hap.keep))
 hap.keep<-hap.keep[,c("ID","sex",keep.names)]
 write.table(hap.keep,"dradPrunedHaps.txt",col.names=TRUE,row.names=TRUE,sep='\t',quote=FALSE)
 
+#For CERVUS
+s<-rep_cervus(nloci=2000,nreps=1,gens=hap.keep,out.prefix = "dradPrunedHaps") #for real analysis
 c<-rep_cervus(nloci=c(50,100,150,300,200,400,800,1600),nreps=10,gens=hap.keep,out.prefix = "dradPrunedHaps")
 write.table(hap.keep$ID[grep("FEM",hap.keep$ID)],
             "candidate_moms.txt",quote=FALSE,row.names=FALSE,col.names=FALSE)
@@ -180,6 +183,17 @@ for(i in 1:length(rownames(hap.keep))){
                 sep='\t',quote=FALSE,col.names = FALSE,row.names = FALSE,append = TRUE)
   }
 }
+
+## Create lists of males
+#biallelic
+bi<-read.delim("../parentage_biallelic/dradPruned200_1.txt")
+write.table(grep("P",bi$ID,value = TRUE),"D:/SCA/parentage_biallelic/males.txt",
+            quote=FALSE,col.names=FALSE,row.names = FALSE)
+#haplotypes
+hp<-read.delim("../parentage_haplotypes/dradPrunedHaps200_1.txt")
+write.table(grep("P",hp$ID,value = TRUE),"D:/SCA/parentage/males.txt",
+            quote=FALSE,col.names=FALSE,row.names = FALSE)
+
 #######################PREVIOUS PRUNING
 #prune to remove non-polymorphic loci
 #<-apply(hapgen,2,function(x){ length(which(x=="consensus")) })
