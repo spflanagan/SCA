@@ -3,10 +3,12 @@ title: "Sequoia"
 author: "Sarah P. Flanagan"
 date: "May 7, 2018"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(root.dir="C:/Users/Sarah/Documents")
+knitr::opts_knit$set(root.dir="C:/Users/sflan/Documents/GitHub/SCA/results/")
 ```
 ```{r}
 library(sequoia)
@@ -16,8 +18,30 @@ library(sequoia)
 
 First I need to get the genomic data in the correct format. 
 
+And create ped and map files so that I can easily prune the loci
+
 ```{r}
-gt<-read.delim("Research/parentage/coancestry_gty.txt",header=FALSE)
+gt<-read.delim("relatedness/coancestry_gty.txt",sep=sep,header=FALSE)
+ped<-data.frame(FamID=LifeHistData$ID,IndID=LifeHistData$ID,PatID=0,
+                MatID=0,Sex=LifeHistData$Sex,Phenotype=-9,
+                gt[,2:ncol(gt)],stringsAsFactors = FALSE)
+ped[grep("OF",ped[,1]),1]<-gsub("OF_(\\d+)(-\\d+)?","\\1",ped[grep("OF",ped[,1]),1])
+ped[grep("PR",ped[,1]),1]<-gsub("PR_(\\d+)","\\1",ped[grep("PR",ped[,1]),1])
+ped[ped[,3]=="086-23",1]<-"08623"
+ped[ped[,3]=="086R",1]<-"086"
+write.table(ped,"sequoia/GenoM.ped",sep='\t',row.names=FALSE,col.names=FALSE,quote=FALSE)
+#create map file
+vcf<-read.table("relatedness/drad_miss3.vcf",header=TRUE)
+map<-data.frame(vcf$CHROM,vcf$ID,NA,vcf$POS)
+write.table(map,"sequoia/GenoM.map",sep='\t',row.names=FALSE,col.names=FALSE,quote=FALSE)
+```
+
+`plink --file C:\Users\sflan\Documents\GitHub\SCA\results\sequoia\GenoM --maf 0.4 --indep 50 5 2 --allow-extra-chr --make-founders --recode --out C:\Users\sflan\Documents\GitHub\SCA\results\sequoia\PrunedGenoM`
+
+This resulted in 2312 loci
+
+```{r}
+
 coan2sequoia<-function(gt.name,sep='\t'){
   gt<-read.delim(gt.name,sep=sep,header=FALSE)
   GenoM<-as.matrix(do.call(cbind,lapply(seq(2,ncol(gt),2),function(coln,gt){
@@ -37,7 +61,30 @@ coan2sequoia<-function(gt.name,sep='\t'){
   rownames(GenoM)<-gt[,1]
   return(GenoM)
 }
-GenoM<-coan2sequoia("Research/parentage/gty_spaces.txt")
+GenoM<-coan2sequoia("relatedness/coancestry_gty.txt")
+summary(SnpStats(GenoM))
+
+ped2sequoia<-function(gt.name,sep='\t'){
+  gt<-read.delim(gt.name,sep=sep,header=FALSE)
+  GenoM<-as.matrix(do.call(cbind,lapply(seq(7,ncol(gt),2),function(coln,gt){
+    dat<-gt[,c(coln,coln+1)]
+    ref<-names(which.max(table(apply(dat,2,factor))))
+    out<-apply(dat,1,function(ind,ref){
+      if(ind[1]==ind[2]){
+        if(ind[2]==ref){ out<-2 }
+        if(ind[2]==0){ out<--9 }
+        if(ind[2]!=ref & ind[2] != 0 ){ out<-0 }
+      }else{
+        out<-1
+      }
+      return(out)
+    },ref)
+  },gt)))
+  rownames(GenoM)<-gt[,1]
+  return(GenoM)
+}
+GenoM_ped<-ped2sequoia("sequoia/PrunedGenoM.ped",sep=' ')
+summary(SnpStats(GenoM_ped))
 ```
 
 
@@ -54,10 +101,15 @@ BY[is.na(BY)]<-2
 LifeHistData<-data.frame(ID=rownames(GenoM),Sex=as.numeric(sex),BY=as.numeric(BY))
 ```
 
+
+
 ## Run Sequoia
 
-Now I'm ready to run sequoia
+Now I'm ready to run sequoia. `MaxSibIter` performs sibship clustering and is time consuming - wise to run with `MaxSibIter=0` for only parentage assignment. It's unclear how to set `Tassign` or `Tfilter`. 
 
 ```{r}
-seq<-sequoia(GenoM,LifeHistData)
+seq<-sequoia(GenoM,LifeHistData,MaxSibIter=0,MaxSibshipSize = 200)
+seq_ped<-sequoia(GenoM_ped,LifeHistData,MaxSibIter=0,MaxSibshipSize = 200,Tassign = 0)
 ```
+
+For some reason these fail to assign parentage.

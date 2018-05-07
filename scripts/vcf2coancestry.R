@@ -25,7 +25,7 @@ prop.miss<-apply(gts[,10:ncol(gts)],1,function(gt){
 vcf<-vcf[which(prop.miss<=0.3),]
 vcf$`#CHROM`<-gsub("[A-z]+_?(\\d+)","\\1",vcf$`#CHROM`)
 colnames(vcf)[10:ncol(vcf)]<-gsub("sample_(\\w\\w)\\w(\\d.*)_align","\\1_\\2",colnames(vcf[10:ncol(vcf)]))
-
+colnames(vcf)[1]<-"CHROM"
 write.table(vcf,"relatedness/drad_miss3.vcf",col.names=TRUE,row.names=FALSE,quote=FALSE,sep='\t')
 
 #Error file
