@@ -184,6 +184,10 @@ plot(model1$E2)
 plot(model1$USdam)
 
 autocorr(model1$E1)
+
+ped1<-modeP(model1$P, threshold=0.9)
+fems<-ped1$P[!is.na(ped1$P[,2]),]
+mals<-ped1$P[!is.na(ped1$P[,3]),]
 ```
 
 The trace for E2 looks a bit wonky and USdam doesn't seem to be converging. What now? Trying setting more informative priors?

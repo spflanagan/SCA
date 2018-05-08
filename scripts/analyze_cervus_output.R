@@ -101,7 +101,7 @@ cervus_patcorr<-function(csv.files,file.patt,name.patt,off.keep=NULL){
 stats.files<-c(list.files(path="parentage_haplotypes",pattern="\\d+.maternity.txt",full.names=TRUE),
                list.files(path="parentage_biallelic",pattern="\\d+.maternity.txt",full.names=TRUE))
 
-stats<-cervus_analysis(stats.files,".*/[A-z]+(\\d+)_\\d+.maternity.txt")
+stats<-cervus_analysis(stats.files,".*/[A-z]+(\\d+)_\\d+.maternity.txt",match_name = "Mother alone (all offspring):")
 stats<-stats[!is.na(stats$NumLoci),]
 
 r<-as.list(by(stats,stats$MarkerType,function(stat){
@@ -111,9 +111,9 @@ png("CervusStats.png",height=5,width=10,res=300, units="in")
 par(mfrow=c(1,2),oma=c(1,1,1,1),mar=c(3,3,1,0.2))
 plot_delta(stats,cols=c("slategray1","steelblue"),borders=c("slategray3","steelblue4"),"topright")
 plot_assignmentRate(stats,cols=c("slategray3","steelblue4"),haps.name="parentage_haplotypes",
-                    snps.name="parentage_biallelic",r=r)
-legend("bottomright",c("Haplotypes","SNPs"),col=c("slategray4","steelblue4"),
-	pch=c(19,22),lwd=2,lty=c(1,1),bty='n')
+                    snps.name="parentage_biallelic",r=r,y.max = 30)
+legend("bottomright",c("Haplotypes","SNPs"),col=c("slategray3","steelblue4"),
+	pch=c(19,15),lwd=2,lty=c(1,1),bty='n')
 mtext("Number of Loci", 1,outer=T)
 dev.off()
 

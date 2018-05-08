@@ -194,6 +194,22 @@ hp<-read.delim("../parentage_haplotypes/dradPrunedHaps200_1.txt")
 write.table(grep("P",hp$ID,value = TRUE),"D:/SCA/parentage/males.txt",
             quote=FALSE,col.names=FALSE,row.names = FALSE)
 
+## allele freqs
+cervus_afs<-function(cervus.dat,first.gen){
+  afs<-unlist(lapply(seq(first.gen,ncol(cervus.dat),2),function(locus,dat){
+    locus<-dat[,c(locus,locus+1)]
+    miss<-locus[locus[,1]==0,]
+    locus<-locus[locus[,1]!=0,]
+    alleles<-c(as.character(locus[,1]),as.character(locus[,2]))
+    afs<-table(alleles)/length(alleles)
+    maf<-min(afs)
+    return(maf)
+  },dat=cervus.dat))
+  return(afs)
+}
+hap.afs<-cervus_afs(hap.keep,3)
+gen.afs<-cervus_afs(gen.keep,2)
+
 #######################PREVIOUS PRUNING
 #prune to remove non-polymorphic loci
 #<-apply(hapgen,2,function(x){ length(which(x=="consensus")) })
