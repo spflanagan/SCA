@@ -112,7 +112,7 @@ for(i in 1:length(off)){
 write.table(offs,"offspring.txt",col.names=FALSE,row.names=FALSE,quote=FALSE,sep='\t')
 
 #############################HAPLOTYPES################################
-setwd("B://ubuntushare//SCA//results//parentage")
+setwd("B://ubuntushare//SCA//results//parentage_haplotypes")
 
 #convert haplotypes to cervus format
 haps<-read.delim("../stacks/batch_1.haplotypes.tsv")

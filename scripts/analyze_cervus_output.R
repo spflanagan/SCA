@@ -13,15 +13,15 @@ setwd("GitHub/SCA/results")
 ##############################################################################
 
 ##### FUNCTIONS #####
-cervus_analysis<-function(stats.files,pattern){
+cervus_analysis<-function(stats.files,pattern,match_name="Mother given known father:"){
   stats<-data.frame(NumLoci=numeric(),ConfidenceLevel=numeric(), Delta=numeric(),
   	NumAssignments=numeric(), AssignmentRate=numeric(),
   	MarkerType=character(),stringsAsFactors=FALSE)
   for(i in 1: length(stats.files)){
   	dat<- readLines(stats.files[i])
   	num.loci<-as.numeric(gsub(pattern,"\\1",stats.files[i]))
-  	dir<-gsub("(.*)/.*\\d+_\\d+.maternity.txt","\\1",stats.files[i])
-  	start<-match("Mother given known father:", dat)
+  	dir<-gsub("(.*)/.*\\d+_\\d+.*.txt","\\1",stats.files[i])
+  	start<-match(match_name, dat)
   	#pull out info for strict only
   	info<-unlist(strsplit(dat[(start+4)],"\\s+"))
   	info<-unlist(strsplit(gsub("[()%]","",info),"[[:space:]]"))
@@ -33,7 +33,7 @@ cervus_analysis<-function(stats.files,pattern){
 }
 
 plot_delta<-function(stats,cols,borders,leg.loc){
-  plot(c(1.5,16.5),c(min(as.numeric(stats$Delta)),max(as.numeric(stats$Delta))),type='n',axes=FALSE,xlab="",ylab="")
+  plot(c(0.5,16.5),c(min(as.numeric(stats$Delta)),max(as.numeric(stats$Delta))),type='n',axes=FALSE,xlab="",ylab="")
   abline(h=0,lty=2,col="darkgrey")
   boxplot(as.numeric(stats$Delta)~stats$MarkerType*as.numeric(stats$NumLoci),
           col=cols,notch=FALSE,add=TRUE,
@@ -46,13 +46,18 @@ plot_delta<-function(stats,cols,borders,leg.loc){
   legend(leg.loc,c("Haplotypes","SNPs"),pt.bg=cols,
          bty='n',pch=22,col=borders)
 }
-plot_assignmentRate<-function(stats,cols,haps.name,snps.name,r){
-  plot(as.numeric(stats[stats$MarkerType==haps.name,"NumLoci"])-10, 
-       as.numeric(stats[stats$MarkerType==haps.name,"AssignmentRate"]),
-       xaxt='n',las=1,col=cols[1],ylab="",xlab="", pch=19,ylim=c(0,100),
+plot_assignmentRate<-function(stats,cols,haps.name,snps.name,r,col2plot="AssignmentRate",
+                              ylab="Assignment Rate (%)",loc.name="NumLoci",y.max=NULL){
+  if(is.null(y.max)){
+    y.max<-round((max(as.numeric(stats[stats$MarkerType==haps.name,col2plot]),
+             as.numeric(stats[stats$MarkerType==snps.name,col2plot]))+10)/10)*10
+  }
+  plot(as.numeric(stats[stats$MarkerType==haps.name,loc.name])-10, 
+       as.numeric(stats[stats$MarkerType==haps.name,col2plot]),
+       xaxt='n',las=1,col=cols[1],ylab="",xlab="", pch=19,ylim=c(0,y.max),
        xlim=c(min(as.numeric(stats$NumLoci)),max(as.numeric(stats$NumLoci))))
-  points(as.numeric(stats[stats$MarkerType==snps.name,"NumLoci"])+10, 
-         as.numeric(stats[stats$MarkerType==snps.name,"AssignmentRate"]),
+  points(as.numeric(stats[stats$MarkerType==snps.name,loc.name])+10, 
+         as.numeric(stats[stats$MarkerType==snps.name,col2plot]),
          col=cols[2],pch=15)
   axis(1, at=sort(as.numeric(unique(stats$NumLoci))),las=2)
   pts<-mapply(function(means,jig,cols){
@@ -63,10 +68,34 @@ plot_assignmentRate<-function(stats,cols,haps.name,snps.name,r){
       lines(x=c(pt["xmin"],pt["xmax"]),y=rep(pt["y"],2),lwd=2,col=color)
     },color=cols)
     return(data.frame(pts))
-  },means=r,jig=c(-10,10),cols=cols)
-  mtext("Assignment Rate (%)",2,outer=F,line=2)
+  },means=r[c(haps.name,snps.name)],jig=c(-10,10),cols=cols)
+  mtext(ylab,2,outer=F,line=2)
 }
 
+cervus_patcorr<-function(csv.files,file.patt,name.patt,off.keep=NULL){
+  prop<-do.call(rbind,lapply(csv.files,function(filename,name.patt,file.patt){
+    assigns<-read.csv(filename,row.names = NULL)
+    colnames(assigns)<-colnames(assigns)[-1] #fix the column names
+    assigns<-assigns[assigns$Offspring.ID %in% off.keep,]
+    #delta.thresh<-pats[rownames(pats) == gsub("csv","txt",filename),"Delta"]
+    sig.assigns<-assigns[assigns$Pair.confidence=="*",]
+    if(length(grep("_align",sig.assigns$Offspring.ID))>0){#remove any tricky things
+      sig.assigns$Offspring.ID<-gsub("(.*)_align","\\1",sig.assigns$Offspring.ID)
+      sig.assigns$Candidate.father.ID<-gsub("(.*)_align","\\1",sig.assigns$Candidate.father.ID)
+    }
+    sig.assigns$offn<-gsub(paste(name.patt,"(-\\d.*)?",sep=""),"\\1",sig.assigns$Offspring.ID)
+    sig.assigns$dadn<-gsub(paste(name.patt,"(.*)",sep=""),"\\1\\2",sig.assigns$Candidate.father.ID)
+    sig.assigns$dadn[grep("086-23",sig.assigns$dadn)]<-"08623"
+    sig.assigns$dadn[grep("086R",sig.assigns$dadn)]<-"086"
+    prop.corr<-nrow(sig.assigns[sig.assigns$dadn==sig.assigns$offn,])/nrow(sig.assigns)
+    num.loci<-as.numeric(gsub(file.patt,"\\1",filename))
+    dir<-gsub("(.*)/.*.csv","\\1",filename)
+    out<-data.frame(MarkerType=dir,NumLoci=as.numeric(num.loci),PropCorrect=as.numeric(prop.corr))
+    rownames(out)<-filename
+    return(out)
+  },name.patt=name.patt,file.patt=file.patt))
+  return(prop)
+}
 #####PLOT CERVUS INFO #####
 
 stats.files<-c(list.files(path="parentage_haplotypes",pattern="\\d+.maternity.txt",full.names=TRUE),
@@ -80,13 +109,89 @@ r<-as.list(by(stats,stats$MarkerType,function(stat){
 }))
 png("CervusStats.png",height=5,width=10,res=300, units="in")
 par(mfrow=c(1,2),oma=c(1,1,1,1),mar=c(3,3,1,0.2))
-plot_delta(stats,cols=c("slategray1","steelblue"),borders=c("slategray3","steelblue4"),"bottomleft")
-plot_assignmentRate(stats,cols=c("slategray3","steelblue4"),haps.name="parentage",snps.name="parentage_biallelic",r=r)
+plot_delta(stats,cols=c("slategray1","steelblue"),borders=c("slategray3","steelblue4"),"topright")
+plot_assignmentRate(stats,cols=c("slategray3","steelblue4"),haps.name="parentage_haplotypes",
+                    snps.name="parentage_biallelic",r=r)
 legend("bottomright",c("Haplotypes","SNPs"),col=c("slategray4","steelblue4"),
 	pch=c(19,22),lwd=2,lty=c(1,1),bty='n')
 mtext("Number of Loci", 1,outer=T)
 dev.off()
 
+# How consistent are maternity assignments?
+## Focus on biallelic markers with 1600 SNPs
+mat.files<-list.files(path="parentage_biallelic/",pattern="dradPruned1600_\\d+_maternity.csv",full.names = TRUE)
+cervus_mats<-function(files){
+  out<-do.call(rbind,lapply(files,function(filename){
+    dat<-read.csv(filename,row.names = NULL)
+    colnames(dat)<-colnames(dat)[-1]
+    off.mom<-dat[dat$Trio.confidence=="*",c("Offspring.ID","Candidate.mother.ID")]
+    off.mom<-cbind(off.mom,filename)
+    return(off.mom)
+  }))
+  return(out)
+}
+mats<-cervus_mats(mat.files)
+off.mat<-tapply(mats$Candidate.mother.ID,mats$Offspring.ID,function(moms){
+  length(unique(moms)) #the number of moms per offspring
+})
+
+length(unique(mats$Candidate.mother.ID))
+
+##### PATERNITY #####
+pat.files<-c(list.files(path="parentage_haplotypes",pattern="\\d+.paternity.txt",full.names=TRUE),
+               list.files(path="parentage_biallelic",pattern="\\d+.paternity.txt",full.names=TRUE))
+
+pats<-cervus_analysis(pat.files,".*/[A-z]+(\\d+)_\\d+.*paternity.txt",match_name = "Father alone (mother unknown):")
+pats<-pats[!is.na(pats$NumLoci),]
+
+pr<-as.list(by(pats,pats$MarkerType,function(stat){
+  rt<-tapply(as.numeric(stat[,"AssignmentRate"]),as.factor(stat[,"NumLoci"]),mean,na.rm=TRUE)
+}))
+
+
+# evaluate whether they match
+csv.files<-c(list.files(path="parentage_haplotypes",pattern="\\d+.paternity.csv",full.names=TRUE),
+             list.files(path="parentage_biallelic",pattern="\\d+.paternity.csv",full.names=TRUE))
+
+pat.corr<-rbind(cervus_patcorr(list.files(path="parentage_haplotypes",
+                                    pattern="\\d+.paternity.csv",full.names=TRUE),
+                         file.patt = ".*/[A-z]+(\\d+)_\\d+.*paternity.csv",
+                         name.patt = "sample_\\w{3}([0-9]+)"),
+                cervus_patcorr(list.files(path="parentage_biallelic",
+                                    pattern="\\d+.paternity.csv",full.names=TRUE),
+                         file.patt = ".*/[A-z]+(\\d+)_\\d+.*paternity.csv",
+                         name.patt = "\\w+_(\\d+)"))
+
+
+pat.assign<-as.list(by(pat.corr,pat.corr$MarkerType,function(stat){
+  rt<-tapply(as.numeric(stat[,"PropCorrect"]),as.factor(stat[,"NumLoci"]),mean,na.rm=TRUE)
+}))
+
+png("Cervus_paternity.png",height=5,width=10,res=300, units="in")
+par(mfrow=c(1,2),oma=c(1,1,1,1),mar=c(3,3,1,0.2))
+#plot_delta(pats,cols=c("slategray1","steelblue"),borders=c("slategray3","steelblue4"),"topright")
+plot_assignmentRate(pats,cols=c("slategray3","steelblue4"),haps.name="parentage_haplotypes",
+                    snps.name="parentage_biallelic",r=pr)
+#legend("bottomright",c("Haplotypes","SNPs"),col=c("slategray4","steelblue4"),
+#       pch=c(19,22),lwd=2,lty=c(1,1),bty='n')
+plot_assignmentRate(pat.corr,cols=c("slategray3","steelblue4"),
+                    haps.name="parentage_haplotypes",
+                    snps.name="parentage_biallelic",r=pat.assign,
+                    col2plot="PropCorrect",ylab="Proportion Correct Assignments",y.max = 1)
+legend("bottomright",c("Haplotypes","SNPs"),col=c("slategray4","steelblue4"),
+       pch=c(19,15),lwd=2,lty=c(1,1),bty='n')
+mtext("Number of Loci", 1,outer=T)
+dev.off()
+
+# what about only those with known dads?
+KnownPat<-read.delim("colony/knownPat.txt",header=FALSE)
+biKnownOff<-gsub("(\\w{2})\\w(\\d+.*)","\\1_\\2",KnownPat$V2)
+bi.corr<-cervus_patcorr(list.files(path="parentage_biallelic",
+                                   pattern="\\d+.paternity.csv",full.names=TRUE),
+                        file.patt = ".*/[A-z]+(\\d+)_\\d+.*paternity.csv",
+                        name.patt = "\\w+_(\\d+)",off.keep = biKnownOff)  
+bicorr.means<-tapply(bi.corr$PropCorrect,bi.corr$NumLoci,mean)
+  
 ##### SIMULATION OUTPUT #####
 sim.files<-list.files(path="parentsim",pattern="_par.txt",full.names=TRUE)
 
