@@ -69,10 +69,11 @@ plot_assignmentRate<-function(stats,cols,haps.name,snps.name,r){
 
 #####PLOT CERVUS INFO #####
 
-stats.files<-c(list.files(path="parentage",pattern="\\d+.maternity.txt",full.names=TRUE),
+stats.files<-c(list.files(path="parentage_haplotypes",pattern="\\d+.maternity.txt",full.names=TRUE),
                list.files(path="parentage_biallelic",pattern="\\d+.maternity.txt",full.names=TRUE))
 
 stats<-cervus_analysis(stats.files,".*/[A-z]+(\\d+)_\\d+.maternity.txt")
+stats<-stats[!is.na(stats$NumLoci),]
 
 r<-as.list(by(stats,stats$MarkerType,function(stat){
   rt<-tapply(as.numeric(stat[,"AssignmentRate"]),as.factor(stat[,"NumLoci"]),mean,na.rm=TRUE)

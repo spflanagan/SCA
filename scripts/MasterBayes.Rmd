@@ -177,7 +177,7 @@ PdP<-PdataPed(formula=list(res1,res2),data=PipefishP,USdam=TRUE)
 ```
 
 ```{r}
-model1<-MCMCped(PdP=PdP, GdP=GdP, verbose=FALSE,burnin=10000)
+model1<-MCMCped(PdP=PdP, GdP=GdP, verbose=TRUE,burnin=50000,nitt=55000)
 
 plot(model1$E1)
 plot(model1$E2)
